@@ -9,21 +9,33 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(tokens: Vec<TokenType>) -> Self {
-        println!("{:?}", tokens);
         Parser { tokens }
     }
 
     pub fn parse(&self) -> Result<Program, String> {
-        let mut token_iter = self.tokens.iter().peekable();
-        let mut tree = Program {
+        let lines: Vec<Vec<TokenType>> = self
+            .tokens
+            .split(|token| *token == TokenType::EndOfLine)
+            .map(|line| line.to_vec())
+            .collect();
+        let mut program = Program {
             statements: Vec::new(),
         };
+
+        for line in lines {
+            self.parse_line(line, &mut program)?;
+        }
+
+        Ok(program)
+    }
+
+    fn parse_line(&self, line: Vec<TokenType>, program: &mut Program) -> Result<(), String> {
+        let mut token_iter = line.iter().peekable();
 
         while let Some(token) = token_iter.next() {
             match token {
                 TokenType::Input => {
                     let data_type = match token_iter.next() {
-                        Some(TokenType::Buffer) => Type::Buffer,
                         Some(TokenType::Float) => Type::Float,
                         _ => {
                             return Err("Expected type after 'input'".into());
@@ -38,28 +50,22 @@ impl Parser {
                     };
 
                     let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => match token_iter.next() {
-                            Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
-                            Some(TokenType::Identifier(name)) => {
-                                Expression::Identifier(name.clone())
-                            }
-                            _ => return Err("Expected initial value after '='".into()),
-                        },
-                        _ => return Err("Expected initial value after identifier".into()),
+                        Some(TokenType::Assign) => Some(self.parse_expression(&mut token_iter)?),
+                        _ => None,
                     };
 
-                    tree.statements
-                        .push(Statement::InputDeclaration(InputDeclarationStatement {
+                    program.statements.push(Statement::InputDeclaration(
+                        InputDeclarationStatement {
                             name,
                             data_type,
                             initial_value,
                             range: None,
-                        }));
+                        },
+                    ));
                 }
 
                 TokenType::InputRange(start, end) => {
                     let data_type = match token_iter.next() {
-                        Some(TokenType::Buffer) => Type::Buffer,
                         Some(TokenType::Float) => Type::Float,
                         _ => {
                             return Err("Expected type after 'input'".into());
@@ -74,28 +80,22 @@ impl Parser {
                     };
 
                     let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => match token_iter.next() {
-                            Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
-                            Some(TokenType::Identifier(name)) => {
-                                Expression::Identifier(name.clone())
-                            }
-                            _ => return Err("Expected initial value after '='".into()),
-                        },
-                        _ => return Err("Expected initial value after identifier".into()),
+                        Some(TokenType::Assign) => Some(self.parse_expression(&mut token_iter)?),
+                        _ => None,
                     };
 
-                    tree.statements
-                        .push(Statement::InputDeclaration(InputDeclarationStatement {
+                    program.statements.push(Statement::InputDeclaration(
+                        InputDeclarationStatement {
                             name,
                             data_type,
                             initial_value,
                             range: Some((*start, *end)),
-                        }));
+                        },
+                    ));
                 }
 
                 TokenType::Output => {
                     let data_type = match token_iter.next() {
-                        Some(TokenType::Buffer) => Type::Buffer,
                         Some(TokenType::Float) => Type::Float,
                         _ => {
                             return Err("Expected type after 'output'".into());
@@ -109,12 +109,12 @@ impl Parser {
                         }
                     };
 
-                    tree.statements.push(Statement::OutputDeclaration(
+                    program.statements.push(Statement::OutputDeclaration(
                         OutputDeclarationStatement { name, data_type },
                     ));
                 }
 
-                TokenType::Buffer | TokenType::Float => {
+                TokenType::Float => {
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
                         _ => {
@@ -122,24 +122,17 @@ impl Parser {
                         }
                     };
 
-                    let initial_value = match token_iter.next() {
-                        Some(TokenType::Assign) => match token_iter.next() {
-                            Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
-                            Some(TokenType::Identifier(name)) => {
-                                Expression::Identifier(name.clone())
-                            }
-                            _ => return Err("Expected initial value after '='".into()),
-                        },
-                        _ => return Err("Expected default value after buffer identifier".into()),
-                    };
-
                     let data_type = match token {
                         TokenType::Float => Type::Float,
-                        TokenType::Buffer => Type::Buffer,
                         _ => unreachable!(),
                     };
 
-                    tree.statements.push(Statement::VariableDeclaration(
+                    let initial_value = match token_iter.next() {
+                        Some(TokenType::Assign) => self.parse_expression(&mut token_iter),
+                        _ => Err("Expected '=' after identifier".into()),
+                    }?;
+
+                    program.statements.push(Statement::VariableDeclaration(
                         VariableDeclarationStatement {
                             name,
                             data_type,
@@ -151,20 +144,22 @@ impl Parser {
                 TokenType::Identifier(name) => {
                     let target_name = name.clone();
 
-                    if token_iter.next() != Some(&TokenType::Assign) {
-                        return Err(format!("Expected '=' after identifier '{}'", name));
+                    match token_iter.next() {
+                        Some(TokenType::Assign) => {
+                            // Assignment statement
+                            let value = self.parse_expression(&mut token_iter)?;
+
+                            program
+                                .statements
+                                .push(Statement::Assignment(AssignmentStatement {
+                                    target_name,
+                                    value,
+                                }));
+                            continue; // Skip to the next token
+                        }
+
+                        _ => return Err(format!("Expected '=' after identifier '{}'", name)),
                     }
-
-                    let value = match self.parse_expression(&mut token_iter) {
-                        Ok(expr) => expr,
-                        Err(e) => return Err(format!("Error parsing expression: {}", e)),
-                    };
-
-                    tree.statements
-                        .push(Statement::Assignment(AssignmentStatement {
-                            target_name,
-                            value,
-                        }));
                 }
 
                 TokenType::EndOfFile => {
@@ -176,7 +171,7 @@ impl Parser {
             }
         }
 
-        Ok(tree)
+        Ok(())
     }
 
     /// Parses an expression recursively from the token iterator.
@@ -186,7 +181,25 @@ impl Parser {
     ) -> Result<Expression, String> {
         let mut left = match token_iter.next() {
             Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
-            Some(TokenType::Identifier(name)) => Expression::Identifier(name.clone()),
+            Some(TokenType::Identifier(name)) => match token_iter.peek() {
+                Some(TokenType::LParen) => {
+                    token_iter.next();
+                    let mut args = Vec::new();
+                    while let Some(arg) = self.parse_expression(token_iter).ok() {
+                        args.push(arg);
+                        if token_iter.peek() == Some(&&TokenType::Comma) {
+                            token_iter.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    Expression::FunctionCall {
+                        name: name.clone(),
+                        arguments: args,
+                    }
+                }
+                _ => Expression::Identifier(name.clone()),
+            },
             Some(TokenType::LParen) => {
                 let expr = self.parse_expression(token_iter)?;
                 match token_iter.next() {

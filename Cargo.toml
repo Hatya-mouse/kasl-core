@@ -8,3 +8,12 @@ name = "knodiq_audio_shader"
 path = "src/lib.rs"
 
 [dependencies]
+rand = "0.9.1"
+target-lexicon = "0.13.2"
+
+[dev-dependencies]
+divan = "0.1.21"
+
+[[bench]]
+name = "bench"
+harness = false

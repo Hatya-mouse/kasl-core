@@ -3,9 +3,8 @@ pub enum TokenType {
     // Keywords
     Input,
     Output,
-    InputRange(f64, f64),
+    InputRange(f32, f32),
     // Types
-    Buffer,
     Float,
     // Operators
     Assign,
@@ -15,7 +14,7 @@ pub enum TokenType {
     Divide,
     Modulo,
     // Literals
-    FloatLiteral(f64),
+    FloatLiteral(f32),
     // Identifiers
     Identifier(String),
     // Delimiters

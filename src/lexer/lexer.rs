@@ -38,7 +38,7 @@ impl Lexer {
                                     break;
                                 }
                             }
-                            if let Ok(value) = number.parse::<f64>() {
+                            if let Ok(value) = number.parse::<f32>() {
                                 tokens.push(TokenType::FloatLiteral(value));
                             }
                         } else {
@@ -72,7 +72,7 @@ impl Lexer {
                             break;
                         }
                     }
-                    if let Ok(value) = number.parse::<f64>() {
+                    if let Ok(value) = number.parse::<f32>() {
                         tokens.push(TokenType::FloatLiteral(value));
                     }
                 }
@@ -88,7 +88,6 @@ impl Lexer {
                     match identifier.as_str() {
                         "input" => tokens.push(TokenType::Input),
                         "output" => tokens.push(TokenType::Output),
-                        "buffer" => tokens.push(TokenType::Buffer),
                         "float" => tokens.push(TokenType::Float),
                         _ => tokens.push(TokenType::Identifier(identifier)),
                     }
