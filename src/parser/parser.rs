@@ -117,16 +117,17 @@ impl Parser {
                     ));
                 }
 
-                TokenType::Float => {
+                TokenType::Float | TokenType::Buffer => {
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
                         _ => {
-                            return Err("Expected identifier after 'buffer'".into());
+                            return Err("Expected identifier after type name".into());
                         }
                     };
 
                     let data_type = match token {
                         TokenType::Float => Type::Float,
+                        TokenType::Buffer => Type::Buffer,
                         _ => unreachable!(),
                     };
 

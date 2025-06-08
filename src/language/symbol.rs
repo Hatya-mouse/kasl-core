@@ -1,4 +1,5 @@
-use crate::{Expression, Type, Value};
+use crate::{Expression, Type};
+use knodiq_engine::Value;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SymbolKind {

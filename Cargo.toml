@@ -10,9 +10,13 @@ path = "src/lib.rs"
 [dependencies]
 rand = "0.9.1"
 target-lexicon = "0.13.2"
+knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine.git" }
 
 [dev-dependencies]
 divan = "0.1.21"
+
+[[test]]
+name = "tests"
 
 [[bench]]
 name = "bench"

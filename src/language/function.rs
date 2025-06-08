@@ -2,18 +2,18 @@ use crate::Type;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-pub struct FunctionInfo {
+pub struct Function {
     pub name: String,
     pub arguments: Vec<Type>,
     pub return_type: Type,
 }
 
-pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
+pub fn built_in_functions() -> HashMap<String, Function> {
     let mut functions = HashMap::new();
 
     functions.insert(
         "sin".to_string(),
-        FunctionInfo {
+        Function {
             name: "sin".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -22,7 +22,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "cos".to_string(),
-        FunctionInfo {
+        Function {
             name: "cos".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -31,7 +31,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "tan".to_string(),
-        FunctionInfo {
+        Function {
             name: "tan".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -40,7 +40,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "asin".to_string(),
-        FunctionInfo {
+        Function {
             name: "asin".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -49,7 +49,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "acos".to_string(),
-        FunctionInfo {
+        Function {
             name: "acos".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -58,7 +58,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "atan".to_string(),
-        FunctionInfo {
+        Function {
             name: "atan".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -67,7 +67,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "abs".to_string(),
-        FunctionInfo {
+        Function {
             name: "abs".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -76,7 +76,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "sgn".to_string(),
-        FunctionInfo {
+        Function {
             name: "sgn".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -85,7 +85,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "min".to_string(),
-        FunctionInfo {
+        Function {
             name: "min".to_string(),
             arguments: vec![Type::Float, Type::Float],
             return_type: Type::Float,
@@ -94,7 +94,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "max".to_string(),
-        FunctionInfo {
+        Function {
             name: "max".to_string(),
             arguments: vec![Type::Float, Type::Float],
             return_type: Type::Float,
@@ -103,7 +103,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "clamp".to_string(),
-        FunctionInfo {
+        Function {
             name: "clamp".to_string(),
             arguments: vec![Type::Float, Type::Float, Type::Float],
             return_type: Type::Float,
@@ -112,7 +112,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "pow".to_string(),
-        FunctionInfo {
+        Function {
             name: "pow".to_string(),
             arguments: vec![Type::Float, Type::Float],
             return_type: Type::Float,
@@ -121,7 +121,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "sqrt".to_string(),
-        FunctionInfo {
+        Function {
             name: "sqrt".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -130,7 +130,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "log".to_string(),
-        FunctionInfo {
+        Function {
             name: "log".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -139,7 +139,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "log2".to_string(),
-        FunctionInfo {
+        Function {
             name: "log2".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -148,7 +148,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "log10".to_string(),
-        FunctionInfo {
+        Function {
             name: "log10".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -157,7 +157,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "saw".to_string(),
-        FunctionInfo {
+        Function {
             name: "saw".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -166,7 +166,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "tri".to_string(),
-        FunctionInfo {
+        Function {
             name: "tri".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -175,7 +175,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "square".to_string(),
-        FunctionInfo {
+        Function {
             name: "square".to_string(),
             arguments: vec![Type::Float],
             return_type: Type::Float,
@@ -184,7 +184,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "rand".to_string(),
-        FunctionInfo {
+        Function {
             name: "rand".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -193,7 +193,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "sample".to_string(),
-        FunctionInfo {
+        Function {
             name: "sample".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -202,7 +202,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "sample_rate".to_string(),
-        FunctionInfo {
+        Function {
             name: "sample_rate".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -211,7 +211,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "bpm".to_string(),
-        FunctionInfo {
+        Function {
             name: "bpm".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -220,7 +220,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "time".to_string(),
-        FunctionInfo {
+        Function {
             name: "time".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -229,7 +229,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "phase".to_string(),
-        FunctionInfo {
+        Function {
             name: "phase".to_string(),
             arguments: vec![],
             return_type: Type::Float,
@@ -238,7 +238,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "mix".to_string(),
-        FunctionInfo {
+        Function {
             name: "mix".to_string(),
             arguments: vec![Type::Float, Type::Float, Type::Float],
             return_type: Type::Float,
@@ -247,7 +247,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "lerp".to_string(),
-        FunctionInfo {
+        Function {
             name: "lerp".to_string(),
             arguments: vec![Type::Float, Type::Float, Type::Float],
             return_type: Type::Float,
@@ -256,7 +256,7 @@ pub fn built_in_functions() -> HashMap<String, FunctionInfo> {
 
     functions.insert(
         "pi".to_string(),
-        FunctionInfo {
+        Function {
             name: "pi".to_string(),
             arguments: vec![],
             return_type: Type::Float,

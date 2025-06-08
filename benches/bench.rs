@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
 use knodiq_audio_shader::{
     Interpreter, Lexer, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Type, Value,
 };
+use std::collections::HashMap;
 
 fn main() {
     divan::main();
@@ -50,7 +49,7 @@ fn audio_shader_sample_processing() {
             kind: SymbolKind::Input,
             initial_value: None,
             range: None,
-            value: Some(Value::Buffer(vec![0.15; 128])),
+            value: Some(Value::Buffer(vec![vec![0.15; 128]; 2])),
         },
     );
     ui_parameters.insert(

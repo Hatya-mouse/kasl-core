@@ -1,4 +1,4 @@
-use crate::{FunctionInfo, SymbolInfo};
+use crate::{Function, SymbolInfo};
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -75,7 +75,7 @@ impl Expression {
     pub fn get_expression_type(
         &self,
         symbols: &HashMap<String, SymbolInfo>,
-        functions: &HashMap<String, FunctionInfo>,
+        functions: &HashMap<String, Function>,
     ) -> Result<Type, String> {
         match self {
             Expression::BinaryOp { left, right, .. } => {

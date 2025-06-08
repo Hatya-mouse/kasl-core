@@ -1,4 +1,4 @@
-use crate::{FunctionInfo, Program, Statement, SymbolInfo, SymbolKind};
+use crate::{Function, Program, Statement, SymbolInfo, SymbolKind};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -7,7 +7,7 @@ pub struct SemanticAnalyzer {
     pub var_table: HashMap<String, SymbolInfo>,
     pub input_table: HashMap<String, SymbolInfo>,
     pub output_table: HashMap<String, SymbolInfo>,
-    pub function_table: HashMap<String, FunctionInfo>,
+    pub function_table: HashMap<String, Function>,
     errors: Vec<String>,
 }
 
@@ -109,6 +109,16 @@ impl SemanticAnalyzer {
                     }
                 }
             }
+        }
+
+        // Check if the AudioShader has buffer output
+        if !self
+            .output_table
+            .values()
+            .any(|info| info.kind == SymbolKind::Output && info.data_type == crate::Type::Buffer)
+        {
+            self.errors
+                .push("AudioShader must have a buffer output.".to_string());
         }
 
         if self.errors.is_empty() {
