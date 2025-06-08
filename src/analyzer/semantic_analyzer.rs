@@ -130,6 +130,14 @@ impl SemanticAnalyzer {
         }
     }
 
+    pub fn get_input_table(&self) -> HashMap<String, SymbolInfo> {
+        self.input_table.clone()
+    }
+
+    pub fn get_output_table(&self) -> HashMap<String, SymbolInfo> {
+        self.output_table.clone()
+    }
+
     fn define_symbol(&mut self, name: String, info: SymbolInfo) {
         if self.symbol_table.contains_key(&name) {
             self.errors

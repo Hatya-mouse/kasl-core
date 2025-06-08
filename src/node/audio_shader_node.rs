@@ -39,6 +39,8 @@ impl AudioShaderNode {
         match analyzer.analyze(&program) {
             Ok(_) => {
                 self.program = Some(program);
+                self.input = analyzer.get_input_table();
+                self.output = analyzer.get_output_table();
                 Ok(())
             }
             Err(errors) => Err(errors),
@@ -58,7 +60,7 @@ impl Node for AudioShaderNode {
         channels: usize,
         chunk_start: usize,
         chunk_end: usize,
-    ) -> Result<HashMap<String, Value>, Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let program = self.program.as_ref().unwrap();
         let mut interpreter = Interpreter::new(
             program.clone(),
@@ -68,11 +70,9 @@ impl Node for AudioShaderNode {
             chunk_end,
         );
         let output_table = interpreter.execute(self.input.clone())?;
+        self.output = output_table;
 
-        Ok(output_table
-            .iter()
-            .filter_map(|(k, v)| v.value.clone().map(|val| (k.clone(), val)))
-            .collect())
+        Ok(())
     }
 
     fn prepare(&mut self, _chunk_size: usize) {}
