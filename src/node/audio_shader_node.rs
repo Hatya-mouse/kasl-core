@@ -72,6 +72,8 @@ impl Node for AudioShaderNode {
         let output_table = interpreter.execute(self.input.clone())?;
         self.output = output_table;
 
+        println!("{:?}", self.output);
+
         Ok(())
     }
 
