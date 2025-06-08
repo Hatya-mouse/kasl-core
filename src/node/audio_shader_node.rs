@@ -70,6 +70,7 @@ impl Node for AudioShaderNode {
             chunk_end,
         );
         let output_table = interpreter.execute(self.input.clone())?;
+        println!("AudioShaderNode output: {:?}", output_table);
         self.output = output_table;
 
         Ok(())
