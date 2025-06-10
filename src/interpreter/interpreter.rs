@@ -299,9 +299,12 @@ impl Interpreter {
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
             "time" => Ok(Value::Buffer(
-                (self.chunk_start..self.chunk_end)
-                    .map(|i| (i as Sample / self.sample_rate as Sample))
-                    .map(|t| (0..self.channels).map(|_| t).collect())
+                (0..self.channels)
+                    .map(|_| {
+                        (self.chunk_start..self.chunk_end)
+                            .map(|s| s as Sample / self.sample_rate as Sample)
+                            .collect()
+                    })
                     .collect(),
             )),
             "sample_rate" => Ok(Value::Float(self.sample_rate as Sample)),
