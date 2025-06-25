@@ -106,7 +106,8 @@ fn test_interpreter() {
     let mut interpreter = Interpreter::new(program, 48000, 2, 0, 2);
 
     let mut input_table = analyzer.input_table.clone();
-    input_table.get_mut("in_buffer").unwrap().value = Some(Value::Buffer(vec![vec![2.0, 3.0]; 2]));
+    input_table.get_mut("in_buffer").unwrap().value =
+        Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
     input_table.get_mut("gain").unwrap().value = Some(Value::Float(1.5));
 
     let output_table = interpreter.execute(input_table).unwrap();
@@ -116,6 +117,6 @@ fn test_interpreter() {
     // out_buffer = result + 1.25 = [[3.0 + 1.25, 4.5 + 1.25], [3.0 + 1.25, 4.5 + 1.25]] = [[4.25, 5.75], [4.25, 5.75]]
     assert_eq!(
         output_table.get("out_buffer").unwrap().value,
-        Some(Value::Buffer(vec![vec![4.25, 5.75]; 2]))
+        Some(Value::from_buffer(vec![vec![4.25, 5.75]; 2]))
     );
 }

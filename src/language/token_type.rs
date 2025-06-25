@@ -22,7 +22,9 @@ pub enum TokenType {
     InputRange(f32, f32),
     // Types
     Float,
-    Buffer,
+    // Brackets
+    LBracket,
+    RBracket,
     // Operators
     Assign,
     Plus,

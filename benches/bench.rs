@@ -61,11 +61,11 @@ fn audio_shader_sample_processing() {
         "in_buffer".to_string(),
         SymbolInfo {
             name: "in_buffer".to_string(),
-            data_type: Type::Buffer,
+            data_type: Type::Array(Box::new(Type::Array(Box::new(Type::Float)))),
             kind: SymbolKind::Input,
             initial_value: None,
             range: None,
-            value: Some(Value::Buffer(vec![vec![0.15; 128]; 2])),
+            value: Some(Value::from_buffer(vec![vec![0.15; 128]; 2])),
         },
     );
     ui_parameters.insert(

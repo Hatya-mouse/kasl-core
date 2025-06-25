@@ -51,13 +51,7 @@ impl Parser {
         while let Some(token) = token_iter.next() {
             match token {
                 TokenType::Input => {
-                    let data_type = match token_iter.next() {
-                        Some(TokenType::Float) => Type::Float,
-                        Some(TokenType::Buffer) => Type::Buffer,
-                        _ => {
-                            return Err("Expected type after 'input'".into());
-                        }
-                    };
+                    let data_type = self.parse_type(&mut token_iter)?;
 
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
@@ -82,13 +76,7 @@ impl Parser {
                 }
 
                 TokenType::InputRange(start, end) => {
-                    let data_type = match token_iter.next() {
-                        Some(TokenType::Float) => Type::Float,
-                        Some(TokenType::Buffer) => Type::Buffer,
-                        _ => {
-                            return Err("Expected type after 'input'".into());
-                        }
-                    };
+                    let data_type = self.parse_type(&mut token_iter)?;
 
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
@@ -113,13 +101,7 @@ impl Parser {
                 }
 
                 TokenType::Output => {
-                    let data_type = match token_iter.next() {
-                        Some(TokenType::Float) => Type::Float,
-                        Some(TokenType::Buffer) => Type::Buffer,
-                        _ => {
-                            return Err("Expected type after 'output'".into());
-                        }
-                    };
+                    let data_type = self.parse_type(&mut token_iter)?;
 
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
@@ -133,18 +115,28 @@ impl Parser {
                     ));
                 }
 
-                TokenType::Float | TokenType::Buffer => {
+                TokenType::Float => {
+                    let mut data_type = Type::Float;
+
+                    // Check for array brackets after float
+                    while token_iter.peek() == Some(&&TokenType::LBracket) {
+                        token_iter.next(); // consume '['
+
+                        match token_iter.next() {
+                            Some(TokenType::RBracket) => {
+                                data_type = Type::Array(Box::new(data_type));
+                            }
+                            _ => {
+                                return Err("Expected ']' after '['".into());
+                            }
+                        }
+                    }
+
                     let name = match token_iter.next() {
                         Some(TokenType::Identifier(name)) => name.clone(),
                         _ => {
                             return Err("Expected identifier after type name".into());
                         }
-                    };
-
-                    let data_type = match token {
-                        TokenType::Float => Type::Float,
-                        TokenType::Buffer => Type::Buffer,
-                        _ => unreachable!(),
                     };
 
                     let initial_value = match token_iter.next() {
@@ -254,5 +246,35 @@ impl Parser {
         }
 
         Ok(left)
+    }
+
+    /// Parses a type from the token iterator.
+    fn parse_type(
+        &self,
+        token_iter: &mut std::iter::Peekable<std::slice::Iter<TokenType>>,
+    ) -> Result<Type, String> {
+        let base_type = match token_iter.next() {
+            Some(TokenType::Float) => Type::Float,
+            _ => {
+                return Err("Expected type".into());
+            }
+        };
+
+        // Check for array brackets after base type
+        let mut current_type = base_type;
+        while token_iter.peek() == Some(&&TokenType::LBracket) {
+            token_iter.next(); // consume '['
+
+            match token_iter.next() {
+                Some(TokenType::RBracket) => {
+                    current_type = Type::Array(Box::new(current_type));
+                }
+                _ => {
+                    return Err("Expected ']' after '[' in type literal".into());
+                }
+            }
+        }
+
+        Ok(current_type)
     }
 }

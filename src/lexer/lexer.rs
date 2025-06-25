@@ -79,6 +79,8 @@ impl Lexer {
                 '(' => tokens.push(TokenType::LParen),
                 ')' => tokens.push(TokenType::RParen),
                 ',' => tokens.push(TokenType::Comma),
+                '[' => tokens.push(TokenType::LBracket),
+                ']' => tokens.push(TokenType::RBracket),
                 '0'..='9' => {
                     let mut number = char.to_string();
                     while let Some(&next_char) = chars.peek() {
@@ -105,7 +107,6 @@ impl Lexer {
                         "input" => tokens.push(TokenType::Input),
                         "output" => tokens.push(TokenType::Output),
                         "float" => tokens.push(TokenType::Float),
-                        "buffer" => tokens.push(TokenType::Buffer),
                         _ => tokens.push(TokenType::Identifier(identifier)),
                     }
                 }

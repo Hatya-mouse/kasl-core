@@ -106,7 +106,7 @@ impl SemanticAnalyzer {
                         let value_type = match value.get_expression_type(
                             &self.symbol_table,
                             &self.function_table,
-                            Some(target_type),
+                            Some(&target_type),
                         ) {
                             Ok(t) => t,
                             Err(e) => {

@@ -50,7 +50,10 @@ fn test_set_shader_populates_io_tables() {
 
     assert!(node.input.contains_key("input_buf"));
     let input_buf_info = node.input.get("input_buf").unwrap();
-    assert_eq!(input_buf_info.data_type, Type::Buffer);
+    assert_eq!(
+        input_buf_info.data_type,
+        Type::Array(Box::new(Type::Array(Box::new(Type::Float))))
+    );
     assert_eq!(input_buf_info.kind, SymbolKind::Input);
 
     assert!(node.output.contains_key("output_value"));
@@ -110,7 +113,10 @@ fn test_process_simple_buffer_shader() {
     assert!(node.set_shader(shader_code.to_string()).is_ok());
 
     let input_buffer_data = vec![vec![10.0, 20.0, 30.0]]; // 1 channel, 3 samples
-    node.set_input("input_signal", Value::Buffer(input_buffer_data.clone()));
+    node.set_input(
+        "input_signal",
+        Value::from_buffer(input_buffer_data.clone()),
+    );
 
     // Process 1 channel, 3 samples
     let process_result = node.process(48000, 1, 0, 3);
@@ -122,8 +128,11 @@ fn test_process_simple_buffer_shader() {
 
     let expected_output_data = vec![vec![5.0, 10.0, 15.0]];
     match node.get_output("output_signal") {
-        Some(Value::Buffer(val)) => assert_eq!(val, expected_output_data),
-        other => panic!("Expected Some(Value::Buffer(...)), got {:?}", other),
+        Some(val) => match val.as_buffer() {
+            Some(buffer) => assert_eq!(buffer, expected_output_data),
+            other => panic!("Expected Some(Value::Buffer(...)), got {:?}", other),
+        },
+        None => panic!("Expected output_signal to be set, but got None"),
     }
 }
 

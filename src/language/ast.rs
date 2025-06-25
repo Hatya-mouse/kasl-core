@@ -26,10 +26,10 @@ pub enum Operator {
     Modulo,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Type {
     Float,
-    Buffer,
+    Array(Box<Type>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -92,14 +92,14 @@ impl Expression {
         &self,
         symbols: &HashMap<String, SymbolInfo>,
         functions: &HashMap<String, Function>,
-        expected: Option<Type>,
+        expected: Option<&Type>,
     ) -> Result<Type, String> {
         match self {
             Expression::BinaryOp { left, right, .. } => {
                 let left_type = left.get_expression_type(symbols, functions, expected);
                 let right_type = right.get_expression_type(symbols, functions, expected);
                 match (left_type, right_type) {
-                    (Ok(left_type), Ok(right_type)) => self.combine_types(left_type, right_type),
+                    (Ok(left_type), Ok(right_type)) => self.combine_types(&left_type, &right_type),
                     (Err(e), _) | (_, Err(e)) => Err(e),
                 }
             }
@@ -126,21 +126,21 @@ impl Expression {
                             match &spec {
                                 ArgumentTypeSpec::Concrete(arg_type_spec) => {
                                     if combined_type.is_none() {
-                                        combined_type = Some(*arg_type_spec);
+                                        combined_type = Some(arg_type_spec.clone());
                                     } else {
                                         combined_type = Some(self.combine_types(
-                                            combined_type.unwrap(),
-                                            *arg_type_spec,
+                                            &combined_type.unwrap(),
+                                            arg_type_spec,
                                         )?);
                                     }
                                 }
                                 ArgumentTypeSpec::Polymorphic(types) => {
                                     if expected.is_some() && types.contains(&expected.unwrap()) {
                                         if combined_type.is_none() {
-                                            combined_type = Some(expected.unwrap());
+                                            combined_type = Some(expected.unwrap().clone());
                                         } else {
                                             combined_type = Some(
-                                                self.combine_types(combined_type.unwrap(), expected.unwrap())?,
+                                                self.combine_types(&combined_type.unwrap(), expected.unwrap())?,
                                             );
                                         }
                                     } else if types.contains(&arg_type) {
@@ -148,7 +148,7 @@ impl Expression {
                                             combined_type = Some(arg_type);
                                         } else {
                                             combined_type = Some(
-                                                self.combine_types(combined_type.unwrap(), arg_type)?,
+                                                self.combine_types(&combined_type.unwrap(), &arg_type)?,
                                             );
                                         }
                                     } else {
@@ -166,11 +166,15 @@ impl Expression {
         }
     }
 
-    fn combine_types(&self, left_type: Type, right_type: Type) -> Result<Type, String> {
+    fn combine_types(&self, left_type: &Type, right_type: &Type) -> Result<Type, String> {
         match (left_type, right_type) {
             (Type::Float, Type::Float) => Ok(Type::Float),
-            (Type::Buffer, Type::Buffer) => Ok(Type::Buffer),
-            (Type::Float, Type::Buffer) | (Type::Buffer, Type::Float) => Ok(Type::Buffer),
+            (Type::Array(left_inner), Type::Array(right_inner)) => Ok(Type::Array(Box::new(
+                self.combine_types(left_inner, right_inner)?,
+            ))),
+            (Type::Float, Type::Array(inner)) | (Type::Array(inner), Type::Float) => Ok(
+                Type::Array(Box::new(self.combine_types(inner, &Type::Float)?)),
+            ),
         }
     }
 }

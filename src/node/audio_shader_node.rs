@@ -21,6 +21,7 @@ use knodiq_engine::{Node, NodeId, Value};
 
 pub struct AudioShaderNode {
     id: NodeId,
+    name: String,
     pub input: HashMap<String, SymbolInfo>,
     pub output: HashMap<String, SymbolInfo>,
     pub shader: String,
@@ -32,6 +33,7 @@ impl AudioShaderNode {
     pub fn new() -> Self {
         AudioShaderNode {
             id: NodeId::new_v4(),
+            name: "Audio Shader Node".to_string(),
             input: HashMap::new(),
             output: HashMap::new(),
             shader: "".to_string(),
@@ -133,6 +135,22 @@ impl Node for AudioShaderNode {
         self.id.clone()
     }
 
+    fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn is_input(&self) -> bool {
+        false
+    }
+
+    fn is_output(&self) -> bool {
+        false
+    }
+
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -142,6 +160,7 @@ impl Clone for AudioShaderNode {
     fn clone(&self) -> Self {
         AudioShaderNode {
             id: self.id.clone(),
+            name: self.name.clone(),
             input: self.input.clone(),
             output: self.output.clone(),
             shader: self.shader.clone(),

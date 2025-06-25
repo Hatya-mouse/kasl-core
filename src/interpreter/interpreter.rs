@@ -81,7 +81,7 @@ impl Interpreter {
                         data_type: assignment.value.get_expression_type(
                             &self.symbol_table,
                             &self.function_table,
-                            Some(target.data_type),
+                            Some(&target.data_type),
                         )?,
                         initial_value: target.initial_value.clone(),
                         range: target.range,
@@ -314,7 +314,7 @@ impl Interpreter {
                 }
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
-            "time" => Ok(Value::Buffer(
+            "time" => Ok(Value::from_buffer(
                 (0..self.channels)
                     .map(|_| {
                         (self.chunk_start..self.chunk_end)
