@@ -15,6 +15,7 @@
 //
 
 use crate::{Function, SymbolInfo, builtin_function::ArgumentTypeSpec};
+use knodiq_engine::Type;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -24,12 +25,6 @@ pub enum Operator {
     Multiply,
     Divide,
     Modulo,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum Type {
-    Float,
-    Array(Box<Type>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
