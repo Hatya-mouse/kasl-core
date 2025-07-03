@@ -388,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "knodiq_audio_shader"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "divan",
  "knodiq_engine",
@@ -398,8 +398,8 @@ dependencies = [
 
 [[package]]
 name = "knodiq_engine"
-version = "0.2.94"
-source = "git+https://github.com/hatya-mouse/knodiq_engine.git#2861c9e5df4ec680882ea2586ae7c3fb04b61a7c"
+version = "0.2.98"
+source = "git+https://github.com/hatya-mouse/knodiq_engine.git#71379f6bcdd7c8a486738dd0fbc9c85f336fb1e6"
 dependencies = [
  "cpal",
  "rubato",
