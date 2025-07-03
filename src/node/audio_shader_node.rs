@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
-use crate::{Interpreter, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
-use knodiq_engine::{Node, NodeId, Value};
+use crate::{Interpreter, InterpreterError, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
+use knodiq_engine::{Node, NodeId, Sample, Value, error::TrackError};
 
 pub struct AudioShaderNode {
     id: NodeId,
@@ -80,7 +80,7 @@ impl Node for AudioShaderNode {
         channels: usize,
         chunk_start: usize,
         chunk_end: usize,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn TrackError>> {
         let program = self.program.as_ref().unwrap();
         let mut interpreter = Interpreter::new(
             program.clone(),
@@ -89,13 +89,22 @@ impl Node for AudioShaderNode {
             chunk_start,
             chunk_end,
         );
-        let output_table = interpreter.execute(self.input.clone())?;
+        let output_table = interpreter
+            .execute(self.input.clone())
+            .map_err(|e| Box::new(InterpreterError { message: e }) as Box<dyn TrackError>)?;
         self.output = output_table;
 
         Ok(())
     }
 
-    fn prepare(&mut self, _chunk_size: usize) {}
+    fn prepare(
+        &mut self,
+        _chunk_size: Sample,
+        _sample_rate: usize,
+        _tempo: Sample,
+    ) -> Result<(), Box<dyn TrackError>> {
+        Ok(())
+    }
 
     fn get_input(&self, key: &str) -> Option<Value> {
         self.input.get(key).and_then(|info| info.value.clone())

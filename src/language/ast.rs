@@ -170,6 +170,7 @@ impl Expression {
             (Type::Float, Type::Array(inner)) | (Type::Array(inner), Type::Float) => Ok(
                 Type::Array(Box::new(self.combine_types(inner, &Type::Float)?)),
             ),
+            _ => Ok(Type::None),
         }
     }
 }

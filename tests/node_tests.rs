@@ -129,8 +129,8 @@ fn test_process_simple_buffer_shader() {
     let expected_output_data = vec![vec![5.0, 10.0, 15.0]];
     match node.get_output("output_signal") {
         Some(val) => match val.as_buffer() {
-            Some(buffer) => assert_eq!(buffer, expected_output_data),
-            other => panic!("Expected Some(Value::Buffer(...)), got {:?}", other),
+            Ok(buffer) => assert_eq!(buffer, expected_output_data),
+            Err(e) => panic!("Expected Some(Value::Buffer(...)), got Err({:?})", e),
         },
         None => panic!("Expected output_signal to be set, but got None"),
     }

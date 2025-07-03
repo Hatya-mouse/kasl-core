@@ -21,8 +21,9 @@ pub mod token_type;
 
 pub use ast::{
     AssignmentStatement, Expression, InputDeclarationStatement, Operator,
-    OutputDeclarationStatement, Program, Statement, Type, VariableDeclarationStatement,
+    OutputDeclarationStatement, Program, Statement, VariableDeclarationStatement,
 };
 pub use builtin_function::{Function, built_in_functions};
+pub use knodiq_engine::Type;
 pub use symbol::{SymbolInfo, SymbolKind};
 pub use token_type::TokenType;

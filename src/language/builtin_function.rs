@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::Type;
+use knodiq_engine::Type;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]

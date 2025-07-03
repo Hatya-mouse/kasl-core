@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-pub mod analyzer;
-pub mod error;
-pub mod interpreter;
-pub mod language;
-pub mod lexer;
-pub mod node;
-pub mod parser;
+use knodiq_engine::error::TrackError;
+use std::{error::Error, fmt::Display};
 
-pub use analyzer::*;
-pub use error::*;
-pub use interpreter::*;
-pub use language::*;
-pub use lexer::*;
-pub use node::*;
-pub use parser::*;
+#[derive(Debug, Clone)]
+pub struct InterpreterError {
+    pub message: String,
+}
 
-pub use knodiq_engine::{Node, Value};
+impl TrackError for InterpreterError {}
+
+impl Error for InterpreterError {}
+
+impl Display for InterpreterError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Interpreter Error: {}", self.message)
+    }
+}
