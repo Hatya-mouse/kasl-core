@@ -103,7 +103,7 @@ fn test_interpreter() {
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program).unwrap();
 
-    let mut interpreter = Interpreter::new(program, 48000, 2, 0, 2);
+    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
 
     let mut input_table = analyzer.input_table.clone();
     input_table.get_mut("in_buffer").unwrap().value =

@@ -77,6 +77,7 @@ impl Node for AudioShaderNode {
     fn process(
         &mut self,
         sample_rate: usize,
+        samples_per_beat: f32,
         channels: usize,
         chunk_start: usize,
         chunk_end: usize,
@@ -86,6 +87,7 @@ impl Node for AudioShaderNode {
         let mut interpreter = Interpreter::new(
             program.clone(),
             sample_rate,
+            samples_per_beat,
             channels,
             chunk_start,
             chunk_end,

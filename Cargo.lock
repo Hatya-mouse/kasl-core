@@ -101,9 +101,9 @@ checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
 
 [[package]]
 name = "cc"
-version = "1.2.28"
+version = "1.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ad45f4f74e4e20eaa392913b7b33a7091c87e59628f4dd27888205ad888843c"
+checksum = "5c1599538de2394445747c8cf7935946e3cc27e9625f889d979bfb2aaf569362"
 dependencies = [
  "jobserver",
  "libc",
@@ -388,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "knodiq_audio_shader"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "divan",
  "knodiq_engine",
@@ -398,8 +398,8 @@ dependencies = [
 
 [[package]]
 name = "knodiq_engine"
-version = "0.2.100"
-source = "git+https://github.com/hatya-mouse/knodiq_engine.git#4ca25afbcae3d464e26476ddb7f0e10de8364747"
+version = "0.2.104"
+source = "git+https://github.com/hatya-mouse/knodiq_engine.git#73d968c84bf79b51e4c62dd8241d30aa8e06a978"
 dependencies = [
  "cpal",
  "rubato",

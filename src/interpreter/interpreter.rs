@@ -17,7 +17,7 @@
 use crate::{
     Expression, Function, Operator, Program, Statement, SymbolInfo, SymbolKind, builtin_function,
 };
-use knodiq_engine::{Sample, Value};
+use knodiq_engine::{Sample, Value, audio_utils::samples_as_beats};
 use std::collections::HashMap;
 
 pub struct Interpreter {
@@ -26,6 +26,7 @@ pub struct Interpreter {
     pub function_table: HashMap<String, Function>,
 
     sample_rate: usize,
+    samples_per_beat: f32,
     channels: usize,
     chunk_start: usize,
     chunk_end: usize,
@@ -35,6 +36,7 @@ impl Interpreter {
     pub fn new(
         program: Program,
         sample_rate: usize,
+        samples_per_beat: f32,
         channels: usize,
         chunk_start: usize,
         chunk_end: usize,
@@ -44,6 +46,7 @@ impl Interpreter {
             symbol_table: HashMap::new(),
             function_table: HashMap::new(),
             sample_rate,
+            samples_per_beat,
             channels,
             chunk_start,
             chunk_end,
@@ -375,7 +378,7 @@ impl Interpreter {
                 (0..self.channels)
                     .map(|_| {
                         (self.chunk_start..self.chunk_end)
-                            .map(|t| t as Sample / self.sample_rate as Sample)
+                            .map(|t| samples_as_beats(self.samples_per_beat, t))
                             .collect()
                     })
                     .collect(),

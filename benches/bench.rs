@@ -72,7 +72,7 @@ fn audio_shader_sample_processing() {
         semantic_analyzer.input_table.get("gain").cloned().unwrap(),
     );
 
-    let mut interpreter = Interpreter::new(program, 48000, 2, 0, 128);
+    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 128);
     divan::black_box_drop(
         // Profile the execution time
         match interpreter.execute(ui_parameters) {
