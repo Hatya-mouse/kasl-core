@@ -144,7 +144,7 @@ impl Parser {
 
                         let initial_value = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Assign) => self.parse_expression(&mut token_iter),
-                            _ => Err("Expected '=' after identifier".into()),
+                            _ => Err(format!("Expected '=' after identifier {}", name)),
                         }?;
 
                         statements.push(Statement::VariableDeclaration(
@@ -243,6 +243,7 @@ impl Parser {
                             return Err("Expected ')'".into());
                         }
                     }
+                    token_iter.next(); // consume ')'
                     Expression::FunctionCall {
                         name: name.clone(),
                         arguments: args,
@@ -262,12 +263,17 @@ impl Parser {
 
         while let Some(op) = token_iter.peek().map(|t| &t.token_type) {
             match op {
-                TokenType::Plus | TokenType::Minus | TokenType::Multiply | TokenType::Divide => {
+                TokenType::Plus
+                | TokenType::Minus
+                | TokenType::Multiply
+                | TokenType::Divide
+                | TokenType::Modulo => {
                     let operator = match op {
                         TokenType::Plus => Operator::Add,
                         TokenType::Minus => Operator::Subtract,
                         TokenType::Multiply => Operator::Multiply,
                         TokenType::Divide => Operator::Divide,
+                        TokenType::Modulo => Operator::Modulo,
                         _ => unreachable!(),
                     };
                     token_iter.next(); // consume the operator

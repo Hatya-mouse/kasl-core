@@ -89,7 +89,7 @@ fn test_parsing() {
 }
 
 #[test]
-fn test_interpreter() {
+fn test_interpreter_basic() {
     let code = "input number in_buffer
                     input number gain = 1.0
                     var result = 0.0
@@ -126,4 +126,33 @@ fn test_interpreter() {
         output_table.get("powered").unwrap().value,
         Some(Value::from_buffer(vec![vec![4.0, 9.0]; 2]))
     );
+}
+
+#[test]
+fn test_interpreter_advanced() {
+    let code = "input number in_buffer
+                    output number out_buffer
+
+                    out_buffer = in_buffer * sin(time() * pi() * 440)";
+    let lexer = Lexer::new(code.to_string());
+    let tokens = lexer.tokenize();
+
+    let parser = Parser::new(tokens);
+    let program: Program = parser.parse().unwrap();
+
+    println!("Parsed Program:");
+    for stmt in &program.statements {
+        println!("{:#?}", stmt);
+    }
+
+    let mut analyzer = SemanticAnalyzer::new();
+    analyzer.analyze(&program).unwrap();
+
+    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
+
+    let mut input_table = analyzer.input_table.clone();
+    input_table.get_mut("in_buffer").unwrap().value =
+        Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
+
+    assert!(interpreter.execute(input_table).is_ok());
 }
