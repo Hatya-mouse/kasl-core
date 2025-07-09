@@ -18,7 +18,7 @@ use crate::{
     Expression, Function, Operator, Program, RuntimeError, Statement, SymbolInfo, SymbolKind,
     builtin_function,
 };
-use knodiq_engine::{Value, audio_utils::samples_as_beats};
+use knodiq_engine::{Sample, Value, audio_utils::samples_as_beats};
 use std::collections::HashMap;
 
 pub struct Interpreter {
@@ -379,7 +379,7 @@ impl Interpreter {
                 if phase < 0.5 { 1.0 } else { -1.0 }
             })
             .ok_or(inv_arg_err("square"))?),
-            "rand" => Ok(Value::Float(rand::random::<f32>())),
+            "rand" => Ok(Value::Float(rand::random::<Sample>())),
             "mix" => {
                 if evaluated_args.len() != 3 {
                     return Err(inv_arg_err("mix"));
@@ -400,25 +400,57 @@ impl Interpreter {
                 )
                 .ok_or(inv_arg_err("lerp"))?)
             }
+            "load_at" => {
+                if evaluated_args.len() != 2 {
+                    return Err(inv_arg_err("load_at"));
+                }
+                // Assuming the first argument is a buffer and the second is time
+                // So we need to convert the time to a sample index and fetch the value from the buffer
+                let audio = match &evaluated_args[0] {
+                    Value::Array(v) => v,
+                    _ => return Err(inv_arg_err("load_at")),
+                };
+
+                let time = match &evaluated_args[1] {
+                    Value::Array(v) => v,
+                    _ => return Err(inv_arg_err("load_at")),
+                };
+
+                if time.len() < 2 {
+                    return Err(inv_arg_err("load_at"));
+                }
+
+                let start = match time[0] {
+                    Value::Float(t) => (t * self.sample_rate as Sample) as usize,
+                    _ => return Err(inv_arg_err("load_at")),
+                };
+
+                let end = match time[1] {
+                    Value::Float(t) => (t * self.sample_rate as Sample) as usize,
+                    _ => return Err(inv_arg_err("load_at")),
+                };
+
+                if start >= audio.len() || end > audio.len() || start >= end {
+                    return Err(inv_arg_err("load_at"));
+                }
+
+                Ok(Value::Array(
+                    audio.split_at(start).1.split_at(end - start).0.to_vec(),
+                ))
+            }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
-            "time" => Ok(Value::from_buffer(
-                (0..self.channels)
-                    .map(|_| {
-                        (self.chunk_start..self.chunk_end)
-                            .map(|t| t as f32 / self.sample_rate as f32)
-                            .collect()
-                    })
+            "time" => Ok(Value::Array(
+                (self.chunk_start..self.chunk_end)
+                    .map(|t| Value::Float(t as Sample / self.sample_rate as Sample))
                     .collect(),
             )),
-            "beats" => Ok(Value::from_buffer(
-                (0..self.channels)
-                    .map(|_| {
-                        (self.chunk_start..self.chunk_end)
-                            .map(|t| samples_as_beats(self.samples_per_beat, t))
-                            .collect()
-                    })
+            "beats" => Ok(Value::Array(
+                (self.chunk_start..self.chunk_end)
+                    .map(|t| Value::Float(samples_as_beats(self.samples_per_beat, t)))
                     .collect(),
             )),
+            "sample_rate" => Ok(Value::Float(self.sample_rate as Sample)),
+            "channels" => Ok(Value::Float(self.channels as Sample)),
             _ => Err(RuntimeError::FunctionNotFound {
                 name: func.name.clone(),
                 line: line,

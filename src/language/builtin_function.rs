@@ -230,6 +230,14 @@ pub fn built_in_functions() -> HashMap<String, Function> {
     );
 
     functions.insert(
+        "load_at".to_string(),
+        Function {
+            name: "load_at".to_string(),
+            argument_specs: vec![p_float_array.clone(), p_float_array.clone()],
+        },
+    );
+
+    functions.insert(
         "pi".to_string(),
         Function {
             name: "pi".to_string(),
@@ -249,6 +257,22 @@ pub fn built_in_functions() -> HashMap<String, Function> {
         "beats".to_string(),
         Function {
             name: "beats".to_string(),
+            argument_specs: vec![],
+        },
+    );
+
+    functions.insert(
+        "sample_rate".to_string(),
+        Function {
+            name: "sample_rate".to_string(),
+            argument_specs: vec![],
+        },
+    );
+
+    functions.insert(
+        "channels".to_string(),
+        Function {
+            name: "channels".to_string(),
             argument_specs: vec![],
         },
     );
