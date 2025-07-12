@@ -18,7 +18,10 @@ use crate::{
     Expression, Function, Operator, Program, RuntimeError, Statement, SymbolInfo, SymbolKind,
     builtin_function,
 };
-use knodiq_engine::{Beats, Sample, Value, audio_utils::samples_as_beats};
+use knodiq_engine::{
+    Sample, Value,
+    audio_utils::{beats_as_samples, samples_as_beats},
+};
 use std::collections::HashMap;
 
 pub struct Interpreter {
@@ -404,8 +407,8 @@ impl Interpreter {
                 if evaluated_args.len() != 2 {
                     return Err(inv_arg_err("load_time"));
                 }
-                // Assuming the first argument is a buffer and the second is time
-                // So we need to convert the time to a sample index and fetch the value from the buffer
+
+                // The first argument should be the audio buffer, and the second should be the time
                 let audio = match &evaluated_args[0] {
                     Value::Array(v) => v,
                     _ => return Err(inv_arg_err("load_time")),
@@ -425,26 +428,34 @@ impl Interpreter {
                     })
                     .collect::<Vec<usize>>();
 
-                Ok(Value::Array(
-                    audio
-                        .iter()
-                        .map(|channel| {
-                            if let Value::Array(samples) = channel {
-                                let mut result = Vec::new();
-                                for &t in &time_sample {
-                                    if t < samples.len() {
-                                        result.push(samples[t].clone());
-                                    } else {
-                                        result.push(Value::Float(0.0));
-                                    }
-                                }
-                                Value::Array(result)
-                            } else {
-                                Value::Float(0.0)
-                            }
-                        })
-                        .collect(),
-                ))
+                Ok(get_samples_at_indices(audio, &time_sample))
+            }
+            "load_beats" => {
+                if evaluated_args.len() != 2 {
+                    return Err(inv_arg_err("load_beats"));
+                }
+
+                // The first argument should be the audio buffer, and the second should be the time
+                let audio = match &evaluated_args[0] {
+                    Value::Array(v) => v,
+                    _ => return Err(inv_arg_err("load_beats")),
+                };
+
+                let time = match &evaluated_args[1] {
+                    Value::Array(v) => v,
+                    _ => return Err(inv_arg_err("load_beats")),
+                };
+
+                // Convert beats to sample indices
+                let time_sample = time
+                    .iter()
+                    .map(|v| match v {
+                        Value::Float(t) => beats_as_samples(self.samples_per_beat, *t),
+                        _ => 0,
+                    })
+                    .collect::<Vec<usize>>();
+
+                Ok(get_samples_at_indices(audio, &time_sample))
             }
             "pi" => Ok(Value::Float(std::f32::consts::PI)),
             "time" => Ok(Value::Array(
@@ -465,4 +476,27 @@ impl Interpreter {
             }),
         }
     }
+}
+
+fn get_samples_at_indices(audio: &Vec<Value>, indices: &Vec<usize>) -> Value {
+    Value::Array(
+        audio
+            .iter()
+            .map(|channel| {
+                if let Value::Array(samples) = channel {
+                    let mut result = Vec::new();
+                    for &t in indices {
+                        if t < samples.len() {
+                            result.push(samples[t].clone());
+                        } else {
+                            result.push(Value::Float(0.0));
+                        }
+                    }
+                    Value::Array(result)
+                } else {
+                    Value::Float(0.0)
+                }
+            })
+            .collect(),
+    )
 }
