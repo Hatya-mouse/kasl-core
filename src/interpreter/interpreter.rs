@@ -492,12 +492,5 @@ impl Interpreter {
 }
 
 fn get_samples_between(audio: &Vec<Value>, start: &usize, end: &usize) -> Value {
-    Value::Array(
-        audio
-            .iter()
-            .skip(*start)
-            .take(end - start + 1)
-            .cloned()
-            .collect(),
-    )
+    Value::Array(audio[*start..*end].to_vec())
 }
