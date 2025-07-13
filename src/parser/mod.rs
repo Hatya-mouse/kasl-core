@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+pub mod nom_parser;
 pub mod parser;
 
 pub use parser::Parser;
