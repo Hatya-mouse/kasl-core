@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-pub mod lexer;
+// pub mod lexer;
 
-pub use lexer::Lexer;
+// pub use lexer::Lexer;

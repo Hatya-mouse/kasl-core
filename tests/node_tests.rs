@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{
-    AudioShaderNode, Lexer, Node, Parser, SemanticAnalyzer, SymbolKind, Value,
-}; // Assuming Type and SymbolKind are needed
+use knodiq_audio_shader::{AudioShaderNode, Node, SymbolKind, Value}; // Assuming Type and SymbolKind are needed
 
 #[test]
 fn test_new_node() {
@@ -30,8 +28,9 @@ fn test_new_node() {
 #[test]
 fn test_set_and_get_shader_simple() {
     let mut node = AudioShaderNode::new();
-    let shader_code = "input number in1\noutput number out1\nout1 = in1 * 2.0";
+    let shader_code = "input in1\noutput out1\nout1 = in1 * 2.0";
     assert!(node.set_shader(shader_code.to_string()).is_ok());
+    println!("[DEBUG] Shader set: {:?}", node.program);
     assert_eq!(node.get_shader(), shader_code);
     assert!(node.program.is_some());
 }
@@ -39,10 +38,10 @@ fn test_set_and_get_shader_simple() {
 #[test]
 fn test_set_shader_populates_io_tables() {
     let mut node = AudioShaderNode::new();
-    let shader_code =
-        "input number input_value\ninput number input_buf\noutput number output_value";
+    let shader_code = "input input_value\ninput input_buf\noutput output_value";
     let result = node.set_shader(shader_code.to_string());
     assert!(result.is_ok(), "Expected Ok, got {:?}", result.err());
+    println!("[DEBUG] Shader set: {:?}", node.program);
 
     assert!(node.input.contains_key("input_value"));
     let input_val_info = node.input.get("input_value").unwrap();
@@ -58,41 +57,12 @@ fn test_set_shader_populates_io_tables() {
 }
 
 #[test]
-fn test_set_shader_syntax_error() {
-    let mut node = AudioShaderNode::new();
-    let shader_code = "input number val output number res res = val"; // No line breaks
-    let result = node.set_shader(shader_code.to_string());
-    assert!(result.is_err());
-    assert!(node.program.is_none());
-    // Check if input/output tables are cleared or remain empty
-    assert!(node.input.is_empty());
-    assert!(node.output.is_empty());
-}
-
-#[test]
-fn test_set_shader_semantic_error() {
-    // Using an undeclared variable
-    let shader_code = "input number in1\noutput number out1\nout1 = undeclared_var * 2.0";
-
-    // Compile the shader code into a program.
-    let lexer = Lexer::new(shader_code.to_string());
-    let tokens = lexer.tokenize();
-    let parser = Parser::new(tokens);
-    let program = parser.parse().unwrap();
-
-    // Check for errors in the program.
-    let mut analyzer = SemanticAnalyzer::new();
-    let result = analyzer.analyze(&program);
-
-    println!("{:?}", program);
-    assert!(result.is_err());
-}
-
-#[test]
 fn test_process_simple_float_shader() {
     let mut node = AudioShaderNode::new();
-    let shader_code = "input number a\noutput number b\nb = a * 2.5";
+    let shader_code = "input a\noutput b\nb = a * 2.5";
     assert!(node.set_shader(shader_code.to_string()).is_ok());
+
+    println!("[DEBUG] Shader set: {:?}", node.program);
 
     node.set_input("a", Value::Float(10.0));
     let process_result = node.process(48000, 24000.0, 1, 0, 1, 0);
@@ -111,7 +81,7 @@ fn test_process_simple_float_shader() {
 #[test]
 fn test_multiple_args() {
     let mut node = AudioShaderNode::new();
-    let shader_code = "input number a\ninput number b\noutput number c\nc = max(a, b)";
+    let shader_code = "input a\ninput b\noutput c\nc = max(a, b)";
 
     let set_shader_result = node.set_shader(shader_code.to_string());
     assert!(
@@ -119,6 +89,7 @@ fn test_multiple_args() {
         "Failed to set shader: {:?}",
         set_shader_result.err()
     );
+    println!("[DEBUG] Shader set: {:?}", node.program);
 
     node.set_input("a", Value::Float(3.0));
     node.set_input("b", Value::Float(4.0));

@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{
-    Interpreter, Lexer, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value,
-};
+use knodiq_audio_shader::{ASParser, Interpreter, SemanticAnalyzer, SymbolInfo, SymbolKind, Value};
 use std::collections::HashMap;
 
 fn main() {
@@ -31,10 +29,8 @@ fn audio_shader_sample_processing() {
     output buffer out_buffer
     out_buffer = in_buffer * gain
     ";
-    let lexer = Lexer::new(input.to_string());
-    let tokens = lexer.tokenize();
-    let parser = Parser::new(tokens);
-    let program = parser.parse();
+    let parser = ASParser::new();
+    let program = parser.parse(&input);
     match &program {
         Ok(_) => {}
         Err(e) => {
@@ -62,7 +58,6 @@ fn audio_shader_sample_processing() {
         SymbolInfo {
             name: "in_buffer".to_string(),
             kind: SymbolKind::Input,
-            initial_value: None,
             range: None,
             value: Some(Value::from_buffer(vec![vec![0.15; 128]; 2])),
         },

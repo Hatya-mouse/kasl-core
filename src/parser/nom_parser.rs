@@ -14,6 +14,11 @@
 // limitations under the License.
 //
 
+use crate::{Program, statement::statement};
+use nom::{
+    IResult, Parser, character::complete::line_ending, combinator::map, multi::separated_list0,
+};
+
 pub struct ASParser {}
 
 impl ASParser {
@@ -21,8 +26,17 @@ impl ASParser {
         ASParser {}
     }
 
-    pub fn parse(&self, input: &str) -> Result<(), String> {
-        // Implement parsing logic here
-        Ok(())
+    pub fn parse(&self, input: &str) -> Result<Program, String> {
+        match program(input) {
+            Ok((_, program)) => Ok(program),
+            Err(err) => Err(format!("Parsing error: {:?}", err)),
+        }
     }
+}
+
+pub fn program(s: &str) -> IResult<&str, Program> {
+    map(separated_list0(line_ending, statement), |statements| {
+        Program { statements }
+    })
+    .parse(s)
 }

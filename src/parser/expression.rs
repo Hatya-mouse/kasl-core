@@ -18,8 +18,7 @@ use crate::{Expression, Operator};
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::tag,
-    bytes::complete::take_while,
+    bytes::complete::{tag, take_while},
     combinator::{map, opt},
     multi::separated_list0,
     number::complete::float,
@@ -55,7 +54,7 @@ pub fn function_call(s: &str) -> IResult<&str, Expression> {
     let call_parser = (
         take_while(|c: char| c.is_alphanumeric() || c == '_'),
         tag("("),
-        opt(separated_list0(tag(","), number)),
+        opt(separated_list0(tag(","), expression)),
         tag(")"),
     );
     map(call_parser, |(name, _, args, _)| Expression::FunctionCall {

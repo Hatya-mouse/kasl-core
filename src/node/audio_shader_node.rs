@@ -16,7 +16,7 @@
 
 use std::collections::HashMap;
 
-use crate::{Interpreter, Lexer, Parser, Program, SemanticAnalyzer, SymbolInfo};
+use crate::{ASParser, Interpreter, Program, SemanticAnalyzer, SymbolInfo};
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
@@ -46,10 +46,8 @@ impl AudioShaderNode {
         self.shader = shader;
 
         // Compile the shader code into a program.
-        let lexer = Lexer::new(self.shader.clone());
-        let tokens = lexer.tokenize();
-        let parser = Parser::new(tokens);
-        let program = match parser.parse() {
+        let parser = ASParser::new();
+        let program = match parser.parse(&self.shader) {
             Ok(program) => program,
             Err(err) => return Err(vec![err.to_string()]),
         };

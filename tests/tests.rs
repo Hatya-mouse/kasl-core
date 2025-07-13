@@ -15,42 +15,20 @@
 //
 
 use knodiq_audio_shader::{
-    Expression, Interpreter, Lexer, Parser, Program, SemanticAnalyzer, Statement, TokenType, Type,
-    Value,
+    ASParser, Expression, Interpreter, Program, SemanticAnalyzer, Statement, Value,
 };
 
 #[test]
-fn test_basic_shader_tokenize() {
-    let code = "input float in_buffer = 0.0
-                    input float gain = 1.0
-                    output float out_buffer
-                    out_buffer = in_buffer * gain";
-    let lexer = Lexer::new(code.to_string());
-    let tokens = lexer.tokenize();
-
-    assert!(!tokens.is_empty());
-    assert_eq!(tokens[0].token_type, TokenType::Input);
-    assert_eq!(
-        tokens[2].token_type,
-        TokenType::Identifier("in_buffer".into())
-    );
-    assert_eq!(tokens[3].token_type, TokenType::Assign);
-    assert_eq!(tokens[4].token_type, TokenType::FloatLiteral(0.0));
-
-    assert_eq!(tokens[10].token_type, TokenType::FloatLiteral(1.0));
-}
-
-#[test]
 fn test_parsing() {
-    let code = "input number x = 1.0
-                    output number y
+    let code = "input x = 1.0
+                    output y
 
                     y = pow(x, 2)";
-    let lexer = Lexer::new(code.to_string());
-    let tokens = lexer.tokenize();
 
-    let parser = Parser::new(tokens);
-    let program = parser.parse();
+    let parser = ASParser::new();
+    let program = parser.parse(&code);
+
+    println!("Parsed Program: {:?}", program);
 
     assert!(program.is_ok());
     let program = program.unwrap();
@@ -61,15 +39,12 @@ fn test_parsing() {
         _ => panic!("Expected InputDeclarationStatement"),
     };
     assert_eq!(input_stmt.name, "x");
-    assert_eq!(input_stmt.data_type, Type::Float);
-    assert_eq!(input_stmt.initial_value, Some(Expression::Literal(1.0)));
 
     let output_stmt = match &program.statements[1] {
         Statement::OutputDeclaration(stmt) => stmt,
         _ => panic!("Expected OutputDeclarationStatement"),
     };
     assert_eq!(output_stmt.name, "y");
-    assert_eq!(output_stmt.data_type, Type::Float);
 
     let assignment_stmt = match &program.statements[2] {
         Statement::Assignment(stmt) => stmt,
@@ -90,21 +65,21 @@ fn test_parsing() {
 
 #[test]
 fn test_interpreter_basic() {
-    let code = "input number in_buffer
-                    input number gain = 1.0
+    let code = "input in_buffer
+                    var gain = 1.0
                     var result = 0.0
-                    output number out_buffer
-                    output number powered
+                    output out_buffer
+                    output powered
 
                     result = in_buffer * gain
                     out_buffer = result + 1.25
                     
                     powered = pow(in_buffer, 2.0)";
-    let lexer = Lexer::new(code.to_string());
-    let tokens = lexer.tokenize();
 
-    let parser = Parser::new(tokens);
-    let program: Program = parser.parse().unwrap();
+    let parser = ASParser::new();
+    let program: Program = parser.parse(&code).unwrap();
+
+    println!("Parsed Program: {:?}", program);
 
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program).unwrap();
@@ -130,15 +105,13 @@ fn test_interpreter_basic() {
 
 #[test]
 fn test_interpreter_advanced() {
-    let code = "input number in_buffer
-                    output number out_buffer
+    let code = "input in_buffer
+                    output out_buffer
 
                     out_buffer = in_buffer * sin(time() * pi() * 440)";
-    let lexer = Lexer::new(code.to_string());
-    let tokens = lexer.tokenize();
 
-    let parser = Parser::new(tokens);
-    let program: Program = parser.parse().unwrap();
+    let parser = ASParser::new();
+    let program: Program = parser.parse(&code).unwrap();
 
     println!("Parsed Program:");
     for stmt in &program.statements {

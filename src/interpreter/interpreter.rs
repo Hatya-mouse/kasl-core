@@ -109,7 +109,6 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: target.name.clone(),
                         kind: target.kind,
-                        initial_value: target.initial_value.clone(),
                         range: target.range,
                         value: Some(value.clone()),
                     };
@@ -122,7 +121,6 @@ impl Interpreter {
                         let symbol = SymbolInfo {
                             name: input.name.clone(),
                             kind: SymbolKind::Input,
-                            initial_value: None,
                             range: None,
                             value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
                         };
@@ -139,7 +137,6 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: output.name.clone(),
                         kind: SymbolKind::Output,
-                        initial_value: None,
                         range: None,
                         value: None,
                     };
@@ -152,7 +149,6 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: var_decl.name.clone(),
                         kind: SymbolKind::Variable,
-                        initial_value: None,
                         range: None,
                         value: Some(initial_value),
                     };
@@ -163,7 +159,6 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: loop_stmt.variable_name.clone(),
                         kind: SymbolKind::Variable,
-                        initial_value: None,
                         range: None,
                         value: Some(Value::Float(0.0)),
                     };
@@ -180,7 +175,6 @@ impl Interpreter {
                                 let symbol_info = SymbolInfo {
                                     name: loop_stmt.variable_name.clone(),
                                     kind: SymbolKind::Variable,
-                                    initial_value: None,
                                     range: None,
                                     value: Some(element.clone()),
                                 };
@@ -194,7 +188,6 @@ impl Interpreter {
                             let symbol_info = SymbolInfo {
                                 name: loop_stmt.variable_name.clone(),
                                 kind: SymbolKind::Variable,
-                                initial_value: None,
                                 range: None,
                                 value: Some(Value::Float(value)),
                             };

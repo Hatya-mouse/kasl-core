@@ -51,14 +51,12 @@ impl SemanticAnalyzer {
             match statement {
                 Statement::InputDeclaration(input) => {
                     let name = input.name.clone();
-                    let initial_value = input.initial_value.clone();
 
                     self.define_input(
                         name.clone(),
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Input,
-                            initial_value,
                             range: None,
                             value: None,
                         },
@@ -73,7 +71,6 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Output,
-                            initial_value: None,
                             range: None,
                             value: None,
                         },
@@ -88,7 +85,6 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Variable,
-                            initial_value: None,
                             range: None,
                             value: None,
                         },
@@ -121,7 +117,6 @@ impl SemanticAnalyzer {
                             SymbolInfo {
                                 name: variable_name.clone(),
                                 kind: SymbolKind::Variable,
-                                initial_value: None,
                                 range: None,
                                 value: None,
                             },
