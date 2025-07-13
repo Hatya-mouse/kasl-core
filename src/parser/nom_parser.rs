@@ -14,5 +14,15 @@
 // limitations under the License.
 //
 
-pub mod compile;
-pub mod ndarray;
+pub struct ASParser {}
+
+impl ASParser {
+    pub fn new() -> Self {
+        ASParser {}
+    }
+
+    pub fn parse(&self, input: &str) -> Result<(), String> {
+        // Implement parsing logic here
+        Ok(())
+    }
+}
