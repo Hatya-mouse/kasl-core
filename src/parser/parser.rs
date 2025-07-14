@@ -103,8 +103,6 @@ impl Parser {
                     }
 
                     TokenType::Var => {
-                        let value_type = self.parse_type(&mut token_iter)?;
-
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -121,7 +119,7 @@ impl Parser {
                             VariableDeclarationStatement {
                                 name,
                                 initial_value,
-                                value_type,
+                                value_type: Type::None,
                                 line: token.line,
                             },
                         ));
@@ -200,7 +198,8 @@ impl Parser {
         token_iter: &mut Peekable<Iter<Token>>,
     ) -> Result<Expression, String> {
         let mut left = match token_iter.next().map(|t| &t.token_type) {
-            Some(TokenType::FloatLiteral(value)) => Expression::Literal(*value),
+            Some(TokenType::IntLiteral(value)) => Expression::IntLiteral(*value),
+            Some(TokenType::FloatLiteral(value)) => Expression::FloatLiteral(*value),
             Some(TokenType::Identifier(name)) => match token_iter.peek().map(|t| &t.token_type) {
                 Some(TokenType::LParen) => {
                     token_iter.next();
@@ -265,11 +264,8 @@ impl Parser {
 
     fn parse_type(&self, token_iter: &mut Peekable<Iter<Token>>) -> Result<Type, String> {
         match token_iter.next().map(|t| &t.token_type) {
-            Some(TokenType::Identifier(name)) => match name.as_str() {
-                "float" => Ok(Type::Float),
-                "int" => Ok(Type::Int),
-                _ => Err(format!("Unknown type '{}'", name)),
-            },
+            Some(TokenType::Float) => Ok(Type::Float),
+            Some(TokenType::Int) => Ok(Type::Int),
             Some(TokenType::LBrace) => {
                 let token: Vec<Token> = token_iter
                     .take_while(|t| t.token_type != TokenType::RBrace)

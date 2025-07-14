@@ -63,8 +63,8 @@ pub struct OutputDeclarationStatement {
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableDeclarationStatement {
     pub name: String,
-    pub value_type: Type,
     pub initial_value: Expression,
+    pub value_type: Type,
     pub line: usize,
 }
 
@@ -90,7 +90,8 @@ pub enum Expression {
         left: Box<Expression>,
         right: Box<Expression>,
     },
-    Literal(f32),
+    IntLiteral(i32),
+    FloatLiteral(f32),
     Identifier(String),
     FunctionCall {
         name: String,

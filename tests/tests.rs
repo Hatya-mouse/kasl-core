@@ -15,12 +15,12 @@
 //
 
 use knodiq_audio_shader::{
-    Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
+    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
 };
 
 #[test]
 fn test_parsing() {
-    let code = "var x = 1.0\noutput y\ny = pow(x, 2)";
+    let code = "var x = 1.0\noutput float y\ny = pow(x, 2)";
 
     let parser = Parser::new();
     let program = parser.parse(&code);
@@ -52,7 +52,7 @@ fn test_parsing() {
             name: "pow".to_string(),
             arguments: vec![
                 Expression::Identifier("x".to_string()),
-                Expression::Literal(2.0)
+                Expression::FloatLiteral(2.0)
             ]
         }
     );
@@ -60,9 +60,9 @@ fn test_parsing() {
 
 #[test]
 fn test_interpreter_basic() {
-    let code = "input in_buffer
-                    output out_buffer
-                    output powered
+    let code = "input float in_buffer
+                    output float out_buffer
+                    output float powered
                     var gain = 1.0
                     var result = 0.0
 
@@ -97,14 +97,13 @@ fn test_interpreter_basic() {
 
 #[test]
 fn test_interpreter_advanced() {
-    let code = "input in_buffer
-                    output out_buffer
+    let code = "input float in_buffer
+                    output float out_buffer
 
                     out_buffer = in_buffer * sin(time() * pi() * 440)";
 
     let parser = Parser::new();
     let program: Program = parser.parse(&code).unwrap();
-    println!("Parsed Program: {:?}", program);
 
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program).unwrap();
@@ -116,4 +115,33 @@ fn test_interpreter_advanced() {
         Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
 
     assert!(interpreter.execute(input_table).is_ok());
+}
+
+#[test]
+fn test_compiler() {
+    let code = "input float in_buffer
+                    output float out_buffer
+                    output float powered
+                    var gain = 1.0
+                    var result = 0.0
+
+                    result = in_buffer * gain
+                    out_buffer = result + 1.25
+
+                    powered = pow(in_buffer, 2.0)";
+
+    let parser = Parser::new();
+    let program: Program = parser.parse(&code).unwrap();
+
+    if let Ok(mut compiler) = Compiler::new() {
+        print!(
+            "{:?}",
+            compiler
+                .execute(&program)
+                .unwrap()
+                .iter()
+                .map(|v| v.as_u32())
+                .collect::<Vec<_>>()
+        );
+    }
 }

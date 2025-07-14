@@ -149,7 +149,7 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: var_decl.name.clone(),
                         kind: SymbolKind::Variable,
-                        value_type: var_decl.value_type.clone(),
+                        value_type: Type::Float,
                         value: Some(initial_value),
                     };
                     self.register_symbol(var_decl.name.clone(), symbol.clone(), var_decl.line)?;
@@ -239,7 +239,9 @@ impl Interpreter {
         line: usize,
     ) -> Result<Value, RuntimeError> {
         match expression {
-            Expression::Literal(value) => Ok(Value::Float(*value)),
+            Expression::IntLiteral(value) => Ok(Value::Int(*value)),
+
+            Expression::FloatLiteral(value) => Ok(Value::Float(*value)),
 
             Expression::Identifier(name) => self
                 .symbol_table

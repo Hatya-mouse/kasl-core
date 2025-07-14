@@ -54,18 +54,31 @@ impl Lexer {
                     if let Some(&next_char) = chars.peek() {
                         if next_char.is_digit(10) {
                             let mut number = String::from("-");
+                            let mut is_float = false;
                             while let Some(&next_char) = chars.peek() {
-                                if next_char.is_digit(10) || next_char == '.' {
+                                if next_char.is_digit(10) {
                                     number.push(chars.next().unwrap());
+                                } else if next_char == '.' {
+                                    number.push(chars.next().unwrap());
+                                    is_float = true;
                                 } else {
                                     break;
                                 }
                             }
-                            if let Ok(value) = number.parse::<f32>() {
-                                tokens.push(Token {
-                                    token_type: TokenType::FloatLiteral(value),
-                                    line: line_number,
-                                });
+                            if is_float {
+                                if let Ok(value) = number.parse::<f32>() {
+                                    tokens.push(Token {
+                                        token_type: TokenType::FloatLiteral(value),
+                                        line: line_number,
+                                    });
+                                }
+                            } else {
+                                if let Ok(value) = number.parse::<i32>() {
+                                    tokens.push(Token {
+                                        token_type: TokenType::IntLiteral(value),
+                                        line: line_number,
+                                    });
+                                }
                             }
                         } else {
                             tokens.push(Token {
@@ -173,8 +186,12 @@ impl Lexer {
                             token_type: TokenType::Var,
                             line: line_number,
                         }),
-                        "number" => tokens.push(Token {
-                            token_type: TokenType::Number,
+                        "float" => tokens.push(Token {
+                            token_type: TokenType::Float,
+                            line: line_number,
+                        }),
+                        "int" => tokens.push(Token {
+                            token_type: TokenType::Int,
                             line: line_number,
                         }),
                         "for" => tokens.push(Token {

@@ -24,6 +24,7 @@ pub mod node;
 pub mod parser;
 
 pub use analyzer::*;
+pub use compiler::*;
 pub use error::*;
 pub use interpreter::*;
 pub use language::*;

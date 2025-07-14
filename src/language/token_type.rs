@@ -29,7 +29,8 @@ pub enum TokenType {
     For,
     In,
     // Types
-    Number,
+    Float,
+    Int,
     // Brackets
     LBracket,
     RBracket,
@@ -44,6 +45,7 @@ pub enum TokenType {
     Divide,
     Modulo,
     // Literals
+    IntLiteral(i32),
     FloatLiteral(f32),
     // Identifiers
     Identifier(String),

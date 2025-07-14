@@ -14,8 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Program, SemanticAnalyzer, Statement};
-use cranelift_codegen::{Context, ir::AbiParam};
+use std::collections::HashMap;
+
+use crate::{Program, SemanticAnalyzer, codegen::get_type, compiler::codegen::Translator};
+use cranelift_codegen::{
+    Context,
+    ir::{self, AbiParam, InstBuilder},
+};
+use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::Module;
 
@@ -35,38 +41,53 @@ impl Compiler {
         })
     }
 
-    pub fn compile(&mut self, program: &Program) -> Result<(), Box<dyn std::error::Error>> {
-        let float = self
-            .module
-            .target_config()
-            .pointer_type()
-            .double_width()
-            .ok_or("Target configuration does not support double width")?;
-        let ndarray = self.module.target_config().pointer_type();
-
+    pub fn execute(
+        &mut self,
+        program: &Program,
+    ) -> Result<Vec<ir::Value>, Box<dyn std::error::Error>> {
         let mut semantic_analyzer = SemanticAnalyzer::new();
         semantic_analyzer.analyze(program)?;
         let inputs = semantic_analyzer.get_input_table();
         let outputs = semantic_analyzer.get_output_table();
+        let mut input_names = Vec::new();
+        let mut output_names = Vec::new();
 
-        for _ in inputs {
-            self.ctx.func.signature.params.push(AbiParam::new(ndarray));
+        for input in inputs {
+            let var_type = get_type(input.1.value_type, &self.module);
+            self.ctx.func.signature.params.push(AbiParam::new(var_type));
+            input_names.push(input.1.name.clone());
         }
 
-        for _ in outputs {
-            self.ctx.func.signature.returns.push(AbiParam::new(ndarray));
+        for output in outputs {
+            let var_type = get_type(output.1.value_type, &self.module);
+            self.ctx
+                .func
+                .signature
+                .returns
+                .push(AbiParam::new(var_type));
+            output_names.push(output.1.name.clone());
         }
 
-        Ok(())
-    }
+        let mut builder_ctx = FunctionBuilderContext::new();
+        let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut builder_ctx);
 
-    fn codegen_stmt(&self, statement: &Statement) {
-        match statement {
-            Statement::InputDeclaration(input_decl) => {}
+        let entry_block = builder.create_block();
+        builder.append_block_params_for_function_params(entry_block);
+        builder.switch_to_block(entry_block);
+        builder.seal_block(entry_block);
+
+        let return_block = builder.create_block();
+        builder.append_block_params_for_function_returns(return_block);
+
+        let mut translator = Translator::new(builder, HashMap::new(), entry_block, return_block);
+        for stmt in program.statements.iter() {
+            translator.codegen_stmt(&input_names, &output_names, stmt, &self.module);
         }
-    }
 
-    fn codegen_expr(&self, expr: &Expression) {
-        match expr {}
+        let return_vals = translator.get_returns();
+        translator.builder.ins().return_(&return_vals);
+        translator.builder.finalize();
+
+        Ok(return_vals)
     }
 }

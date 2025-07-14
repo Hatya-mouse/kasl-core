@@ -15,6 +15,7 @@
 //
 
 use knodiq_audio_shader::{Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value};
+use knodiq_engine::Type;
 use std::collections::HashMap;
 
 fn main() {
@@ -58,7 +59,7 @@ fn audio_shader_sample_processing() {
         SymbolInfo {
             name: "in_buffer".to_string(),
             kind: SymbolKind::Input,
-            range: None,
+            value_type: Type::Array(Box::new(Type::Array(Box::new(Type::Float)))),
             value: Some(Value::from_buffer(vec![vec![0.15; 128]; 2])),
         },
     );

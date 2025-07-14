@@ -14,10 +14,12 @@
 // limitations under the License.
 //
 
-use knodiq_engine::Type;
+use knodiq_engine::{Type, graph::value::type_of};
 
 use crate::{
-    Expression, Function, Program, SemanticError, Statement, SymbolInfo, SymbolKind, semantic_error,
+    Expression, Function, Program, SemanticError, Statement, SymbolInfo, SymbolKind,
+    VariableDeclarationStatement,
+    semantic_error::{self, ErrorVariant},
 };
 use std::collections::HashMap;
 
@@ -43,13 +45,21 @@ impl SemanticAnalyzer {
         }
     }
 
-    pub fn analyze(&mut self, program: &Program) -> Result<(), SemanticError> {
-        self.analyze_statements(&program.statements)
+    /// Analyzes the given program for semantic errors.
+    /// Also infers variable types and checks for undefined symbols.
+    pub fn analyze(&mut self, program: &Program) -> Result<Program, SemanticError> {
+        Ok(Program {
+            statements: self.analyze_statements(&program.statements)?,
+        })
     }
 
-    pub fn analyze_statements(&mut self, statements: &Vec<Statement>) -> Result<(), SemanticError> {
+    pub fn analyze_statements(
+        &mut self,
+        statements: &Vec<Statement>,
+    ) -> Result<Vec<Statement>, SemanticError> {
         self.function_table
             .extend(crate::builtin_function::built_in_functions());
+        let mut result = Vec::new();
 
         for statement in statements {
             match statement {
@@ -65,6 +75,8 @@ impl SemanticAnalyzer {
                             value: None,
                         },
                     );
+
+                    result.push(Statement::InputDeclaration(input.clone()));
                 }
 
                 Statement::OutputDeclaration(output) => {
@@ -79,20 +91,33 @@ impl SemanticAnalyzer {
                             value: None,
                         },
                     );
+
+                    result.push(Statement::OutputDeclaration(output.clone()));
                 }
 
                 Statement::VariableDeclaration(var) => {
                     let name = var.name.clone();
+
+                    let value_type = self.infer_type(&var.initial_value)?;
 
                     self.define_symbol(
                         name.clone(),
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Variable,
-                            value_type: var.value_type.clone(),
+                            value_type: Type::Float,
                             value: None,
                         },
                     );
+
+                    result.push(Statement::VariableDeclaration(
+                        VariableDeclarationStatement {
+                            name: name.clone(),
+                            value_type,
+                            initial_value: var.initial_value.clone(),
+                            line: var.line,
+                        },
+                    ));
                 }
 
                 Statement::Assignment(assignment) => {
@@ -109,6 +134,8 @@ impl SemanticAnalyzer {
                     if let Err(e) = self.analyze_expression(&assignment.value) {
                         self.error.errors.extend(e.errors);
                     }
+
+                    result.push(Statement::Assignment(assignment.clone()));
                 }
 
                 Statement::ForLoop(loop_stmt) => {
@@ -136,12 +163,14 @@ impl SemanticAnalyzer {
                     if let Err(e) = self.analyze_statements(&loop_stmt.body) {
                         self.error.errors.extend(e.errors);
                     }
+
+                    result.push(Statement::ForLoop(loop_stmt.clone()));
                 }
             }
         }
 
         if self.error.errors.is_empty() {
-            Ok(())
+            Ok(result)
         } else {
             Err(self.error.clone())
         }
@@ -149,7 +178,8 @@ impl SemanticAnalyzer {
 
     pub fn analyze_expression(&mut self, expr: &Expression) -> Result<(), SemanticError> {
         match expr {
-            Expression::Literal(_) => Ok(()),
+            Expression::IntLiteral(_) => Ok(()),
+            Expression::FloatLiteral(_) => Ok(()),
             Expression::Identifier(name) => {
                 if !self.symbol_table.contains_key(name) {
                     self.error
@@ -222,6 +252,44 @@ impl SemanticAnalyzer {
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
             self.output_table.insert(name, info);
+        }
+    }
+
+    fn infer_type(&self, expr: &Expression) -> Result<Type, SemanticError> {
+        match expr {
+            Expression::IntLiteral(_) => Ok(Type::Int),
+            Expression::FloatLiteral(_) => Ok(Type::Float),
+            Expression::Identifier(name) => {
+                if let Some(info) = self.symbol_table.get(name) {
+                    Ok(info.value_type.clone())
+                } else {
+                    Err(SemanticError {
+                        errors: vec![ErrorVariant::UndefinedSymbol(name.clone())],
+                    })
+                }
+            }
+            Expression::FunctionCall { name, arguments } => {
+                if let Some(_) = self.function_table.get(name) {
+                    let input_types = arguments.iter().map(|arg| self.infer_type(arg));
+                    let mut inferred_type = Type::None;
+                    for arg in input_types {
+                        match arg {
+                            Ok(t) => inferred_type = type_of(&inferred_type, &t),
+                            Err(e) => return Err(e),
+                        }
+                    }
+                    Ok(inferred_type)
+                } else {
+                    return Err(SemanticError {
+                        errors: vec![ErrorVariant::UndefinedFunction(name.clone())],
+                    });
+                }
+            }
+            Expression::BinaryOp { op: _, left, right } => {
+                let left_type = self.infer_type(left)?;
+                let right_type = self.infer_type(right)?;
+                Ok(type_of(&left_type, &right_type))
+            }
         }
     }
 }

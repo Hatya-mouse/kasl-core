@@ -15,6 +15,8 @@ knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine.git" }
 cranelift-jit = "0.121.1"
 cranelift-codegen = "0.121.1"
 cranelift-module = "0.121.1"
+pest = "2.8.1"
+cranelift-frontend = "0.121.1"
 
 [dev-dependencies]
 divan = "0.1.21"
