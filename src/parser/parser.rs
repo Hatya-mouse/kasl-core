@@ -17,23 +17,22 @@
 use std::{iter::Peekable, slice::Iter};
 
 use crate::{
-    AssignmentStatement, Expression, InputDeclarationStatement, Operator,
-    OutputDeclarationStatement, Program, Statement, TokenType, Type, VariableDeclarationStatement,
+    AssignmentStatement, Expression, InputDeclarationStatement, Lexer, Operator,
+    OutputDeclarationStatement, Program, Statement, TokenType, VariableDeclarationStatement,
     ast::ForLoopStatement, token_type::Token,
 };
 
-pub struct Parser {
-    tokens: Vec<Token>,
-}
+pub struct Parser {}
 
 impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
-        Parser { tokens }
+    pub fn new() -> Self {
+        Parser {}
     }
 
-    pub fn parse(&self) -> Result<Program, String> {
-        let lines: Vec<Vec<Token>> = self
-            .tokens
+    pub fn parse(&self, program: &str) -> Result<Program, String> {
+        let tokens = Lexer::new(program.to_string()).tokenize();
+
+        let lines: Vec<Vec<Token>> = tokens
             .split(|token| token.token_type == TokenType::EndOfLine)
             .map(|line| line.to_vec())
             .collect();
@@ -67,33 +66,6 @@ impl Parser {
             while let Some(token) = token_iter.next() {
                 match &token.token_type {
                     TokenType::Input => {
-                        let mut range: Option<(f32, f32)> = None;
-
-                        // Parse value range
-                        if let Some(TokenType::LParen) = token_iter.peek().map(|t| &t.token_type) {
-                            token_iter.next(); // consume '('
-                            let start = match token_iter.next().map(|t| &t.token_type) {
-                                Some(TokenType::FloatLiteral(value)) => value,
-                                _ => {
-                                    return Err("Expected float literal after '('.".into());
-                                }
-                            };
-
-                            let end = match token_iter.next().map(|t| &t.token_type) {
-                                Some(TokenType::FloatLiteral(value)) => value,
-                                _ => return Err("Expected float literal after range start.".into()),
-                            };
-
-                            if token_iter.next().map(|t| &t.token_type) != Some(&TokenType::RParen)
-                            {
-                                return Err("Expected ')' to close range".into());
-                            }
-
-                            range = Some((*start, *end));
-                        }
-
-                        let data_type = self.parse_type(&mut token_iter)?;
-
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -101,25 +73,14 @@ impl Parser {
                             }
                         };
 
-                        let initial_value = match token_iter.next().map(|t| &t.token_type) {
-                            Some(TokenType::Assign) => {
-                                Some(self.parse_expression(&mut token_iter)?)
-                            }
-                            _ => None,
-                        };
-
                         statements.push(Statement::InputDeclaration(InputDeclarationStatement {
                             name,
-                            data_type,
-                            initial_value,
-                            range,
+                            input_attrs: Vec::new(),
                             line: token.line,
                         }));
                     }
 
                     TokenType::Output => {
-                        let data_type = self.parse_type(&mut token_iter)?;
-
                         let name = match token_iter.next().map(|t| &t.token_type) {
                             Some(TokenType::Identifier(name)) => name.clone(),
                             _ => {
@@ -129,7 +90,6 @@ impl Parser {
 
                         statements.push(Statement::OutputDeclaration(OutputDeclarationStatement {
                             name,
-                            data_type,
                             line: token.line,
                         }));
                     }
@@ -290,32 +250,5 @@ impl Parser {
         }
 
         Ok(left)
-    }
-
-    /// Parses a type from the token iterator.
-    fn parse_type(&self, token_iter: &mut Peekable<Iter<Token>>) -> Result<Type, String> {
-        let base_type = match token_iter.next().map(|t| &t.token_type) {
-            Some(TokenType::Number) => Type::Float,
-            _ => {
-                return Err("Expected type".into());
-            }
-        };
-
-        // Check for array brackets after base type
-        let mut current_type = base_type;
-        while token_iter.peek().map(|t| &t.token_type) == Some(&&TokenType::LBracket) {
-            token_iter.next(); // consume '['
-
-            match token_iter.next().map(|t| &t.token_type) {
-                Some(TokenType::RBracket) => {
-                    current_type = Type::Array(Box::new(current_type));
-                }
-                _ => {
-                    return Err("Expected ']' after '[' in type literal".into());
-                }
-            }
-        }
-
-        Ok(current_type)
     }
 }

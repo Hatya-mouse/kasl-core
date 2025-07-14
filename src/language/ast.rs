@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+use knodiq_engine::Type;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Operator {
     Add,
@@ -46,6 +48,7 @@ pub struct InputAttribute {
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputDeclarationStatement {
     pub name: String,
+    pub value_type: Type,
     pub input_attrs: Vec<InputAttribute>,
     pub line: usize,
 }
@@ -53,12 +56,14 @@ pub struct InputDeclarationStatement {
 #[derive(Debug, PartialEq, Clone)]
 pub struct OutputDeclarationStatement {
     pub name: String,
+    pub value_type: Type,
     pub line: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableDeclarationStatement {
     pub name: String,
+    pub value_type: Type,
     pub initial_value: Expression,
     pub line: usize,
 }

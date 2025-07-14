@@ -15,5 +15,9 @@
 //
 
 pub mod runtime_error;
+pub mod semantic_error;
+pub mod syntax_error;
 
 pub use runtime_error::RuntimeError;
+pub use semantic_error::SemanticError;
+pub use syntax_error::SyntaxError;

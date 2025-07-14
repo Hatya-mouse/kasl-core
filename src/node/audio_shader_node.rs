@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
+use std::{collections::HashMap, error::Error};
 
-use crate::{ASParser, Interpreter, Program, SemanticAnalyzer, SymbolInfo};
+use crate::{Interpreter, Parser, Program, SemanticAnalyzer, SymbolInfo, SyntaxError};
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
@@ -42,14 +42,14 @@ impl AudioShaderNode {
     }
 
     /// Sets the shader code for the node.
-    pub fn set_shader(&mut self, shader: String) -> Result<(), Vec<String>> {
+    pub fn set_shader(&mut self, shader: String) -> Result<(), Box<dyn Error>> {
         self.shader = shader;
 
         // Compile the shader code into a program.
-        let parser = ASParser::new();
+        let parser = Parser::new();
         let program = match parser.parse(&self.shader) {
             Ok(program) => program,
-            Err(err) => return Err(vec![err.to_string()]),
+            Err(_) => return Err(Box::new(SyntaxError::new())),
         };
 
         // Check for errors in the program.
@@ -61,7 +61,7 @@ impl AudioShaderNode {
                 self.output = analyzer.get_output_table();
                 Ok(())
             }
-            Err(errors) => Err(errors),
+            Err(error) => Err(Box::new(error)),
         }
     }
 

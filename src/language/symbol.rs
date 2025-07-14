@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_engine::Value;
+use knodiq_engine::{Type, Value};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SymbolKind {
@@ -29,6 +29,6 @@ pub enum SymbolKind {
 pub struct SymbolInfo {
     pub name: String,
     pub kind: SymbolKind,
-    pub range: Option<(f32, f32)>,
+    pub value_type: Type,
     pub value: Option<Value>,
 }

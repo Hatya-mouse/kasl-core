@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Function, Program, Statement, SymbolInfo, SymbolKind};
+use knodiq_engine::Type;
+
+use crate::{
+    Expression, Function, Program, SemanticError, Statement, SymbolInfo, SymbolKind, semantic_error,
+};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -24,7 +28,7 @@ pub struct SemanticAnalyzer {
     pub input_table: HashMap<String, SymbolInfo>,
     pub output_table: HashMap<String, SymbolInfo>,
     pub function_table: HashMap<String, Function>,
-    errors: Vec<String>,
+    error: SemanticError,
 }
 
 impl SemanticAnalyzer {
@@ -35,15 +39,15 @@ impl SemanticAnalyzer {
             input_table: HashMap::new(),
             output_table: HashMap::new(),
             function_table: HashMap::new(),
-            errors: Vec::new(),
+            error: SemanticError::new(),
         }
     }
 
-    pub fn analyze(&mut self, program: &Program) -> Result<(), Vec<String>> {
+    pub fn analyze(&mut self, program: &Program) -> Result<(), SemanticError> {
         self.analyze_statements(&program.statements)
     }
 
-    pub fn analyze_statements(&mut self, statements: &Vec<Statement>) -> Result<(), Vec<String>> {
+    pub fn analyze_statements(&mut self, statements: &Vec<Statement>) -> Result<(), SemanticError> {
         self.function_table
             .extend(crate::builtin_function::built_in_functions());
 
@@ -57,7 +61,7 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Input,
-                            range: None,
+                            value_type: input.value_type.clone(),
                             value: None,
                         },
                     );
@@ -71,7 +75,7 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Output,
-                            range: None,
+                            value_type: output.value_type.clone(),
                             value: None,
                         },
                     );
@@ -85,7 +89,7 @@ impl SemanticAnalyzer {
                         SymbolInfo {
                             name: name.clone(),
                             kind: SymbolKind::Variable,
-                            range: None,
+                            value_type: var.value_type.clone(),
                             value: None,
                         },
                     );
@@ -95,11 +99,15 @@ impl SemanticAnalyzer {
                     let target = &assignment.target_name;
 
                     if !self.symbol_table.contains_key(target) {
-                        self.errors.push(format!("Undefined symbol '{}'.", target));
+                        self.error
+                            .errors
+                            .push(semantic_error::ErrorVariant::UndefinedSymbol(
+                                target.clone(),
+                            ));
                     }
 
                     if let Err(e) = self.analyze_expression(&assignment.value) {
-                        self.errors.extend(e);
+                        self.error.errors.extend(e.errors);
                     }
                 }
 
@@ -107,17 +115,18 @@ impl SemanticAnalyzer {
                     let variable_name = &loop_stmt.variable_name;
 
                     if self.symbol_table.contains_key(variable_name) {
-                        self.errors.push(format!(
-                            "Variable '{}' is already defined in the symbol table.",
-                            variable_name
-                        ));
+                        self.error
+                            .errors
+                            .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
+                                variable_name.clone(),
+                            ));
                     } else {
                         self.define_symbol(
                             variable_name.clone(),
                             SymbolInfo {
                                 name: variable_name.clone(),
                                 kind: SymbolKind::Variable,
-                                range: None,
+                                value_type: Type::Int,
                                 value: None,
                             },
                         );
@@ -125,31 +134,37 @@ impl SemanticAnalyzer {
 
                     // Check if the body is valid
                     if let Err(e) = self.analyze_statements(&loop_stmt.body) {
-                        self.errors.extend(e);
+                        self.error.errors.extend(e.errors);
                     }
                 }
             }
         }
 
-        if self.errors.is_empty() {
+        if self.error.errors.is_empty() {
             Ok(())
         } else {
-            Err(self.errors.clone())
+            Err(self.error.clone())
         }
     }
 
-    pub fn analyze_expression(&mut self, expr: &Expression) -> Result<(), Vec<String>> {
+    pub fn analyze_expression(&mut self, expr: &Expression) -> Result<(), SemanticError> {
         match expr {
             Expression::Literal(_) => Ok(()),
             Expression::Identifier(name) => {
                 if !self.symbol_table.contains_key(name) {
-                    self.errors.push(format!("Undefined symbol '{}'.", name));
+                    self.error
+                        .errors
+                        .push(semantic_error::ErrorVariant::UndefinedSymbol(name.clone()));
                 }
                 Ok(())
             }
             Expression::FunctionCall { name, arguments } => {
                 if !self.function_table.contains_key(name) {
-                    self.errors.push(format!("Undefined function '{}'.", name));
+                    self.error
+                        .errors
+                        .push(semantic_error::ErrorVariant::UndefinedFunction(
+                            name.clone(),
+                        ));
                 }
                 for arg in arguments {
                     self.analyze_expression(arg)?;
@@ -173,8 +188,11 @@ impl SemanticAnalyzer {
 
     fn define_symbol(&mut self, name: String, info: SymbolInfo) {
         if self.symbol_table.contains_key(&name) {
-            self.errors
-                .push(format!("Symbol '{}' is already defined.", name));
+            self.error
+                .errors
+                .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
+                    name.clone(),
+                ));
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
             self.var_table.insert(name, info);
@@ -183,8 +201,11 @@ impl SemanticAnalyzer {
 
     fn define_input(&mut self, name: String, info: SymbolInfo) {
         if self.input_table.contains_key(&name) {
-            self.errors
-                .push(format!("UI parameter '{}' is already defined.", name));
+            self.error
+                .errors
+                .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
+                    name.clone(),
+                ));
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
             self.input_table.insert(name, info);
@@ -193,8 +214,11 @@ impl SemanticAnalyzer {
 
     fn define_output(&mut self, name: String, info: SymbolInfo) {
         if self.output_table.contains_key(&name) {
-            self.errors
-                .push(format!("UI parameter '{}' is already defined.", name));
+            self.error
+                .errors
+                .push(semantic_error::ErrorVariant::SymbolAlreadyDefined(
+                    name.clone(),
+                ));
         } else {
             self.symbol_table.insert(name.clone(), info.clone());
             self.output_table.insert(name, info);

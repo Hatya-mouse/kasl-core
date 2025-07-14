@@ -18,13 +18,13 @@ use crate::{
     AssignmentStatement, InputDeclarationStatement, OutputDeclarationStatement, Statement,
     VariableDeclarationStatement,
     ast::{ForLoopStatement, InputAttribute},
-    expression::expression,
+    expression::{expression, symbol_name},
 };
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::{tag, take_while},
-    character::complete::space1,
+    bytes::complete::tag,
+    character::complete::{space0, space1},
     combinator::{map, opt},
     multi::{many0, separated_list0},
 };
@@ -33,7 +33,7 @@ pub fn input_attr(s: &str) -> IResult<&str, InputAttribute> {
     map(
         (
             tag("#"),
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
+            symbol_name,
             opt((tag("("), separated_list0(tag(","), expression), tag(")"))),
         ),
         |(_, name, value)| InputAttribute {
@@ -49,7 +49,7 @@ pub fn input_decl(s: &str) -> IResult<&str, Statement> {
         (
             tag("input"),
             space1,
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
+            symbol_name,
             many0((space1, input_attr)),
         ),
         |(_, _, name, input_attrs)| {
@@ -65,16 +65,9 @@ pub fn input_decl(s: &str) -> IResult<&str, Statement> {
 
 pub fn output_decl(s: &str) -> IResult<&str, Statement> {
     map(
-        (
-            tag("output"),
-            space1,
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
-        ),
-        |(_, _, name): (_, _, &str)| {
-            Statement::OutputDeclaration(OutputDeclarationStatement {
-                name: name.to_string(),
-                line: 0,
-            })
+        (tag("output"), space1, symbol_name),
+        |(_, _, name): (_, _, String)| {
+            Statement::OutputDeclaration(OutputDeclarationStatement { name, line: 0 })
         },
     )
     .parse(s)
@@ -85,11 +78,13 @@ pub fn variable_decl(s: &str) -> IResult<&str, Statement> {
         (
             tag("var"),
             space1,
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
+            symbol_name,
+            space0,
             tag("="),
+            space0,
             expression,
         ),
-        |(_, _, name, _, value)| {
+        |(_, _, name, _, _, _, value)| {
             Statement::VariableDeclaration(VariableDeclarationStatement {
                 name: name.to_string(),
                 initial_value: value,
@@ -102,12 +97,8 @@ pub fn variable_decl(s: &str) -> IResult<&str, Statement> {
 
 pub fn assignment(s: &str) -> IResult<&str, Statement> {
     map(
-        (
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
-            tag("="),
-            expression,
-        ),
-        |(target_name, _, value)| {
+        (symbol_name, space0, tag("="), space0, expression),
+        |(target_name, _, _, _, value)| {
             Statement::Assignment(AssignmentStatement {
                 target_name: target_name.to_string(),
                 value,
@@ -123,15 +114,17 @@ pub fn for_loop(s: &str) -> IResult<&str, Statement> {
         (
             tag("for"),
             space1,
-            take_while(|c: char| c.is_alphanumeric() || c == '_'),
+            symbol_name,
+            space1,
             tag("in"),
+            space1,
             expression,
             space1,
             tag("{"),
             many0(statement),
             tag("}"),
         ),
-        |(_, _, variable_name, _, iterable, _, _, body, _)| {
+        |(_, _, variable_name, _, _, _, iterable, _, _, body, _)| {
             Statement::ForLoop(ForLoopStatement {
                 variable_name: variable_name.to_string(),
                 iterable,
@@ -144,5 +137,13 @@ pub fn for_loop(s: &str) -> IResult<&str, Statement> {
 }
 
 pub fn statement(s: &str) -> IResult<&str, Statement> {
-    alt((input_decl, output_decl, variable_decl, assignment, for_loop)).parse(s)
+    map(
+        (
+            space0,
+            alt((input_decl, output_decl, variable_decl, assignment, for_loop)),
+            space0,
+        ),
+        |(_, stmt, _)| stmt,
+    )
+    .parse(s)
 }

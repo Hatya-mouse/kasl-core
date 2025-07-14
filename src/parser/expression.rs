@@ -16,11 +16,12 @@
 
 use crate::{Expression, Operator};
 use nom::{
-    IResult, Parser,
+    AsChar, IResult, Parser,
     branch::alt,
-    bytes::complete::{tag, take_while},
+    bytes::complete::{tag, take_till1},
+    character::complete::{alphanumeric1, space0},
     combinator::{map, opt},
-    multi::separated_list0,
+    multi::{many1, separated_list0},
     number::complete::float,
 };
 
@@ -28,42 +29,128 @@ pub fn number(s: &str) -> IResult<&str, Expression> {
     map(float, |num: f32| Expression::Literal(num)).parse(s)
 }
 
-pub fn operator(s: &str) -> IResult<&str, Operator> {
+pub fn expression(s: &str) -> IResult<&str, Expression> {
     alt((
-        map(nom::bytes::complete::tag("+"), |_| Operator::Add),
-        map(nom::bytes::complete::tag("-"), |_| Operator::Subtract),
-        map(nom::bytes::complete::tag("*"), |_| Operator::Multiply),
-        map(nom::bytes::complete::tag("/"), |_| Operator::Divide),
-        map(nom::bytes::complete::tag("%"), |_| Operator::Modulo),
+        map(
+            (expr_term, space0, tag("+"), space0, expression),
+            |(left, _, _, _, right)| Expression::BinaryOp {
+                op: Operator::Add,
+                left: Box::new(left),
+                right: Box::new(right),
+            },
+        ),
+        map(
+            (expr_term, space0, tag("-"), space0, expression),
+            |(left, _, _, _, right)| Expression::BinaryOp {
+                op: Operator::Subtract,
+                left: Box::new(left),
+                right: Box::new(right),
+            },
+        ),
+        expr_term,
     ))
     .parse(s)
 }
 
-pub fn operator_expression(s: &str) -> IResult<&str, Expression> {
-    map((number, operator, number), |(left, op, right)| {
-        Expression::BinaryOp {
-            op: op,
-            left: Box::new(left),
-            right: Box::new(right),
+pub fn expr_term(s: &str) -> IResult<&str, Expression> {
+    let res = alt((
+        map(
+            (term_muldiv, space0, expr_factor),
+            |((left, op), _, right)| Expression::BinaryOp {
+                op,
+                left: Box::new(left),
+                right: Box::new(right),
+            },
+        ),
+        expr_factor,
+    ))
+    .parse(s);
+    res
+}
+
+pub fn term_muldiv(s: &str) -> IResult<&str, (Expression, Operator)> {
+    let res = alt((
+        map(
+            (
+                take_till1(|c: char| c == '*' || c.is_newline()),
+                space0,
+                tag::<&str, &str, nom::error::Error<&str>>("*"),
+                space0,
+            ),
+            |(left, _, _, _)| (left, Operator::Multiply),
+        ),
+        map(
+            (
+                take_till1(|c: char| c == '/' || c.is_newline()),
+                space0,
+                tag("/"),
+                space0,
+            ),
+            |(left, _, _, _)| (left, Operator::Divide),
+        ),
+    ))
+    .parse(s);
+
+    if let Ok((remaining, (left, op))) = res {
+        if let Ok((_, left_expr)) = expr_term(left) {
+            Ok((remaining, (left_expr, op)))
+        } else {
+            Err(nom::Err::Error(nom::error::make_error(
+                s,
+                nom::error::ErrorKind::Tag,
+            )))
         }
-    })
-    .parse(s)
+    } else {
+        Err(nom::Err::Error(nom::error::make_error(
+            s,
+            nom::error::ErrorKind::Tag,
+        )))
+    }
 }
 
-pub fn function_call(s: &str) -> IResult<&str, Expression> {
-    let call_parser = (
-        take_while(|c: char| c.is_alphanumeric() || c == '_'),
-        tag("("),
-        opt(separated_list0(tag(","), expression)),
-        tag(")"),
-    );
-    map(call_parser, |(name, _, args, _)| Expression::FunctionCall {
-        name: name.to_string(),
-        arguments: args.unwrap_or_default(),
-    })
-    .parse(s)
+pub fn expr_factor(s: &str) -> IResult<&str, Expression> {
+    let res = map(
+        (
+            alt((
+                number,
+                identifier,
+                map((tag("("), expression, tag(")")), |(_, expr, _)| expr),
+            )),
+            space0,
+        ),
+        |(expr, _)| expr,
+    )
+    .parse(s);
+    res
 }
 
-pub fn expression(s: &str) -> IResult<&str, Expression> {
-    alt((number, operator_expression, function_call)).parse(s)
+pub fn identifier(s: &str) -> IResult<&str, Expression> {
+    println!("Parsing identifier from: {}", s);
+    let res = map(
+        (
+            symbol_name,
+            opt(map(
+                (
+                    tag("("),
+                    separated_list0((space0, tag(","), space0), expression),
+                    tag(")"),
+                ),
+                |(_, args, _)| args,
+            )),
+        ),
+        |(name, args)| match args {
+            Some(args) => Expression::FunctionCall {
+                name,
+                arguments: args,
+            },
+            None => Expression::Identifier(name),
+        },
+    )
+    .parse(s);
+    println!("Parsed identifier: {:?}", res);
+    res
+}
+
+pub fn symbol_name(s: &str) -> IResult<&str, String> {
+    map(many1(alt((alphanumeric1, tag("_")))), |name| name.concat()).parse(s)
 }

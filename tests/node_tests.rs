@@ -30,7 +30,6 @@ fn test_set_and_get_shader_simple() {
     let mut node = AudioShaderNode::new();
     let shader_code = "input in1\noutput out1\nout1 = in1 * 2.0";
     assert!(node.set_shader(shader_code.to_string()).is_ok());
-    println!("[DEBUG] Shader set: {:?}", node.program);
     assert_eq!(node.get_shader(), shader_code);
     assert!(node.program.is_some());
 }
@@ -41,7 +40,6 @@ fn test_set_shader_populates_io_tables() {
     let shader_code = "input input_value\ninput input_buf\noutput output_value";
     let result = node.set_shader(shader_code.to_string());
     assert!(result.is_ok(), "Expected Ok, got {:?}", result.err());
-    println!("[DEBUG] Shader set: {:?}", node.program);
 
     assert!(node.input.contains_key("input_value"));
     let input_val_info = node.input.get("input_value").unwrap();
@@ -61,8 +59,6 @@ fn test_process_simple_float_shader() {
     let mut node = AudioShaderNode::new();
     let shader_code = "input a\noutput b\nb = a * 2.5";
     assert!(node.set_shader(shader_code.to_string()).is_ok());
-
-    println!("[DEBUG] Shader set: {:?}", node.program);
 
     node.set_input("a", Value::Float(10.0));
     let process_result = node.process(48000, 24000.0, 1, 0, 1, 0);
@@ -84,12 +80,12 @@ fn test_multiple_args() {
     let shader_code = "input a\ninput b\noutput c\nc = max(a, b)";
 
     let set_shader_result = node.set_shader(shader_code.to_string());
+
     assert!(
         set_shader_result.is_ok(),
         "Failed to set shader: {:?}",
         set_shader_result.err()
     );
-    println!("[DEBUG] Shader set: {:?}", node.program);
 
     node.set_input("a", Value::Float(3.0));
     node.set_input("b", Value::Float(4.0));

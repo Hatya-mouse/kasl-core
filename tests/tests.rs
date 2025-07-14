@@ -15,30 +15,25 @@
 //
 
 use knodiq_audio_shader::{
-    ASParser, Expression, Interpreter, Program, SemanticAnalyzer, Statement, Value,
+    Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
 };
 
 #[test]
 fn test_parsing() {
-    let code = "input x = 1.0
-                    output y
+    let code = "var x = 1.0\noutput y\ny = pow(x, 2)";
 
-                    y = pow(x, 2)";
-
-    let parser = ASParser::new();
+    let parser = Parser::new();
     let program = parser.parse(&code);
-
-    println!("Parsed Program: {:?}", program);
 
     assert!(program.is_ok());
     let program = program.unwrap();
     assert!(!program.statements.is_empty());
 
-    let input_stmt = match &program.statements[0] {
-        Statement::InputDeclaration(stmt) => stmt,
-        _ => panic!("Expected InputDeclarationStatement"),
+    let var_stmt = match &program.statements[0] {
+        Statement::VariableDeclaration(stmt) => stmt,
+        _ => panic!("Expected VariableDeclarationStatement"),
     };
-    assert_eq!(input_stmt.name, "x");
+    assert_eq!(var_stmt.name, "x");
 
     let output_stmt = match &program.statements[1] {
         Statement::OutputDeclaration(stmt) => stmt,
@@ -66,20 +61,18 @@ fn test_parsing() {
 #[test]
 fn test_interpreter_basic() {
     let code = "input in_buffer
-                    var gain = 1.0
-                    var result = 0.0
                     output out_buffer
                     output powered
+                    var gain = 1.0
+                    var result = 0.0
 
                     result = in_buffer * gain
                     out_buffer = result + 1.25
-                    
+
                     powered = pow(in_buffer, 2.0)";
 
-    let parser = ASParser::new();
+    let parser = Parser::new();
     let program: Program = parser.parse(&code).unwrap();
-
-    println!("Parsed Program: {:?}", program);
 
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program).unwrap();
@@ -89,13 +82,12 @@ fn test_interpreter_basic() {
     let mut input_table = analyzer.input_table.clone();
     input_table.get_mut("in_buffer").unwrap().value =
         Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
-    input_table.get_mut("gain").unwrap().value = Some(Value::Float(1.5));
 
     let output_table = interpreter.execute(input_table).unwrap();
 
     assert_eq!(
         output_table.get("out_buffer").unwrap().value,
-        Some(Value::from_buffer(vec![vec![4.25, 5.75]; 2]))
+        Some(Value::from_buffer(vec![vec![3.25, 4.25]; 2]))
     );
     assert_eq!(
         output_table.get("powered").unwrap().value,
@@ -110,13 +102,9 @@ fn test_interpreter_advanced() {
 
                     out_buffer = in_buffer * sin(time() * pi() * 440)";
 
-    let parser = ASParser::new();
+    let parser = Parser::new();
     let program: Program = parser.parse(&code).unwrap();
-
-    println!("Parsed Program:");
-    for stmt in &program.statements {
-        println!("{:#?}", stmt);
-    }
+    println!("Parsed Program: {:?}", program);
 
     let mut analyzer = SemanticAnalyzer::new();
     analyzer.analyze(&program).unwrap();

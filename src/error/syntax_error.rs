@@ -14,21 +14,21 @@
 // limitations under the License.
 //
 
-pub mod analyzer;
-pub mod compiler;
-pub mod error;
-pub mod interpreter;
-pub mod language;
-pub mod lexer;
-pub mod node;
-pub mod parser;
+use std::{error::Error, fmt::Display};
 
-pub use analyzer::*;
-pub use error::*;
-pub use interpreter::*;
-pub use language::*;
-pub use lexer::*;
-pub use node::*;
-pub use parser::*;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SyntaxError {}
 
-pub use knodiq_engine::{Node, Value};
+impl SyntaxError {
+    pub fn new() -> Self {
+        SyntaxError {}
+    }
+}
+
+impl Error for SyntaxError {}
+
+impl Display for SyntaxError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Syntax error in the shader code")
+    }
+}

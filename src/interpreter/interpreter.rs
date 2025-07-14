@@ -19,7 +19,7 @@ use crate::{
     builtin_function,
 };
 use knodiq_engine::{
-    Sample, Value,
+    Sample, Type, Value,
     audio_utils::{beats_as_samples, samples_as_beats},
 };
 use std::collections::HashMap;
@@ -109,7 +109,7 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: target.name.clone(),
                         kind: target.kind,
-                        range: target.range,
+                        value_type: target.value_type.clone(),
                         value: Some(value.clone()),
                     };
                     self.symbol_table
@@ -121,7 +121,7 @@ impl Interpreter {
                         let symbol = SymbolInfo {
                             name: input.name.clone(),
                             kind: SymbolKind::Input,
-                            range: None,
+                            value_type: input.value_type.clone(),
                             value: Some(input_param.value.unwrap_or(Value::Float(0.0))),
                         };
                         self.register_symbol(input.name.clone(), symbol.clone(), input.line)?;
@@ -137,7 +137,7 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: output.name.clone(),
                         kind: SymbolKind::Output,
-                        range: None,
+                        value_type: output.value_type.clone(),
                         value: None,
                     };
                     self.register_symbol(output.name.clone(), symbol.clone(), output.line)?;
@@ -149,7 +149,7 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: var_decl.name.clone(),
                         kind: SymbolKind::Variable,
-                        range: None,
+                        value_type: var_decl.value_type.clone(),
                         value: Some(initial_value),
                     };
                     self.register_symbol(var_decl.name.clone(), symbol.clone(), var_decl.line)?;
@@ -159,7 +159,7 @@ impl Interpreter {
                     let symbol = SymbolInfo {
                         name: loop_stmt.variable_name.clone(),
                         kind: SymbolKind::Variable,
-                        range: None,
+                        value_type: Type::Float,
                         value: Some(Value::Float(0.0)),
                     };
                     self.register_symbol(
@@ -175,7 +175,7 @@ impl Interpreter {
                                 let symbol_info = SymbolInfo {
                                     name: loop_stmt.variable_name.clone(),
                                     kind: SymbolKind::Variable,
-                                    range: None,
+                                    value_type: element.get_type(),
                                     value: Some(element.clone()),
                                 };
                                 self.symbol_table
@@ -188,8 +188,20 @@ impl Interpreter {
                             let symbol_info = SymbolInfo {
                                 name: loop_stmt.variable_name.clone(),
                                 kind: SymbolKind::Variable,
-                                range: None,
+                                value_type: Type::Float,
                                 value: Some(Value::Float(value)),
+                            };
+                            self.symbol_table
+                                .insert(loop_stmt.variable_name.clone(), symbol_info);
+
+                            self.execute_statements(&loop_stmt.body, input_parameters.clone())?;
+                        }
+                        Value::Int(value) => {
+                            let symbol_info = SymbolInfo {
+                                name: loop_stmt.variable_name.clone(),
+                                kind: SymbolKind::Variable,
+                                value_type: Type::Int,
+                                value: Some(Value::Int(value)),
                             };
                             self.symbol_table
                                 .insert(loop_stmt.variable_name.clone(), symbol_info);

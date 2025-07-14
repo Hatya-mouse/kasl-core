@@ -16,7 +16,10 @@
 
 use crate::{Program, statement::statement};
 use nom::{
-    IResult, Parser, character::complete::line_ending, combinator::map, multi::separated_list0,
+    IResult, Parser,
+    character::complete::line_ending,
+    combinator::map,
+    multi::{many1, separated_list0},
 };
 
 pub struct ASParser {}
@@ -35,8 +38,9 @@ impl ASParser {
 }
 
 pub fn program(s: &str) -> IResult<&str, Program> {
-    map(separated_list0(line_ending, statement), |statements| {
-        Program { statements }
-    })
+    map(
+        separated_list0(many1(line_ending), statement),
+        |statements| Program { statements },
+    )
     .parse(s)
 }
