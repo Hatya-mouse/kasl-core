@@ -131,7 +131,7 @@ fn test_compiler() {
                     powered = pow(in_buffer, 2.0)";
 
     let parser = Parser::new();
-    let program: Program = parser.parse(&code).unwrap();
+    let program = parser.parse(&code).unwrap();
 
     if let Ok(mut compiler) = Compiler::new() {
         print!(
