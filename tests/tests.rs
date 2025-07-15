@@ -135,6 +135,6 @@ fn test_compiler() {
     inputs.push(Value::Float(2.0));
 
     let mut compiler = Compiler::new().unwrap();
-    let result = unsafe { run(&mut compiler, &code, inputs) }.unwrap();
+    let result = run(&mut compiler, &code, inputs).unwrap();
     println!("Compiler run result: {:?}", result);
 }

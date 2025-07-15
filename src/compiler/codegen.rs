@@ -24,7 +24,7 @@ use cranelift_jit::JITModule;
 use cranelift_module::Module;
 use std::collections::HashMap;
 
-const TYPE_INT: ir::Type = types::I32;
+const TYPE_INT: ir::Type = types::I64;
 const TYPE_FLOAT: ir::Type = types::F32;
 
 pub struct Translator<'a> {
@@ -78,7 +78,7 @@ impl<'a> Translator<'a> {
                 let var = Variable::new(self.variables.len());
                 let val_type = get_type(&input_info.value_type, module);
 
-                let offset = self.builder.ins().iconst(types::I32, input_offset);
+                let offset = self.builder.ins().iconst(TYPE_INT, input_offset);
                 let addr = self.builder.ins().iadd(self.input_ptr, offset);
                 let val = self
                     .builder
@@ -91,7 +91,7 @@ impl<'a> Translator<'a> {
 
                 // Calculate the offset for the next element
                 input_offset += match val_type {
-                    types::I32 => 4,
+                    TYPE_INT => 4,
                     types::F32 => 4,
                     _ => 8,
                 }
@@ -108,7 +108,7 @@ impl<'a> Translator<'a> {
                 self.builder.declare_var(var, val_type);
 
                 let default_val = match val_type {
-                    types::I32 => self.builder.ins().iconst(types::I32, 0),
+                    TYPE_INT => self.builder.ins().iconst(TYPE_INT, 0),
                     types::F32 => self.builder.ins().f32const(0.0),
                     _ => self.builder.ins().iconst(val_type, 0),
                 };
@@ -123,13 +123,13 @@ impl<'a> Translator<'a> {
         for output_name in output_names.iter() {
             if let Some((var, val_type)) = self.variables.get(output_name) {
                 let val = self.builder.use_var(*var);
-                let offset = self.builder.ins().iconst(types::I32, output_offset);
+                let offset = self.builder.ins().iconst(TYPE_INT, output_offset);
                 let addr = self.builder.ins().iadd(self.output_ptr, offset);
                 self.builder.ins().store(ir::MemFlags::new(), val, addr, 0);
 
                 // Calculate the offset for the next element
                 output_offset += match val_type {
-                    &types::I32 => 4,
+                    &TYPE_INT => 4,
                     &types::F32 => 4,
                     _ => 8,
                 };
@@ -189,13 +189,9 @@ impl<'a> Translator<'a> {
     ) -> (ir::Value, ir::Type) {
         match expr {
             Expression::IntLiteral(lit) => {
-                (self.builder.ins().iconst(types::I32, *lit as i64), TYPE_INT)
+                (self.builder.ins().iconst(TYPE_INT, *lit as i64), TYPE_INT)
             }
-            Expression::FloatLiteral(lit) => {
-                let val = self.builder.ins().f32const(*lit);
-                println!("Float literal {}: {:?}", lit, val);
-                (val, TYPE_FLOAT)
-            }
+            Expression::FloatLiteral(lit) => (self.builder.ins().f32const(*lit), TYPE_FLOAT),
             Expression::Identifier(id) => {
                 let (var, var_type) = self.variables.get(id).expect("Variable not found");
                 (self.builder.use_var(*var), *var_type)
@@ -306,14 +302,14 @@ pub fn get_type(value_type: &knodiq_engine::Type, module: &JITModule) -> types::
 
 pub fn eval_type(left: ir::Type, right: ir::Type) -> ir::Type {
     match left {
-        types::I32 => match right {
-            types::I32 => types::I32,
+        TYPE_INT => match right {
+            TYPE_INT => TYPE_INT,
             types::F32 => types::F32,
             types::INVALID => right,
             _ => right,
         },
         types::F32 => match right {
-            types::I32 => types::F32,
+            TYPE_INT => types::F32,
             types::F32 => types::F32,
             types::INVALID => left,
             _ => right,

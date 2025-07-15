@@ -266,14 +266,13 @@ impl Parser {
         match token_iter.next().map(|t| &t.token_type) {
             Some(TokenType::Float) => Ok(Type::Float),
             Some(TokenType::Int) => Ok(Type::Int),
-            Some(TokenType::LBrace) => {
-                let token: Vec<Token> = token_iter
-                    .take_while(|t| t.token_type != TokenType::RBrace)
-                    .cloned()
-                    .collect();
-                Ok(Type::Array(Box::new(
-                    self.parse_type(&mut token.iter().peekable())?,
-                )))
+            Some(TokenType::LBracket) => {
+                let inner_type = self.parse_type(token_iter)?;
+
+                match token_iter.next().map(|t| &t.token_type) {
+                    Some(TokenType::RBracket) => Ok(Type::Array(Box::new(inner_type))),
+                    _ => Err("Expected ']' after array type".into()),
+                }
             }
             _ => Err("Expected type identifier".into()),
         }

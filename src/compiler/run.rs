@@ -17,7 +17,7 @@
 use crate::Compiler;
 use knodiq_engine::Value;
 
-pub unsafe fn run(
+pub fn run(
     compiler: &mut Compiler,
     code: &str,
     inputs: Vec<Value>,
