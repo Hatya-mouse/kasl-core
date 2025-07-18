@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Operator, Statement, SymbolInfo};
+use crate::{Expression, Operator, Statement, SymbolInfo, codegen};
 use cranelift_codegen::{
     entity::EntityRef,
-    ir::{self, Block, InstBuilder, types},
+    ir::{self, Block, BlockArg, InstBuilder, types},
 };
 use cranelift_frontend::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
@@ -139,11 +139,11 @@ impl<'a> Translator<'a> {
         self.builder.ins().return_(&[]);
     }
 
-    pub fn codegen_stmt(&mut self, statement: &Statement, pointer_type: ir::Type) {
+    pub fn codegen_stmt(&mut self, statement: &Statement, module: &JITModule) {
         match statement {
             Statement::VariableDeclaration(var_decl) => {
                 let var = Variable::new(self.variables.len());
-                let (val, val_type) = self.codegen_expr(&var_decl.initial_value, pointer_type);
+                let (val, val_type) = self.codegen_expr(&var_decl.initial_value, module);
 
                 self.variables
                     .insert(var_decl.name.clone(), (var, val_type));
@@ -153,7 +153,7 @@ impl<'a> Translator<'a> {
             }
             Statement::Assignment(assignment_stmt) => {
                 if let Some((var, _)) = self.variables.get(&assignment_stmt.target_name).cloned() {
-                    let (val, _) = self.codegen_expr(&assignment_stmt.value, pointer_type);
+                    let (val, _) = self.codegen_expr(&assignment_stmt.value, module);
                     self.builder.def_var(var, val);
                 }
             }
@@ -169,24 +169,13 @@ impl<'a> Translator<'a> {
             knodiq_engine::Value::Int(i) => self.builder.ins().iconst(TYPE_INT, *i as i64),
             knodiq_engine::Value::Float(f) => self.builder.ins().f32const(*f),
             knodiq_engine::Value::Array(arr) => {
-                let arr_type = module.target_config().pointer_type();
-                let arr_ptr = self.builder.ins().get_stack_pointer(arr_type);
-                for (i, elem) in arr.iter().enumerate() {
-                    let elem_val = self.value_as_ir(elem, module);
-                    self.builder
-                        .ins()
-                        .store(ir::MemFlags::new(), elem_val, arr_ptr, i as i32);
-                }
-                arr_ptr
+                let vals = arr.iter().map(|v| self.value_as_ir(v, module)).collect();
+                self.arr_ptr(vals, module)
             }
         }
     }
 
-    pub fn codegen_expr(
-        &mut self,
-        expr: &Expression,
-        pointer_type: ir::Type,
-    ) -> (ir::Value, ir::Type) {
+    pub fn codegen_expr(&mut self, expr: &Expression, module: &JITModule) -> (ir::Value, ir::Type) {
         match expr {
             Expression::IntLiteral(lit) => {
                 (self.builder.ins().iconst(TYPE_INT, *lit as i64), TYPE_INT)
@@ -196,19 +185,32 @@ impl<'a> Translator<'a> {
                 let (var, var_type) = self.variables.get(id).expect("Variable not found");
                 (self.builder.use_var(*var), *var_type)
             }
-            Expression::BinaryOp { op, left, right } => {
-                let (left_val, left_type) = self.codegen_expr(left, pointer_type);
-                let (right_val, right_type) = self.codegen_expr(right, pointer_type);
-                let op_type = eval_type(left_type, right_type);
+            Expression::BinaryOp {
+                op,
+                left,
+                right,
+                left_type,
+                right_type,
+            } => {
+                let (left_val, left_ir_type) = self.codegen_expr(left, module);
+                let (right_val, right_ir_type) = self.codegen_expr(right, module);
+                let op_type = eval_type(left_ir_type, right_ir_type);
                 (
-                    self.codegen_op(op, left_val, right_val, op_type, pointer_type),
+                    self.codegen_op(
+                        op,
+                        left_val,
+                        right_val,
+                        left_type.clone(),
+                        right_type.clone(),
+                        module,
+                    ),
                     op_type,
                 )
             }
             Expression::FunctionCall { name, arguments } => {
                 let args = arguments
                     .iter()
-                    .map(|arg| self.codegen_expr(arg, pointer_type))
+                    .map(|arg| self.codegen_expr(arg, module))
                     .collect::<Vec<(ir::Value, ir::Type)>>();
                 let arg_val = args.iter().map(|(val, _)| *val).collect::<Vec<ir::Value>>();
                 let mut inferred_type = types::INVALID;
@@ -239,14 +241,20 @@ impl<'a> Translator<'a> {
         op: &Operator,
         left: ir::Value,
         right: ir::Value,
-        op_type: ir::Type,
-        _pointer_type: ir::Type,
+        left_type: knodiq_engine::Type,
+        right_type: knodiq_engine::Type,
+        module: &JITModule,
     ) -> ir::Value {
-        match op_type {
-            TYPE_INT => self.codegen_int_op(op, left, right),
-            TYPE_FLOAT => self.codegen_float_op(op, left, right),
-            // pointer_type => self.codegen_pointer_op(op, left, right, pointer_type),
-            _ => panic!("Unsupported operation type: {:?}", op_type),
+        match (left_type, right_type) {
+            (knodiq_engine::Type::Int, knodiq_engine::Type::Int) => {
+                self.codegen_int_op(op, left, right)
+            }
+            (knodiq_engine::Type::Float, knodiq_engine::Type::Float) => {
+                self.codegen_float_op(op, left, right)
+            }
+            (left_type, right_type) => {
+                self.codegen_broadcast_op(op, left, right, left_type, right_type, module)
+            }
         }
     }
 
@@ -280,6 +288,33 @@ impl<'a> Translator<'a> {
         }
     }
 
+    pub fn codegen_broadcast_op(
+        &mut self,
+        op: &Operator,
+        mut left_val: ir::Value,
+        mut right_val: ir::Value,
+        mut left_type: knodiq_engine::Type,
+        mut right_type: knodiq_engine::Type,
+        module: &JITModule,
+    ) -> ir::Value {
+        let left_depth = left_type.get_depth();
+        let right_depth = right_type.get_depth();
+
+        while left_depth > right_depth {
+            right_val = self.arr_ptr(vec![left_val], module);
+            right_type = knodiq_engine::Type::Array(Box::new(right_type));
+        }
+
+        while left_depth < right_depth {
+            left_val = self.arr_ptr(vec![right_val], module);
+            left_type = knodiq_engine::Type::Array(Box::new(left_type));
+        }
+
+        for depth in 0..left_depth {}
+
+        ir::Value::new(0)
+    }
+
     pub fn get_returns(&mut self) -> Vec<ir::Value> {
         let return_vals = self
             .return_vars
@@ -289,6 +324,90 @@ impl<'a> Translator<'a> {
         self.builder.ins().return_(&return_vals);
         return_vals
     }
+
+    pub fn arr_ptr(&mut self, elems: Vec<ir::Value>, module: &JITModule) -> ir::Value {
+        let arr_type = module.target_config().pointer_type();
+        let arr_ptr = self.builder.ins().get_stack_pointer(arr_type);
+        self.builder.ins().store(
+            ir::MemFlags::new(),
+            ir::Value::from_u32(elems.len() as u32),
+            arr_ptr,
+            0,
+        );
+        for (i, elem) in elems.iter().enumerate() {
+            self.builder
+                .ins()
+                .store(ir::MemFlags::new(), *elem, arr_ptr, 1 + i as i32);
+        }
+        arr_ptr
+    }
+
+    pub fn load_arr_from(&mut self, val_type: ir::Type, addr: ir::Value) -> Vec<ir::Value> {
+        let load_arr_block = self.builder.create_block();
+        let after_block = self.builder.create_block();
+        self.builder.ins().jump(load_arr_block, []);
+
+        let size = self
+            .builder
+            .ins()
+            .load(TYPE_INT, ir::MemFlags::new(), addr, 0);
+
+        // Value #0 is size so I start from index 1
+        let initial_counter = self.builder.ins().iconst(TYPE_INT, 1);
+
+        // Calculate the loop end index
+        let loop_end_index = self.builder.ins().iadd(size, initial_counter);
+
+        let mut vals = Vec::new();
+
+        let header_block = self.builder.create_block();
+        let body_block = self.builder.create_block();
+        let exit_block = self.builder.create_block();
+
+        // --- LOOP START ---
+
+        // Jump to enter the loop
+        self.builder
+            .ins()
+            .jump(header_block, &[BlockArg::Value(initial_counter)]);
+
+        // Define a condition
+        let current_counter = self.builder.block_params(header_block)[0];
+        let loop_cond = self.builder.ins().icmp(
+            ir::condcodes::IntCC::SignedLessThan,
+            current_counter,
+            loop_end_index,
+        );
+
+        // Check the condition and keep/exit from the loop
+        self.builder
+            .ins()
+            .brif(loop_cond, body_block, [], exit_block, []);
+
+        // --- LOOP BODY ---
+        let current_val =
+            self.builder
+                .ins()
+                .load(val_type, ir::MemFlags::new(), addr, current_counter);
+        vals.push(current_val);
+
+        // Jump to the header to keep the loop
+        let next_counter = self.builder.ins().iadd(current_counter, ir::Value::new(1));
+        self.builder
+            .ins()
+            .jump(header_block, &[BlockArg::Value(next_counter)]);
+
+        // --- LOOP END ---
+
+        // Operation after finishing the loop
+        self.builder.switch_to_block(exit_block);
+
+        self.builder.ins().jump(after_block, []);
+
+        vec![ir::Value::new(0)]
+    }
+
+    pub fn codegen_loop(&mut self, header: Box<dyn Fn(Vec<ir::Value>)>, body: Box<dyn Fn()>) {}
 }
 
 pub fn get_type(value_type: &knodiq_engine::Type, module: &JITModule) -> types::Type {

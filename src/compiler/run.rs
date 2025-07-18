@@ -17,38 +17,49 @@
 use crate::Compiler;
 use knodiq_engine::Value;
 
-pub fn run(
+pub struct Executable {
+    pub func: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> (),
+    pub outputs: Vec<f32>,
+}
+
+pub fn compile(
     compiler: &mut Compiler,
     code: &str,
-    inputs: Vec<Value>,
-) -> Result<Vec<Value>, Box<dyn std::error::Error>> {
+) -> Result<Executable, Box<dyn std::error::Error>> {
     let code_ptr = compiler.compile(code)?;
 
-    let main_fn: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> () =
+    let func: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> () =
         unsafe { std::mem::transmute(code_ptr) };
 
+    // Get the output count
+    let output_count = get_output_count(code)?;
+    let outputs = vec![0.0f32; output_count];
+
+    Ok(Executable { func, outputs })
+}
+
+pub fn run_fn(
+    exec: &mut Executable,
+    inputs: Vec<Value>,
+) -> Result<Vec<Value>, Box<dyn std::error::Error>> {
     // Convert inputs to a flat vector of f32
     let mut input_floats = Vec::new();
     for input in &inputs {
         flatten_value_to_floats(input, &mut input_floats);
     }
 
-    // Get the output count
-    let output_count = get_output_count(code)?;
-    let mut outputs = vec![0.0f32; output_count];
-
     // Execute the function
     unsafe {
-        main_fn(
+        (exec.func)(
             input_floats.as_ptr(),
             input_floats.len(),
-            outputs.as_mut_ptr(),
-            outputs.len(),
+            exec.outputs.as_mut_ptr(),
+            exec.outputs.len(),
         );
     }
 
     // Convert results to Value
-    let result: Vec<Value> = outputs.into_iter().map(|f| Value::Float(f)).collect();
+    let result: Vec<Value> = exec.outputs.iter().map(|&f| Value::Float(f)).collect();
 
     Ok(result)
 }

@@ -253,6 +253,8 @@ impl Parser {
                         op: operator,
                         left: Box::new(left),
                         right: Box::new(right),
+                        left_type: Type::None,
+                        right_type: Type::None,
                     };
                 }
                 _ => break,

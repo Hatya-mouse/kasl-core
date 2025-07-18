@@ -122,7 +122,7 @@ impl Compiler {
         );
 
         for stmt in program.statements.iter() {
-            translator.codegen_stmt(stmt, pointer_type);
+            translator.codegen_stmt(stmt, &self.module);
         }
 
         translator.finalize_array_interface(&output_names);

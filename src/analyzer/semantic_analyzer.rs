@@ -48,14 +48,15 @@ impl SemanticAnalyzer {
     /// Analyzes the given program for semantic errors.
     /// Also infers variable types and checks for undefined symbols.
     pub fn analyze(&mut self, program: &Program) -> Result<Program, SemanticError> {
+        let mut program = program.clone();
         Ok(Program {
-            statements: self.analyze_statements(&program.statements)?,
+            statements: self.analyze_statements(&mut program.statements)?,
         })
     }
 
     pub fn analyze_statements(
         &mut self,
-        statements: &Vec<Statement>,
+        statements: &mut Vec<Statement>,
     ) -> Result<Vec<Statement>, SemanticError> {
         self.function_table
             .extend(crate::builtin_function::built_in_functions());
@@ -131,7 +132,7 @@ impl SemanticAnalyzer {
                             ));
                     }
 
-                    if let Err(e) = self.analyze_expression(&assignment.value) {
+                    if let Err(e) = self.evaluate_expression(&mut assignment.value) {
                         self.error.errors.extend(e.errors);
                     }
 
@@ -160,7 +161,7 @@ impl SemanticAnalyzer {
                     }
 
                     // Check if the body is valid
-                    if let Err(e) = self.analyze_statements(&loop_stmt.body) {
+                    if let Err(e) = self.analyze_statements(&mut loop_stmt.body) {
                         self.error.errors.extend(e.errors);
                     }
 
@@ -176,17 +177,17 @@ impl SemanticAnalyzer {
         }
     }
 
-    pub fn analyze_expression(&mut self, expr: &Expression) -> Result<(), SemanticError> {
+    pub fn evaluate_expression(&mut self, expr: &Expression) -> Result<Expression, SemanticError> {
         match expr {
-            Expression::IntLiteral(_) => Ok(()),
-            Expression::FloatLiteral(_) => Ok(()),
+            Expression::IntLiteral(_) => Ok(expr.clone()),
+            Expression::FloatLiteral(_) => Ok(expr.clone()),
             Expression::Identifier(name) => {
                 if !self.symbol_table.contains_key(name) {
                     self.error
                         .errors
                         .push(semantic_error::ErrorVariant::UndefinedSymbol(name.clone()));
                 }
-                Ok(())
+                Ok(expr.clone())
             }
             Expression::FunctionCall { name, arguments } => {
                 if !self.function_table.contains_key(name) {
@@ -196,14 +197,35 @@ impl SemanticAnalyzer {
                             name.clone(),
                         ));
                 }
+                let mut evaluated_arguments = Vec::new();
                 for arg in arguments {
-                    self.analyze_expression(arg)?;
+                    evaluated_arguments.push(self.evaluate_expression(arg)?);
                 }
-                Ok(())
+                Ok(Expression::FunctionCall {
+                    name: name.clone(),
+                    arguments: evaluated_arguments,
+                })
             }
-            Expression::BinaryOp { op: _, left, right } => {
-                self.analyze_expression(left)?;
-                self.analyze_expression(right)
+            Expression::BinaryOp {
+                op,
+                left,
+                right,
+                left_type: _,
+                right_type: _,
+            } => {
+                let evaluated_left = Box::new(self.evaluate_expression(left)?);
+                let evaluated_right = Box::new(self.evaluate_expression(right)?);
+
+                let left_type = self.infer_type(&left)?;
+                let right_type = self.infer_type(&right)?;
+
+                Ok(Expression::BinaryOp {
+                    op: op.clone(),
+                    left: evaluated_left,
+                    right: evaluated_right,
+                    left_type,
+                    right_type,
+                })
             }
         }
     }
@@ -285,11 +307,13 @@ impl SemanticAnalyzer {
                     });
                 }
             }
-            Expression::BinaryOp { op: _, left, right } => {
-                let left_type = self.infer_type(left)?;
-                let right_type = self.infer_type(right)?;
-                Ok(type_of(&left_type, &right_type))
-            }
+            Expression::BinaryOp {
+                op: _,
+                left: _,
+                right: _,
+                left_type,
+                right_type,
+            } => Ok(type_of(&left_type, &right_type)),
         }
     }
 }

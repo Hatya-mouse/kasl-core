@@ -15,7 +15,7 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value, run,
+    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value, compile, run_fn,
 };
 use knodiq_engine::Type;
 use std::collections::HashMap;
@@ -81,7 +81,7 @@ fn audio_shader_sample_processing() {
 }
 
 #[divan::bench]
-fn compare_interpreter_and_jit() {
+fn jit() {
     let code = "
     input float in_buffer
     output float out_buffer
@@ -91,7 +91,27 @@ fn compare_interpreter_and_jit() {
 
     result = in_buffer * gain
     out_buffer = result + 1.25
-    powered = pow(in_buffer, 2.0)
+    powered = in_buffer * in_buffer
+    ";
+
+    let mut compiler = Compiler::new().unwrap();
+    let mut exec = compile(&mut compiler, &code).unwrap();
+
+    divan::black_box_drop(run_fn(&mut exec, vec![Value::Float(2.0)]).unwrap());
+}
+
+#[divan::bench]
+fn interpreter() {
+    let code = "
+    input float in_buffer
+    output float out_buffer
+    output float powered
+    var gain = 1.0
+    var result = 0.0
+
+    result = in_buffer * gain
+    out_buffer = result + 1.25
+    powered = in_buffer * in_buffer
     ";
 
     let parser = Parser::new();
@@ -103,14 +123,10 @@ fn compare_interpreter_and_jit() {
     let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
 
     let mut input_table = analyzer.input_table.clone();
-    input_table.get_mut("in_buffer").unwrap().value =
-        Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
+    input_table.get_mut("in_buffer").unwrap().value = Some(Value::Float(2.0));
 
     divan::black_box_drop(match interpreter.execute(input_table) {
         Ok(_) => {}
         Err(_) => return,
     });
-
-    let mut compiler = Compiler::new().unwrap();
-    divan::black_box_drop(|| run(&mut compiler, &code, vec![Value::Float(2.0)]).unwrap());
 }

@@ -15,7 +15,8 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value, run,
+    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
+    compile, run_fn,
 };
 
 #[test]
@@ -135,6 +136,7 @@ fn test_compiler() {
     inputs.push(Value::Float(2.0));
 
     let mut compiler = Compiler::new().unwrap();
-    let result = run(&mut compiler, &code, inputs).unwrap();
+    let mut exec = compile(&mut compiler, &code).unwrap();
+    let result = run_fn(&mut exec, inputs).unwrap();
     println!("Compiler run result: {:?}", result);
 }

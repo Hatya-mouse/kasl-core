@@ -21,4 +21,4 @@ pub mod run;
 
 pub use codegen::Translator;
 pub use compiler::Compiler;
-pub use run::run;
+pub use run::{compile, run_fn};

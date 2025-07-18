@@ -17,7 +17,7 @@
 pub mod analyzer;
 pub mod compiler;
 pub mod error;
-pub mod interpreter;
+// pub mod interpreter;
 pub mod language;
 pub mod lexer;
 pub mod node;
@@ -26,7 +26,7 @@ pub mod parser;
 pub use analyzer::*;
 pub use compiler::*;
 pub use error::*;
-pub use interpreter::*;
+// pub use interpreter::*;
 pub use language::*;
 pub use lexer::*;
 pub use node::*;

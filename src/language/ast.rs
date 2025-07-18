@@ -89,6 +89,8 @@ pub enum Expression {
         op: Operator,
         left: Box<Expression>,
         right: Box<Expression>,
+        left_type: Type,
+        right_type: Type,
     },
     IntLiteral(i32),
     FloatLiteral(f32),
