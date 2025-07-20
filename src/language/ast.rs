@@ -16,7 +16,7 @@
 
 use knodiq_engine::Type;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operator {
     Add,
     Subtract,

@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
+use crate::Operator;
+use knodiq_engine::Type;
 use std::{error::Error, fmt::Display};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ErrorVariant {
     UndefinedSymbol(String),
     UndefinedFunction(String),
     SymbolAlreadyDefined(String),
+    InvalidOperation(Operator, Type, Type),
 }
 
 impl Display for ErrorVariant {
@@ -31,11 +34,16 @@ impl Display for ErrorVariant {
             ErrorVariant::SymbolAlreadyDefined(name) => {
                 write!(f, "Symbol already defined: {}", name)
             }
+            ErrorVariant::InvalidOperation(op, left_type, right_type) => write!(
+                f,
+                "Invalid operation: {:?} on types {:?} and {:?}",
+                op, left_type, right_type
+            ),
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SemanticError {
     pub errors: Vec<ErrorVariant>,
 }

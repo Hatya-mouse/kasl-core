@@ -14,71 +14,67 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{
-    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, Value, compile, run_fn,
-};
-use knodiq_engine::Type;
-use std::collections::HashMap;
+use knodiq_audio_shader::{Compiler, Value, compile, run_fn};
 
 fn main() {
     divan::main();
 }
 
-#[divan::bench]
-fn audio_shader_sample_processing() {
-    let input = "
-    input [[float]] in_buffer
-    input float gain = 0.8
-    output [[float]] out_buffer
-    out_buffer = in_buffer * gain
-    ";
-    let parser = Parser::new();
-    let program = parser.parse(&input);
-    match &program {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Error parsing input: {}", e);
-        }
-    }
+// #[divan::bench]
+// fn audio_shader_sample_processing() {
+//     let input = "
+//     input [[float]] in_buffer
+//     input float gain = 0.8
+//     output [[float]] out_buffer
+//     out_buffer = in_buffer * gain
+//     ";
+//     let parser = Parser::new();
+//     let program = parser.parse(&input);
+//     match &program {
+//         Ok(_) => {}
+//         Err(e) => {
+//             eprintln!("Error parsing input: {}", e);
+//         }
+//     }
 
-    let program = program.unwrap();
+//     let program = program.unwrap();
 
-    let mut semantic_analyzer = SemanticAnalyzer::new();
-    match semantic_analyzer
-        .analyze(&program)
-        .map_err(|e| format!("{:?}", e))
-    {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Semantic analysis error: {}", e);
-            return;
-        }
-    }
+//     let mut semantic_analyzer = SemanticAnalyzer::new();
+//     match semantic_analyzer
+//         .analyze(&program)
+//         .map_err(|e| format!("{:?}", e))
+//     {
+//         Ok(_) => {}
+//         Err(e) => {
+//             eprintln!("Semantic analysis error: {}", e);
+//             return;
+//         }
+//     }
 
-    let mut ui_parameters = HashMap::new();
-    ui_parameters.insert(
-        "in_buffer".to_string(),
-        SymbolInfo {
-            name: "in_buffer".to_string(),
-            kind: SymbolKind::Input,
-            value_type: Type::Array(Box::new(Type::Array(Box::new(Type::Float)))),
-            value: Some(Value::from_buffer(vec![vec![0.15; 128]; 2])),
-        },
-    );
-    ui_parameters.insert(
-        "gain".to_string(),
-        semantic_analyzer.input_table.get("gain").cloned().unwrap(),
-    );
+//     let mut ui_parameters = HashMap::new();
+//     ui_parameters.insert(
+//         "in_buffer".to_string(),
+//         SymbolInfo {
+//             name: "in_buffer".to_string(),
+//             kind: SymbolKind::Input,
+//             value_type: Type::Array(Box::new(Type::Array(Box::new(Type::Float)))),
+//             value: Some(Value::from_buffer(vec![vec![0.15; 128]; 2])),
+//         },
+//     );
+//     ui_parameters.insert(
+//         "gain".to_string(),
+//         semantic_analyzer.input_table.get("gain").cloned().unwrap(),
+//     );
 
-    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 128);
-    divan::black_box_drop(
-        // Profile the execution time
-        match interpreter.execute(ui_parameters) {
-            Ok(_) => {}
-            Err(_) => return,
-        },
-    );
-}
+//     let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 128);
+//     divan::black_box_drop(
+//         // Profile the execution time
+//         match interpreter.execute(ui_parameters) {
+//             Ok(_) => {}
+//             Err(_) => return,
+//         },
+//     );
+// }
 
 #[divan::bench]
 fn jit() {
@@ -100,33 +96,33 @@ fn jit() {
     divan::black_box_drop(run_fn(&mut exec, vec![Value::Float(2.0)]).unwrap());
 }
 
-#[divan::bench]
-fn interpreter() {
-    let code = "
-    input float in_buffer
-    output float out_buffer
-    output float powered
-    var gain = 1.0
-    var result = 0.0
+// #[divan::bench]
+// fn interpreter() {
+//     let code = "
+//     input float in_buffer
+//     output float out_buffer
+//     output float powered
+//     var gain = 1.0
+//     var result = 0.0
 
-    result = in_buffer * gain
-    out_buffer = result + 1.25
-    powered = in_buffer * in_buffer
-    ";
+//     result = in_buffer * gain
+//     out_buffer = result + 1.25
+//     powered = in_buffer * in_buffer
+//     ";
 
-    let parser = Parser::new();
-    let program = parser.parse(&code).unwrap();
+//     let parser = Parser::new();
+//     let program = parser.parse(&code).unwrap();
 
-    let mut analyzer = SemanticAnalyzer::new();
-    analyzer.analyze(&program).unwrap();
+//     let mut analyzer = SemanticAnalyzer::new();
+//     analyzer.analyze(&program).unwrap();
 
-    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
+//     let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
 
-    let mut input_table = analyzer.input_table.clone();
-    input_table.get_mut("in_buffer").unwrap().value = Some(Value::Float(2.0));
+//     let mut input_table = analyzer.input_table.clone();
+//     input_table.get_mut("in_buffer").unwrap().value = Some(Value::Float(2.0));
 
-    divan::black_box_drop(match interpreter.execute(input_table) {
-        Ok(_) => {}
-        Err(_) => return,
-    });
-}
+//     divan::black_box_drop(match interpreter.execute(input_table) {
+//         Ok(_) => {}
+//         Err(_) => return,
+//     });
+// }

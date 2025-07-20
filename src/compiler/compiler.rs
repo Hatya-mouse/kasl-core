@@ -58,9 +58,9 @@ impl Compiler {
 
         self.module.finalize_definitions()?;
 
-        let code = self.module.get_finalized_function(id);
+        let func_addr = self.module.get_finalized_function(id);
 
-        Ok(code)
+        Ok(func_addr)
     }
 
     pub fn translate(

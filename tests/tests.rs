@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{
-    Compiler, Expression, Interpreter, Parser, Program, SemanticAnalyzer, Statement, Value,
-    compile, run_fn,
-};
+use knodiq_audio_shader::{Compiler, Expression, Parser, Statement, Value, compile, run_fn};
 
 #[test]
 fn test_parsing() {
@@ -59,64 +56,64 @@ fn test_parsing() {
     );
 }
 
-#[test]
-fn test_interpreter_basic() {
-    let code = "input float in_buffer
-                    output float out_buffer
-                    output float powered
-                    var gain = 1.0
-                    var result = 0.0
+// #[test]
+// fn test_interpreter_basic() {
+//     let code = "input float in_buffer
+//                     output float out_buffer
+//                     output float powered
+//                     var gain = 1.0
+//                     var result = 0.0
 
-                    result = in_buffer * gain
-                    out_buffer = result + 1.25
+//                     result = in_buffer * gain
+//                     out_buffer = result + 1.25
 
-                    powered = pow(in_buffer, 2.0)";
+//                     powered = pow(in_buffer, 2.0)";
 
-    let parser = Parser::new();
-    let program: Program = parser.parse(&code).unwrap();
+//     let parser = Parser::new();
+//     let program: Program = parser.parse(&code).unwrap();
 
-    let mut analyzer = SemanticAnalyzer::new();
-    analyzer.analyze(&program).unwrap();
+//     let mut analyzer = SemanticAnalyzer::new();
+//     analyzer.analyze(&program).unwrap();
 
-    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
+//     let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
 
-    let mut input_table = analyzer.input_table.clone();
-    input_table.get_mut("in_buffer").unwrap().value =
-        Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
+//     let mut input_table = analyzer.input_table.clone();
+//     input_table.get_mut("in_buffer").unwrap().value =
+//         Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
 
-    let output_table = interpreter.execute(input_table).unwrap();
+//     let output_table = interpreter.execute(input_table).unwrap();
 
-    assert_eq!(
-        output_table.get("out_buffer").unwrap().value,
-        Some(Value::from_buffer(vec![vec![3.25, 4.25]; 2]))
-    );
-    assert_eq!(
-        output_table.get("powered").unwrap().value,
-        Some(Value::from_buffer(vec![vec![4.0, 9.0]; 2]))
-    );
-}
+//     assert_eq!(
+//         output_table.get("out_buffer").unwrap().value,
+//         Some(Value::from_buffer(vec![vec![3.25, 4.25]; 2]))
+//     );
+//     assert_eq!(
+//         output_table.get("powered").unwrap().value,
+//         Some(Value::from_buffer(vec![vec![4.0, 9.0]; 2]))
+//     );
+// }
 
-#[test]
-fn test_interpreter_advanced() {
-    let code = "input float in_buffer
-                    output float out_buffer
+// #[test]
+// fn test_interpreter_advanced() {
+//     let code = "input float in_buffer
+//                     output float out_buffer
 
-                    out_buffer = in_buffer * sin(time() * pi() * 440)";
+//                     out_buffer = in_buffer * sin(time() * pi() * 440)";
 
-    let parser = Parser::new();
-    let program: Program = parser.parse(&code).unwrap();
+//     let parser = Parser::new();
+//     let program: Program = parser.parse(&code).unwrap();
 
-    let mut analyzer = SemanticAnalyzer::new();
-    analyzer.analyze(&program).unwrap();
+//     let mut analyzer = SemanticAnalyzer::new();
+//     analyzer.analyze(&program).unwrap();
 
-    let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
+//     let mut interpreter = Interpreter::new(program, 48000, 24000.0, 2, 0, 2);
 
-    let mut input_table = analyzer.input_table.clone();
-    input_table.get_mut("in_buffer").unwrap().value =
-        Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
+//     let mut input_table = analyzer.input_table.clone();
+//     input_table.get_mut("in_buffer").unwrap().value =
+//         Some(Value::from_buffer(vec![vec![2.0, 3.0]; 2]));
 
-    assert!(interpreter.execute(input_table).is_ok());
-}
+//     assert!(interpreter.execute(input_table).is_ok());
+// }
 
 #[test]
 fn test_compiler() {

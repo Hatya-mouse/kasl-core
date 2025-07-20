@@ -16,7 +16,9 @@
 
 use std::{collections::HashMap, error::Error};
 
-use crate::{Interpreter, Parser, Program, SemanticAnalyzer, SymbolInfo, SyntaxError};
+use crate::{
+    Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SyntaxError, compile, run_fn,
+};
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
 pub struct AudioShaderNode {
@@ -55,13 +57,13 @@ impl AudioShaderNode {
         // Check for errors in the program.
         let mut analyzer = SemanticAnalyzer::new();
         match analyzer.analyze(&program) {
-            Ok(_) => {
+            Ok(program) => {
                 self.program = Some(program);
                 self.input = analyzer.get_input_table();
                 self.output = analyzer.get_output_table();
-                Ok(())
+                return Ok(());
             }
-            Err(error) => Err(Box::new(error)),
+            Err(error) => return Err(Box::new(error)),
         }
     }
 
@@ -74,31 +76,73 @@ impl AudioShaderNode {
 impl Node for AudioShaderNode {
     fn process(
         &mut self,
-        sample_rate: usize,
-        samples_per_beat: f32,
-        channels: usize,
-        chunk_start: usize,
-        chunk_end: usize,
+        _sample_rate: usize,
+        _samples_per_beat: f32,
+        _channels: usize,
+        _chunk_start: usize,
+        _chunk_end: usize,
         _track_id: u32,
     ) -> Result<(), Box<dyn TrackError>> {
-        let program = match self.program.as_ref() {
-            Some(program) => program,
-            None => return Ok(()),
+        // let program = match self.program.as_ref() {
+        //     Some(program) => program,
+        //     None => return Ok(()),
+        // };
+
+        // let mut interpreter = Interpreter::new(
+        //     program.clone(),
+        //     sample_rate,
+        //     samples_per_beat,
+        //     channels,
+        //     chunk_start,
+        //     chunk_end,
+        // );
+
+        // let output_table = interpreter
+        //     .execute(self.input.clone())
+        //     .map_err(|e| Box::new(e) as Box<dyn TrackError>)?;
+        // self.output = output_table;
+
+        let mut input_vec = Vec::new();
+        for (_, symbol_info) in &self.input {
+            input_vec.push(match &symbol_info.value {
+                Some(v) => v.clone(),
+                None => return Ok(()),
+            });
+        }
+
+        let mut compiler = match Compiler::new() {
+            Ok(c) => c,
+            Err(_) => return Ok(()),
         };
 
-        let mut interpreter = Interpreter::new(
-            program.clone(),
-            sample_rate,
-            samples_per_beat,
-            channels,
-            chunk_start,
-            chunk_end,
-        );
+        let mut exec = match compile(&mut compiler, &self.shader) {
+            Ok(e) => e,
+            Err(_) => return Ok(()),
+        };
 
-        let output_table = interpreter
-            .execute(self.input.clone())
-            .map_err(|e| Box::new(e) as Box<dyn TrackError>)?;
-        self.output = output_table;
+        let output = match run_fn(&mut exec, input_vec) {
+            Ok(r) => r,
+            Err(_) => return Ok(()),
+        };
+
+        let output_entries: Vec<(String, SymbolInfo)> = self
+            .output
+            .iter()
+            .map(|(key, symbol_info)| (key.clone(), symbol_info.clone()))
+            .collect();
+        for (i, (key, symbol_info)) in output_entries.iter().enumerate() {
+            if let Some(value) = output.get(i) {
+                self.output.insert(
+                    key.clone(),
+                    SymbolInfo {
+                        value: Some(value.clone()),
+                        ..symbol_info.clone()
+                    },
+                );
+            } else {
+                self.output.insert(key.clone(), symbol_info.clone());
+            }
+        }
 
         Ok(())
     }

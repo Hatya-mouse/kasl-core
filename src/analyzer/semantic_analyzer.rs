@@ -17,7 +17,7 @@
 use knodiq_engine::{Type, graph::value::type_of};
 
 use crate::{
-    Expression, Function, Program, SemanticError, Statement, SymbolInfo, SymbolKind,
+    Expression, Function, Operator, Program, SemanticError, Statement, SymbolInfo, SymbolKind,
     VariableDeclarationStatement,
     semantic_error::{self, ErrorVariant},
 };
@@ -218,6 +218,16 @@ impl SemanticAnalyzer {
 
                 let left_type = self.infer_type(&left)?;
                 let right_type = self.infer_type(&right)?;
+
+                if op == &Operator::Modulo && (left_type != Type::Int || right_type != Type::Int) {
+                    self.error
+                        .errors
+                        .push(semantic_error::ErrorVariant::InvalidOperation(
+                            Operator::Modulo,
+                            left_type.clone(),
+                            right_type.clone(),
+                        ));
+                }
 
                 Ok(Expression::BinaryOp {
                     op: op.clone(),
