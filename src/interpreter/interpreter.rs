@@ -67,8 +67,8 @@ impl Interpreter {
 
     pub fn execute(
         &mut self,
-        input_parameters: HashMap<String, SymbolInfo>,
-    ) -> Result<HashMap<String, SymbolInfo>, RuntimeError> {
+        input_parameters: Vec<SymbolInfo>,
+    ) -> Result<Vec<SymbolInfo>, RuntimeError> {
         self.initialize();
 
         let statements = self.program.statements.clone();
@@ -78,21 +78,21 @@ impl Interpreter {
         let output_table = self
             .symbol_table
             .iter()
-            .filter_map(|(name, info)| {
+            .filter_map(|(_, info)| {
                 if info.kind == SymbolKind::Output {
-                    Some((name.clone(), info.clone()))
+                    Some(info.clone())
                 } else {
                     None
                 }
             })
-            .collect::<HashMap<String, SymbolInfo>>();
+            .collect::<Vec<SymbolInfo>>();
         Ok(output_table)
     }
 
     fn execute_statements(
         &mut self,
         statements: &Vec<Statement>,
-        input_parameters: HashMap<String, SymbolInfo>,
+        input_parameters: Vec<SymbolInfo>,
     ) -> Result<(), RuntimeError> {
         for statement in statements {
             match &statement {
@@ -117,7 +117,11 @@ impl Interpreter {
                 }
 
                 Statement::InputDeclaration(input) => {
-                    if let Some(input_param) = input_parameters.get(&input.name).cloned() {
+                    if let Some(input_param) = input_parameters
+                        .iter()
+                        .find(|param| param.name == input.name)
+                        .cloned()
+                    {
                         let symbol = SymbolInfo {
                             name: input.name.clone(),
                             kind: SymbolKind::Input,
@@ -254,7 +258,13 @@ impl Interpreter {
                 .value
                 .ok_or_else(|| RuntimeError::Unknown { line }),
 
-            Expression::BinaryOp { left, op, right } => {
+            Expression::BinaryOp {
+                op,
+                left,
+                right,
+                left_type: _,
+                right_type: _,
+            } => {
                 let left_value = self.evaluate_expression(left, line)?;
                 let right_value = self.evaluate_expression(right, line)?;
 

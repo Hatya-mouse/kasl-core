@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use knodiq_audio_shader::{Compiler, Expression, Parser, Statement, Value, compile, run_fn};
+use knodiq_audio_shader::{Compiler, Expression, Parser, Statement, Value, compile};
 
 #[test]
 fn test_parsing() {
@@ -120,7 +120,7 @@ fn test_compiler() {
     let code = "input float in_buffer
                     output float out_buffer
                     output float powered
-                    var gain = 1.0
+                    var gain = 1.5
                     var result = 0.0
 
                     result = in_buffer * gain
@@ -130,10 +130,10 @@ fn test_compiler() {
                     powered = in_buffer * in_buffer";
 
     let mut inputs = Vec::new();
-    inputs.push(Value::Float(2.0));
+    inputs.push(Value::Array(vec![Value::Float(2.0), Value::Float(3.0)]));
 
     let mut compiler = Compiler::new().unwrap();
     let mut exec = compile(&mut compiler, &code).unwrap();
-    let result = run_fn(&mut exec, inputs).unwrap();
+    let result = exec.run(inputs).unwrap();
     println!("Compiler run result: {:?}", result);
 }

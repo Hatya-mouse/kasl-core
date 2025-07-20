@@ -175,7 +175,6 @@ impl<'a> Translator<'a> {
 
     /// Generates code for an expression and returns the resulting IR value and its type.
     pub fn codegen_expr(&mut self, expr: &Expression, module: &JITModule) -> (ir::Value, ir::Type) {
-        println!("Codegen expression: {:?}", expr);
         match expr {
             Expression::IntLiteral(lit) => {
                 (self.builder.ins().iconst(TYPE_INT, *lit as i64), TYPE_INT)

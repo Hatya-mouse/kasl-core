@@ -18,7 +18,6 @@ use std::error::Error;
 
 use crate::{
     Compiler, Parser, Program, SemanticAnalyzer, SymbolInfo, SymbolKind, SyntaxError, compile,
-    run_fn,
 };
 use knodiq_engine::{Node, NodeId, Value, error::TrackError};
 
@@ -121,7 +120,7 @@ impl Node for AudioShaderNode {
             Err(_) => return Ok(()),
         };
 
-        let output = match run_fn(&mut exec, input_vec) {
+        let output = match exec.run(input_vec) {
             Ok(r) => r,
             Err(_) => return Ok(()),
         };

@@ -20,6 +20,34 @@ use knodiq_engine::Value;
 pub struct Executable {
     pub func: unsafe extern "C" fn(*const f32, usize, *mut f32, usize) -> (),
     pub outputs: Vec<f32>,
+    // プールされたバッファを追加
+    pub input_buffer: Vec<f32>,
+    pub temp_buffer: Vec<f32>,
+}
+
+impl Executable {
+    pub fn run(&mut self, inputs: Vec<Value>) -> Result<Vec<Value>, Box<dyn std::error::Error>> {
+        // Convert inputs to a flat vector of f32
+        let mut input_floats = Vec::new();
+        for input in &inputs {
+            flatten_value_to_floats(input, &mut input_floats);
+        }
+
+        // Execute the function
+        unsafe {
+            (self.func)(
+                input_floats.as_ptr(),
+                input_floats.len(),
+                self.outputs.as_mut_ptr(),
+                self.outputs.len(),
+            );
+        }
+
+        // Convert results to Value
+        let result: Vec<Value> = self.outputs.iter().map(|&f| Value::Float(f)).collect();
+
+        Ok(result)
+    }
 }
 
 pub fn compile(
@@ -35,33 +63,12 @@ pub fn compile(
     let output_count = get_output_count(code)?;
     let outputs = vec![0.0f32; output_count];
 
-    Ok(Executable { func, outputs })
-}
-
-pub fn run_fn(
-    exec: &mut Executable,
-    inputs: Vec<Value>,
-) -> Result<Vec<Value>, Box<dyn std::error::Error>> {
-    // Convert inputs to a flat vector of f32
-    let mut input_floats = Vec::new();
-    for input in &inputs {
-        flatten_value_to_floats(input, &mut input_floats);
-    }
-
-    // Execute the function
-    unsafe {
-        (exec.func)(
-            input_floats.as_ptr(),
-            input_floats.len(),
-            exec.outputs.as_mut_ptr(),
-            exec.outputs.len(),
-        );
-    }
-
-    // Convert results to Value
-    let result: Vec<Value> = exec.outputs.iter().map(|&f| Value::Float(f)).collect();
-
-    Ok(result)
+    Ok(Executable {
+        func,
+        outputs,
+        input_buffer: Vec::new(),
+        temp_buffer: Vec::new(),
+    })
 }
 
 fn flatten_value_to_floats(value: &Value, output: &mut Vec<f32>) {

@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-
 use crate::{Parser, Program, SemanticAnalyzer, SymbolInfo, compiler::codegen::Translator};
-use cranelift_codegen::{Context, ir::AbiParam};
+use cranelift_codegen::{
+    Context,
+    ir::AbiParam,
+    settings::{self, Configurable},
+};
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
+use std::collections::HashMap;
 
 pub struct Compiler {
     ctx: Context,
@@ -31,6 +34,10 @@ impl Compiler {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let builder = JITBuilder::new(cranelift_module::default_libcall_names())?;
         let module = JITModule::new(builder);
+
+        let mut flag_builder = settings::builder();
+        flag_builder.set("opt_level", "speed")?;
+        flag_builder.set("enable_verifier", "false")?;
 
         Ok(Compiler {
             ctx: module.make_context(),
