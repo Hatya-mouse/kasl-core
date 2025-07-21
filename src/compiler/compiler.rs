@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Parser, Program, SemanticAnalyzer, SymbolInfo, codegen::get_type,
+    Parser, Program, SemanticAnalyzer, SymbolInfo, codegen::get_ir_type,
     compiler::codegen::Translator, run::Executable,
 };
 use cranelift_codegen::{Context, ir::AbiParam};
@@ -62,7 +62,7 @@ impl Compiler {
             .collect::<Vec<_>>();
         let output_size = output_types
             .iter()
-            .map(|t| get_type(t, &self.module).bytes())
+            .map(|t| get_ir_type(t, &self.module).bytes())
             .sum::<u32>() as usize;
         let outputs = vec![0u8; output_size];
 
@@ -82,15 +82,15 @@ impl Compiler {
     ) -> Result<*const u8, Box<dyn std::error::Error>> {
         self.translate(&program, &inputs, &outputs)?;
 
+        // println!("Function: {}", self.ctx.func);
+
         let func_name = "main";
         let id =
             self.module
                 .declare_function(func_name, Linkage::Export, &self.ctx.func.signature)?;
 
         self.module.define_function(id, &mut self.ctx)?;
-
         self.module.clear_context(&mut self.ctx);
-
         self.module.finalize_definitions()?;
 
         let func_addr = self.module.get_finalized_function(id);

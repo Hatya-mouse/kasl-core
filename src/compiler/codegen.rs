@@ -72,7 +72,7 @@ impl<'a> Translator<'a> {
         let mut input_offset = 0;
         for input_info in inputs {
             let var = self.new_var();
-            let val_type = get_type(&input_info.value_type, module);
+            let val_type = get_ir_type(&input_info.value_type, module);
 
             let offset = self.builder.ins().iconst(TYPE_INT, input_offset);
             let addr = self.builder.ins().iadd(self.input_ptr, offset);
@@ -94,7 +94,7 @@ impl<'a> Translator<'a> {
 
         for output_info in outputs {
             let var = self.new_var();
-            let val_type = get_type(&output_info.value_type, module);
+            let val_type = get_ir_type(&output_info.value_type, module);
 
             self.variables.insert(
                 output_info.name.clone(),
@@ -123,15 +123,8 @@ impl<'a> Translator<'a> {
                 let addr = self.builder.ins().iadd(self.output_ptr, offset);
                 self.builder.ins().store(ir::MemFlags::new(), val, addr, 0);
 
-                println!(
-                    "Storing {} at offset {} (size: {})",
-                    output_name,
-                    output_offset,
-                    get_type(val_type, module).bytes()
-                );
-
                 // Calculate the offset for the next element
-                output_offset += get_type(val_type, module).bytes() as i64;
+                output_offset += get_ir_type(val_type, module).bytes() as i64;
             }
         }
 
@@ -148,18 +141,19 @@ impl<'a> Translator<'a> {
                 self.variables
                     .insert(var_decl.name.clone(), (var, var_decl.value_type.clone()));
 
-                self.builder.declare_var(var, get_type(&val_type, module));
+                self.builder
+                    .declare_var(var, get_ir_type(&val_type, module));
                 self.builder.def_var(var, val);
             }
             Statement::Assignment(assignment_stmt) => {
                 let (val, val_type) = self.codegen_expr(&assignment_stmt.value, module);
-                let val_ir_type = get_type(&val_type, module);
+                let val_ir_type = get_ir_type(&val_type, module);
 
                 // Check if the variable already exists
                 if let Some((existing_var, existing_type)) =
                     self.variables.get(&assignment_stmt.target_name)
                 {
-                    let existing_type = get_type(existing_type, module);
+                    let existing_type = get_ir_type(existing_type, module);
                     if existing_type == val_ir_type {
                         // If the types are the same, reuse the existing variable
                         self.builder.def_var(*existing_var, val);
@@ -338,6 +332,15 @@ impl<'a> Translator<'a> {
             &JITModule,
         ) -> ir::Value,
     {
+        let has_array = val_types
+            .iter()
+            .any(|ty| matches!(ty, knodiq_engine::Type::Array(_)));
+        if !has_array {
+            // If there are no arrays, just apply the operation directly
+            let return_type = val_types[0].clone();
+            return (op(vals, val_types, self, module), return_type);
+        }
+
         let max_depth = val_types
             .iter()
             .max_by(|&a, &b| a.get_depth().cmp(&b.get_depth()))
@@ -353,7 +356,7 @@ impl<'a> Translator<'a> {
             while val_type.get_depth() < max_depth {
                 // Resize the value to match the maximum depth
                 let vec = vec![val];
-                val = self.vec_as_array(vec, get_type(&val_type, module), module);
+                val = self.vec_as_array(vec, get_ir_type(&val_type, module), module);
                 val_type = knodiq_engine::Type::Array(Box::new(val_type.clone()));
             }
 
@@ -364,7 +367,7 @@ impl<'a> Translator<'a> {
         self.recurse_op_broadcast(&mut op, resized_vals, resized_val_types, module)
     }
 
-    fn recurse_op_broadcast<F>(
+    pub fn recurse_op_broadcast<F>(
         &mut self,
         op: &mut F,
         args: Vec<ir::Value>,
@@ -379,113 +382,92 @@ impl<'a> Translator<'a> {
             &JITModule,
         ) -> ir::Value,
     {
-        if args.len() == 0 {
-            return (
-                self.builder.ins().iconst(TYPE_INT, 0),
-                knodiq_engine::Type::Int,
-            );
+        let has_array = arg_types
+            .iter()
+            .any(|ty| matches!(ty, knodiq_engine::Type::Array(_)));
+
+        if !has_array {
+            // If there are no arrays, just apply the operation directly
+            let return_type = arg_types[0].clone();
+            return (op(args, arg_types, self, module), return_type);
         }
 
-        let is_all_array = arg_types
+        let array_types: Vec<_> = arg_types
             .iter()
-            .all(|ty| matches!(ty, knodiq_engine::Type::Array(_)));
+            .filter_map(|ty| match ty {
+                knodiq_engine::Type::Array(inner) => Some(inner.clone()),
+                _ => None,
+            })
+            .collect();
 
-        if is_all_array {
-            let mut inside_types = Vec::new();
+        if array_types.is_empty() {
+            unreachable!("Expected at least one array type!?");
+        }
 
-            for i in 0..args.len() {
-                let val_type = &arg_types[i];
+        let element_type = array_types[0].clone();
+        let element_ir_type = get_ir_type(&element_type, module);
+        let element_size = element_ir_type.bytes() as i64;
+        let element_size_ir_val = self.builder.ins().iconst(element_ir_type, element_size);
 
-                match val_type {
-                    knodiq_engine::Type::Array(inside_type) => {
-                        inside_types.push(*inside_type.clone())
+        // Calculate the offset for the data part of the array
+        // The first `TYPE_INT` bytes store the size of the array
+        let data_offset = TYPE_INT.bytes() as i64;
+        let data_offset_ir_val = self.builder.ins().iconst(TYPE_INT, data_offset);
+
+        // TODO: Check if all arrays have the same size
+        let array_size = self.load_arr_size(args[0]);
+
+        // Create a new array to hold the results
+        let result_var = self.new_var();
+        self.builder
+            .declare_var(result_var, module.target_config().pointer_type());
+
+        // Initialize with an empty array
+        let empty_array = self.vec_as_array(Vec::new(), element_ir_type, module);
+        self.builder.def_var(result_var, empty_array);
+
+        // Iterate over the array elements
+        self.codegen_loop(array_size, |slf, idx| {
+            // Load the current values from the arrays
+            let mut current_vals = Vec::new();
+            let mut current_types = Vec::new();
+
+            for (i, arg_type) in arg_types.iter().enumerate() {
+                match arg_type {
+                    knodiq_engine::Type::Array(inner_type) => {
+                        let elem =
+                            slf.load_arr_val_at(get_ir_type(inner_type, module), args[i], idx);
+                        current_vals.push(elem);
+                        current_types.push(arg_type.clone());
                     }
-                    _ => unreachable!("Expected all types to be arrays"),
+                    _ => {
+                        // If it's not an array, just use the value directly
+                        current_vals.push(args[i]);
+                        current_types.push(arg_type.clone());
+                    }
                 }
             }
 
-            let max_len = args.iter().map(|v| self.load_arr_size(*v)).max().unwrap();
+            // Apply the operation to the current values
+            let result_element = slf
+                .recurse_op_broadcast(op, current_vals, current_types, module)
+                .0;
 
-            let mut operated_vals = Vec::new();
-            let mut operated_types = Vec::new();
-            self.codegen_loop(max_len, |slf, arr_idx| {
-                let mut inside_vals = Vec::new();
-                for arg_idx in 0..args.len() {
-                    let arr_size = slf.load_arr_size(args[arg_idx]);
-                    let is_arr_enough = slf.builder.ins().icmp(
-                        ir::condcodes::IntCC::SignedLessThan,
-                        arr_idx,
-                        arr_size,
-                    );
+            // Store the result in the result array
+            let result_array = slf.builder.use_var(result_var);
+            let element_offset = slf.builder.ins().imul(idx, element_size_ir_val);
+            // Skip the first `TYPE_INT` bytes which store the size of the array
+            let total_offset = slf.builder.ins().iadd(data_offset_ir_val, result_array);
+            let target_addr = slf.builder.ins().iadd(total_offset, element_offset);
 
-                    slf.codegen_if(
-                        is_arr_enough,
-                        Box::new(|slf: &mut Self| {
-                            vec![(
-                                slf.load_arr_val_at(
-                                    get_type(&inside_types[arg_idx], module),
-                                    args[arg_idx],
-                                    arr_idx,
-                                ),
-                                get_type(&inside_types[arg_idx], module),
-                            )]
-                        }),
-                        |slf: &mut Self| {
-                            let zero = slf.builder.ins().iconst(TYPE_INT, 0);
-                            let is_arr_empty =
-                                slf.builder
-                                    .ins()
-                                    .icmp(ir::condcodes::IntCC::Equal, arr_size, zero);
-                            slf.codegen_if(
-                                is_arr_empty,
-                                |slf: &mut Self| {
-                                    vec![(
-                                        slf.builder
-                                            .ins()
-                                            .iconst(get_type(&inside_types[arg_idx], module), 0),
-                                        get_type(&inside_types[arg_idx], module),
-                                    )]
-                                },
-                                |slf: &mut Self| {
-                                    let arr_len = slf.load_arr_size(args[arg_idx]);
-                                    let one = slf.builder.ins().iconst(TYPE_INT, 1);
-                                    let last_idx = slf.builder.ins().isub(arr_len, one);
-                                    vec![(
-                                        slf.load_arr_val_at(
-                                            get_type(&inside_types[arg_idx], module),
-                                            args[arg_idx],
-                                            last_idx,
-                                        ),
-                                        get_type(&inside_types[arg_idx], module),
-                                    )]
-                                },
-                            );
-                            let current_block = slf.builder.current_block().unwrap();
-                            let return_vals = slf.builder.block_params(current_block)[0];
-                            vec![(return_vals, get_type(&inside_types[arg_idx], module))]
-                        },
-                    );
+            // Store the result element at the calculated address
+            slf.builder
+                .ins()
+                .store(ir::MemFlags::new(), result_element, target_addr, 0);
+        });
 
-                    let current_block = slf.builder.current_block().unwrap();
-                    let inside_val = slf.builder.block_params(current_block)[0];
-
-                    inside_vals.push(inside_val);
-                }
-
-                let operated =
-                    slf.recurse_op_broadcast(op, inside_vals, inside_types.clone(), module);
-                operated_vals.push(operated.0);
-                operated_types.push(operated.1);
-            });
-
-            (
-                self.vec_as_array(operated_vals, get_type(&operated_types[0], module), module),
-                knodiq_engine::Type::Array(Box::new(inside_types[0].clone())),
-            )
-        } else {
-            let return_type = arg_types[0].clone();
-            (op(args, arg_types, self, module), return_type)
-        }
+        let final_result = self.builder.use_var(result_var);
+        (final_result, knodiq_engine::Type::Array(element_type))
     }
 
     /// Converts a vector of IR values into an array pointer.
@@ -619,7 +601,7 @@ impl<'a> Translator<'a> {
         let cond_block = self.builder.create_block();
         let loop_block = self.builder.create_block();
         let next_block = self.builder.create_block();
-        self.builder.append_block_param(loop_block, TYPE_INT);
+        self.builder.append_block_param(cond_block, TYPE_INT);
         self.builder.insert_block_after(loop_block, current_block);
         self.builder.insert_block_after(next_block, current_block);
 
@@ -631,7 +613,7 @@ impl<'a> Translator<'a> {
 
         // Loop condition
         self.builder.switch_to_block(cond_block);
-        let i = self.builder.block_params(loop_block)[0];
+        let i = self.builder.block_params(cond_block)[0];
         let cmp = self
             .builder
             .ins()
@@ -664,6 +646,11 @@ impl<'a> Translator<'a> {
         ElseFn: FnMut(&mut Self) -> Vec<(ir::Value, ir::Type)>,
     {
         let current_block = self.builder.current_block().unwrap();
+
+        let result_var = self.new_var();
+
+        self.builder.declare_var(result_var, TYPE_INT);
+
         let then_block = self.builder.create_block();
         let else_block = self.builder.create_block();
         let next_block = self.builder.create_block();
@@ -674,6 +661,7 @@ impl<'a> Translator<'a> {
             .ins()
             .brif(condition, then_block, &[], else_block, &[]);
 
+        // --- THEN BLOCK ---
         self.builder.switch_to_block(then_block);
         let then_res = then_fn(self);
         for (_, res_type) in &then_res {
@@ -687,6 +675,7 @@ impl<'a> Translator<'a> {
                 .collect::<Vec<_>>(),
         );
 
+        // --- ELSE BLOCK ---
         self.builder.switch_to_block(else_block);
         let else_res = else_fn(self);
         for (_, res_type) in &else_res {
@@ -711,31 +700,11 @@ impl<'a> Translator<'a> {
 }
 
 /// Converts a `knodiq_engine::Type` to an IR type.
-pub fn get_type(value_type: &knodiq_engine::Type, module: &JITModule) -> types::Type {
+pub fn get_ir_type(value_type: &knodiq_engine::Type, module: &JITModule) -> types::Type {
     match value_type {
         knodiq_engine::Type::Int => TYPE_INT,
         knodiq_engine::Type::Float => TYPE_FLOAT,
         knodiq_engine::Type::Array(_) => module.target_config().pointer_type(),
         knodiq_engine::Type::None => types::INVALID,
-    }
-}
-
-/// Evaluates the resulting type of a binary operation based on the left and right types.
-pub fn eval_type(left: ir::Type, right: ir::Type) -> ir::Type {
-    match left {
-        TYPE_INT => match right {
-            TYPE_INT => TYPE_INT,
-            TYPE_FLOAT => TYPE_FLOAT,
-            types::INVALID => left,
-            _ => right,
-        },
-        TYPE_FLOAT => match right {
-            TYPE_INT => TYPE_FLOAT,
-            TYPE_FLOAT => TYPE_FLOAT,
-            types::INVALID => left,
-            _ => right,
-        },
-        types::INVALID => right,
-        _ => left,
     }
 }

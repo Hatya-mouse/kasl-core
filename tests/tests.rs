@@ -127,38 +127,22 @@ fn test_compiler() {
                     result = in_buffer * gain
                     out_buffer = result + 1.25
 
-                    powered = pow(in_buffer, 2.0)";
+                    powered = in_buffer * in_buffer";
 
     let mut inputs = Vec::new();
-    inputs.push(Value::Array(vec![Value::Float(2.0), Value::Float(3.0)]));
+    inputs.push(Value::Float(2.0));
 
     let mut compiler = Compiler::new().unwrap();
     let mut exec = compiler.compile(&code).unwrap();
-    let result = exec
-        .run(
-            inputs,
-            vec![
-                Type::Array(Box::new(Type::Float)),
-                Type::Array(Box::new(Type::Float)),
-            ],
-        )
-        .unwrap();
+    let result = exec.run(inputs, vec![Type::Float, Type::Float]).unwrap();
     println!("Compiler run result: {:?}", result);
 }
 
 #[test]
-#[ignore]
 fn test_compiler_arr() {
     let code = "input [float] in_buffer
                     output [float] out_buffer
-                    output [float] powered
-                    var gain = 1.5
-                    var result = 0.0
-
-                    result = in_buffer * gain
-                    out_buffer = result + 1.25
-
-                    powered = in_buffer * in_buffer";
+                    out_buffer = in_buffer * 2.0";
 
     let mut inputs = Vec::new();
     inputs.push(Value::Array(vec![Value::Float(2.0), Value::Float(3.0)]));

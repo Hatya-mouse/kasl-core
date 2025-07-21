@@ -17,7 +17,7 @@
 use knodiq_engine::{Type, Value};
 
 pub struct Executable {
-    pub func: unsafe extern "C" fn(*const u8, *mut u8) -> (),
+    pub func: unsafe extern "C" fn(*const u8, *mut u8),
     pub outputs: Vec<u8>,
     pub output_types: Vec<Type>,
 }
@@ -64,10 +64,6 @@ fn get_bytes_repr(value: &Value, output: &mut Vec<u8>) {
 }
 
 fn bytes_as_value(bytes: &Vec<u8>, target_type: &Type) -> (Vec<u8>, Value) {
-    println!(
-        "bytes_as_value: {:?}, target_type: {:?}",
-        bytes, target_type
-    );
     match target_type {
         Type::Float => {
             if bytes.len() < 4 {
