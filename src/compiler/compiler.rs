@@ -16,7 +16,7 @@
 
 use crate::{
     Parser, Program, SemanticAnalyzer, SymbolInfo, codegen::get_ir_type,
-    compiler::codegen::Translator, run::Executable,
+    compiler::codegen::Translator, executable::Executable,
 };
 use cranelift_codegen::{Context, ir::AbiParam};
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
@@ -31,10 +31,10 @@ pub struct Compiler {
 
 impl Compiler {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        // let flags = [("opt_level", "speed"), ("enable_verifier", "false")];
+        let flags = [("enable_verifier", "false")];
 
-        // let builder = JITBuilder::with_flags(&flags, cranelift_module::default_libcall_names())?;
-        let builder = JITBuilder::new(cranelift_module::default_libcall_names())?;
+        let builder = JITBuilder::with_flags(&flags, cranelift_module::default_libcall_names())?;
+        // let builder = JITBuilder::new(cranelift_module::default_libcall_names())?;
         let module = JITModule::new(builder);
         let ctx = module.make_context();
 
@@ -82,7 +82,7 @@ impl Compiler {
     ) -> Result<*const u8, Box<dyn std::error::Error>> {
         self.translate(&program, &inputs, &outputs)?;
 
-        // println!("Function: {}", self.ctx.func);
+        println!("Translated function: {}", self.ctx.func.name);
 
         let func_name = "main";
         let id =
@@ -115,17 +115,7 @@ impl Compiler {
             .func
             .signature
             .params
-            .push(AbiParam::new(pointer_type)); // input_count (usize)
-        self.ctx
-            .func
-            .signature
-            .params
             .push(AbiParam::new(pointer_type)); // output_ptr
-        self.ctx
-            .func
-            .signature
-            .params
-            .push(AbiParam::new(pointer_type)); // output_count
 
         let mut builder_ctx = FunctionBuilderContext::new();
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut builder_ctx);

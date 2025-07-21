@@ -595,6 +595,7 @@ dependencies = [
  "divan",
  "knodiq_audio_shader",
  "knodiq_engine",
+ "lazy_static",
  "pest",
  "rand",
  "target-lexicon",

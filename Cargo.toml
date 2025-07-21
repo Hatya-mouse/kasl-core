@@ -17,6 +17,7 @@ cranelift-codegen = "0.121.1"
 cranelift-module = "0.121.1"
 pest = "2.8.1"
 cranelift-frontend = "0.121.1"
+lazy_static = "1.5.0"
 
 [features]
 interpreter = []

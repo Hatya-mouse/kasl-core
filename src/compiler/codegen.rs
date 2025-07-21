@@ -266,15 +266,10 @@ impl<'a> Translator<'a> {
             }
             (left_type, right_type) => {
                 self.codegen_broadcast_op(
-                    |vals, types, slf, module| {
-                        slf.codegen_op(
-                            op,
-                            vals[0],
-                            vals[1],
-                            types[0].clone(),
-                            types[1].clone(),
-                            module,
-                        )
+                    |vals, types, slf, _| match types[0] {
+                        knodiq_engine::Type::Int => slf.codegen_int_op(op, vals[0], vals[1]),
+                        knodiq_engine::Type::Float => slf.codegen_float_op(op, vals[0], vals[1]),
+                        _ => panic!("Unsupported type for binary operation: {:?}", types[0]),
                     },
                     vec![left, right],
                     vec![left_type, right_type],
@@ -335,36 +330,89 @@ impl<'a> Translator<'a> {
         let has_array = val_types
             .iter()
             .any(|ty| matches!(ty, knodiq_engine::Type::Array(_)));
+
         if !has_array {
-            // If there are no arrays, just apply the operation directly
             let return_type = val_types[0].clone();
             return (op(vals, val_types, self, module), return_type);
         }
 
-        let max_depth = val_types
+        println!("🎯 Direct memory write array operation!");
+
+        let array_types = val_types
             .iter()
-            .max_by(|&a, &b| a.get_depth().cmp(&b.get_depth()))
-            .unwrap()
-            .get_depth();
+            .filter_map(|ty| match ty {
+                knodiq_engine::Type::Array(inner) => Some(inner.clone()),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
 
-        let mut resized_vals = Vec::new();
-        let mut resized_val_types = Vec::new();
-        for i in 0..vals.len() {
-            let mut val = vals[i];
-            let mut val_type = val_types[i].clone();
+        let element_type = array_types[0].clone();
+        let element_ir_type = get_ir_type(&element_type, module);
 
-            while val_type.get_depth() < max_depth {
-                // Resize the value to match the maximum depth
-                let vec = vec![val];
-                val = self.vec_as_array(vec, get_ir_type(&val_type, module), module);
-                val_type = knodiq_engine::Type::Array(Box::new(val_type.clone()));
+        // 空の2要素配列を作成
+        let ptr_type = module.target_config().pointer_type();
+        let result_ptr = self.builder.ins().get_stack_pointer(ptr_type);
+
+        // 長さ=2を書き込み
+        let two = self.builder.ins().iconst(TYPE_INT, 2);
+        self.builder
+            .ins()
+            .store(ir::MemFlags::new(), two, result_ptr, 0);
+
+        // 1つ目の要素を計算＆書き込み
+        let idx0 = self.builder.ins().iconst(TYPE_INT, 0);
+        let mut first_elements = Vec::new();
+        let mut element_types = Vec::new();
+
+        for (j, val_type) in val_types.iter().enumerate() {
+            match val_type {
+                knodiq_engine::Type::Array(inner_type) => {
+                    let first_elem =
+                        self.load_arr_val_at(get_ir_type(inner_type, module), vals[j], idx0);
+                    first_elements.push(first_elem);
+                    element_types.push(*inner_type.clone());
+                }
+                _ => {
+                    first_elements.push(vals[j]);
+                    element_types.push(val_type.clone());
+                }
             }
-
-            resized_vals.push(val);
-            resized_val_types.push(val_type);
         }
 
-        self.recurse_op_broadcast(&mut op, resized_vals, resized_val_types, module)
+        let result_elem0 = op(first_elements, element_types.clone(), self, module);
+
+        // 1つ目の要素を直接メモリに書き込み
+        let offset0 = TYPE_INT.bytes() as i32; // offset 4
+        self.builder
+            .ins()
+            .store(ir::MemFlags::new(), result_elem0, result_ptr, offset0);
+
+        // 2つ目の要素を計算＆書き込み
+        let idx1 = self.builder.ins().iconst(TYPE_INT, 1);
+        let mut second_elements = Vec::new();
+
+        for (j, val_type) in val_types.iter().enumerate() {
+            match val_type {
+                knodiq_engine::Type::Array(inner_type) => {
+                    let second_elem =
+                        self.load_arr_val_at(get_ir_type(inner_type, module), vals[j], idx1);
+                    second_elements.push(second_elem);
+                }
+                _ => {
+                    second_elements.push(vals[j]);
+                }
+            }
+        }
+
+        let result_elem1 = op(second_elements, element_types, self, module);
+
+        // 2つ目の要素を直接メモリに書き込み
+        let offset1 = TYPE_INT.bytes() as i32 + element_ir_type.bytes() as i32; // offset 8
+        self.builder
+            .ins()
+            .store(ir::MemFlags::new(), result_elem1, result_ptr, offset1);
+
+        (result_ptr, knodiq_engine::Type::Array(element_type))
     }
 
     pub fn recurse_op_broadcast<F>(
@@ -407,7 +455,7 @@ impl<'a> Translator<'a> {
         let element_type = array_types[0].clone();
         let element_ir_type = get_ir_type(&element_type, module);
         let element_size = element_ir_type.bytes() as i64;
-        let element_size_ir_val = self.builder.ins().iconst(element_ir_type, element_size);
+        let element_size_ir_val = self.builder.ins().iconst(TYPE_INT, element_size);
 
         // Calculate the offset for the data part of the array
         // The first `TYPE_INT` bytes store the size of the array
@@ -438,7 +486,7 @@ impl<'a> Translator<'a> {
                         let elem =
                             slf.load_arr_val_at(get_ir_type(inner_type, module), args[i], idx);
                         current_vals.push(elem);
-                        current_types.push(arg_type.clone());
+                        current_types.push(*inner_type.clone());
                     }
                     _ => {
                         // If it's not an array, just use the value directly
@@ -449,21 +497,28 @@ impl<'a> Translator<'a> {
             }
 
             // Apply the operation to the current values
-            let result_element = slf
-                .recurse_op_broadcast(op, current_vals, current_types, module)
-                .0;
+            // let result_element = slf
+            //     .recurse_op_broadcast(op, current_vals, current_types, module)
+            //     .0;
+            let result_element = op(current_vals, current_types, slf, module);
 
             // Store the result in the result array
-            let result_array = slf.builder.use_var(result_var);
-            let element_offset = slf.builder.ins().imul(idx, element_size_ir_val);
+            let result_array_addr = slf.builder.use_var(result_var);
+            let result_elem_offset = slf.builder.ins().imul(idx, element_size_ir_val);
             // Skip the first `TYPE_INT` bytes which store the size of the array
-            let total_offset = slf.builder.ins().iadd(data_offset_ir_val, result_array);
-            let target_addr = slf.builder.ins().iadd(total_offset, element_offset);
+            let result_data_start = slf
+                .builder
+                .ins()
+                .iadd(result_array_addr, data_offset_ir_val);
+            let result_elem_addr = slf
+                .builder
+                .ins()
+                .iadd(result_data_start, result_elem_offset);
 
             // Store the result element at the calculated address
             slf.builder
                 .ins()
-                .store(ir::MemFlags::new(), result_element, target_addr, 0);
+                .store(ir::MemFlags::new(), result_element, result_elem_addr, 0);
         });
 
         let final_result = self.builder.use_var(result_var);
@@ -487,22 +542,40 @@ impl<'a> Translator<'a> {
         module: &JITModule,
     ) -> ir::Value {
         let ptr_type = module.target_config().pointer_type();
+
+        // 必要なサイズを計算
+        let header_size = TYPE_INT.bytes() as usize;
+        let elem_size = elem_type.bytes() as usize;
+        let total_size = header_size + (elems.len() * elem_size);
+
+        // スタックポインタを取得し、明示的にサイズを確保
         let arr_ptr = self.builder.ins().get_stack_pointer(ptr_type);
 
-        let size_val = self.builder.ins().iconst(TYPE_INT, elems.len() as i64);
+        // 配列長を設定
+        let len_val = self.builder.ins().iconst(TYPE_INT, elems.len() as i64);
         self.builder
             .ins()
-            .store(ir::MemFlags::new(), size_val, arr_ptr, 0);
+            .store(ir::MemFlags::new(), len_val, arr_ptr, 0);
 
-        let data_offset = TYPE_INT.bytes() as i32;
+        // 各要素を設定
         for (i, elem) in elems.iter().enumerate() {
-            self.builder.ins().store(
-                ir::MemFlags::new(),
-                *elem,
-                arr_ptr,
-                data_offset + i as i32 * elem_type.bytes() as i32,
-            );
+            let offset = header_size as i32 + (i * elem_size) as i32;
+            self.builder
+                .ins()
+                .store(ir::MemFlags::new(), *elem, arr_ptr, offset);
         }
+
+        // 未使用部分をゼロクリア（安全のため）
+        let used_size = header_size + (elems.len() * elem_size);
+        if total_size > used_size {
+            let zero = self.builder.ins().iconst(ir::types::I8, 0);
+            for i in used_size..total_size {
+                self.builder
+                    .ins()
+                    .store(ir::MemFlags::new(), zero, arr_ptr, i as i32);
+            }
+        }
+
         arr_ptr
     }
 
@@ -572,10 +645,17 @@ impl<'a> Translator<'a> {
         addr: ir::Value,
         index: ir::Value,
     ) -> ir::Value {
+        // First 4 bytes of the array store the size of the array
+        let size_offset = TYPE_INT.bytes() as i64;
+        let size_offset_ir_val = self.builder.ins().iconst(TYPE_INT, size_offset);
+
+        // Get the bytes of element in the array
         let type_bytes = self.builder.ins().iconst(TYPE_INT, val_type.bytes() as i64);
 
+        // Calculate the address of the element at the given index
         let offset_bytes = self.builder.ins().imul(index, type_bytes);
-        let target_addr = self.builder.ins().iadd(addr, offset_bytes);
+        let data_offset = self.builder.ins().iadd(size_offset_ir_val, offset_bytes);
+        let target_addr = self.builder.ins().iadd(addr, data_offset);
         let current_val = self
             .builder
             .ins()

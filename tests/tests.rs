@@ -149,15 +149,8 @@ fn test_compiler_arr() {
 
     let mut compiler = Compiler::new().unwrap();
     let mut exec = compiler.compile(&code).unwrap();
-    println!("Compiled code");
     let result = exec
-        .run(
-            inputs,
-            vec![
-                Type::Array(Box::new(Type::Float)),
-                Type::Array(Box::new(Type::Float)),
-            ],
-        )
+        .run(inputs, vec![Type::Array(Box::new(Type::Float))])
         .unwrap();
     println!("Compiler run result: {:?}", result);
 }

@@ -15,7 +15,7 @@
 //
 
 use knodiq_audio_shader::{
-    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, run::Executable,
+    Compiler, Interpreter, Parser, SemanticAnalyzer, SymbolInfo, SymbolKind, executable::Executable,
 };
 use knodiq_engine::{Type, Value};
 
