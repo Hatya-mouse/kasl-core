@@ -18,7 +18,7 @@ pub mod ast;
 pub mod parser;
 
 pub use ast::{
-    ExprToken, FuncParam, InputAttribute, LiteralBind, Program, ProtocolRequirement, StateVar,
-    Statement,
+    ExprToken, FuncCallArg, FuncParam, InfixAttrValue, InputAttribute, LiteralBind, Program,
+    ProtocolRequirement, StateVar, Statement,
 };
-pub use parser::kash;
+pub use parser::kash_parser;

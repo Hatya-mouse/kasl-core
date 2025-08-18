@@ -1,0 +1,327 @@
+//
+// Copyright 2025 Shuntaro Kasatani
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#[cfg(test)]
+mod parsing {
+    use kash::{ExprToken, FuncParam, Statement, ast::FuncCallArg, kash_parser};
+
+    /// Test parsing of chained expressions.
+    #[test]
+    fn chaining() {
+        let object = kash_parser::expression("object");
+        // println!("{:#?}", object);
+        assert_eq!(
+            object,
+            Ok(vec![ExprToken::Identifier(vec!["object".to_string()])])
+        );
+
+        let object_property = kash_parser::expression("object.property");
+        // println!("{:#?}", object_property);
+        assert_eq!(
+            object_property,
+            Ok(vec![ExprToken::Identifier(vec![
+                "object".to_string(),
+                "property".to_string()
+            ])])
+        );
+
+        let long_property = kash_parser::expression("object.property.subproperty");
+        // println!("{:#?}", long_property);
+        assert_eq!(
+            long_property,
+            Ok(vec![ExprToken::Identifier(vec![
+                "object".to_string(),
+                "property".to_string(),
+                "subproperty".to_string()
+            ])])
+        );
+
+        let method_chain = kash_parser::expression("object.method(param1, param2)");
+        // println!("{:#?}", method_chain);
+        assert_eq!(
+            method_chain,
+            Ok(vec![ExprToken::FuncCall {
+                name: vec!["object".to_string(), "method".to_string()],
+                args: vec![
+                    FuncCallArg {
+                        label: None,
+                        value: vec![ExprToken::Identifier(vec!["param1".to_string()])]
+                    },
+                    FuncCallArg {
+                        label: None,
+                        value: vec![ExprToken::Identifier(vec!["param2".to_string()])]
+                    }
+                ]
+            }])
+        );
+    }
+
+    /// Test parsing of simple statements.
+    #[test]
+    fn easy_program() {
+        let program = "input integer: Int = 14
+            input fac = 5
+            output out_value: Int
+
+            struct Multiplier {
+                var value = 1
+
+                init(_ value: Int) {
+                    self.value = value
+                }
+
+                func multiply(_ another: Int) -> Int {
+                    return value * another
+                }
+            }
+
+            func main() {
+                var multiplier = Multiplier()
+                out_value = multiply(multiplier)
+            }
+
+            func multiply(_ multiplier: Multiplier) -> Int {
+                return multiplier.value * fac
+            }
+        ";
+
+        let parsed_program = kash_parser::parse(program);
+        // println!("{:#?}", parsed_program);
+        assert!(parsed_program.is_ok());
+
+        assert_eq!(
+            parsed_program.unwrap(),
+            vec![
+                Statement::Input {
+                    name: String::from("integer"),
+                    value_type: Some(String::from("Int")),
+                    def_val: Some(vec![ExprToken::IntLiteral(14)]),
+                    attrs: vec![]
+                },
+                Statement::Input {
+                    name: String::from("fac"),
+                    value_type: None,
+                    def_val: Some(vec![ExprToken::IntLiteral(5)]),
+                    attrs: vec![]
+                },
+                Statement::Output {
+                    name: String::from("out_value"),
+                    value_type: String::from("Int")
+                },
+                Statement::StructDecl {
+                    name: String::from("Multiplier"),
+                    inherits: vec![],
+                    body: vec![
+                        Statement::Var {
+                            name: String::from("value"),
+                            value_type: None,
+                            def_val: vec![ExprToken::IntLiteral(1)]
+                        },
+                        Statement::Init {
+                            literal_bind: None,
+                            params: vec![FuncParam {
+                                label: Some(String::from("_")),
+                                name: String::from("value"),
+                                value_type: Some(String::from("Int")),
+                                def_val: None
+                            }],
+                            body: vec![Statement::Assign {
+                                target: vec![String::from("self"), String::from("value")],
+                                value: vec![ExprToken::Identifier(vec![String::from("value")])]
+                            }]
+                        },
+                        Statement::FuncDecl {
+                            required_by: None,
+                            name: String::from("multiply"),
+                            params: vec![FuncParam {
+                                label: Some(String::from("_")),
+                                name: String::from("another"),
+                                value_type: Some(String::from("Int")),
+                                def_val: None
+                            }],
+                            return_type: Some(String::from("Int")),
+                            body: vec![Statement::Return {
+                                value: Some(vec![
+                                    ExprToken::Identifier(vec![String::from("value")]),
+                                    ExprToken::Operator(String::from("*")),
+                                    ExprToken::Identifier(vec![String::from("another")])
+                                ])
+                            }]
+                        }
+                    ]
+                },
+                Statement::FuncDecl {
+                    required_by: None,
+                    name: String::from("main"),
+                    params: vec![],
+                    return_type: None,
+                    body: vec![
+                        Statement::Var {
+                            name: String::from("multiplier"),
+                            value_type: None,
+                            def_val: vec![ExprToken::FuncCall {
+                                name: vec![String::from("Multiplier")],
+                                args: vec![]
+                            }]
+                        },
+                        Statement::Assign {
+                            target: vec![String::from("out_value")],
+                            value: vec![ExprToken::FuncCall {
+                                name: vec![String::from("multiply")],
+                                args: vec![FuncCallArg {
+                                    label: None,
+                                    value: vec![ExprToken::Identifier(vec![String::from(
+                                        "multiplier"
+                                    )])]
+                                }]
+                            }]
+                        }
+                    ]
+                },
+                Statement::FuncDecl {
+                    required_by: None,
+                    name: String::from("multiply"),
+                    params: vec![FuncParam {
+                        label: Some(String::from("_")),
+                        name: String::from("multiplier"),
+                        value_type: Some(String::from("Multiplier")),
+                        def_val: None
+                    }],
+                    return_type: Some(String::from("Int")),
+                    body: vec![Statement::Return {
+                        value: Some(vec![
+                            ExprToken::Identifier(vec![
+                                String::from("multiplier"),
+                                String::from("value")
+                            ]),
+                            ExprToken::Operator(String::from("*")),
+                            ExprToken::Identifier(vec![String::from("fac")])
+                        ])
+                    }]
+                }
+            ]
+        );
+    }
+
+    // Test parsing of complex statements.
+    #[test]
+    fn complex_program() {
+        let program = "// Input declarations
+            input sample_rate: Int = 44100
+            input gain = 0.8
+            input delay_time: Float = 0.5 #range(0.0, 1.0)
+
+            // Output declaration
+            output processed_signal: Float
+
+            // State block
+            state {
+                buffer: Float = 0.0
+                index: Int = 0
+            }
+
+            // Struct declaration
+            struct Delay: Effect {
+                var feedback: Float = 0.5
+
+                init(feedback: Float) {
+                    self.feedback = feedback
+                }
+
+                Effect func process(_ in_value: Float) -> Float {
+                    return in_value * self.feedback
+                }
+            }
+
+            // Protocol declaration
+            protocol Effect {
+                func process(_ in_value: Float) -> Float
+            }
+
+            struct Int: CompInt {
+                // Literal binding
+                intliteral init(_ value: CompInt) {
+                    self.raw = value
+                }
+
+                // Infix operator declaration
+                infix **(rhs: Int) -> Int {
+                    associativity: right,
+                    priority: 2
+                }: {
+                    return self * rhs
+                }
+
+                // Postfix operator declaration
+                postfix !() -> Bool {
+                    return self == 0
+                }
+            }
+
+            struct Float: CompFloat {
+                // Literal binding
+                floatliteral init(_ value: CompFloat) {
+                    self.raw = value
+                }
+
+                // Prefix operator declaration
+                prefix -() -> Float {
+                    return self * -1.0
+                }
+            }
+
+            // Main function
+            func main() {
+                var delay = Delay(feedback: 0.7)
+                var input_signal: Float = 1.0
+
+                // Apply delay effect
+                processed_signal = delay.process(input_signal)
+
+                // Test infix operator
+                var power = 2 ** 3
+
+                // Test prefix operator
+                var inverted_gain = -gain
+
+                // Test postfix operator
+                var is_zero = power!
+            }
+
+            // Standalone function
+            func multiply(_ a: Int, _ b: Int) -> Int {
+                return a * b
+            }
+
+            // Protocol conformance
+            struct Multiplier: Effect {
+                var value: Int = 1
+
+                init(_ value: Int) {
+                    self.value = value
+                }
+
+                func process(_ in_value: Float) -> Float {
+                    return in_value * Float(self.value)
+                }
+            }
+            ";
+
+        let parsed_program = kash_parser::parse(program);
+        println!("{:#?}", parsed_program);
+        assert!(parsed_program.is_ok());
+    }
+}

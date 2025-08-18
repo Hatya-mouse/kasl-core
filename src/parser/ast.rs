@@ -24,13 +24,14 @@ pub struct Program {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Statement {
     FuncDecl {
+        required_by: Option<String>,
         name: String,
         params: Vec<FuncParam>,
         return_type: Option<String>,
         body: Vec<Statement>,
     },
     Return {
-        value: Vec<ExprToken>,
+        value: Option<Vec<ExprToken>>,
     },
     Input {
         name: String,
@@ -51,12 +52,12 @@ pub enum Statement {
         vars: Vec<StateVar>,
     },
     Assign {
-        property: Vec<String>,
+        target: Vec<String>,
         value: Vec<ExprToken>,
     },
     FuncCall {
         name: Vec<String>,
-        args: Vec<Vec<ExprToken>>,
+        args: Vec<FuncCallArg>,
     },
     If {
         condition: Vec<ExprToken>,
@@ -86,7 +87,7 @@ pub enum Statement {
         symbol: String,
         params: Vec<FuncParam>,
         return_type: String,
-        attrs: HashMap<String, String>,
+        attrs: HashMap<String, InfixAttrValue>,
         body: Vec<Statement>,
     },
     Prefix {
@@ -100,6 +101,9 @@ pub enum Statement {
         params: Vec<FuncParam>,
         return_type: String,
         body: Vec<Statement>,
+    },
+    Block {
+        statements: Vec<Statement>,
     },
 }
 
@@ -118,6 +122,12 @@ pub struct InputAttribute {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct FuncCallArg {
+    pub label: Option<String>,
+    pub value: Vec<ExprToken>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum ProtocolRequirement {
     Func {
         name: String,
@@ -128,7 +138,7 @@ pub enum ProtocolRequirement {
         symbol: String,
         params: Vec<FuncParam>,
         return_type: String,
-        attrs: HashMap<String, String>,
+        attrs: Option<HashMap<String, InfixAttrValue>>,
     },
     Prefix {
         symbol: String,
@@ -150,6 +160,12 @@ pub struct StateVar {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum InfixAttrValue {
+    String(String),
+    Integer(u32),
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum LiteralBind {
     IntLiteral,
     FloatLiteral,
@@ -158,11 +174,13 @@ pub enum LiteralBind {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ExprToken {
-    Literal(String),
+    IntLiteral(u32),
+    FloatLiteral(f32),
+    BoolLiteral(bool),
     Operator(String),
     Identifier(Vec<String>),
     FuncCall {
         name: Vec<String>,
-        args: Vec<Vec<ExprToken>>,
+        args: Vec<FuncCallArg>,
     },
 }

@@ -19,3 +19,6 @@ pest = "2.8.1"
 cranelift-frontend = "0.121.1"
 lazy_static = "1.5.0"
 peg = "0.8.5"
+
+[dev-dependencies]
+kash = { path = "./" }

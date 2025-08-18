@@ -519,6 +519,7 @@ dependencies = [
  "cranelift-frontend",
  "cranelift-jit",
  "cranelift-module",
+ "kash",
  "knodiq_engine",
  "lazy_static",
  "peg",
