@@ -126,6 +126,7 @@ mod parsing {
                     inherits: vec![],
                     body: vec![
                         ParserStatement::Var {
+                            required_by: None,
                             name: String::from("value"),
                             value_type: None,
                             def_val: vec![ExprToken::IntLiteral(1)]
@@ -170,6 +171,7 @@ mod parsing {
                     return_type: None,
                     body: vec![
                         ParserStatement::Var {
+                            required_by: None,
                             name: String::from("multiplier"),
                             value_type: None,
                             def_val: vec![ExprToken::FuncCall {

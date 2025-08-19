@@ -14,6 +14,14 @@
 // limitations under the License.
 //
 
-pub mod table_constructor;
+use crate::ParserStatement;
 
-pub use table_constructor::*;
+pub struct TableConstructor {
+    pub parser_ststs: Vec<ParserStatement>,
+}
+
+impl TableConstructor {
+    pub fn new(parser_ststs: Vec<ParserStatement>) -> Self {
+        TableConstructor { parser_ststs }
+    }
+}

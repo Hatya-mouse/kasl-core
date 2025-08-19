@@ -14,21 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{
-    Function, InputVar, OutputVar, ProtocolType, StateVar, StructType, type_def::Initializer,
-};
+use crate::{SymbolTable, type_def::Initializer};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Program {
-    pub functions: Vec<Function>,
-    pub inputs: Vec<InputVar>,
-    pub outputs: Vec<OutputVar>,
-    pub states: Vec<StateVar>,
-
-    pub structs: Vec<StructType>,
-    pub protocols: Vec<ProtocolType>,
-
     pub intliteral: Option<Initializer>,
     pub floatliteral: Option<Initializer>,
     pub boolliteral: Option<Initializer>,
+
+    pub symbol_table: SymbolTable,
 }
