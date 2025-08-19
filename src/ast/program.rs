@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{SymbolTable, type_def::Initializer};
+use crate::Statement;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Program {
-    pub intliteral: Option<Initializer>,
-    pub floatliteral: Option<Initializer>,
-    pub boolliteral: Option<Initializer>,
+    pub statements: Vec<Statement>,
+}
 
-    pub symbol_table: SymbolTable,
+impl Program {
+    pub fn new() -> Self {
+        Self {
+            statements: Vec::new(),
+        }
+    }
 }

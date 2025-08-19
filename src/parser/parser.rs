@@ -17,6 +17,7 @@
 use crate::{
     ExprToken, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue, ParserInputAttribute,
     ParserLiteralBind, ParserProtocolRequirement, ParserStateVar, ParserStatement,
+    parser_ast::{ExprTokenKind, ParserStatementKind},
 };
 use std::collections::HashMap;
 
@@ -50,122 +51,190 @@ peg::parser!(pub grammar kash_parser() for str {
         / expected!("statement")
 
     rule func_decl_statement() -> ParserStatement
-        = required_by:(r:identifier() _ { r })?
+        = start:position!() required_by:(r:identifier() _ { r })?
         "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:identifier() { t })? __? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::FuncDecl { required_by, name, params, return_type, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::FuncDecl { required_by, name, params, return_type, body }
+            }
         }
 
     rule return_statement() -> ParserStatement
-        = "return" value:(_ v:expression() { v })? {
-            ParserStatement::Return { value }
+        = start:position!() "return" value:(_ v:expression() { v })? end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Return { value }
+            }
         }
 
     rule input_statement() -> ParserStatement
-        = "input" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? v:expression() { v })? attrs:(_? a:input_attr() { a })* {
-            ParserStatement::Input { name, value_type, def_val, attrs }
+        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? def_val:(_? "=" _? v:expression() { v })? attrs:(_? a:input_attr() { a })* end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Input { name, value_type, def_val, attrs }
+            }
         }
 
     rule output_statement() -> ParserStatement
-        = "output" _ name:identifier() _? ":" _? value_type:identifier() {
-            ParserStatement::Output { name, value_type }
+        = start:position!() "output" _ name:identifier() _? ":" _? value_type:identifier() end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Output { name, value_type }
+            }
         }
 
     rule var_statement() -> ParserStatement
-        = required_by:(r:identifier() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? _? "=" _? def_val:expression() {
-            ParserStatement::Var { required_by, name, value_type, def_val }
+        = start:position!() required_by:(r:identifier() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:identifier() { t })? _? "=" _? def_val:expression() end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Var { required_by, name, value_type, def_val }
+            }
         }
 
     rule state_statement() -> ParserStatement
-        = "state" _? "{" __? vars:(state_var() ** ((_? "\n" _?)+)) __? "}" {
-            ParserStatement::State { vars }
+        = start:position!() "state" _? "{" __? vars:(state_var() ** ((_? "\n" _?)+)) __? "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::State { vars }
+            }
         }
 
     rule assign_statement() -> ParserStatement
-        = target:id_chain() _ "=" _ value:expression() {
-            ParserStatement::Assign { target, value }
+        = start:position!() target:id_chain() _ "=" _ value:expression() end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Assign { target, value }
+            }
         }
 
     rule func_call_statement() -> ParserStatement
-        = name:id_chain() _? "(" __? args:func_call_args() ")" {
-            ParserStatement::FuncCall { name, args }
+        = start:position!() name:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::FuncCall { name, args }
+            }
         }
 
     rule if_statement() -> ParserStatement
-        = "if" _ condition:expression() __ "{"
+        = start:position!() "if" _ condition:expression() __ "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::If { condition, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::If { condition, body }
+            }
         }
 
     rule if_else_statement() -> ParserStatement
-        = "if" _ condition:expression() __ "{"
+        = start:position!() "if" _ condition:expression() __ "{"
         __? body:statements() __?
         "}" __ "else" __ "{"
         __? else_body:statements() __?
-        "}" {
-            ParserStatement::IfElse { condition, body, else_body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::IfElse { condition, body, else_body }
+            }
         }
 
     rule struct_decl_statement() -> ParserStatement
-        = "struct" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
+        = start:position!() "struct" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::StructDecl {
-                name,
-                inherits: match inherits {
-                    Some(inherits) => inherits,
-                    None => Vec::new()
-                },
-                body
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::StructDecl {
+                    name,
+                    inherits: match inherits {
+                        Some(inherits) => inherits,
+                        None => Vec::new()
+                    },
+                    body
+                }
             }
         }
 
     rule protocol_decl_statement() -> ParserStatement
-        = "protocol" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
+        = start:position!() "protocol" _ name:identifier() inherits:(_? ":" _? i:(identifier() ** comma()) comma()? { i })? _? "{"
         __? requires:(protocol_requirement() ** "\n") __?
-        "}" {
-            ParserStatement::ProtocolDecl { name, inherits: match inherits {
-                Some(inherits) => inherits,
-                None => Vec::new()
-            }, requires }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::ProtocolDecl { name, inherits: match inherits {
+                    Some(inherits) => inherits,
+                    None => Vec::new()
+                }, requires }
+            }
         }
 
     rule init_statement() -> ParserStatement
-        = literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" __? "{"
+        = start:position!() literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" __? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::Init { literal_bind, params, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Init { literal_bind, params, body }
+            }
         }
 
     rule infix_statement() -> ParserStatement
-        = "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
+        = start:position!() "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? attrs:infix_attrs() __?
         "}" __? ":" __? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::Infix { symbol, params, return_type, attrs, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Infix { symbol, params, return_type, attrs, body }
+            }
         }
 
     rule prefix_statement() -> ParserStatement
-        = "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
+        = start:position!() "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::Prefix { symbol, params, return_type, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
+            }
         }
 
     rule postfix_statement() -> ParserStatement
-        = "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
+        = start:position!() "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:identifier() __? "{"
         __? body:statements() __?
-        "}" {
-            ParserStatement::Postfix { symbol, params, return_type, body }
+        "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Postfix { symbol, params, return_type, body }
+            }
         }
 
     rule block_statement() -> ParserStatement
-        = "{" _? statements:statements() _? "}" {
-            ParserStatement::Block { statements }
+        = start:position!() "{" _? statements:statements() _? "}" end:position!() {
+            ParserStatement {
+                start,
+                end,
+                kind: ParserStatementKind::Block { statements }
+            }
         }
 
     // --- STATEMENT HELPERS ---
@@ -242,16 +311,12 @@ peg::parser!(pub grammar kash_parser() for str {
             !(__? "\n" / __? ")" / __? "}")
             first:expr_token()?
             rest:(
-                ops:(
-                    __? op:operator() {
-                        ExprToken::Operator(op)
-                    }
-                )+
+                ops:(__? op:operator_token() { op })+
                 __? token:expr_token() {
                     (ops, token)
                 }
             )*
-            last:operator()? {
+            last:operator_token()? {
                 let mut tokens = match first {
                     Some(first) => vec![first],
                     None => vec![],
@@ -260,7 +325,7 @@ peg::parser!(pub grammar kash_parser() for str {
                     tokens.extend(ops);
                     tokens.push(token);
                 }
-                if let Some(op) = last { tokens.push(ExprToken::Operator(op)); }
+                if let Some(op) = last { tokens.push(op); }
 
                 tokens
             }
@@ -268,24 +333,29 @@ peg::parser!(pub grammar kash_parser() for str {
         / "(" _ expr:expression() _ ")" { expr }
         / expected!("expression")
 
+    rule operator_token() -> ExprToken
+        = start:position!() op:operator() end:position!() { ExprToken { start, end, kind: ExprTokenKind::Operator(op) } }
+
     rule expr_token() -> ExprToken
-        = token:(
+        = start:position!() kind:(
             literal()
             / func_call()
-            / (ids:id_chain() { ExprToken::Identifier(ids) })
-        ) {
-            token
-        }
+            / id_chain_token()
+        ) end:position!() { ExprToken { start, end, kind } }
 
-    rule func_call() -> ExprToken
+
+    rule func_call() -> ExprTokenKind
         = name:id_chain() _? "(" __? args:func_call_args() ")" {
-            ExprToken::FuncCall { name, args }
+            ExprTokenKind::FuncCall { name, args }
         }
 
-    rule literal() -> ExprToken
-        = decimal:decimal() { ExprToken::FloatLiteral(decimal) }
-        / integer:integer() { ExprToken::IntLiteral(integer) }
-        / boolean:boolean() { ExprToken::BoolLiteral(boolean)}
+    rule literal() -> ExprTokenKind
+        = decimal:decimal() { ExprTokenKind::FloatLiteral(decimal) }
+        / integer:integer() { ExprTokenKind::IntLiteral(integer) }
+        / boolean:boolean() { ExprTokenKind::BoolLiteral(boolean)}
+
+    rule id_chain_token() -> ExprTokenKind
+        = ids:id_chain() { ExprTokenKind::Identifier(ids) }
 
     // --- TOKENS ---
 

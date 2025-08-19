@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncParam, Function, Operator, Variable};
+use crate::{Expression, FuncParam, Function, Variable};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TypeName {
@@ -44,18 +44,18 @@ pub struct StructType {
     pub vars: Vec<Variable>,
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
-    pub ops: Vec<Operator>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ProtocolType {
-    name: String,
-    inherits: Vec<TypeName>,
-    funcs: Vec<Function>,
+    pub name: String,
+    pub inherits: Vec<TypeName>,
+    pub vars: Vec<Variable>,
+    pub funcs: Vec<Function>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Initializer {
-    params: Vec<FuncParam>,
-    body: Box<Expression>,
+    pub params: Vec<FuncParam>,
+    pub body: Box<Expression>,
 }

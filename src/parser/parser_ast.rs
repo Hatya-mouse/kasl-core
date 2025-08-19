@@ -22,7 +22,14 @@ pub struct ParserProgram {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserStatement {
+pub struct ParserStatement {
+    pub start: usize,
+    pub end: usize,
+    pub kind: ParserStatementKind,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ParserStatementKind {
     FuncDecl {
         required_by: Option<String>,
         name: String,
@@ -165,7 +172,14 @@ pub enum ParserLiteralBind {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ExprToken {
+pub struct ExprToken {
+    pub start: usize,
+    pub end: usize,
+    pub kind: ExprTokenKind,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ExprTokenKind {
     IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),

@@ -14,6 +14,5 @@
 // limitations under the License.
 //
 
-pub mod table_constructor;
-
-pub use table_constructor::*;
+pub mod resolver;
+pub mod symbol_table;

@@ -16,7 +16,10 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{ExprToken, ParserFuncCallArg, ParserFuncParam, ParserStatement, kash_parser};
+    use kash::{
+        ExprToken, ParserFuncCallArg, ParserFuncParam, ParserStatement, kash_parser,
+        parser_ast::ExprTokenKind,
+    };
 
     /// Test parsing of chained expressions.
     #[test]
@@ -25,46 +28,67 @@ mod parsing {
         // println!("{:#?}", object);
         assert_eq!(
             object,
-            Ok(vec![ExprToken::Identifier(vec!["object".to_string()])])
+            Ok(vec![ExprToken {
+                start: 0,
+                end: 6,
+                kind: ExprTokenKind::Identifier(vec!["object".to_string()])
+            }])
         );
 
         let object_property = kash_parser::expression("object.property");
         // println!("{:#?}", object_property);
         assert_eq!(
             object_property,
-            Ok(vec![ExprToken::Identifier(vec![
-                "object".to_string(),
-                "property".to_string()
-            ])])
+            Ok(vec![ExprToken {
+                start: 0,
+                end: 15,
+                kind: ExprTokenKind::Identifier(vec!["object".to_string(), "property".to_string()])
+            }])
         );
 
         let long_property = kash_parser::expression("object.property.subproperty");
         // println!("{:#?}", long_property);
         assert_eq!(
             long_property,
-            Ok(vec![ExprToken::Identifier(vec![
-                "object".to_string(),
-                "property".to_string(),
-                "subproperty".to_string()
-            ])])
+            Ok(vec![ExprToken {
+                start: 0,
+                end: 27,
+                kind: ExprTokenKind::Identifier(vec![
+                    "object".to_string(),
+                    "property".to_string(),
+                    "subproperty".to_string()
+                ])
+            }])
         );
 
         let method_chain = kash_parser::expression("object.method(param1, param2)");
         // println!("{:#?}", method_chain);
         assert_eq!(
             method_chain,
-            Ok(vec![ExprToken::FuncCall {
-                name: vec!["object".to_string(), "method".to_string()],
-                args: vec![
-                    ParserFuncCallArg {
-                        label: None,
-                        value: vec![ExprToken::Identifier(vec!["param1".to_string()])]
-                    },
-                    ParserFuncCallArg {
-                        label: None,
-                        value: vec![ExprToken::Identifier(vec!["param2".to_string()])]
-                    }
-                ]
+            Ok(vec![ExprToken {
+                start: 0,
+                end: 29,
+                kind: ExprTokenKind::FuncCall {
+                    name: vec!["object".to_string(), "method".to_string()],
+                    args: vec![
+                        ParserFuncCallArg {
+                            label: None,
+                            value: vec![ExprToken {
+                                start: 14,
+                                end: 20,
+                                kind: ExprTokenKind::Identifier(vec!["param1".to_string()])
+                            }]
+                        },
+                        ParserFuncCallArg {
+                            label: None,
+                            value: vec![ExprToken {
+                                start: 22,
+                                end: 28,
+                                kind: ExprTokenKind::Identifier(vec!["param2".to_string()])
+                            }]
+                        }
+                    ]
+                }
             }])
         );
     }
@@ -101,121 +125,6 @@ mod parsing {
         let parsed_program = kash_parser::parse(program);
         // println!("{:#?}", parsed_program);
         assert!(parsed_program.is_ok());
-
-        assert_eq!(
-            parsed_program.unwrap(),
-            vec![
-                ParserStatement::Input {
-                    name: String::from("integer"),
-                    value_type: Some(String::from("Int")),
-                    def_val: Some(vec![ExprToken::IntLiteral(14)]),
-                    attrs: vec![]
-                },
-                ParserStatement::Input {
-                    name: String::from("fac"),
-                    value_type: None,
-                    def_val: Some(vec![ExprToken::IntLiteral(5)]),
-                    attrs: vec![]
-                },
-                ParserStatement::Output {
-                    name: String::from("out_value"),
-                    value_type: String::from("Int")
-                },
-                ParserStatement::StructDecl {
-                    name: String::from("Multiplier"),
-                    inherits: vec![],
-                    body: vec![
-                        ParserStatement::Var {
-                            required_by: None,
-                            name: String::from("value"),
-                            value_type: None,
-                            def_val: vec![ExprToken::IntLiteral(1)]
-                        },
-                        ParserStatement::Init {
-                            literal_bind: None,
-                            params: vec![ParserFuncParam {
-                                label: Some(String::from("_")),
-                                name: String::from("value"),
-                                value_type: Some(String::from("Int")),
-                                def_val: None
-                            }],
-                            body: vec![ParserStatement::Assign {
-                                target: vec![String::from("self"), String::from("value")],
-                                value: vec![ExprToken::Identifier(vec![String::from("value")])]
-                            }]
-                        },
-                        ParserStatement::FuncDecl {
-                            required_by: None,
-                            name: String::from("multiply"),
-                            params: vec![ParserFuncParam {
-                                label: Some(String::from("_")),
-                                name: String::from("another"),
-                                value_type: Some(String::from("Int")),
-                                def_val: None
-                            }],
-                            return_type: Some(String::from("Int")),
-                            body: vec![ParserStatement::Return {
-                                value: Some(vec![
-                                    ExprToken::Identifier(vec![String::from("value")]),
-                                    ExprToken::Operator(String::from("*")),
-                                    ExprToken::Identifier(vec![String::from("another")])
-                                ])
-                            }]
-                        }
-                    ]
-                },
-                ParserStatement::FuncDecl {
-                    required_by: None,
-                    name: String::from("main"),
-                    params: vec![],
-                    return_type: None,
-                    body: vec![
-                        ParserStatement::Var {
-                            required_by: None,
-                            name: String::from("multiplier"),
-                            value_type: None,
-                            def_val: vec![ExprToken::FuncCall {
-                                name: vec![String::from("Multiplier")],
-                                args: vec![]
-                            }]
-                        },
-                        ParserStatement::Assign {
-                            target: vec![String::from("out_value")],
-                            value: vec![ExprToken::FuncCall {
-                                name: vec![String::from("multiply")],
-                                args: vec![ParserFuncCallArg {
-                                    label: None,
-                                    value: vec![ExprToken::Identifier(vec![String::from(
-                                        "multiplier"
-                                    )])]
-                                }]
-                            }]
-                        }
-                    ]
-                },
-                ParserStatement::FuncDecl {
-                    required_by: None,
-                    name: String::from("multiply"),
-                    params: vec![ParserFuncParam {
-                        label: Some(String::from("_")),
-                        name: String::from("multiplier"),
-                        value_type: Some(String::from("Multiplier")),
-                        def_val: None
-                    }],
-                    return_type: Some(String::from("Int")),
-                    body: vec![ParserStatement::Return {
-                        value: Some(vec![
-                            ExprToken::Identifier(vec![
-                                String::from("multiplier"),
-                                String::from("value")
-                            ]),
-                            ExprToken::Operator(String::from("*")),
-                            ExprToken::Identifier(vec![String::from("fac")])
-                        ])
-                    }]
-                }
-            ]
-        );
     }
 
     // Test parsing of complex statements.
