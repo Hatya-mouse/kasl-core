@@ -1,7 +1,7 @@
 # Syntax
 
 ## No Semicolons
-AudioShader doesn't use semicolons. Instead, it uses line breaks to separate statements, which keeps the code cleaner.
+AudioShader doesn't use semicolons. Instead, it uses line breaks to separate statements, which contributes to keep the code cleaner.
 
 ## Input Declaration
 In AudioShader, you can easily define input variables using `input` keyword. Let's see:

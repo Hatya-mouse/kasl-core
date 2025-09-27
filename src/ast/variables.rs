@@ -27,6 +27,7 @@ pub struct InputVar {
     pub name: String,
     pub value_type: TypeName,
     pub def_val: Option<Expression>,
+    pub attrs: Vec<InputAttribute>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

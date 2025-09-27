@@ -22,6 +22,7 @@ pub struct Function {
     pub params: Vec<FuncParam>,
     pub return_type: String,
     pub body: Vec<Statement>,
+    pub required_by: Option<TypeName>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

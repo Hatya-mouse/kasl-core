@@ -14,37 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncCallArg, FuncParam, InputAttribute, StateVar, SymbolPath, TypeName};
+use crate::{Expression, FuncCallArg, SymbolPath, TypeName};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    FuncDecl {
-        required_by: Option<String>,
-        name: String,
-        params: Vec<FuncParam>,
-        return_type: TypeName,
-        body: Vec<Statement>,
-    },
     Return {
         value: Option<Expression>,
-    },
-    Input {
-        name: String,
-        value_type: TypeName,
-        def_val: Option<Expression>,
-        attrs: Vec<InputAttribute>,
-    },
-    Output {
-        name: String,
-        value_type: TypeName,
     },
     Var {
         name: String,
         value_type: TypeName,
         def_val: Expression,
-    },
-    State {
-        vars: Vec<StateVar>,
     },
     Assign {
         target: SymbolPath,
@@ -62,15 +42,5 @@ pub enum Statement {
         condition: Expression,
         body: Vec<Statement>,
         else_body: Vec<Statement>,
-    },
-    StructDecl {
-        name: String,
-        inherits: Vec<TypeName>,
-        body: Vec<Statement>,
-    },
-    ProtocolDecl {
-        name: String,
-        inherits: Vec<TypeName>,
-        body: Vec<Statement>,
     },
 }

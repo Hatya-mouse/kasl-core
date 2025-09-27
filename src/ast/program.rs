@@ -14,17 +14,28 @@
 // limitations under the License.
 //
 
-use crate::Statement;
+use crate::{Function, InputVar, OutputVar, ProtocolType, StateVar, StructType};
 
-#[derive(Debug, PartialEq, Clone)]
 pub struct Program {
-    pub statements: Vec<Statement>,
+    pub main_func: Option<Function>,
+    pub funcs: Vec<Function>,
+    pub structs: Vec<StructType>,
+    pub protocols: Vec<ProtocolType>,
+    pub states: Vec<StateVar>,
+    pub inputs: Vec<InputVar>,
+    pub outputs: Vec<OutputVar>,
 }
 
 impl Program {
     pub fn new() -> Self {
         Self {
-            statements: Vec::new(),
+            main_func: None,
+            funcs: Vec::new(),
+            structs: Vec::new(),
+            protocols: Vec::new(),
+            states: Vec::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
         }
     }
 }
