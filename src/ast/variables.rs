@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, TypeName};
+use crate::{Expression, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputAttribute {
@@ -25,7 +25,7 @@ pub struct InputAttribute {
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputVar {
     pub name: String,
-    pub value_type: TypeName,
+    pub value_type: Option<SymbolPath>,
     pub def_val: Option<Expression>,
     pub attrs: Vec<InputAttribute>,
 }
@@ -33,19 +33,19 @@ pub struct InputVar {
 #[derive(Debug, PartialEq, Clone)]
 pub struct OutputVar {
     pub name: String,
-    pub value_type: TypeName,
+    pub value_type: SymbolPath,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct StateVar {
     pub name: String,
-    pub value_type: TypeName,
-    pub def_val: Expression,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Variable {
     pub name: String,
-    pub value_type: TypeName,
-    pub def_val: Expression,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
 }

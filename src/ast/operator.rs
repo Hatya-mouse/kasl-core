@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Statement, TypeName};
+use crate::{FuncParam, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Operator {
     InfixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: TypeName,
+        return_type: SymbolPath,
         associativity: OperatorAssociativity,
         precedence: u8,
         body: Vec<Statement>,
@@ -29,13 +29,13 @@ pub enum Operator {
     PrefixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: TypeName,
+        return_type: SymbolPath,
         body: Vec<Statement>,
     },
     PostfixOperator {
         symbol: String,
         another: FuncParam,
-        return_type: TypeName,
+        return_type: SymbolPath,
         body: Vec<Statement>,
     },
 }

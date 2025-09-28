@@ -14,12 +14,23 @@
 // limitations under the License.
 //
 
-pub type SymbolPath = Vec<SymbolPathComponent>;
+use crate::ResolverErrorType;
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum SymbolPathComponent {
-    Field(String),
-    Method(String),
-    Struct(String),
-    Protocol(String),
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct ResolverError {
+    pub error_type: ResolverErrorType,
+    pub offset: usize,
 }
+
+impl Display for ResolverError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let message = self.error_type.format();
+        write!(f, "{}", message)
+    }
+}
+
+impl Error for ResolverError {}

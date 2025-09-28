@@ -31,10 +31,10 @@ pub struct ParserStatement {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserStatementKind {
     FuncDecl {
-        required_by: Option<String>,
+        required_by: Option<ParserSymbolPath>,
         name: String,
         params: Vec<ParserFuncParam>,
-        return_type: Option<String>,
+        return_type: Option<ParserSymbolPath>,
         body: Vec<ParserStatement>,
     },
     Return {
@@ -42,29 +42,29 @@ pub enum ParserStatementKind {
     },
     Input {
         name: String,
-        value_type: Option<String>,
+        value_type: Option<ParserSymbolPath>,
         def_val: Option<Vec<ExprToken>>,
         attrs: Vec<ParserInputAttribute>,
     },
     Output {
         name: String,
-        value_type: String,
+        value_type: ParserSymbolPath,
     },
     Var {
-        required_by: Option<String>,
+        required_by: Option<ParserSymbolPath>,
         name: String,
-        value_type: Option<String>,
+        value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,
     },
     State {
         vars: Vec<ParserStateVar>,
     },
     Assign {
-        target: Vec<String>,
+        target: ParserSymbolPath,
         value: Vec<ExprToken>,
     },
     FuncCall {
-        name: Vec<String>,
+        name: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
     If {
@@ -78,15 +78,16 @@ pub enum ParserStatementKind {
     },
     StructDecl {
         name: String,
-        inherits: Vec<String>,
+        inherits: Vec<ParserSymbolPath>,
         body: Vec<ParserStatement>,
     },
     ProtocolDecl {
         name: String,
-        inherits: Vec<String>,
+        inherits: Vec<ParserSymbolPath>,
         body: Vec<ParserStatement>,
     },
     Init {
+        required_by: Option<ParserSymbolPath>,
         literal_bind: Option<ParserLiteralBind>,
         params: Vec<ParserFuncParam>,
         body: Vec<ParserStatement>,
@@ -94,20 +95,20 @@ pub enum ParserStatementKind {
     Infix {
         symbol: String,
         params: Vec<ParserFuncParam>,
-        return_type: String,
+        return_type: ParserSymbolPath,
         attrs: HashMap<String, ParserInfixAttrValue>,
         body: Vec<ParserStatement>,
     },
     Prefix {
         symbol: String,
         params: Vec<ParserFuncParam>,
-        return_type: String,
+        return_type: ParserSymbolPath,
         body: Vec<ParserStatement>,
     },
     Postfix {
         symbol: String,
         params: Vec<ParserFuncParam>,
-        return_type: String,
+        return_type: ParserSymbolPath,
         body: Vec<ParserStatement>,
     },
     Block {
@@ -130,7 +131,7 @@ pub struct ParserFuncCallArg {
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserStateVar {
     pub name: String,
-    pub value_type: Option<String>,
+    pub value_type: Option<ParserSymbolPath>,
     pub def_val: Vec<ExprToken>,
 }
 
@@ -138,7 +139,7 @@ pub struct ParserStateVar {
 pub struct ParserFuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: Option<String>,
+    pub value_type: Option<ParserSymbolPath>,
     pub def_val: Option<Vec<ExprToken>>,
 }
 
@@ -168,9 +169,18 @@ pub enum ExprTokenKind {
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator(String),
-    Identifier(Vec<String>),
+    Identifier(ParserSymbolPath),
     FuncCall {
-        name: Vec<String>,
+        name: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
+}
+
+pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserSymbolPathComponent {
+    pub start: usize,
+    pub end: usize,
+    pub symbol: String,
 }

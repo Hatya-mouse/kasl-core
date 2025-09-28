@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncCallArg, SymbolPath, TypeName};
+use crate::{Expression, FuncCallArg, SymbolPath};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
@@ -23,7 +23,7 @@ pub enum Statement {
     },
     Var {
         name: String,
-        value_type: TypeName,
+        value_type: SymbolPath,
         def_val: Expression,
     },
     Assign {

@@ -19,7 +19,6 @@ pub mod function;
 pub mod operator;
 pub mod program;
 pub mod statement;
-pub mod symbols;
 pub mod type_def;
 pub mod variables;
 
@@ -28,6 +27,5 @@ pub use function::{FuncCallArg, FuncParam, Function};
 pub use operator::{Operator, OperatorAssociativity};
 pub use program::Program;
 pub use statement::Statement;
-pub use symbols::{SymbolPath, SymbolPathComponent};
-pub use type_def::{ProtocolType, StructType, TypeName};
+pub use type_def::{SymbolPath, TypeDef};
 pub use variables::{InputAttribute, InputVar, OutputVar, StateVar, Variable};

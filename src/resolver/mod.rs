@@ -15,3 +15,8 @@
 //
 
 pub mod resolver;
+pub mod resolver_error;
+pub mod resolver_error_type;
+
+pub use resolver_error::ResolverError;
+pub use resolver_error_type::ResolverErrorType;

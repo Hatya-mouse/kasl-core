@@ -14,22 +14,22 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Statement, TypeName};
+use crate::{Expression, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
     pub name: String,
     pub params: Vec<FuncParam>,
-    pub return_type: String,
+    pub return_type: Option<SymbolPath>,
     pub body: Vec<Statement>,
-    pub required_by: Option<TypeName>,
+    pub required_by: Option<SymbolPath>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: TypeName,
+    pub value_type: Option<SymbolPath>,
     pub def_val: Option<Box<Expression>>,
 }
 

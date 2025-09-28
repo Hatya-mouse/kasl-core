@@ -14,76 +14,50 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncParam, Function, Variable};
+use crate::{Expression, FuncParam, Function, Operator, Variable};
+
+pub type SymbolPath = Vec<SymbolPathComponent>;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum TypeName {
+pub enum SymbolPathComponent {
+    Field(String),
+    Method(String),
+    TypeDef(String),
     CompInt,
     CompFloat,
     CompBool,
-    Struct(String),
-    Protocol(String),
-}
-
-impl TypeName {
-    pub fn str(&self) -> &str {
-        match self {
-            TypeName::CompInt => "CompInt",
-            TypeName::CompFloat => "CompFloat",
-            TypeName::CompBool => "CompBool",
-            TypeName::Struct(name) => name,
-            TypeName::Protocol(name) => name,
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct StructType {
+pub struct TypeDef {
     pub name: String,
-    pub inherits: Vec<TypeName>,
+    pub inherits: Vec<SymbolPath>,
     pub vars: Vec<Variable>,
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
-    pub protocols: Vec<ProtocolType>,
-    pub structs: Vec<StructType>,
+    pub types: Vec<TypeDef>,
+    pub operators: Vec<Operator>,
 }
 
-impl StructType {
+impl TypeDef {
     pub fn new(name: String) -> Self {
-        StructType {
+        TypeDef {
             name,
             inherits: Vec::new(),
             vars: Vec::new(),
             inits: Vec::new(),
             funcs: Vec::new(),
-            protocols: Vec::new(),
-            structs: Vec::new(),
+            types: Vec::new(),
+            operators: Vec::new(),
         }
     }
-}
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct ProtocolType {
-    pub name: String,
-    pub inherits: Vec<TypeName>,
-    pub vars: Vec<Variable>,
-    pub inits: Vec<Initializer>,
-    pub funcs: Vec<Function>,
-    pub protocols: Vec<ProtocolType>,
-    pub structs: Vec<StructType>,
-}
+    pub fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
+        self.types.iter().find(|s| s.name == name)
+    }
 
-impl ProtocolType {
-    pub fn new(name: String) -> Self {
-        ProtocolType {
-            name,
-            inherits: Vec::new(),
-            vars: Vec::new(),
-            inits: Vec::new(),
-            funcs: Vec::new(),
-            protocols: Vec::new(),
-            structs: Vec::new(),
-        }
+    pub fn fine_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+        self.types.iter_mut().find(|s| s.name == name)
     }
 }
 

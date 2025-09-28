@@ -16,6 +16,8 @@
 
 pub mod ast;
 pub mod parser;
+pub mod resolver;
 
 pub use ast::*;
 pub use parser::*;
+pub use resolver::*;

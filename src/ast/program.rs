@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
-use crate::{Function, InputVar, OutputVar, ProtocolType, StateVar, StructType};
+use crate::{
+    Function, InputVar, OutputVar, ParserSymbolPathComponent, ResolverErrorType, StateVar,
+    SymbolPath,
+    resolver_error::ResolverError,
+    type_def::{SymbolPathComponent, TypeDef},
+};
 
 pub struct Program {
     pub main_func: Option<Function>,
     pub funcs: Vec<Function>,
-    pub structs: Vec<StructType>,
-    pub protocols: Vec<ProtocolType>,
+    pub types: Vec<TypeDef>,
     pub states: Vec<StateVar>,
     pub inputs: Vec<InputVar>,
     pub outputs: Vec<OutputVar>,
@@ -31,11 +35,62 @@ impl Program {
         Self {
             main_func: None,
             funcs: Vec::new(),
-            structs: Vec::new(),
-            protocols: Vec::new(),
+            types: Vec::new(),
             states: Vec::new(),
             inputs: Vec::new(),
             outputs: Vec::new(),
         }
+    }
+
+    pub fn resolve_type(
+        &self,
+        type_path: &Vec<ParserSymbolPathComponent>,
+    ) -> Result<SymbolPath, ResolverError> {
+        if type_path.is_empty() {
+            return Err(ResolverError {
+                error_type: ResolverErrorType::ExpectType,
+                offset: 0,
+            });
+        }
+
+        let mut symbol_path = Vec::new();
+        let mut current_scope = None;
+
+        for (i, segment) in type_path.iter().enumerate() {
+            if i == 0 {
+                if let Some(type_def) = self.find_type_def(&segment.symbol) {
+                    symbol_path.push(SymbolPathComponent::TypeDef(segment.symbol.clone()));
+                    current_scope = Some(type_def);
+                } else {
+                    match segment.symbol.as_str() {
+                        "CompInt" => symbol_path.push(SymbolPathComponent::CompInt),
+                        "CompFloat" => symbol_path.push(SymbolPathComponent::CompFloat),
+                        "CompBool" => symbol_path.push(SymbolPathComponent::CompBool),
+                        _ => {
+                            return Err(ResolverError {
+                                error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
+                                offset: 0,
+                            });
+                        }
+                    }
+                }
+            } else if let Some(some_scope) = current_scope {
+                if let Some(type_def) = some_scope.find_type_def(&segment.symbol) {
+                    symbol_path.push(SymbolPathComponent::TypeDef(segment.symbol.clone()));
+                    current_scope = Some(type_def);
+                } else {
+                    return Err(ResolverError {
+                        error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
+                        offset: 0,
+                    });
+                }
+            }
+        }
+
+        Ok(symbol_path)
+    }
+
+    fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
+        self.types.iter().find(|s| s.name == name)
     }
 }
