@@ -37,14 +37,14 @@ impl Resolver {
         let mut program = Program::new();
         self.statements = statements;
 
-        let (structs, protocols) = self.get_types(&self.statements);
+        let (structs, protocols) = Resolver::get_types(&self.statements);
         program.structs = structs;
         program.protocols = protocols;
 
         Ok(())
     }
 
-    pub fn get_types(&self, stmts: &Vec<ParserStatement>) -> (Vec<StructType>, Vec<ProtocolType>) {
+    pub fn get_types(stmts: &Vec<ParserStatement>) -> (Vec<StructType>, Vec<ProtocolType>) {
         let mut structs = Vec::new();
         let mut protocols = Vec::new();
 
@@ -53,16 +53,24 @@ impl Resolver {
                 ParserStatementKind::StructDecl {
                     name,
                     inherits: _,
-                    body: _,
+                    body,
                 } => {
-                    structs.push(StructType::new(name.clone()));
+                    let mut struct_type = StructType::new(name.clone());
+                    let (structs, protocols) = Resolver::get_types(&body);
+                    struct_type.structs = structs;
+                    strcut_type.protocols = protocols;
+                    structs.push(struct_type);
                 }
                 ParserStatementKind::ProtocolDecl {
                     name,
                     inherits: _,
-                    body: _,
+                    body,
                 } => {
-                    protocols.push(ProtocolType::new(name.clone()));
+                    let mut protocol_type = ProtocolType::new(name.clone());
+                    let (structs, protocols) = Resolver::get_types(&body);
+                    protocol_type.structs = structs;
+                    protocol_type.protocols = protocols;
+                    protocols.push(protocol_type);
                 }
                 _ => {}
             }
