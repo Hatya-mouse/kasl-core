@@ -88,7 +88,11 @@ impl Program {
         Ok(symbol_path)
     }
 
-    fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
+    pub fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
         self.types.iter().find(|s| s.name == name)
+    }
+
+    pub fn find_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+        self.types.iter_mut().find(|s| s.name == name)
     }
 }

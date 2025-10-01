@@ -16,7 +16,7 @@
 
 use crate::{
     FuncParam, Function, InputVar, OutputVar, ParserStatement, ParserStatementKind, Program,
-    ResolverError, ResolverErrorType, StateVar,
+    ResolverError, ResolverErrorType, StateVar, member_collector::collect_members,
 };
 
 pub fn collect_top_level_symbols(
@@ -103,6 +103,28 @@ pub fn collect_top_level_symbols(
                     body: Vec::new(),
                     required_by: None,
                 })
+            }
+
+            ParserStatementKind::StructDecl {
+                name,
+                inherits: _,
+                body,
+            }
+            | ParserStatementKind::ProtocolDecl {
+                name,
+                inherits: _,
+                body,
+            } => {
+                let type_def = match program.find_type_def_mut(name) {
+                    Some(ty) => ty,
+                    None => {
+                        return Err(ResolverError {
+                            error_type: ResolverErrorType::TypeNotFound(name.clone()),
+                            offset: stmt.start,
+                        });
+                    }
+                };
+                collect_members(program, body, type_def)?;
             }
             _ => (),
         }
