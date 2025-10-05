@@ -14,15 +14,14 @@
 // limitations under the License.
 //
 
-pub mod member_collection;
-pub mod symbol_collector;
-pub mod type_collector;
+pub mod functions;
+pub mod nests;
+pub mod operators;
 pub mod type_member_collector;
+pub mod variables;
 
-pub use member_collection::{
-    collect_member_functions, collect_member_nests, collect_member_operators,
-    collect_member_variables,
-};
-pub use symbol_collector::collect_top_level_symbols;
-pub use type_collector::collect_types;
+pub use functions::collect_member_functions;
+pub use nests::collect_member_nests;
+pub use operators::collect_member_operators;
 pub use type_member_collector::{collect_all_type_members, collect_type_members};
+pub use variables::collect_member_variables;

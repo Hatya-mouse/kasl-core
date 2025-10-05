@@ -14,17 +14,6 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserStatement, Program, ResolverError, member_collection::collect_all_type_members,
-    symbol_collection::collect_top_level_symbols, type_collection::collect_types,
-};
+pub mod symbol_collector;
 
-pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
-    let mut program = Program::new();
-
-    program.types = collect_types(&statements);
-    collect_top_level_symbols(&mut program, &statements)?;
-    collect_all_type_members(&mut program, &statements)?;
-
-    Ok(())
-}
+pub use symbol_collector::collect_top_level_symbols;

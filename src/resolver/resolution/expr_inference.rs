@@ -14,17 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserStatement, Program, ResolverError, member_collection::collect_all_type_members,
-    symbol_collection::collect_top_level_symbols, type_collection::collect_types,
-};
+use crate::{ExprToken, Program, Range, ResolverError, ResolverErrorType, SymbolPath};
 
-pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
-    let mut program = Program::new();
-
-    program.types = collect_types(&statements);
-    collect_top_level_symbols(&mut program, &statements)?;
-    collect_all_type_members(&mut program, &statements)?;
-
-    Ok(())
+pub fn infer_expr_type(program: &Program, expr: &[ExprToken]) -> Result<SymbolPath, ResolverError> {
+    todo!("Implement Expression Type Inference");
+    Err(ResolverError {
+        error_type: ResolverErrorType::Placeholder,
+        position: Range::zero(),
+    })
 }

@@ -44,13 +44,6 @@ impl Program {
         &self,
         type_path: &[ParserSymbolPathComponent],
     ) -> Result<SymbolPath, ResolverError> {
-        if type_path.is_empty() {
-            return Err(ResolverError {
-                error_type: ResolverErrorType::ExpectType,
-                offset: 0,
-            });
-        }
-
         let mut symbol_path = Vec::new();
         let mut current_scope = None;
 
@@ -67,7 +60,7 @@ impl Program {
                         _ => {
                             return Err(ResolverError {
                                 error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
-                                offset: 0,
+                                position: segment.range,
                             });
                         }
                     }
@@ -79,7 +72,7 @@ impl Program {
                 } else {
                     return Err(ResolverError {
                         error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
-                        offset: 0,
+                        position: segment.range,
                     });
                 }
             }
@@ -87,6 +80,20 @@ impl Program {
 
         Ok(symbol_path)
     }
+
+    // -- Getter Functions --
+
+    // # Function
+
+    pub fn find_func(&self, name: &str) -> Option<&Function> {
+        self.funcs.iter().find(|f| f.name == name)
+    }
+
+    pub fn find_func_mut(&mut self, name: &str) -> Option<&mut Function> {
+        self.funcs.iter_mut().find(|f| f.name == name)
+    }
+
+    // # Type
 
     pub fn find_type_def(&self, name: &str) -> Option<&TypeDef> {
         self.types.iter().find(|s| s.name == name)

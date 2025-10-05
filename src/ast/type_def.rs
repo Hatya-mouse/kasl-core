@@ -56,7 +56,7 @@ impl TypeDef {
         self.types.iter().find(|s| s.name == name)
     }
 
-    pub fn fine_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+    pub fn find_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
         self.types.iter_mut().find(|s| s.name == name)
     }
 }

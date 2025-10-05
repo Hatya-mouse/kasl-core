@@ -16,7 +16,7 @@
 
 use std::collections::HashMap;
 
-use crate::type_def::LiteralBind;
+use crate::{Range, type_def::LiteralBind};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
@@ -25,8 +25,7 @@ pub struct ParserProgram {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserStatement {
-    pub start: usize,
-    pub end: usize,
+    pub range: Range,
     pub kind: ParserStatementKind,
 }
 
@@ -122,12 +121,14 @@ pub enum ParserStatementKind {
 pub struct ParserInputAttribute {
     pub name: String,
     pub args: Vec<Vec<ExprToken>>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserFuncCallArg {
     pub label: Option<String>,
     pub value: Vec<ExprToken>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -135,6 +136,7 @@ pub struct ParserStateVar {
     pub name: String,
     pub value_type: Option<ParserSymbolPath>,
     pub def_val: Vec<ExprToken>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -143,6 +145,7 @@ pub struct ParserFuncParam {
     pub name: String,
     pub value_type: Option<ParserSymbolPath>,
     pub def_val: Option<Vec<ExprToken>>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -153,8 +156,7 @@ pub enum ParserInfixAttrValue {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ExprToken {
-    pub start: usize,
-    pub end: usize,
+    pub range: Range,
     pub kind: ExprTokenKind,
 }
 
@@ -175,7 +177,6 @@ pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserSymbolPathComponent {
-    pub start: usize,
-    pub end: usize,
+    pub range: Range,
     pub symbol: String,
 }

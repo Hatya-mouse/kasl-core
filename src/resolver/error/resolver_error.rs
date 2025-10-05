@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::ResolverErrorType;
+use crate::{Range, ResolverErrorType};
 use std::{
     error::Error,
     fmt::{Display, Formatter},
@@ -23,7 +23,7 @@ use std::{
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ResolverError {
     pub error_type: ResolverErrorType,
-    pub offset: usize,
+    pub position: Range,
 }
 
 impl Display for ResolverError {

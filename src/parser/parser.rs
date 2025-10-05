@@ -17,7 +17,7 @@
 use crate::{
     ExprToken, ExprTokenKind, LiteralBind, ParserFuncCallArg, ParserFuncParam,
     ParserInfixAttrValue, ParserInputAttribute, ParserStateVar, ParserStatement,
-    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent,
+    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
 };
 use std::collections::HashMap;
 
@@ -57,8 +57,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::FuncDecl { required_by, name, params, return_type, body }
             }
         }
@@ -66,8 +65,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule return_statement() -> ParserStatement
         = start:position!() "return" value:(_ v:expression() { v })? end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Return { value }
             }
         }
@@ -75,8 +73,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule input_statement() -> ParserStatement
         = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:expression() { v })? attrs:(_? a:input_attr() { a })* end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Input { name, value_type, def_val, attrs }
             }
         }
@@ -84,8 +81,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule output_statement() -> ParserStatement
         = start:position!() "output" _ name:identifier() _? ":" _? value_type:id_chain() end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Output { name, value_type }
             }
         }
@@ -93,8 +89,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule var_statement() -> ParserStatement
         = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Var { required_by, name, value_type, def_val }
             }
         }
@@ -102,8 +97,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule state_statement() -> ParserStatement
         = start:position!() "state" _? "{" __? vars:(state_var() ** ((_? "\n" _?)+)) __? "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::State { vars }
             }
         }
@@ -111,8 +105,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule assign_statement() -> ParserStatement
         = start:position!() target:id_chain() _ "=" _ value:expression() end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Assign { target, value }
             }
         }
@@ -120,8 +113,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule func_call_statement() -> ParserStatement
         = start:position!() name:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::FuncCall { name, args }
             }
         }
@@ -131,8 +123,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::If { condition, body }
             }
         }
@@ -144,8 +135,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? else_body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::IfElse { condition, body, else_body }
             }
         }
@@ -155,8 +145,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::StructDecl {
                     name,
                     inherits: match inherits {
@@ -173,8 +162,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::ProtocolDecl { name, inherits: match inherits {
                     Some(inherits) => inherits,
                     None => Vec::new()
@@ -187,8 +175,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Init { required_by, literal_bind, params, body }
             }
         }
@@ -200,8 +187,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Infix { symbol, params, return_type, attrs, body }
             }
         }
@@ -211,8 +197,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
             }
         }
@@ -222,8 +207,7 @@ peg::parser!(pub grammar kash_parser() for str {
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Postfix { symbol, params, return_type, body }
             }
         }
@@ -231,8 +215,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule block_statement() -> ParserStatement
         = start:position!() "{" _? statements:statements() _? "}" end:position!() {
             ParserStatement {
-                start,
-                end,
+                range: Range::n(start, end),
                 kind: ParserStatementKind::Block { statements }
             }
         }
@@ -241,8 +224,8 @@ peg::parser!(pub grammar kash_parser() for str {
 
     // Function Parameter
     rule func_param() -> ParserFuncParam
-        = label:param_label()? name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:expression() { v })? {
-            ParserFuncParam { label, name, value_type, def_val }
+        = start:position!() label:param_label()? name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:expression() { v })? end:position!() {
+            ParserFuncParam { label, name, value_type, def_val, range: Range::n(start, end) }
         }
 
     rule param_label() -> String
@@ -250,23 +233,23 @@ peg::parser!(pub grammar kash_parser() for str {
 
     // Input Attribute
     rule input_attr() -> ParserInputAttribute
-        = "#" name:identifier() opt_args:("(" _? args:(expression() ** comma()) comma()? ")" { args })? {
+        = start:position!() "#" name:identifier() opt_args:("(" _? args:(expression() ** comma()) comma()? ")" { args })? end:position!() {
             ParserInputAttribute { name, args: match opt_args {
                 None => vec![],
                 Some(args) => args
-            } }
+            }, range: Range::n(start, end) }
         }
 
     // State Variable
     rule state_var() -> ParserStateVar
-        = name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() {
-            ParserStateVar { name, value_type, def_val }
+        = start:position!() name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() end:position!() {
+            ParserStateVar { name, value_type, def_val, range: Range::n(start, end) }
         }
 
     // Function Call Argument
     rule func_call_args() -> Vec<ParserFuncCallArg>
-        = entries:((label:(n:identifier() _? ":" _? { n })? value:expression() {
-            ParserFuncCallArg { label, value }
+        = start:position!() entries:((label:(n:identifier() _? ":" _? { n })? value:expression() end:position!() {
+            ParserFuncCallArg { label, value, range: Range::n(start, end) }
         }) ** comma()) comma()? {
             entries
         }
@@ -318,14 +301,14 @@ peg::parser!(pub grammar kash_parser() for str {
         / expected!("expression")
 
     rule operator_token() -> ExprToken
-        = start:position!() op:operator() end:position!() { ExprToken { start, end, kind: ExprTokenKind::Operator(op) } }
+        = start:position!() op:operator() end:position!() { ExprToken { range: Range::n(start, end), kind: ExprTokenKind::Operator(op) } }
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
             literal()
             / func_call()
             / id_chain_token()
-        ) end:position!() { ExprToken { start, end, kind } }
+        ) end:position!() { ExprToken { range: Range::n(start, end), kind } }
 
 
     rule func_call() -> ExprTokenKind
@@ -353,14 +336,12 @@ peg::parser!(pub grammar kash_parser() for str {
     rule id_chain() -> ParserSymbolPath
         = parent:(start:position!() symbol:identifier() end:position!() {
             ParserSymbolPathComponent {
-                start,
-                end,
+                range: Range::n(start, end),
                 symbol,
             }
         }) children:(start:position!() dot() symbol:identifier() end:position!() {
             ParserSymbolPathComponent {
-                start,
-                end,
+                range: Range::n(start, end),
                 symbol,
             }
         })* {

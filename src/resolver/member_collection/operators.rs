@@ -16,7 +16,7 @@
 
 use crate::{
     FuncParam, Operator, OperatorAssociativity, ParserStatement, ParserStatementKind,
-    ResolverError, ResolverErrorType, TypeDef,
+    ResolverError, ResolverErrorType, TypeDef, error::resolver_error_type::OperatorKind,
 };
 
 pub fn collect_member_operators(
@@ -41,8 +41,8 @@ pub fn collect_member_operators(
                     }
                 } else {
                     return Err(ResolverError {
-                        error_type: ResolverErrorType::ExpectType,
-                        offset: 0,
+                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Infix),
+                        position: stmt.range,
                     });
                 };
 
@@ -71,8 +71,8 @@ pub fn collect_member_operators(
                     }
                 } else {
                     return Err(ResolverError {
-                        error_type: ResolverErrorType::ExpectType,
-                        offset: 0,
+                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Prefix),
+                        position: stmt.range,
                     });
                 };
 
@@ -99,8 +99,8 @@ pub fn collect_member_operators(
                     }
                 } else {
                     return Err(ResolverError {
-                        error_type: ResolverErrorType::ExpectType,
-                        offset: 0,
+                        error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Postfix),
+                        position: stmt.range,
                     });
                 };
 

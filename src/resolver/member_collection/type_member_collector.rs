@@ -15,14 +15,14 @@
 //
 
 use crate::{
-    ParserStatement, ParserStatementKind, Program, ResolverError, ResolverErrorType, TypeDef,
-    collection::{
+    ParserStatement, ParserStatementKind, Program, ResolverError, TypeDef,
+    member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,
     },
 };
 
-/// Collects every single members in the structs and protocols.
+/// Loop through the top level and collect type members.
 pub fn collect_all_type_members(
     program: &mut Program,
     stmts: &[ParserStatement],
@@ -38,18 +38,14 @@ pub fn collect_all_type_members(
                 name,
                 inherits: _,
                 body,
-            } => {
-                let type_def = match program.find_type_def_mut(name) {
-                    Some(ty) => ty,
-                    None => {
-                        return Err(ResolverError {
-                            error_type: ResolverErrorType::TypeNotFound(name.clone()),
-                            offset: stmt.start,
-                        });
-                    }
-                };
-                collect_type_members(body, type_def)?;
-            }
+            } => match program.find_type_def_mut(name) {
+                Some(parent_type_def) => {
+                    collect_type_members(body, parent_type_def)?;
+                }
+                None => {
+                    panic!("TypeDef {} not found while it's defined", name);
+                }
+            },
 
             _ => (),
         }
@@ -58,6 +54,7 @@ pub fn collect_all_type_members(
     Ok(())
 }
 
+// Collects members in a given struct or protocol.
 pub fn collect_type_members(
     stmts: &[ParserStatement],
     type_def: &mut TypeDef,

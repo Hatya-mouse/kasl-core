@@ -14,17 +14,21 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserStatement, Program, ResolverError, member_collection::collect_all_type_members,
-    symbol_collection::collect_top_level_symbols, type_collection::collect_types,
-};
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct Range {
+    pub start: usize,
+    pub end: usize,
+}
 
-pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
-    let mut program = Program::new();
+impl Range {
+    pub fn n(start: usize, end: usize) -> Self {
+        Range {
+            start: start,
+            end: end,
+        }
+    }
 
-    program.types = collect_types(&statements);
-    collect_top_level_symbols(&mut program, &statements)?;
-    collect_all_type_members(&mut program, &statements)?;
-
-    Ok(())
+    pub fn zero() -> Self {
+        Range { start: 0, end: 0 }
+    }
 }

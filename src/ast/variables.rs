@@ -33,7 +33,7 @@ pub struct InputVar {
 #[derive(Debug, PartialEq, Clone)]
 pub struct OutputVar {
     pub name: String,
-    pub value_type: SymbolPath,
+    pub value_type: Option<SymbolPath>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
