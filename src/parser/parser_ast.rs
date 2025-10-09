@@ -23,11 +23,19 @@ pub struct ParserProgram {
     pub statements: Vec<ParserStatement>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct ParserStatement {
     pub range: Range,
     pub kind: ParserStatementKind,
 }
+
+impl PartialEq for ParserStatement {
+    fn eq(&self, other: &Self) -> bool {
+        self.range == other.range && self.kind == other.kind
+    }
+}
+
+impl Eq for ParserStatement {}
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserStatementKind {

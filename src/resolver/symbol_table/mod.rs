@@ -15,5 +15,7 @@
 //
 
 pub mod symbol_table;
+pub mod table_builder;
 
 pub use symbol_table::SymbolTable;
+pub use table_builder::build_symbol_table;

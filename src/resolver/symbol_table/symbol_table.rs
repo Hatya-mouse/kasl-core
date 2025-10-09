@@ -16,18 +16,70 @@
 
 use std::collections::HashMap;
 
-use crate::{ParserStatementKind, SymbolPath};
+use crate::ParserStatement;
 
 pub struct SymbolTable<'a> {
-    pub symbol_def_table: HashMap<SymbolPath, &'a ParserStatementKind>,
-    pub func_def_table: HashMap<SymbolPath, &'a ParserStatementKind>,
+    pub vars: HashMap<String, &'a ParserStatement>,
+    pub funcs: HashMap<String, &'a ParserStatement>,
+    pub operators: HashMap<String, &'a ParserStatement>,
+    pub type_defs: HashMap<String, &'a ParserStatement>,
+
+    /// Path to the initializers are just a path to the
+    /// Path example: "Hoge"
+    pub inits: HashMap<String, Vec<&'a ParserStatement>>,
 }
 
 impl<'a> SymbolTable<'a> {
     pub fn new() -> Self {
         Self {
-            symbol_def_table: HashMap::new(),
-            func_def_table: HashMap::new(),
+            vars: HashMap::new(),
+            funcs: HashMap::new(),
+            operators: HashMap::new(),
+            type_defs: HashMap::new(),
+            inits: HashMap::new(),
         }
+    }
+
+    pub fn insert_var(&mut self, path: String, stmt: &'a ParserStatement) {
+        self.vars.insert(path, stmt);
+    }
+
+    pub fn insert_func(&mut self, path: String, stmt: &'a ParserStatement) {
+        self.funcs.insert(path, stmt);
+    }
+
+    pub fn insert_operator(&mut self, path: String, stmt: &'a ParserStatement) {
+        self.operators.insert(path, stmt);
+    }
+
+    pub fn insert_type_def(&mut self, path: String, stmt: &'a ParserStatement) {
+        self.operators.insert(path, stmt);
+    }
+
+    pub fn insert_init(&mut self, struct_name: String, stmt: &'a ParserStatement) {
+        self.inits
+            .entry(struct_name)
+            .or_insert_with(Vec::new)
+            .push(stmt);
+    }
+
+    pub fn get_var(&self, path: &str) -> Option<&&ParserStatement> {
+        self.vars.get(path)
+    }
+
+    pub fn get_func(&self, path: &str) -> Option<&&ParserStatement> {
+        self.funcs.get(path)
+    }
+
+    pub fn get_operator(&self, path: &str) -> Option<&&ParserStatement> {
+        self.operators.get(path)
+    }
+
+    pub fn get_type_def(&self, path: &str) -> Option<&&ParserStatement> {
+        self.type_defs.get(path)
+    }
+
+    pub fn get_inits(&self, path: &str) -> Option<&Vec<&ParserStatement>> {
+        self.inits.get(path)
     }
 }
