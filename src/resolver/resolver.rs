@@ -21,7 +21,6 @@ pub fn resolve(statements: Vec<ParserStatement>) -> Result<(), ResolverError> {
     let mut symbol_table = SymbolTable::new();
 
     build_symbol_table(&mut symbol_table, &statements);
-    println!("{:#?}", &symbol_table);
 
     // program.types = collect_types(&statements);
     // collect_top_level_symbols(&mut program, &mut symbol_table, &statements)?;

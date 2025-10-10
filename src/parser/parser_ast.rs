@@ -44,7 +44,7 @@ pub enum ParserStatementKind {
         name: String,
         params: Vec<ParserFuncParam>,
         return_type: Option<ParserSymbolPath>,
-        body: Vec<ParserStatement>,
+        body: Option<Vec<ParserStatement>>,
     },
     Return {
         value: Option<Vec<ExprToken>>,
@@ -63,7 +63,7 @@ pub enum ParserStatementKind {
         required_by: Option<ParserSymbolPath>,
         name: String,
         value_type: Option<ParserSymbolPath>,
-        def_val: Vec<ExprToken>,
+        def_val: Option<Vec<ExprToken>>,
     },
     State {
         vars: Vec<ParserStateVar>,
@@ -99,26 +99,26 @@ pub enum ParserStatementKind {
         required_by: Option<ParserSymbolPath>,
         literal_bind: Option<LiteralBind>,
         params: Vec<ParserFuncParam>,
-        body: Vec<ParserStatement>,
+        body: Option<Vec<ParserStatement>>,
     },
     Infix {
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
         attrs: HashMap<String, ParserInfixAttrValue>,
-        body: Vec<ParserStatement>,
+        body: Option<Vec<ParserStatement>>,
     },
     Prefix {
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
-        body: Vec<ParserStatement>,
+        body: Option<Vec<ParserStatement>>,
     },
     Postfix {
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
-        body: Vec<ParserStatement>,
+        body: Option<Vec<ParserStatement>>,
     },
     Block {
         statements: Vec<ParserStatement>,

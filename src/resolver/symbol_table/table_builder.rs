@@ -21,8 +21,6 @@ pub fn build_symbol_table<'a>(
     statements: &'a [ParserStatement],
 ) {
     for stmt in statements {
-        println!("Parsing {:#?}", &stmt.kind);
-
         match &stmt.kind {
             ParserStatementKind::FuncDecl {
                 required_by: _,
@@ -59,14 +57,14 @@ pub fn build_symbol_table<'a>(
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
-                body: _,
+                body,
             }
             | ParserStatementKind::ProtocolDecl {
                 name,
                 inherits: _,
-                body: _,
+                body,
             } => {
-                build_nest_symbol_table(name.clone(), symbol_table, statements);
+                build_nest_symbol_table(name.clone(), symbol_table, body);
             }
 
             _ => {}
@@ -80,7 +78,6 @@ pub fn build_nest_symbol_table<'a>(
     statements: &'a [ParserStatement],
 ) {
     for stmt in statements {
-        println!("Parsing {:#?} inside {}", &stmt.kind, &path);
         match &stmt.kind {
             ParserStatementKind::Var {
                 required_by: _,

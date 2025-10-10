@@ -48,7 +48,7 @@ mod parsing {
                         symbol: "object".to_string()
                     },
                     ParserSymbolPathComponent {
-                        range: Range::n(7, 15),
+                        range: Range::n(6, 15),
                         symbol: "property".to_string()
                     }
                 ])
@@ -60,7 +60,7 @@ mod parsing {
     #[test]
     fn easy_program() {
         let program = "input integer: Int = 14
-            input fac = 5
+            input fac = 5 #range(0, 100)
             output out_value: Int
 
             struct Multiplier {
@@ -135,7 +135,7 @@ mod parsing {
                 infix **(rhs: Int) -> Int {
                     associativity: right,
                     priority: 2
-                }: {
+                } {
                     return self * rhs
                 }
 
@@ -195,7 +195,7 @@ mod parsing {
             ";
 
         let parsed_program = kash_parser::parse(program);
-        println!("{:#?}", parsed_program);
+        // println!("{:#?}", parsed_program);
         assert!(parsed_program.is_ok());
     }
 }

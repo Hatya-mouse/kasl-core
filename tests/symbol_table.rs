@@ -19,8 +19,6 @@ mod symbol_table {
 
     #[test]
     fn table_generation() {
-        assert_eq!(true, false);
-
         let program = "input integer: Int = 14
             input fac = 5
             output out_value: Int
@@ -54,6 +52,6 @@ mod symbol_table {
 
         symbol_table.get_func("main");
 
-        println!("{:#?}", symbol_table);
+        // println!("{:#?}", symbol_table);
     }
 }

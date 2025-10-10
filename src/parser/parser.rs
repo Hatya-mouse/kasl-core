@@ -53,9 +53,9 @@ peg::parser!(pub grammar kash_parser() for str {
     rule func_decl_statement() -> ParserStatement
         = start:position!() required_by:(r:id_chain() _ { r })?
         "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
-        return_type:("->" _? t:id_chain() { t })? __? "{"
+        return_type:("->" _? t:id_chain() { t })? body:(__? "{"
         __? body:statements() __?
-        "}" end:position!() {
+        "}" { body })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::FuncDecl { required_by, name, params, return_type, body }
@@ -87,7 +87,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule var_statement() -> ParserStatement
-        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() end:position!() {
+        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? def_val:expression() { def_val })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Var { required_by, name, value_type, def_val }
@@ -171,9 +171,9 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule init_statement() -> ParserStatement
-        = start:position!() required_by:id_chain()? literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" __? "{"
+        = start:position!() required_by:id_chain()? literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" body:(__? "{"
         __? body:statements() __?
-        "}" end:position!() {
+        "}" { body })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Init { required_by, literal_bind, params, body }
@@ -183,9 +183,9 @@ peg::parser!(pub grammar kash_parser() for str {
     rule infix_statement() -> ParserStatement
         = start:position!() "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? "{"
         __? attrs:infix_attrs() __?
-        "}" __? ":" __? "{"
+        "}" __? body:("{"
         __? body:statements() __?
-        "}" end:position!() {
+        "}" { body })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Infix { symbol, params, return_type, attrs, body }
@@ -193,9 +193,9 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule prefix_statement() -> ParserStatement
-        = start:position!() "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? "{"
+        = start:position!() "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
-        "}" end:position!() {
+        "}" { body })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
@@ -203,9 +203,9 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule postfix_statement() -> ParserStatement
-        = start:position!() "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? "{"
+        = start:position!() "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
-        "}" end:position!() {
+        "}" { body })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Postfix { symbol, params, return_type, body }

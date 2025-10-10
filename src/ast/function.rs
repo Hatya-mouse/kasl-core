@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, ParserStatementKind, Statement, SymbolPath};
+use crate::{Expression, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
