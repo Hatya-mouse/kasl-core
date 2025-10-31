@@ -14,19 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, Operator, Statement, Variable};
-
-pub type SymbolPath = Vec<SymbolPathComponent>;
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum SymbolPathComponent {
-    Field(String),
-    Method(String),
-    TypeDef(String),
-    CompInt,
-    CompFloat,
-    CompBool,
-}
+use crate::{FuncParam, Function, Operator, Statement, SymbolPath, Variable};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef {

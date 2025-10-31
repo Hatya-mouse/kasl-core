@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    Function, InputVar, OutputVar, ParserSymbolPathComponent, ResolverError, ResolverErrorType,
-    StateVar, SymbolPath, SymbolPathComponent, TypeDef,
-};
+use crate::{Function, InputVar, OutputVar, StateVar, TypeDef};
 
 pub struct Program {
     pub main_func: Option<Function>,
@@ -38,47 +35,6 @@ impl Program {
             inputs: Vec::new(),
             outputs: Vec::new(),
         }
-    }
-
-    pub fn resolve_type(
-        &self,
-        type_path: &[ParserSymbolPathComponent],
-    ) -> Result<SymbolPath, ResolverError> {
-        let mut symbol_path = Vec::new();
-        let mut current_scope = None;
-
-        for (i, segment) in type_path.iter().enumerate() {
-            if i == 0 {
-                if let Some(type_def) = self.find_type_def(&segment.symbol) {
-                    symbol_path.push(SymbolPathComponent::TypeDef(segment.symbol.clone()));
-                    current_scope = Some(type_def);
-                } else {
-                    match segment.symbol.as_str() {
-                        "CompInt" => symbol_path.push(SymbolPathComponent::CompInt),
-                        "CompFloat" => symbol_path.push(SymbolPathComponent::CompFloat),
-                        "CompBool" => symbol_path.push(SymbolPathComponent::CompBool),
-                        _ => {
-                            return Err(ResolverError {
-                                error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
-                                position: segment.range,
-                            });
-                        }
-                    }
-                }
-            } else if let Some(some_scope) = current_scope {
-                if let Some(type_def) = some_scope.find_type_def(&segment.symbol) {
-                    symbol_path.push(SymbolPathComponent::TypeDef(segment.symbol.clone()));
-                    current_scope = Some(type_def);
-                } else {
-                    return Err(ResolverError {
-                        error_type: ResolverErrorType::TypeNotFound(segment.symbol.clone()),
-                        position: segment.range,
-                    });
-                }
-            }
-        }
-
-        Ok(symbol_path)
     }
 
     // -- Getter Functions --

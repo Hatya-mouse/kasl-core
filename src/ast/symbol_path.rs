@@ -14,12 +14,15 @@
 // limitations under the License.
 //
 
-pub mod builders;
-pub mod graph_builder;
-pub mod graph_def;
-pub mod sorter;
+pub type SymbolPath = Vec<SymbolPathComponent>;
 
-pub use builders::{build_func_graph, build_struct_and_protocol_graph, build_var_graph};
-pub use graph_builder::build_graph;
-pub use graph_def::{DependencyGraphEdge, DependencyGraphNode};
-pub use sorter::sort_graph;
+#[derive(Debug, PartialEq, Clone)]
+pub enum SymbolPathComponent {
+    CompInt,
+    CompFloat,
+    CompBool,
+    Var(String),
+    Func(String),
+    TypeDef(String),
+    FuncParam(String),
+}

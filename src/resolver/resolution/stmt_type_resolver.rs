@@ -39,7 +39,12 @@ pub fn construct_resolving_tree_struct(
                 // Loop through the body to resolve types.
                 for stmt in body {
                     match &stmt.kind {
-                        ParserStatementKind::Input { name, value_type, def_val, attrs }
+                        ParserStatementKind::Input {
+                            name,
+                            value_type,
+                            def_val,
+                            attrs,
+                        } => {}
 
                         _ => (),
                     }

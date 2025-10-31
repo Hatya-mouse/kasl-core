@@ -15,17 +15,15 @@
 //
 
 use crate::{
-    FuncParam, Function, Initializer, ParserStatement, ParserStatementKind, ResolverError,
-    SymbolTable, TypeDef,
+    FuncParam, Function, Initializer, ParserStatementKind, ResolverError, SymbolTable, TypeDef,
 };
 
 pub fn collect_member_functions(
-    stmts: &[ParserStatement],
-    symbol_table: &mut SymbolTable,
+    symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    for stmt in stmts {
-        match &stmt.kind {
+    for stmt in &symbol_table.funcs {
+        match &stmt.1.kind {
             ParserStatementKind::FuncDecl {
                 required_by: _,
                 name,
@@ -54,6 +52,12 @@ pub fn collect_member_functions(
                 });
             }
 
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.inits {
+        match &stmt.kind {
             ParserStatementKind::Init {
                 required_by: _,
                 literal_bind,

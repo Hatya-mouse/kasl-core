@@ -15,29 +15,29 @@
 //
 
 use crate::{
-    ParserStatement, ParserStatementKind, ResolverError, TypeDef,
+    ParserStatementKind, ResolverError, SymbolTable, TypeDef,
     member_collection::collect_type_members,
 };
 
 /// Loop through the scope and collect type members.
 pub fn collect_member_nests(
-    stmts: &[ParserStatement],
+    symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    for stmt in stmts {
-        match &stmt.kind {
+    for stmt in &symbol_table.type_defs {
+        match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
-                body,
+                body: _,
             }
             | ParserStatementKind::ProtocolDecl {
                 name,
                 inherits: _,
-                body,
-            } => match type_def.find_type_def_mut(name) {
+                body: _,
+            } => match type_def.find_type_def_mut(&name) {
                 Some(parent_type_def) => {
-                    collect_type_members(body, parent_type_def)?;
+                    collect_type_members(&stmt.1.1, parent_type_def)?;
                 }
                 None => {
                     panic!("TypeDef {} not found while it's defined", name);

@@ -20,7 +20,31 @@ pub struct DependencyGraphNode {
     name: SymbolPath,
 }
 
+impl DependencyGraphNode {
+    pub fn new(name: SymbolPath) -> Self {
+        DependencyGraphNode { name }
+    }
+}
+
+impl Clone for DependencyGraphNode {
+    fn clone(&self) -> Self {
+        DependencyGraphNode {
+            name: self.name.clone(),
+        }
+    }
+}
+
+/// Represents an edge in a dependency graph.
+///
+/// # Example
+/// Edge `A -> B` means that "A depends on B", therefore B must be resolved before A.
 pub struct DependencyGraphEdge {
     from: DependencyGraphNode,
     to: DependencyGraphNode,
+}
+
+impl DependencyGraphEdge {
+    pub fn new(from: DependencyGraphNode, to: DependencyGraphNode) -> Self {
+        DependencyGraphEdge { from, to }
+    }
 }

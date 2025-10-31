@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
+use crate::{ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent};
 use std::collections::HashMap;
-
-use crate::ParserStatement;
 
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
@@ -37,6 +36,32 @@ impl<'a> SymbolTable<'a> {
             inits: Vec::new(),
         }
     }
+
+    pub fn resolve_path(&self, parser_path: &ParserSymbolPath) -> SymbolPath {
+        let mut result_path = Vec::new();
+        let mut current_scope = self;
+
+        for component in parser_path {
+            if &component.symbol == "CompInt" {
+                result_path.push(SymbolPathComponent::CompInt);
+            } else if &component.symbol == "CompFloat" {
+                result_path.push(SymbolPathComponent::CompFloat);
+            } else if &component.symbol == "CompBool" {
+                result_path.push(SymbolPathComponent::CompBool);
+            } else if let Some(_) = current_scope.get_var(&component.symbol) {
+                result_path.push(SymbolPathComponent::Var(component.symbol.clone()));
+            } else if let Some(_) = current_scope.get_func(&component.symbol) {
+                result_path.push(SymbolPathComponent::Func(component.symbol.clone()));
+            } else if let Some(type_def) = current_scope.get_type_def(&component.symbol) {
+                result_path.push(SymbolPathComponent::TypeDef(component.symbol.clone()));
+                current_scope = &type_def.1;
+            }
+        }
+
+        result_path
+    }
+
+    // Insert functions
 
     pub fn insert_var(&mut self, name: String, stmt: &'a ParserStatement) {
         self.vars.insert(name, stmt);
@@ -62,6 +87,8 @@ impl<'a> SymbolTable<'a> {
     pub fn insert_init(&mut self, stmt: &'a ParserStatement) {
         self.inits.push(stmt);
     }
+
+    // Getter functions
 
     pub fn get_var(&self, name: &str) -> Option<&&ParserStatement> {
         self.vars.get(name)

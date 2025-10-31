@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-pub mod builders;
-pub mod graph_builder;
-pub mod graph_def;
-pub mod sorter;
+pub mod func_collector;
+pub mod nests_collector;
+pub mod operator_collector;
+pub mod var_collector;
 
-pub use builders::{build_func_graph, build_struct_and_protocol_graph, build_var_graph};
-pub use graph_builder::build_graph;
-pub use graph_def::{DependencyGraphEdge, DependencyGraphNode};
-pub use sorter::sort_graph;
+pub use func_collector::collect_member_functions;
+pub use nests_collector::collect_member_nests;
+pub use operator_collector::collect_member_operators;
+pub use var_collector::collect_member_variables;

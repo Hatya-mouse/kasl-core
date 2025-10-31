@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatement, ParserStatementKind, ResolverError, TypeDef, Variable};
+use crate::{ParserStatementKind, ResolverError, SymbolTable, TypeDef, Variable};
 
 pub fn collect_member_variables(
-    stmts: &[ParserStatement],
+    symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    for stmt in stmts {
-        match &stmt.kind {
+    for stmt in &symbol_table.vars {
+        match &stmt.1.kind {
             ParserStatementKind::Var {
                 required_by: _,
                 name,

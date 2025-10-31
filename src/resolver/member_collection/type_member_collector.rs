@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatement, ParserStatementKind, Program, ResolverError, SymbolTable, TypeDef,
+    ParserStatementKind, Program, ResolverError, SymbolTable, TypeDef,
     member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,
@@ -25,23 +25,22 @@ use crate::{
 /// Loop through the top level and collect type members.
 pub fn collect_all_type_members(
     program: &mut Program,
-    symbol_table: &mut SymbolTable,
-    stmts: &[ParserStatement],
+    symbol_table: &SymbolTable,
 ) -> Result<(), ResolverError> {
-    for stmt in stmts {
-        match &stmt.kind {
+    for stmt in &symbol_table.type_defs {
+        match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
-                body,
+                body: _,
             }
             | ParserStatementKind::ProtocolDecl {
                 name,
                 inherits: _,
-                body,
+                body: _,
             } => match program.find_type_def_mut(name) {
                 Some(parent_type_def) => {
-                    collect_type_members(body, symbol_table, parent_type_def)?;
+                    collect_type_members(&stmt.1.1, parent_type_def)?;
                 }
                 None => {
                     panic!("TypeDef {} not found while it's defined", name);
@@ -57,14 +56,13 @@ pub fn collect_all_type_members(
 
 // Collects members in a given struct or protocol.
 pub fn collect_type_members(
-    stmts: &[ParserStatement],
-    symbol_table: &mut SymbolTable,
-    type_def: &mut TypeDef,
+    child_symbol_table: &SymbolTable,
+    parent_type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    collect_member_variables(stmts, symbol_table, type_def)?;
-    collect_member_functions(stmts, symbol_table, type_def)?;
-    collect_member_operators(stmts, symbol_table, type_def)?;
-    collect_member_nests(stmts, type_def)?;
+    collect_member_variables(child_symbol_table, parent_type_def)?;
+    collect_member_functions(child_symbol_table, parent_type_def)?;
+    collect_member_operators(child_symbol_table, parent_type_def)?;
+    collect_member_nests(child_symbol_table, parent_type_def)?;
 
     Ok(())
 }

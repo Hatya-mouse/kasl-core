@@ -15,16 +15,16 @@
 //
 
 use crate::{
-    FuncParam, Operator, OperatorAssociativity, ParserStatement, ParserStatementKind,
-    ResolverError, ResolverErrorType, TypeDef, error::resolver_error_type::OperatorKind,
+    FuncParam, Operator, OperatorAssociativity, ParserStatementKind, ResolverError,
+    ResolverErrorType, SymbolTable, TypeDef, error::resolver_error_type::OperatorKind,
 };
 
 pub fn collect_member_operators(
-    stmts: &[ParserStatement],
+    symbol_table: &SymbolTable,
     type_def: &mut TypeDef,
 ) -> Result<(), ResolverError> {
-    for stmt in stmts {
-        match &stmt.kind {
+    for stmt in &symbol_table.operators {
+        match &stmt.1.kind {
             ParserStatementKind::Infix {
                 symbol,
                 params,
@@ -42,7 +42,7 @@ pub fn collect_member_operators(
                 } else {
                     return Err(ResolverError {
                         error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Infix),
-                        position: stmt.range,
+                        position: stmt.1.range,
                     });
                 };
 
@@ -72,7 +72,7 @@ pub fn collect_member_operators(
                 } else {
                     return Err(ResolverError {
                         error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Prefix),
-                        position: stmt.range,
+                        position: stmt.1.range,
                     });
                 };
 
@@ -100,7 +100,7 @@ pub fn collect_member_operators(
                 } else {
                     return Err(ResolverError {
                         error_type: ResolverErrorType::NotEnoughParamForOp(OperatorKind::Postfix),
-                        position: stmt.range,
+                        position: stmt.1.range,
                     });
                 };
 

@@ -20,6 +20,7 @@ pub mod operator;
 pub mod program;
 pub mod range;
 pub mod statement;
+pub mod symbol_path;
 pub mod type_def;
 pub mod variables;
 
@@ -29,5 +30,6 @@ pub use operator::{Operator, OperatorAssociativity};
 pub use program::Program;
 pub use range::Range;
 pub use statement::Statement;
-pub use type_def::{Initializer, LiteralBind, SymbolPath, SymbolPathComponent, TypeDef};
+pub use symbol_path::{SymbolPath, SymbolPathComponent};
+pub use type_def::{Initializer, LiteralBind, TypeDef};
 pub use variables::{InputAttribute, InputVar, OutputVar, StateVar, Variable};

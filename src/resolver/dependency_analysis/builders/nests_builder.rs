@@ -15,37 +15,32 @@
 //
 
 use crate::{
-    ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
-    dependency_analysis::{build_func_graph, build_struct_and_protocol_graph, build_var_graph},
+    DependencyGraphEdge, ParserStatementKind, Program, SymbolPath, SymbolPathComponent,
+    SymbolTable,
+    dependency_analysis::{build_func_graph, build_var_graph},
 };
 
-pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
-    let mut graph = Vec::new();
-
-    // Output variables MUST have type annotations therefore we don't need to resolve their types.
-    for stmt in &symbol_table.vars {
+pub fn build_struct_and_protocol_graph(
+    graph: &mut Vec<DependencyGraphEdge>,
+    program: &Program,
+    type_path: &SymbolPath,
+    root_symbol_table: &SymbolTable,
+    child_symbol_table: &SymbolTable,
+) {
+    for stmt in &child_symbol_table.vars {
         match &stmt.1.kind {
-            ParserStatementKind::Input {
+            ParserStatementKind::Var {
+                required_by: _,
                 name,
                 value_type,
                 def_val,
-                attrs: _,
             } => {
                 if value_type.is_none() {
                     if let Some(def_val) = def_val {
                         // Combine variable name to create a new path for the child type
-                        let var_path = vec![SymbolPathComponent::Var(name.to_string())];
-                        build_var_graph(&mut graph, symbol_table, var_path, def_val);
-                    }
-                }
-            }
-
-            ParserStatementKind::State { vars } => {
-                for var in vars {
-                    if var.value_type.is_none() {
-                        // Combine variable name to create a new path for the child type
-                        let var_path = vec![SymbolPathComponent::Var(var.name.to_string())];
-                        build_var_graph(&mut graph, symbol_table, var_path, &var.def_val);
+                        let mut var_path = type_path.clone();
+                        var_path.push(SymbolPathComponent::Var(name.to_string()));
+                        build_var_graph(graph, root_symbol_table, var_path, def_val);
                     }
                 }
             }
@@ -54,7 +49,7 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
         }
     }
 
-    for stmt in &symbol_table.funcs {
+    for stmt in &child_symbol_table.funcs {
         match &stmt.1.kind {
             ParserStatementKind::FuncDecl {
                 required_by: _,
@@ -63,16 +58,17 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 return_type: _,
                 body: _,
             } => {
-                // Combine variable name to create a new path for the function
-                let func_path = vec![SymbolPathComponent::Func(name.to_string())];
-                build_func_graph(&mut graph, symbol_table, func_path, params);
+                // Combine function name to create a new path for the function
+                let mut func_path = type_path.clone();
+                func_path.push(SymbolPathComponent::Func(name.to_string()));
+                build_func_graph(graph, root_symbol_table, func_path, params);
             }
 
             _ => (),
         }
     }
 
-    for stmt in &symbol_table.type_defs {
+    for stmt in &child_symbol_table.type_defs {
         match &stmt.1.0.kind {
             ParserStatementKind::StructDecl {
                 name,
@@ -84,15 +80,18 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 inherits: _,
                 body: _,
             } => {
-                if let Some(decl_stmt) = symbol_table.get_type_def(&name) {
-                    let child_symbol_table = &decl_stmt.1;
-                    let mut child_type_path = vec![SymbolPathComponent::TypeDef(name.to_string())];
+                if let Some(decl_expr) = child_symbol_table.get_type_def(&name) {
+                    let child_symbol_table = &decl_expr.1;
+
+                    // Combine the child type name to create a new type path for the child type
+                    let mut child_type_path = type_path.clone();
+                    child_type_path.push(SymbolPathComponent::TypeDef(name.to_string()));
 
                     build_struct_and_protocol_graph(
-                        &mut graph,
+                        graph,
                         program,
                         &child_type_path,
-                        symbol_table,
+                        root_symbol_table,
                         child_symbol_table,
                     );
                 }
