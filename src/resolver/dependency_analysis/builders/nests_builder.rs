@@ -15,13 +15,12 @@
 //
 
 use crate::{
-    DependencyGraphEdge, ParserStatementKind, Program, SymbolPath, SymbolPathComponent,
-    SymbolTable,
+    DependencyGraph, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
     dependency_analysis::{build_func_graph, build_var_graph},
 };
 
 pub fn build_struct_and_protocol_graph(
-    graph: &mut Vec<DependencyGraphEdge>,
+    graph: &mut DependencyGraph,
     program: &Program,
     type_path: &SymbolPath,
     root_symbol_table: &SymbolTable,

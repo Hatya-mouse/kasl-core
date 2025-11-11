@@ -15,6 +15,50 @@
 //
 
 use crate::SymbolPath;
+use std::collections::HashMap;
+
+pub struct DependencyGraph {
+    pub nodes: HashMap<SymbolPath, DependencyGraphNode>,
+    pub edges: Vec<DependencyGraphEdge>,
+}
+
+impl DependencyGraph {
+    pub fn new() -> Self {
+        DependencyGraph {
+            nodes: HashMap::new(),
+            edges: Vec::new(),
+        }
+    }
+
+    pub fn add_node(&mut self, node: DependencyGraphNode) {
+        self.nodes.insert(node.name.clone(), node);
+    }
+
+    pub fn add_edge(&mut self, from: &SymbolPath, to: &SymbolPath) {
+        self.edges.push(DependencyGraphEdge {
+            from: from.clone(),
+            to: to.clone(),
+        });
+    }
+
+    pub fn node(&self, name: &SymbolPath) -> Option<&DependencyGraphNode> {
+        self.nodes.get(name)
+    }
+
+    pub fn edge(&self, from: &SymbolPath, to: &SymbolPath) -> Option<&DependencyGraphEdge> {
+        self.edges
+            .iter()
+            .find(|edge| edge.from == *from && edge.to == *to)
+    }
+
+    pub fn get_edge_nodes(
+        &self,
+        edge: &DependencyGraphEdge,
+    ) -> Option<(&DependencyGraphNode, &DependencyGraphNode)> {
+        self.node(&edge.from)
+            .and_then(|from| self.node(&edge.to).map(|to| (from, to)))
+    }
+}
 
 pub struct DependencyGraphNode {
     name: SymbolPath,
@@ -39,12 +83,12 @@ impl Clone for DependencyGraphNode {
 /// # Example
 /// Edge `A -> B` means that "A depends on B", therefore B must be resolved before A.
 pub struct DependencyGraphEdge {
-    pub from: DependencyGraphNode,
-    pub to: DependencyGraphNode,
+    pub from: SymbolPath,
+    pub to: SymbolPath,
 }
 
 impl DependencyGraphEdge {
-    pub fn new(from: DependencyGraphNode, to: DependencyGraphNode) -> Self {
+    pub fn new(from: SymbolPath, to: SymbolPath) -> Self {
         DependencyGraphEdge { from, to }
     }
 }

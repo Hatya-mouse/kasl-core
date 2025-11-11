@@ -23,6 +23,6 @@ pub mod symbol_collection;
 pub mod symbol_table;
 pub mod type_collection;
 
-pub use dependency_analysis::{DependencyGraphEdge, DependencyGraphNode};
+pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
 pub use error::{ResolverError, ResolverErrorType};
 pub use symbol_table::SymbolTable;

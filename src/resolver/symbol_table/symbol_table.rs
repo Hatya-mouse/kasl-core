@@ -38,7 +38,7 @@ impl<'a> SymbolTable<'a> {
     }
 
     pub fn resolve_path(&self, parser_path: &ParserSymbolPath) -> SymbolPath {
-        let mut result_path = Vec::new();
+        let mut result_path = SymbolPath::new();
         let mut current_scope = self;
 
         for component in parser_path {

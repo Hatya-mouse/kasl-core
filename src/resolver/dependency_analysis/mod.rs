@@ -21,5 +21,5 @@ pub mod sorter;
 
 pub use builders::{build_func_graph, build_struct_and_protocol_graph, build_var_graph};
 pub use graph_builder::build_graph;
-pub use graph_def::{DependencyGraphEdge, DependencyGraphNode};
+pub use graph_def::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
 pub use sorter::sort_graph;

@@ -15,30 +15,32 @@
 //
 
 use crate::{
-    DependencyGraphEdge, DependencyGraphNode, ExprTokenKind, ParserFuncParam, SymbolPath,
-    SymbolPathComponent, SymbolTable,
+    DependencyGraph, ExprTokenKind, ParserFuncParam, SymbolPath, SymbolPathComponent, SymbolTable,
 };
 
 pub fn build_func_graph(
-    graph: &mut Vec<DependencyGraphEdge>,
+    graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
     func_path: SymbolPath,
     params: &[ParserFuncParam],
 ) {
     for param in params {
+        // Check if the parameter has a type annotation
+        // and if the type is not stated, we need to infer the type
         if param.value_type.is_none() {
+            // Get the default value to infer the type
             if let Some(def_value) = &param.def_val {
                 for expr in def_value {
                     match &expr.kind {
+                        // If the default value has an identifier in it,
+                        // the parameter depends on the identifier
                         ExprTokenKind::Identifier(path) => {
                             let mut from_path = func_path.clone();
                             from_path.push(SymbolPathComponent::FuncParam(param.name.clone()));
-                            let from_node = DependencyGraphNode::new(from_path);
 
                             let to_path = root_symbol_table.resolve_path(path);
-                            let to_node = DependencyGraphNode::new(to_path);
 
-                            graph.push(DependencyGraphEdge::new(from_node, to_node));
+                            graph.add_edge(&from_path, &to_path);
                         }
 
                         _ => (),

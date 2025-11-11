@@ -14,26 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{
-    DependencyGraphEdge, DependencyGraphNode, ExprToken, ExprTokenKind, SymbolPath, SymbolTable,
-};
+use crate::{DependencyGraph, ExprToken, ExprTokenKind, SymbolPath, SymbolTable};
 
 pub fn build_var_graph(
-    graph: &mut Vec<DependencyGraphEdge>,
+    graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
     var_path: SymbolPath,
     def_val: &Vec<ExprToken>,
 ) {
+    // If the default value has any identifiers, thus the variable depends on them
     for expr in def_val {
         match &expr.kind {
             ExprTokenKind::Identifier(path) => {
-                let from_node = DependencyGraphNode::new(var_path.clone());
-
                 let to_path = root_symbol_table.resolve_path(path);
-                let to_node = DependencyGraphNode::new(to_path);
-
-                let edge = DependencyGraphEdge::new(from_node, to_node);
-                graph.push(edge);
+                graph.add_edge(&var_path, &to_path);
             }
             _ => (),
         }

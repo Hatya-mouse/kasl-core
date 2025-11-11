@@ -14,9 +14,34 @@
 // limitations under the License.
 //
 
-pub type SymbolPath = Vec<SymbolPathComponent>;
+use std::ops::Index;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+pub struct SymbolPath {
+    components: Vec<SymbolPathComponent>,
+}
+
+impl SymbolPath {
+    pub fn new() -> Self {
+        SymbolPath {
+            components: Vec::new(),
+        }
+    }
+
+    pub fn push(&mut self, component: SymbolPathComponent) {
+        self.components.push(component);
+    }
+}
+
+impl Index<usize> for SymbolPath {
+    type Output = SymbolPathComponent;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.components[index]
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum SymbolPathComponent {
     CompInt,
     CompFloat,
@@ -25,4 +50,26 @@ pub enum SymbolPathComponent {
     Func(String),
     TypeDef(String),
     FuncParam(String),
+}
+
+// Use this macro to create a SymbolPath from a simple list of components
+// Example:
+// ```
+// symbol_path!["foo", "bar", "baz"];
+// ```
+#[macro_export]
+macro_rules! symbol_path {
+    ( $( $x:expr ),* $(,)? ) => {
+        {
+            let mut temp_path = $crate::ast::SymbolPath::new();
+            $(
+                let temp_val = $x;
+                // Type check to ensure it's SymbolPathComponent
+                let _: &$crate::ast::SymbolPathComponent = &temp_val;
+                // Push the component to the vector
+                temp_path.push(temp_val);
+            )*
+            temp_path
+        }
+    };
 }

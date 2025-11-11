@@ -15,12 +15,13 @@
 //
 
 use crate::{
-    ParserStatementKind, Program, SymbolPathComponent, SymbolTable,
+    DependencyGraph, ParserStatementKind, Program, SymbolPathComponent, SymbolTable,
     dependency_analysis::{build_func_graph, build_struct_and_protocol_graph, build_var_graph},
+    symbol_path,
 };
 
 pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
-    let mut graph = Vec::new();
+    let mut graph = DependencyGraph::new();
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
     for stmt in &symbol_table.vars {
@@ -34,7 +35,7 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 if value_type.is_none() {
                     if let Some(def_val) = def_val {
                         // Combine variable name to create a new path for the child type
-                        let var_path = vec![SymbolPathComponent::Var(name.to_string())];
+                        let var_path = symbol_path![SymbolPathComponent::Var(name.to_string())];
                         build_var_graph(&mut graph, symbol_table, var_path, def_val);
                     }
                 }
@@ -44,7 +45,7 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 for var in vars {
                     if var.value_type.is_none() {
                         // Combine variable name to create a new path for the child type
-                        let var_path = vec![SymbolPathComponent::Var(var.name.to_string())];
+                        let var_path = symbol_path![SymbolPathComponent::Var(var.name.to_string())];
                         build_var_graph(&mut graph, symbol_table, var_path, &var.def_val);
                     }
                 }
@@ -64,7 +65,7 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
                 body: _,
             } => {
                 // Combine variable name to create a new path for the function
-                let func_path = vec![SymbolPathComponent::Func(name.to_string())];
+                let func_path = symbol_path![SymbolPathComponent::Func(name.to_string())];
                 build_func_graph(&mut graph, symbol_table, func_path, params);
             }
 
@@ -86,7 +87,8 @@ pub fn build_graph(program: &Program, symbol_table: &SymbolTable) {
             } => {
                 if let Some(decl_stmt) = symbol_table.get_type_def(&name) {
                     let child_symbol_table = &decl_stmt.1;
-                    let child_type_path = vec![SymbolPathComponent::TypeDef(name.to_string())];
+                    let child_type_path =
+                        symbol_path![SymbolPathComponent::TypeDef(name.to_string())];
 
                     build_struct_and_protocol_graph(
                         &mut graph,
