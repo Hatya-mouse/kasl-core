@@ -3,6 +3,9 @@
 ## No Semicolons
 AudioShader doesn't use semicolons. Instead, it uses line breaks to separate statements, which contributes to keep the code cleaner.
 
+## No Recursions
+Recursions are not allowed in AudioShader.
+
 ## Input Declaration
 In AudioShader, you can easily define input variables using `input` keyword. Let's see:
 ```AudioShader
