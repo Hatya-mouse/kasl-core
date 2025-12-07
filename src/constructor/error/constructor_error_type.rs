@@ -30,6 +30,7 @@ pub enum ConstructorErrorType {
     AmbiguousDeclaration(String),
     NotEnoughParamForOp(OperatorKind),
     DependencyCycle(SymbolPath),
+    CannotInferType(SymbolPath),
 
     Placeholder,
 }
@@ -79,6 +80,9 @@ impl ConstructorErrorType {
                     "Cannot infer the type of '{}' due to a dependency cycle.",
                     symbol_path
                 )
+            }
+            ConstructorErrorType::CannotInferType(symbol_path) => {
+                format!("Cannot infer the type of '{}'.", symbol_path)
             }
             ConstructorErrorType::Placeholder => "PLACEHOLDER ERROR".to_string(),
         }

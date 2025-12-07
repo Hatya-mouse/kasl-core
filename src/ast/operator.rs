@@ -17,27 +17,22 @@
 use crate::{FuncParam, Statement, TypeDef};
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Operator<'a> {
+pub struct Operator<'a> {
+    pub symbol: String,
+    pub return_type: Option<&'a TypeDef<'a>>,
+    pub body: Vec<Statement<'a>>,
+    pub kind: OperatorKind<'a>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum OperatorKind<'a> {
     InfixOperator {
-        symbol: String,
         another: FuncParam<'a>,
-        return_type: Option<&'a TypeDef<'a>>,
         associativity: OperatorAssociativity,
         precedence: u8,
-        body: Vec<Statement<'a>>,
     },
-    PrefixOperator {
-        symbol: String,
-        another: FuncParam<'a>,
-        return_type: Option<&'a TypeDef<'a>>,
-        body: Vec<Statement<'a>>,
-    },
-    PostfixOperator {
-        symbol: String,
-        another: FuncParam<'a>,
-        return_type: Option<&'a TypeDef<'a>>,
-        body: Vec<Statement<'a>>,
-    },
+    PrefixOperator,
+    PostfixOperator,
 }
 
 #[derive(Debug, PartialEq, Clone)]

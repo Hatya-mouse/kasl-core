@@ -115,11 +115,10 @@ impl<'a> SymbolTable<'a> {
     /// Componenets except the last one must be a Type statement.
     pub fn get_statement_by_path(&self, symbol_path: &SymbolPath) -> Option<&&ParserStatement> {
         let mut current_scope = self;
-        let components = &symbol_path.components;
-        let last_index = components.len().checked_sub(1)?;
+        let last_index = symbol_path.components.len().checked_sub(1)?;
 
         for i in 0..last_index {
-            match &components[i] {
+            match &symbol_path.components[i] {
                 SymbolPathComponent::TypeDef(type_name) => {
                     if let Some(type_def_entry) = current_scope.type_defs.get(type_name) {
                         current_scope = &type_def_entry.1;
@@ -131,7 +130,7 @@ impl<'a> SymbolTable<'a> {
             }
         }
 
-        match &components[last_index] {
+        match &symbol_path.components[last_index] {
             SymbolPathComponent::Var(name) => current_scope.get_var(name),
             SymbolPathComponent::Func(name) => current_scope.get_func(name),
             SymbolPathComponent::TypeDef(name) => {

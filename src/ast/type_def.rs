@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, Operator, Statement, Variable};
+use crate::{FuncParam, Function, Operator, Scope, Statement, Variable};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef<'a> {
@@ -42,6 +42,40 @@ impl<'a> TypeDef<'a> {
 
     pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
         self.types.iter_mut().find(|s| s.name == name)
+    }
+}
+
+impl<'a> Scope<'a> for TypeDef<'a> {
+    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function<'a>> {
+        self.funcs.iter_mut().find(|f| f.name == name)
+    }
+
+    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
+        self.types.iter_mut().find(|s| s.name == name)
+    }
+
+    fn get_state_mut(&mut self, _name: &str) -> Option<&mut super::StateVar<'a>> {
+        None
+    }
+
+    fn get_input_mut(&mut self, _name: &str) -> Option<&mut super::InputVar<'a>> {
+        None
+    }
+
+    fn get_output_mut(&mut self, _name: &str) -> Option<&mut super::OutputVar<'a>> {
+        None
+    }
+
+    fn get_var_mut(&mut self, name: &str) -> Option<&mut Variable<'a>> {
+        self.vars.iter_mut().find(|v| v.name == name)
+    }
+
+    fn get_operator_mut(&mut self, name: &str) -> Option<&mut Operator<'a>> {
+        self.operators.iter_mut().find(|o| o.symbol == name)
+    }
+
+    fn get_func_param_mut(&mut self, _name: &str) -> Option<&mut FuncParam<'a>> {
+        None
     }
 }
 

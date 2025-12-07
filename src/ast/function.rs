@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Statement, TypeDef};
+use crate::{Expression, Scope, Statement, TypeDef};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function<'a> {
@@ -23,6 +23,40 @@ pub struct Function<'a> {
     pub return_type: Option<&'a TypeDef<'a>>,
     pub body: Vec<Statement<'a>>,
     pub required_by: Option<&'a TypeDef<'a>>,
+}
+
+impl<'a> Scope<'a> for Function<'a> {
+    fn get_func_mut(&mut self, _name: &str) -> Option<&mut Function<'a>> {
+        None
+    }
+
+    fn get_type_def_mut(&mut self, _name: &str) -> Option<&mut TypeDef<'a>> {
+        None
+    }
+
+    fn get_state_mut(&mut self, _name: &str) -> Option<&mut super::StateVar<'a>> {
+        None
+    }
+
+    fn get_input_mut(&mut self, _name: &str) -> Option<&mut super::InputVar<'a>> {
+        None
+    }
+
+    fn get_output_mut(&mut self, _name: &str) -> Option<&mut super::OutputVar<'a>> {
+        None
+    }
+
+    fn get_var_mut(&mut self, _name: &str) -> Option<&mut super::Variable<'a>> {
+        None
+    }
+
+    fn get_operator_mut(&mut self, _name: &str) -> Option<&mut super::Operator<'a>> {
+        None
+    }
+
+    fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam<'a>> {
+        self.params.iter_mut().find(|p| p.name == name)
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

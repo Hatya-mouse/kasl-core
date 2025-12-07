@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Program, Range, SymbolTable,
+    ConstructorError, ConstructorErrorType, ParserStatementKind, Program, Range, SymbolTable,
     resolution::dependency_analysis::{build_graph, sort_graph},
 };
 
@@ -48,11 +48,35 @@ pub fn resolve_types(
     };
 
     // Resolve types for each symbol in the sorted order
+    let mut errors = Vec::new();
+
     for symbol in sorted_list {
         // Get the symbol declaration statement
-        let symbol_decl_statement = symbol_table.get_statement_by_path(symbol);
+        let symbol_decl_statement = match symbol_table.get_statement_by_path(symbol) {
+            Some(stmt) => stmt,
+            None => {
+                errors.push(ConstructorError {
+                    error_type: ConstructorErrorType::CannotInferType(symbol.clone()),
+                    position: Range::zero(),
+                });
+                continue;
+            }
+        };
+
         // Check if the symbol has a type annotation
         // If not, infer the type
+        match symbol_decl_statement.kind {
+            ParserStatementKind::Var {
+                required_by,
+                name,
+                value_type,
+                def_val,
+            } => {
+                if let Some(value_type) = value_type {
+                } else {
+                }
+            }
+        }
     }
 
     Ok(())
