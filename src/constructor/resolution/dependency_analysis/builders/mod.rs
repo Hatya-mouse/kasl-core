@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-pub mod func_builder;
+pub mod func_param_builder;
 pub mod nests_builder;
 pub mod var_builder;
 
-pub use func_builder::build_func_graph;
+pub use func_param_builder::build_func_param_graph;
 pub use nests_builder::build_struct_and_protocol_graph;
 pub use var_builder::build_var_graph;

@@ -17,27 +17,83 @@
 use crate::{FuncParam, Function, InputVar, Operator, OutputVar, StateVar, TypeDef, Variable};
 
 pub trait Scope<'a> {
+    /// Get an immutable reference to a Function by name. Returns None if the Function is not found.
+    fn get_func(&self, _name: &str) -> Option<&Function<'a>> {
+        None
+    }
+
     /// Get a mutable reference to a Function by name. Returns None if the Function is not found.
-    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function<'a>>;
+    fn get_func_mut(&mut self, _name: &str) -> Option<&mut Function<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to a TypeDef by name. Returns None if the TypeDef is not found.
+    fn get_type_def(&self, _name: &str) -> Option<&TypeDef<'a>> {
+        None
+    }
 
     /// Get a mutable reference to a TypeDef by name. Returns None if the TypeDef is not found.
-    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>>;
+    fn get_type_def_mut(&mut self, _name: &str) -> Option<&mut TypeDef<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to a StateVar by name. Returns None if the StateVar is not found.
+    fn get_state(&self, _name: &str) -> Option<&StateVar<'a>> {
+        None
+    }
 
     /// Get a mutable reference to a StateVar by name. Returns None if the StateVar is not found.
-    fn get_state_mut(&mut self, name: &str) -> Option<&mut StateVar<'a>>;
+    fn get_state_mut(&mut self, _name: &str) -> Option<&mut StateVar<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to an InputVar by name. Returns None if the InputVar is not found.
+    fn get_input(&self, _name: &str) -> Option<&InputVar<'a>> {
+        None
+    }
 
     /// Get a mutable reference to an InputVar by name. Returns None if the InputVar is not found.
-    fn get_input_mut(&mut self, name: &str) -> Option<&mut InputVar<'a>>;
+    fn get_input_mut(&mut self, _name: &str) -> Option<&mut InputVar<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to an OutputVar by name. Returns None if the OutputVar is not found.
+    fn get_output(&self, _name: &str) -> Option<&OutputVar<'a>> {
+        None
+    }
 
     /// Get a mutable reference to an OutputVar by name. Returns None if the OutputVar is not found.
-    fn get_output_mut(&mut self, name: &str) -> Option<&mut OutputVar<'a>>;
+    fn get_output_mut(&mut self, _name: &str) -> Option<&mut OutputVar<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to a Variable by name. Returns None if the Variable is not found.
+    fn get_var(&self, _name: &str) -> Option<&Variable<'a>> {
+        None
+    }
 
     /// Get a mutable reference to a Variable by name. Returns None if the Variable is not found.
-    fn get_var_mut(&mut self, name: &str) -> Option<&mut Variable<'a>>;
+    fn get_var_mut(&mut self, _name: &str) -> Option<&mut Variable<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to an Operator by name. Returns None if the Operator is not found.
+    fn get_operator(&self, _name: &str) -> Option<&Operator<'a>> {
+        None
+    }
 
     /// Get a mutable reference to an Operator by name. Returns None if the Operator is not found.
-    fn get_operator_mut(&mut self, name: &str) -> Option<&mut Operator<'a>>;
+    fn get_operator_mut(&mut self, _name: &str) -> Option<&mut Operator<'a>> {
+        None
+    }
+
+    /// Get an immutable reference to a FuncParam by name. Returns None if the FuncParam is not found.
+    fn get_func_param(&self, _name: &str) -> Option<&FuncParam<'a>> {
+        None
+    }
 
     /// Get a mutable reference to a FuncParam by name. Returns None if the FuncParam is not found.
-    fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam<'a>>;
+    fn get_func_param_mut(&mut self, _name: &str) -> Option<&mut FuncParam<'a>> {
+        None
+    }
 }

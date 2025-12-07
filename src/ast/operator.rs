@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+use std::fmt::Debug;
+
 use crate::{FuncParam, Statement, TypeDef};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -24,7 +26,7 @@ pub struct Operator<'a> {
     pub kind: OperatorKind<'a>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub enum OperatorKind<'a> {
     InfixOperator {
         another: FuncParam<'a>,
@@ -33,6 +35,16 @@ pub enum OperatorKind<'a> {
     },
     PrefixOperator,
     PostfixOperator,
+}
+
+impl Debug for OperatorKind<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OperatorKind::InfixOperator { .. } => write!(f, "infix"),
+            OperatorKind::PrefixOperator => write!(f, "prefix"),
+            OperatorKind::PostfixOperator => write!(f, "postfix"),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

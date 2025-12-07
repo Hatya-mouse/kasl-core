@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, ConstructorErrorType, FuncParam, Operator, OperatorAssociativity,
-    ParserStatementKind, SymbolTable, TypeDef, error::constructor_error_type::OperatorKind,
+    OperatorKind, ParserStatementKind, SymbolTable, TypeDef,
 };
 
 pub fn collect_member_operators(
@@ -41,18 +41,20 @@ pub fn collect_member_operators(
                     }
                 } else {
                     return Err(ConstructorError {
-                        error_type: ConstructorErrorType::NotEnoughParamForOp(OperatorKind::Infix),
+                        error_type: ConstructorErrorType::InvalidParamForOp,
                         position: stmt.1.range,
                     });
                 };
 
-                type_def.operators.push(Operator::InfixOperator {
+                type_def.operators.push(Operator {
                     symbol: symbol.clone(),
-                    another: param,
                     return_type: None,
-                    associativity: OperatorAssociativity::Left,
-                    precedence: 0,
                     body: Vec::new(),
+                    kind: OperatorKind::InfixOperator {
+                        another: param,
+                        associativity: OperatorAssociativity::Left,
+                        precedence: 0,
+                    },
                 });
             }
 
@@ -62,25 +64,18 @@ pub fn collect_member_operators(
                 return_type: _,
                 body: _,
             } => {
-                let param = if let Some(first_param) = params.first() {
-                    FuncParam {
-                        label: first_param.label.clone(),
-                        name: first_param.name.clone(),
-                        value_type: None,
-                        def_val: None,
-                    }
-                } else {
+                if params.len() > 0 {
                     return Err(ConstructorError {
-                        error_type: ConstructorErrorType::NotEnoughParamForOp(OperatorKind::Prefix),
+                        error_type: ConstructorErrorType::InvalidParamForOp,
                         position: stmt.1.range,
                     });
-                };
+                }
 
-                type_def.operators.push(Operator::PrefixOperator {
+                type_def.operators.push(Operator {
                     symbol: symbol.clone(),
-                    another: param,
                     return_type: None,
                     body: Vec::new(),
+                    kind: OperatorKind::PrefixOperator,
                 });
             }
 
@@ -90,27 +85,18 @@ pub fn collect_member_operators(
                 return_type: _,
                 body: _,
             } => {
-                let param = if let Some(first_param) = params.first() {
-                    FuncParam {
-                        label: first_param.label.clone(),
-                        name: first_param.name.clone(),
-                        value_type: None,
-                        def_val: None,
-                    }
-                } else {
+                if params.len() > 0 {
                     return Err(ConstructorError {
-                        error_type: ConstructorErrorType::NotEnoughParamForOp(
-                            OperatorKind::Postfix,
-                        ),
+                        error_type: ConstructorErrorType::InvalidParamForOp,
                         position: stmt.1.range,
                     });
-                };
+                }
 
-                type_def.operators.push(Operator::PostfixOperator {
+                type_def.operators.push(Operator {
                     symbol: symbol.clone(),
-                    another: param,
                     return_type: None,
                     body: Vec::new(),
+                    kind: OperatorKind::PostfixOperator,
                 });
             }
 

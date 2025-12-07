@@ -16,8 +16,12 @@
 
 use crate::{
     ParserStatementKind, SymbolPathComponent, SymbolTable,
-    resolution::dependency_analysis::{
-        DependencyGraph, build_func_graph, build_struct_and_protocol_graph, build_var_graph,
+    resolution::{
+        DependencyGraphNode,
+        dependency_analysis::{
+            DependencyGraph, build_func_param_graph, build_struct_and_protocol_graph,
+            build_var_graph,
+        },
     },
     symbol_path,
 };
@@ -30,28 +34,34 @@ pub fn build_graph(symbol_table: &SymbolTable) -> DependencyGraph {
         match &stmt.1.kind {
             ParserStatementKind::Input {
                 name,
-                value_type,
+                value_type: _,
                 def_val,
                 attrs: _,
             } => {
-                if value_type.is_none() {
-                    if let Some(def_val) = def_val {
-                        // Combine variable name to create a new path for the child type
-                        let var_path =
-                            symbol_path![SymbolPathComponent::InputVar(name.to_string())];
-                        build_var_graph(&mut graph, symbol_table, var_path, def_val);
-                    }
+                if let Some(def_val) = def_val {
+                    // Combine variable name to create a new path for the child type
+                    let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
+                    build_var_graph(&mut graph, symbol_table, &var_path, def_val);
+                    graph.add_node(DependencyGraphNode::new(var_path));
                 }
+            }
+
+            ParserStatementKind::Output {
+                name,
+                value_type: _,
+            } => {
+                // Combine variable name to create a new path for the child type
+                let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
+                graph.add_node(DependencyGraphNode::new(var_path));
             }
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    if var.value_type.is_none() {
-                        // Combine variable name to create a new path for the child type
-                        let var_path =
-                            symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
-                        build_var_graph(&mut graph, symbol_table, var_path, &var.def_val);
-                    }
+                    // Combine variable name to create a new path for the child type
+                    let var_path =
+                        symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
+                    build_var_graph(&mut graph, symbol_table, &var_path, &var.def_val);
+                    graph.add_node(DependencyGraphNode::new(var_path));
                 }
             }
 
@@ -70,7 +80,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> DependencyGraph {
             } => {
                 // Combine variable name to create a new path for the function
                 let func_path = symbol_path![SymbolPathComponent::Func(name.to_string())];
-                build_func_graph(&mut graph, symbol_table, func_path, params);
+                build_func_param_graph(&mut graph, symbol_table, func_path, params);
             }
 
             _ => (),

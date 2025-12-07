@@ -28,7 +28,7 @@ pub enum ConstructorErrorType {
     },
     InvalidRequiredBy,
     AmbiguousDeclaration(String),
-    NotEnoughParamForOp(OperatorKind),
+    InvalidParamForOp,
     DependencyCycle(SymbolPath),
     CannotInferType(SymbolPath),
 
@@ -69,11 +69,8 @@ impl ConstructorErrorType {
                     type_name, type_name, type_name
                 )
             }
-            ConstructorErrorType::NotEnoughParamForOp(op_type) => {
-                format!(
-                    "Not enough number of parameters for {} operator.",
-                    op_type.to_string()
-                )
+            ConstructorErrorType::InvalidParamForOp => {
+                format!("Invalid parameter for operator.")
             }
             ConstructorErrorType::DependencyCycle(symbol_path) => {
                 format!(
@@ -149,23 +146,6 @@ impl StatementType {
             StatementType::Prefix => "prefix operator".to_string(),
             StatementType::Postfix => "postfix operator".to_string(),
             StatementType::Block => "block statement".to_string(),
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum OperatorKind {
-    Infix,
-    Prefix,
-    Postfix,
-}
-
-impl OperatorKind {
-    pub fn to_string(&self) -> String {
-        match self {
-            OperatorKind::Infix => "infix".to_string(),
-            OperatorKind::Prefix => "prefix".to_string(),
-            OperatorKind::Postfix => "postfix".to_string(),
         }
     }
 }

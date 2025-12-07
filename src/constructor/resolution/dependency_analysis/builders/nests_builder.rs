@@ -16,7 +16,7 @@
 
 use crate::{
     ParserStatementKind, SymbolPath, SymbolPathComponent, SymbolTable,
-    resolution::dependency_analysis::{DependencyGraph, build_func_graph, build_var_graph},
+    resolution::dependency_analysis::{DependencyGraph, build_func_param_graph, build_var_graph},
 };
 
 pub fn build_struct_and_protocol_graph(
@@ -30,16 +30,14 @@ pub fn build_struct_and_protocol_graph(
             ParserStatementKind::Var {
                 required_by: _,
                 name,
-                value_type,
+                value_type: _,
                 def_val,
             } => {
-                if value_type.is_none() {
-                    if let Some(def_val) = def_val {
-                        // Combine variable name to create a new path for the child type
-                        let mut var_path = type_path.clone();
-                        var_path.push(SymbolPathComponent::Var(name.to_string()));
-                        build_var_graph(graph, root_symbol_table, var_path, def_val);
-                    }
+                if let Some(def_val) = def_val {
+                    // Combine variable name to create a new path for the child type
+                    let mut var_path = type_path.clone();
+                    var_path.push(SymbolPathComponent::Var(name.to_string()));
+                    build_var_graph(graph, root_symbol_table, &var_path, def_val);
                 }
             }
 
@@ -59,7 +57,7 @@ pub fn build_struct_and_protocol_graph(
                 // Combine function name to create a new path for the function
                 let mut func_path = type_path.clone();
                 func_path.push(SymbolPathComponent::Func(name.to_string()));
-                build_func_graph(graph, root_symbol_table, func_path, params);
+                build_func_param_graph(graph, root_symbol_table, func_path, params);
             }
 
             _ => (),

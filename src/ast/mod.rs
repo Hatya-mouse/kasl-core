@@ -27,7 +27,7 @@ pub mod variables;
 
 pub use expression::Expression;
 pub use function::{FuncCallArg, FuncParam, Function};
-pub use operator::{Operator, OperatorAssociativity};
+pub use operator::{Operator, OperatorAssociativity, OperatorKind};
 pub use program::Program;
 pub use range::Range;
 pub use scope::Scope;

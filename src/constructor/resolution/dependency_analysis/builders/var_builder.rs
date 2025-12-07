@@ -15,22 +15,40 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, SymbolPath, SymbolTable,
-    resolution::dependency_analysis::DependencyGraph,
+    ExprToken, ExprTokenKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_var_graph(
     graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
-    var_path: SymbolPath,
+    var_path: &SymbolPath,
     def_val: &Vec<ExprToken>,
 ) {
     // If the default value has any identifiers, thus the variable depends on them
     for expr in def_val {
         match &expr.kind {
             ExprTokenKind::Identifier(path) => {
-                let to_path = root_symbol_table.resolve_path(path);
-                graph.add_edge(&var_path, &to_path);
+                let resolved_path = root_symbol_table.resolve_path(path);
+
+                // Normalize the path to remove unnecessary components
+                // Because we just need to infer the type of the top variable or function
+                let mut to_path = SymbolPath::new();
+                for component in resolved_path.components {
+                    match component {
+                        SymbolPathComponent::Var(_) | SymbolPathComponent::Func(_) => {
+                            // If the path reached a variable or a function, stop here
+                            to_path.push(component);
+                            break;
+                        }
+                        _ => to_path.push(component),
+                    }
+                }
+
+                if !to_path.components.is_empty() {
+                    graph.add_edge(var_path, &to_path);
+                    graph.add_node(DependencyGraphNode::new(to_path));
+                }
             }
             _ => (),
         }

@@ -26,32 +26,8 @@ pub struct Function<'a> {
 }
 
 impl<'a> Scope<'a> for Function<'a> {
-    fn get_func_mut(&mut self, _name: &str) -> Option<&mut Function<'a>> {
-        None
-    }
-
-    fn get_type_def_mut(&mut self, _name: &str) -> Option<&mut TypeDef<'a>> {
-        None
-    }
-
-    fn get_state_mut(&mut self, _name: &str) -> Option<&mut super::StateVar<'a>> {
-        None
-    }
-
-    fn get_input_mut(&mut self, _name: &str) -> Option<&mut super::InputVar<'a>> {
-        None
-    }
-
-    fn get_output_mut(&mut self, _name: &str) -> Option<&mut super::OutputVar<'a>> {
-        None
-    }
-
-    fn get_var_mut(&mut self, _name: &str) -> Option<&mut super::Variable<'a>> {
-        None
-    }
-
-    fn get_operator_mut(&mut self, _name: &str) -> Option<&mut super::Operator<'a>> {
-        None
+    fn get_func_param(&self, name: &str) -> Option<&FuncParam<'a>> {
+        self.params.iter().find(|p| p.name == name)
     }
 
     fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam<'a>> {
