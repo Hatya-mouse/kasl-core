@@ -15,11 +15,11 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ParserStatementKind, Program, Range,
-    SymbolPathComponent, SymbolTable,
+    ConstructorError, ConstructorErrorType, ParserStatementKind, Program, Range, SymbolTable,
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
-        symbol_locator::ProgramLocator,
+        expr_inference::ExprTypeInference,
+        program_locator::ProgramLocator,
     },
 };
 
@@ -56,27 +56,137 @@ pub fn resolve_types(
 
     for symbol_path in sorted_list {
         // Get the symbol declaration statement
-        let symbol_decl_statement = match symbol_table.get_statement_by_path(symbol) {
+        let symbol_decl_statement = match symbol_table.get_statement_by_path(&symbol_path) {
             Some(stmt) => stmt,
             None => {
                 continue;
             }
         };
 
-        // Check if the symbol has a type annotation
+        // Check if the symbol has already got a type annotation
         // If not, infer the type
-        match symbol_decl_statement.kind {
+        match &symbol_decl_statement.kind {
+            ParserStatementKind::Input {
+                name: _,
+                value_type,
+                def_val,
+                attrs: _,
+            } => {
+                if let Some(type_parser_path) = value_type {
+                    let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
+                    if let Some(variable) = program.get_inferable_input_mut(&symbol_path) {
+                        variable.value_type = type_symbol_path;
+                    } else {
+                        errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        });
+                    }
+                } else if let Some(def_val) = def_val {
+                    match program.infer_expr_type(def_val) {
+                        Ok(type_symbol_path) => {
+                            if let Some(variable) = program.get_inferable_input_mut(&symbol_path) {
+                                variable.value_type = Some(type_symbol_path);
+                            } else {
+                                errors.push(ConstructorError {
+                                    error_type: ConstructorErrorType::CannotInferType(
+                                        symbol_path.clone(),
+                                    ),
+                                    position: symbol_decl_statement.range,
+                                });
+                            }
+                        }
+                        Err(err) => errors.push(err),
+                    }
+                }
+            }
+
+            ParserStatementKind::Output {
+                name: _,
+                value_type,
+            } => {
+                let type_symbol_path = program.resolve_type_def_parser_path(&value_type);
+                if let Some(variable) = program.get_inferable_input_mut(&symbol_path) {
+                    variable.value_type = type_symbol_path;
+                } else {
+                    errors.push(ConstructorError {
+                        error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                        position: symbol_decl_statement.range,
+                    });
+                }
+            }
+
+            ParserStatementKind::State { vars } => {
+                for var in vars {
+                    if let Some(type_parser_path) = &var.value_type {
+                        let type_symbol_path =
+                            program.resolve_type_def_parser_path(&type_parser_path);
+                        if let Some(variable) = program.get_inferable_var_mut(&symbol_path) {
+                            variable.value_type = type_symbol_path;
+                        } else {
+                            errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            });
+                        }
+                    } else {
+                        match program.infer_expr_type(&var.def_val) {
+                            Ok(type_symbol_path) => {
+                                if let Some(variable) = program.get_inferable_var_mut(&symbol_path)
+                                {
+                                    variable.value_type = Some(type_symbol_path);
+                                } else {
+                                    errors.push(ConstructorError {
+                                        error_type: ConstructorErrorType::CannotInferType(
+                                            symbol_path.clone(),
+                                        ),
+                                        position: symbol_decl_statement.range,
+                                    });
+                                }
+                            }
+                            Err(err) => errors.push(err),
+                        }
+                    }
+                }
+            }
+
             ParserStatementKind::Var {
-                required_by,
-                name,
+                required_by: _,
+                name: _,
                 value_type,
                 def_val,
             } => {
-                if let Some(value_type_path) = value_type {
-                    let value_type = program.get_type_def_by_path(value_type_path);
-                } else {
+                if let Some(type_parser_path) = value_type {
+                    let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
+                    if let Some(variable) = program.get_inferable_var_mut(&symbol_path) {
+                        variable.value_type = type_symbol_path;
+                    } else {
+                        errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        });
+                    }
+                } else if let Some(def_val) = def_val {
+                    match program.infer_expr_type(def_val) {
+                        Ok(type_symbol_path) => {
+                            if let Some(variable) = program.get_inferable_var_mut(&symbol_path) {
+                                variable.value_type = Some(type_symbol_path);
+                            } else {
+                                errors.push(ConstructorError {
+                                    error_type: ConstructorErrorType::CannotInferType(
+                                        symbol_path.clone(),
+                                    ),
+                                    position: symbol_decl_statement.range,
+                                });
+                            }
+                        }
+                        Err(err) => errors.push(err),
+                    }
                 }
             }
+
             _ => (),
         }
     }

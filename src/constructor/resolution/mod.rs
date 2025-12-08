@@ -16,7 +16,7 @@
 
 pub mod dependency_analysis;
 pub mod expr_inference;
+pub mod program_locator;
 pub mod resolver;
-pub mod symbol_locator;
 
 pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};

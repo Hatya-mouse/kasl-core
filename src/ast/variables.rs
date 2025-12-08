@@ -14,39 +14,39 @@
 // limitations under the License.
 //
 
-use crate::{Expression, TypeDef};
+use crate::{Expression, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct InputAttribute<'a> {
+pub struct InputAttribute {
     pub name: String,
-    pub args: Vec<Expression<'a>>,
+    pub args: Vec<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct InputVar<'a> {
+pub struct InputVar {
     pub name: String,
-    pub value_type: Option<&'a TypeDef<'a>>,
-    pub def_val: Option<Expression<'a>>,
-    pub attrs: Vec<InputAttribute<'a>>,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
+    pub attrs: Vec<InputAttribute>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct OutputVar<'a> {
+pub struct OutputVar {
     pub name: String,
-    pub value_type: Option<&'a TypeDef<'a>>,
+    pub value_type: Option<SymbolPath>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct StateVar<'a> {
+pub struct StateVar {
     pub name: String,
-    pub value_type: Option<&'a TypeDef<'a>>,
-    pub def_val: Option<Expression<'a>>,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Variable<'a> {
-    pub required_by: Option<&'a TypeDef<'a>>,
+pub struct Variable {
+    pub required_by: Option<SymbolPath>,
     pub name: String,
-    pub value_type: Option<&'a TypeDef<'a>>,
-    pub def_val: Option<Expression<'a>>,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
 }

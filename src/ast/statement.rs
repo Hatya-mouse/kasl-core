@@ -17,30 +17,30 @@
 use crate::{Expression, FuncCallArg, SymbolPath};
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Statement<'a> {
+pub enum Statement {
     Return {
-        value: Option<Expression<'a>>,
+        value: Option<Expression>,
     },
     Var {
         name: String,
         value_type: SymbolPath,
-        def_val: Expression<'a>,
+        def_val: Expression,
     },
     Assign {
         target: SymbolPath,
-        value: Expression<'a>,
+        value: Expression,
     },
     FuncCall {
         name: Vec<String>,
-        args: Vec<FuncCallArg<'a>>,
+        args: Vec<FuncCallArg>,
     },
     If {
-        condition: Expression<'a>,
-        body: Vec<Statement<'a>>,
+        condition: Expression,
+        body: Vec<Statement>,
     },
     IfElse {
-        condition: Expression<'a>,
-        body: Vec<Statement<'a>>,
-        else_body: Vec<Statement<'a>>,
+        condition: Expression,
+        body: Vec<Statement>,
+        else_body: Vec<Statement>,
     },
 }

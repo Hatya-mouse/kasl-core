@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatementKind, Program, SymbolTable, TypeDef,
+    ConstructorError, ParserStatementKind, Program, Scope, SymbolTable, TypeDef,
     member_collection::{
         collect_member_functions, collect_member_nests, collect_member_operators,
         collect_member_variables,

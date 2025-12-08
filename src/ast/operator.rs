@@ -16,20 +16,20 @@
 
 use std::fmt::Debug;
 
-use crate::{FuncParam, Statement, TypeDef};
+use crate::{FuncParam, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Operator<'a> {
+pub struct Operator {
     pub symbol: String,
-    pub return_type: Option<&'a TypeDef<'a>>,
-    pub body: Vec<Statement<'a>>,
-    pub kind: OperatorKind<'a>,
+    pub return_type: Option<SymbolPath>,
+    pub body: Vec<Statement>,
+    pub kind: OperatorKind,
 }
 
 #[derive(PartialEq, Clone)]
-pub enum OperatorKind<'a> {
+pub enum OperatorKind {
     InfixOperator {
-        another: FuncParam<'a>,
+        another: FuncParam,
         associativity: OperatorAssociativity,
         precedence: u8,
     },
@@ -37,7 +37,7 @@ pub enum OperatorKind<'a> {
     PostfixOperator,
 }
 
-impl Debug for OperatorKind<'_> {
+impl Debug for OperatorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             OperatorKind::InfixOperator { .. } => write!(f, "infix"),

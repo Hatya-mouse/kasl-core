@@ -28,6 +28,12 @@ impl SymbolPath {
         }
     }
 
+    pub fn from(path: &[SymbolPathComponent]) -> Self {
+        SymbolPath {
+            components: path.to_vec(),
+        }
+    }
+
     pub fn push(&mut self, component: SymbolPathComponent) {
         self.components.push(component);
     }

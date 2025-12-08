@@ -18,43 +18,25 @@ use crate::{
     FuncParam, InputVar, OutputVar, Program, StateVar, SymbolPath, SymbolPathComponent, Variable,
 };
 
-pub trait ProgramLocator<'a> {
+pub trait ProgramLocator {
     /// Get mutable reference to inferable variable
-    fn get_inferable_var_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut Variable<'a>>;
+    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut Variable>;
 
     /// Get mutable reference to inferable input variable
-    fn get_inferable_input_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut InputVar<'a>>;
+    fn get_inferable_input_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut InputVar>;
 
     /// Get mutable reference to inferable output variable
-    fn get_inferable_output_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut OutputVar<'a>>;
+    fn get_inferable_output_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut OutputVar>;
 
     /// Get mutable reference to inferable state variable
-    fn get_inferable_state_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut StateVar<'a>>;
+    fn get_inferable_state_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut StateVar>;
 
     /// Get mutable reference to inferable function parameter variable
-    fn get_inferable_func_param_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut FuncParam<'a>>;
+    fn get_inferable_func_param_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut FuncParam>;
 }
 
-impl<'a> ProgramLocator<'a> for Program<'a> {
-    fn get_inferable_var_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut Variable<'a>> {
+impl ProgramLocator for Program {
+    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut Variable> {
         if symbol_path.components.is_empty() {
             return None;
         }
@@ -68,10 +50,7 @@ impl<'a> ProgramLocator<'a> for Program<'a> {
         }
     }
 
-    fn get_inferable_input_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut InputVar<'a>> {
+    fn get_inferable_input_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut InputVar> {
         if symbol_path.components.is_empty() {
             return None;
         }
@@ -85,10 +64,7 @@ impl<'a> ProgramLocator<'a> for Program<'a> {
         }
     }
 
-    fn get_inferable_output_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut OutputVar<'a>> {
+    fn get_inferable_output_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut OutputVar> {
         if symbol_path.components.is_empty() {
             return None;
         }
@@ -102,10 +78,7 @@ impl<'a> ProgramLocator<'a> for Program<'a> {
         }
     }
 
-    fn get_inferable_state_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut StateVar<'a>> {
+    fn get_inferable_state_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut StateVar> {
         if symbol_path.components.is_empty() {
             return None;
         }
@@ -119,10 +92,7 @@ impl<'a> ProgramLocator<'a> for Program<'a> {
         }
     }
 
-    fn get_inferable_func_param_mut(
-        &'a mut self,
-        symbol_path: &SymbolPath,
-    ) -> Option<&'a mut FuncParam<'a>> {
+    fn get_inferable_func_param_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut FuncParam> {
         if symbol_path.components.is_empty() {
             return None;
         }

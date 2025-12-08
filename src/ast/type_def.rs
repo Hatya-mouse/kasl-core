@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, Operator, Scope, Statement, Variable};
+use crate::{FuncParam, Function, Operator, Scope, Statement, SymbolPath, Variable};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct TypeDef<'a> {
+pub struct TypeDef {
     pub name: String,
-    pub inherits: Vec<&'a TypeDef<'a>>,
-    pub vars: Vec<Variable<'a>>,
-    pub inits: Vec<Initializer<'a>>,
-    pub funcs: Vec<Function<'a>>,
-    pub types: Vec<TypeDef<'a>>,
-    pub operators: Vec<Operator<'a>>,
+    pub inherits: Vec<SymbolPath>,
+    pub vars: Vec<Variable>,
+    pub inits: Vec<Initializer>,
+    pub funcs: Vec<Function>,
+    pub types: Vec<TypeDef>,
+    pub operators: Vec<Operator>,
 }
 
-impl<'a> TypeDef<'a> {
+impl TypeDef {
     pub fn new(name: String) -> Self {
         TypeDef {
             name,
@@ -40,51 +40,51 @@ impl<'a> TypeDef<'a> {
         }
     }
 
-    pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
+    pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
         self.types.iter_mut().find(|s| s.name == name)
     }
 }
 
-impl<'a> Scope<'a> for TypeDef<'a> {
-    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function<'a>> {
+impl Scope for TypeDef {
+    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function> {
         self.funcs.iter_mut().find(|f| f.name == name)
     }
 
-    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef<'a>> {
+    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
         self.types.iter_mut().find(|s| s.name == name)
     }
 
-    fn get_state_mut(&mut self, _name: &str) -> Option<&mut super::StateVar<'a>> {
+    fn get_state_mut(&mut self, _name: &str) -> Option<&mut super::StateVar> {
         None
     }
 
-    fn get_input_mut(&mut self, _name: &str) -> Option<&mut super::InputVar<'a>> {
+    fn get_input_mut(&mut self, _name: &str) -> Option<&mut super::InputVar> {
         None
     }
 
-    fn get_output_mut(&mut self, _name: &str) -> Option<&mut super::OutputVar<'a>> {
+    fn get_output_mut(&mut self, _name: &str) -> Option<&mut super::OutputVar> {
         None
     }
 
-    fn get_var_mut(&mut self, name: &str) -> Option<&mut Variable<'a>> {
+    fn get_var_mut(&mut self, name: &str) -> Option<&mut Variable> {
         self.vars.iter_mut().find(|v| v.name == name)
     }
 
-    fn get_operator_mut(&mut self, name: &str) -> Option<&mut Operator<'a>> {
+    fn get_operator_mut(&mut self, name: &str) -> Option<&mut Operator> {
         self.operators.iter_mut().find(|o| o.symbol == name)
     }
 
-    fn get_func_param_mut(&mut self, _name: &str) -> Option<&mut FuncParam<'a>> {
+    fn get_func_param_mut(&mut self, _name: &str) -> Option<&mut FuncParam> {
         None
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Initializer<'a> {
+pub struct Initializer {
     pub literal_bind: Option<LiteralBind>,
-    pub params: Vec<FuncParam<'a>>,
-    pub body: Vec<Statement<'a>>,
-    pub required_by: Option<&'a TypeDef<'a>>,
+    pub params: Vec<FuncParam>,
+    pub body: Vec<Statement>,
+    pub required_by: Option<SymbolPath>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

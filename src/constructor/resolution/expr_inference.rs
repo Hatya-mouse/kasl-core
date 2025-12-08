@@ -16,13 +16,16 @@
 
 use crate::{ConstructorError, ConstructorErrorType, ExprToken, Program, Range, SymbolPath};
 
-pub fn infer_expr_type(
-    program: &Program,
-    expr: &[ExprToken],
-) -> Result<SymbolPath, ConstructorError> {
-    // todo!("Implement Expression Type Inference");
-    Err(ConstructorError {
-        error_type: ConstructorErrorType::Placeholder,
-        position: Range::zero(),
-    })
+pub trait ExprTypeInference {
+    fn infer_expr_type(&self, expr: &[ExprToken]) -> Result<SymbolPath, ConstructorError>;
+}
+
+impl ExprTypeInference for Program {
+    fn infer_expr_type(&self, expr: &[ExprToken]) -> Result<SymbolPath, ConstructorError> {
+        // todo!("Implement Expression Type Inference");
+        Err(ConstructorError {
+            error_type: ConstructorErrorType::Placeholder,
+            position: Range::zero(),
+        })
+    }
 }

@@ -21,7 +21,7 @@ pub fn collect_all_types(program: &mut Program, symbol_table: &SymbolTable) {
     program.types.extend(types);
 }
 
-fn collect_nested_types<'a>(symbol_table: &SymbolTable) -> Vec<TypeDef<'a>> {
+fn collect_nested_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
     let mut types = Vec::new();
 
     for (_, stmt) in &symbol_table.type_defs {

@@ -14,37 +14,37 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Scope, Statement, TypeDef};
+use crate::{Expression, Scope, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Function<'a> {
+pub struct Function {
     pub name: String,
-    pub params: Vec<FuncParam<'a>>,
-    pub return_type: Option<&'a TypeDef<'a>>,
-    pub body: Vec<Statement<'a>>,
-    pub required_by: Option<&'a TypeDef<'a>>,
+    pub params: Vec<FuncParam>,
+    pub return_type: Option<SymbolPath>,
+    pub body: Vec<Statement>,
+    pub required_by: Option<SymbolPath>,
 }
 
-impl<'a> Scope<'a> for Function<'a> {
-    fn get_func_param(&self, name: &str) -> Option<&FuncParam<'a>> {
+impl Scope for Function {
+    fn get_func_param(&self, name: &str) -> Option<&FuncParam> {
         self.params.iter().find(|p| p.name == name)
     }
 
-    fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam<'a>> {
+    fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam> {
         self.params.iter_mut().find(|p| p.name == name)
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct FuncParam<'a> {
+pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
-    pub value_type: Option<&'a TypeDef<'a>>,
-    pub def_val: Option<Box<Expression<'a>>>,
+    pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Box<Expression>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct FuncCallArg<'a> {
+pub struct FuncCallArg {
     pub label: String,
-    pub value: Expression<'a>,
+    pub value: Expression,
 }

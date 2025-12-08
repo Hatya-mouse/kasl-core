@@ -17,18 +17,18 @@
 use crate::{FuncCallArg, Operator, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Expression<'a> {
+pub enum Expression {
     IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator {
-        operator: Operator<'a>,
-        operand: Box<Expression<'a>>,
-        args: Vec<FuncCallArg<'a>>,
+        operator: Operator,
+        operand: Box<Expression>,
+        args: Vec<FuncCallArg>,
     },
     Identifier(SymbolPath),
     FuncCall {
         name: SymbolPath,
-        arguments: Vec<Expression<'a>>,
+        arguments: Vec<Expression>,
     },
 }
