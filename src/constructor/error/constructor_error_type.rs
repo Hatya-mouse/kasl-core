@@ -31,6 +31,7 @@ pub enum ConstructorErrorType {
     InvalidParamForOp,
     DependencyCycle(SymbolPath),
     CannotInferType(SymbolPath),
+    CompilerBug(String),
 
     Placeholder,
 }
@@ -80,6 +81,12 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::CannotInferType(symbol_path) => {
                 format!("Cannot infer the type of '{}'.", symbol_path)
+            }
+            ConstructorErrorType::CompilerBug(message) => {
+                format!(
+                    "Compiler bug: \"{}\" Please report to the developer.",
+                    message
+                )
             }
             ConstructorErrorType::Placeholder => "PLACEHOLDER ERROR".to_string(),
         }

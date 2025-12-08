@@ -240,7 +240,7 @@ peg::parser!(pub grammar kash_parser() for str {
             }, range: Range::n(start, end) }
         }
 
-    // State Variable
+    // State ScopeVar
     rule state_var() -> ParserStateVar
         = start:position!() name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() end:position!() {
             ParserStateVar { name, value_type, def_val, range: Range::n(start, end) }

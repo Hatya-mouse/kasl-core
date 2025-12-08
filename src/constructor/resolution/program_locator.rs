@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    FuncParam, InputVar, OutputVar, Program, StateVar, SymbolPath, SymbolPathComponent, Variable,
+    FuncParam, InputVar, OutputVar, Program, ScopeVar, StateVar, SymbolPath, SymbolPathComponent,
 };
 
 pub trait ProgramLocator {
     /// Get mutable reference to inferable variable
-    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut Variable>;
+    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut ScopeVar>;
 
     /// Get mutable reference to inferable input variable
     fn get_inferable_input_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut InputVar>;
@@ -36,7 +36,7 @@ pub trait ProgramLocator {
 }
 
 impl ProgramLocator for Program {
-    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut Variable> {
+    fn get_inferable_var_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut ScopeVar> {
         if symbol_path.components.is_empty() {
             return None;
         }

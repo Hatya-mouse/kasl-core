@@ -26,7 +26,7 @@ pub mod type_def;
 pub mod variables;
 
 pub use expression::Expression;
-pub use function::{FuncCallArg, FuncParam, Function};
+pub use function::{FuncCallArg, Function};
 pub use operator::{Operator, OperatorAssociativity, OperatorKind};
 pub use program::Program;
 pub use range::Range;
@@ -34,4 +34,4 @@ pub use scope::Scope;
 pub use statement::Statement;
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 pub use type_def::{Initializer, LiteralBind, TypeDef};
-pub use variables::{InputAttribute, InputVar, OutputVar, StateVar, Variable};
+pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};

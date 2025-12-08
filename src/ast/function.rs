@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Scope, Statement, SymbolPath};
+use crate::{Expression, FuncParam, Scope, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
@@ -33,14 +33,6 @@ impl Scope for Function {
     fn get_func_param_mut(&mut self, name: &str) -> Option<&mut FuncParam> {
         self.params.iter_mut().find(|p| p.name == name)
     }
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct FuncParam {
-    pub label: Option<String>,
-    pub name: String,
-    pub value_type: Option<SymbolPath>,
-    pub def_val: Option<Box<Expression>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, InputVar, Operator, OutputVar, StateVar, TypeDef, Variable};
+use crate::{FuncParam, Function, InputVar, Operator, OutputVar, ScopeVar, StateVar, TypeDef};
 
 pub trait Scope {
     /// Get an immutable reference to a Function by its name. Returns None if the Function is not found.
@@ -67,13 +67,13 @@ pub trait Scope {
         None
     }
 
-    /// Get an immutable reference to a Variable by its name. Returns None if the Variable is not found.
-    fn get_var(&self, _name: &str) -> Option<&Variable> {
+    /// Get an immutable reference to a ScopeVar by its name. Returns None if the ScopeVar is not found.
+    fn get_var(&self, _name: &str) -> Option<&ScopeVar> {
         None
     }
 
-    /// Get a mutable reference to a Variable by its name. Returns None if the Variable is not found.
-    fn get_var_mut(&mut self, _name: &str) -> Option<&mut Variable> {
+    /// Get a mutable reference to a ScopeVar by its name. Returns None if the ScopeVar is not found.
+    fn get_var_mut(&mut self, _name: &str) -> Option<&mut ScopeVar> {
         None
     }
 

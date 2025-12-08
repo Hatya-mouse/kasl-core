@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Function, Operator, Scope, Statement, SymbolPath, Variable};
+use crate::{FuncParam, Function, Operator, Scope, ScopeVar, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef {
     pub name: String,
     pub inherits: Vec<SymbolPath>,
-    pub vars: Vec<Variable>,
+    pub vars: Vec<ScopeVar>,
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
     pub types: Vec<TypeDef>,
@@ -66,7 +66,7 @@ impl Scope for TypeDef {
         None
     }
 
-    fn get_var_mut(&mut self, name: &str) -> Option<&mut Variable> {
+    fn get_var_mut(&mut self, name: &str) -> Option<&mut ScopeVar> {
         self.vars.iter_mut().find(|v| v.name == name)
     }
 

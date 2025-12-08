@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ParserStatementKind, SymbolTable, TypeDef, Variable};
+use crate::{ConstructorError, ParserStatementKind, ScopeVar, SymbolTable, TypeDef};
 
 pub fn collect_member_variables(
     symbol_table: &SymbolTable,
@@ -28,7 +28,7 @@ pub fn collect_member_variables(
                 value_type: _,
                 def_val: _,
             } => {
-                type_def.vars.push(Variable {
+                type_def.vars.push(ScopeVar {
                     required_by: None,
                     name: name.clone(),
                     value_type: None,

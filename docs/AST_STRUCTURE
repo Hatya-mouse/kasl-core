@@ -10,11 +10,11 @@ AST {
     // State variables
     // AudioShader doesn't allow you to define variables in the top level.
     // Instead, you can use state to keep values between frames.
-    states: Variable[]
+    states: ScopeVar[]
     // Input variables
-    inputs: Variable[]
+    inputs: ScopeVar[]
     // Output variables
-    outputs: Variable[]
+    outputs: ScopeVar[]
 }
 
 Type: Protocol / Struct / Primitive
@@ -33,7 +33,7 @@ Function {
 }
 
 FunctionArgument {
-    variable: Variable
+    variable: ScopeVar
     // Label is also a name of the argument but written when calling
     // the function (Please think of Swift's)
     label: String
@@ -46,7 +46,7 @@ FunctionArgument {
 Protocol {
     name: String
     inherits: Protocol[]
-    variables: Variable[]
+    variables: ScopeVar[]
     functions: Function[]
     initializers: Function[]
     operators: Operator[]
@@ -57,7 +57,7 @@ Protocol {
 Struct {
     name: String
     inherits: Protocol[]
-    variables: Variable[]
+    variables: ScopeVar[]
     functions: Function[]
     initializers: Function[]
     operators: Operator[]
@@ -65,7 +65,7 @@ Struct {
     structs: Struct[]
 }
 
-Variable {
+ScopeVar {
     name: String
     type: Type
     default: Expression?
