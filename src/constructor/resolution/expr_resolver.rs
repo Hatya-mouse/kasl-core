@@ -13,11 +13,3 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
-pub mod dependency_analysis;
-pub mod expr_inference;
-pub mod expr_resolver;
-pub mod program_locator;
-pub mod type_resolver;
-
-pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};

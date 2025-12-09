@@ -16,7 +16,7 @@
 
 use crate::{
     ConstructorError, ParserStatement, Program, SymbolTable,
-    member_collection::collect_all_type_members, resolution::resolver::resolve_types,
+    member_collection::collect_all_type_members, resolution::type_resolver::resolve_types,
     symbol_collection::collect_top_level_symbols, symbol_table::build_symbol_table,
     type_collection::collect_all_types,
 };
