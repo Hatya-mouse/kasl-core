@@ -20,8 +20,7 @@ use crate::{LiteralBind, SymbolPath};
 pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
-    TypeNotFound(SymbolPath),
-    FuncNotFound(SymbolPath),
+    SymbolNotFound(Option<SymbolPath>),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -47,12 +46,10 @@ impl ConstructorErrorType {
                 "Consecutive dots are not allowed here.".to_string()
             }
             ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
-            ConstructorErrorType::TypeNotFound(type_path) => {
-                format!("Type '{}' not found here.", type_path)
-            }
-            ConstructorErrorType::FuncNotFound(func_path) => {
-                format!("Function '{}' not found here.", func_path)
-            }
+            ConstructorErrorType::SymbolNotFound(symbol_path) => match symbol_path {
+                Some(path) => format!("Symbol '{}' not found here.", path),
+                None => "Symbol not found here.".to_string(),
+            },
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
                 let cause_str = cause.to_string();

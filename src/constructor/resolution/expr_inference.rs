@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
-    SymbolPath, SymbolTable, symbol_path,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind,
+    ParserSymbolPath, Program, SymbolPath, SymbolPathComponent, SymbolTable, symbol_path,
 };
 
 pub trait ExprTypeInference {
@@ -74,32 +74,17 @@ impl ExprTypeInference for Program {
                     }
                 },
 
+                ExprTokenKind::Identifier(ref parser_path) => {
+                    let symbol_type = self.get_symbol_type(&parser_path, symbol_table, token)?;
+                    last_type = Some(symbol_type);
+                }
+
                 ExprTokenKind::FuncCall {
                     path: ref func_parser_path,
                     args: _,
                 } => {
-                    let func_symbol_path = symbol_table.resolve_path(func_parser_path);
-                    let func = self.get_func_by_path(&func_symbol_path);
-
-                    match func {
-                        Some(func) => match &func.return_type {
-                            Some(return_type) => last_type = Some(return_type.clone()),
-                            None => {
-                                return Err(ConstructorError {
-                                    error_type: ConstructorErrorType::NoReturnFunctionInExpr(
-                                        func_symbol_path,
-                                    ),
-                                    position: token.range,
-                                });
-                            }
-                        },
-                        None => {
-                            return Err(ConstructorError {
-                                error_type: ConstructorErrorType::FuncNotFound(func_symbol_path),
-                                position: token.range,
-                            });
-                        }
-                    }
+                    let func_type = self.get_func_type(func_parser_path, symbol_table, token)?;
+                    last_type = Some(func_type);
                 }
 
                 _ => (),
@@ -107,5 +92,102 @@ impl ExprTypeInference for Program {
         }
 
         Ok(symbol_path![])
+    }
+}
+
+impl Program {
+    fn get_symbol_type(
+        &self,
+        parser_path: &ParserSymbolPath,
+        symbol_table: &SymbolTable,
+        token: &ExprToken,
+    ) -> Result<SymbolPath, ConstructorError> {
+        let symbol_path = match symbol_table.resolve_path(parser_path) {
+            Some(path) => path,
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(None),
+                    position: token.range,
+                });
+            }
+        };
+
+        match symbol_path.components.last() {
+            Some(last_component) => match last_component {
+                SymbolPathComponent::InputVar(_) => {
+                    let input_var = self.get_input_by_path(&symbol_path).unwrap();
+                    input_var.value_type.clone().ok_or(ConstructorError {
+                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                        position: token.range,
+                    })
+                }
+                SymbolPathComponent::OutputVar(_) => {
+                    let output_var = self.get_output_by_path(&symbol_path).unwrap();
+                    output_var.value_type.clone().ok_or(ConstructorError {
+                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                        position: token.range,
+                    })
+                }
+                SymbolPathComponent::StateVar(_) => {
+                    let state_var = self.get_state_by_path(&symbol_path).unwrap();
+                    state_var.value_type.clone().ok_or(ConstructorError {
+                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                        position: token.range,
+                    })
+                }
+                SymbolPathComponent::Var(_) => {
+                    let scope_var = self.get_var_by_path(&symbol_path).unwrap();
+                    scope_var.value_type.clone().ok_or(ConstructorError {
+                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                        position: token.range,
+                    })
+                }
+                _ => {
+                    return Err(ConstructorError {
+                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                        position: token.range,
+                    });
+                }
+            },
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
+                    position: token.range,
+                });
+            }
+        }
+    }
+
+    fn get_func_type(
+        &self,
+        parser_path: &ParserSymbolPath,
+        symbol_table: &SymbolTable,
+        token: &ExprToken,
+    ) -> Result<SymbolPath, ConstructorError> {
+        let func_symbol_path = match symbol_table.resolve_path(parser_path) {
+            Some(path) => path,
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(None),
+                    position: token.range,
+                });
+            }
+        };
+        let func = match self.get_func_by_path(&func_symbol_path) {
+            Some(func) => func,
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(
+                        func_symbol_path.clone(),
+                    )),
+                    position: token.range,
+                });
+            }
+        };
+
+        func.return_type.clone().ok_or(ConstructorError {
+            error_type: ConstructorErrorType::NoReturnFunctionInExpr(func_symbol_path),
+            position: token.range,
+        })
     }
 }

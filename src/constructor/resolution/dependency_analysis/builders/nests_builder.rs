@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatementKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    ConstructorError, ParserStatementKind, SymbolPath, SymbolPathComponent, SymbolTable,
     resolution::dependency_analysis::{DependencyGraph, build_func_param_graph, build_var_graph},
 };
 
@@ -24,7 +24,7 @@ pub fn build_struct_and_protocol_graph(
     type_path: &SymbolPath,
     root_symbol_table: &SymbolTable,
     child_symbol_table: &SymbolTable,
-) {
+) -> Result<(), ConstructorError> {
     for stmt in &child_symbol_table.vars {
         match &stmt.1.kind {
             ParserStatementKind::Var {
@@ -37,7 +37,7 @@ pub fn build_struct_and_protocol_graph(
                     // Combine variable name to create a new path for the child type
                     let mut var_path = type_path.clone();
                     var_path.push(SymbolPathComponent::Var(name.to_string()));
-                    build_var_graph(graph, root_symbol_table, &var_path, def_val);
+                    build_var_graph(graph, root_symbol_table, &var_path, def_val)?;
                 }
             }
 
@@ -57,7 +57,7 @@ pub fn build_struct_and_protocol_graph(
                 // Combine function name to create a new path for the function
                 let mut func_path = type_path.clone();
                 func_path.push(SymbolPathComponent::Func(name.to_string()));
-                build_func_param_graph(graph, root_symbol_table, func_path, params);
+                build_func_param_graph(graph, root_symbol_table, func_path, params)?;
             }
 
             _ => (),
@@ -88,11 +88,13 @@ pub fn build_struct_and_protocol_graph(
                         &child_type_path,
                         root_symbol_table,
                         child_symbol_table,
-                    );
+                    )?;
                 }
             }
 
             _ => (),
         }
     }
+
+    Ok(())
 }

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{ParserSymbolPath, Program, Scope, SymbolPath, SymbolPathComponent, TypeDef};
+use crate::{ParserSymbolPath, Program, Scope, SymbolPath, SymbolPathComponent};
 
 impl Program {
     /// Resolve ParserSymbolPath to obtain a SymbolPath to the TypeDef.

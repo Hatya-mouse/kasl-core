@@ -29,7 +29,7 @@ pub fn resolve_types(
     symbol_table: &SymbolTable,
 ) -> Result<(), Vec<ConstructorError>> {
     // Build the type dependency graph
-    let graph = build_graph(symbol_table);
+    let graph = build_graph(symbol_table).map_err(|err| vec![err])?;
 
     // Then sort symbols based on the dependency graph
     let sorted_list = match sort_graph(&graph) {

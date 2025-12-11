@@ -20,6 +20,9 @@ use std::collections::HashMap;
 /// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
+    pub inputs: HashMap<String, &'a ParserStatement>,
+    pub outputs: HashMap<String, &'a ParserStatement>,
+    pub states: HashMap<String, &'a ParserStatement>,
     pub vars: HashMap<String, &'a ParserStatement>,
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub operators: HashMap<String, &'a ParserStatement>,
@@ -30,6 +33,9 @@ pub struct SymbolTable<'a> {
 impl<'a> SymbolTable<'a> {
     pub fn new() -> Self {
         Self {
+            inputs: HashMap::new(),
+            outputs: HashMap::new(),
+            states: HashMap::new(),
             vars: HashMap::new(),
             funcs: HashMap::new(),
             operators: HashMap::new(),
@@ -38,7 +44,8 @@ impl<'a> SymbolTable<'a> {
         }
     }
 
-    pub fn resolve_path(&self, parser_path: &ParserSymbolPath) -> SymbolPath {
+    /// Resolves a ParserSymbolPath into a SymbolPath.
+    pub fn resolve_path(&self, parser_path: &ParserSymbolPath) -> Option<SymbolPath> {
         let mut result_path = SymbolPath::new();
         let mut current_scope = self;
 
@@ -49,6 +56,12 @@ impl<'a> SymbolTable<'a> {
                 result_path.push(SymbolPathComponent::CompFloat);
             } else if &component.symbol == "CompBool" {
                 result_path.push(SymbolPathComponent::CompBool);
+            } else if let Some(_) = current_scope.get_input(&component.symbol) {
+                result_path.push(SymbolPathComponent::InputVar(component.symbol.clone()));
+            } else if let Some(_) = current_scope.get_output(&component.symbol) {
+                result_path.push(SymbolPathComponent::OutputVar(component.symbol.clone()));
+            } else if let Some(_) = current_scope.get_state(&component.symbol) {
+                result_path.push(SymbolPathComponent::StateVar(component.symbol.clone()));
             } else if let Some(_) = current_scope.get_var(&component.symbol) {
                 result_path.push(SymbolPathComponent::Var(component.symbol.clone()));
             } else if let Some(_) = current_scope.get_func(&component.symbol) {
@@ -56,13 +69,27 @@ impl<'a> SymbolTable<'a> {
             } else if let Some(type_def) = current_scope.get_type_def(&component.symbol) {
                 result_path.push(SymbolPathComponent::TypeDef(component.symbol.clone()));
                 current_scope = &type_def.1;
+            } else {
+                return None;
             }
         }
 
-        result_path
+        Some(result_path)
     }
 
     // Insert functions
+
+    pub fn insert_input(&mut self, name: String, stmt: &'a ParserStatement) {
+        self.inputs.insert(name, stmt);
+    }
+
+    pub fn insert_output(&mut self, name: String, stmt: &'a ParserStatement) {
+        self.outputs.insert(name, stmt);
+    }
+
+    pub fn insert_state(&mut self, name: String, stmt: &'a ParserStatement) {
+        self.states.insert(name, stmt);
+    }
 
     pub fn insert_var(&mut self, name: String, stmt: &'a ParserStatement) {
         self.vars.insert(name, stmt);
@@ -90,6 +117,18 @@ impl<'a> SymbolTable<'a> {
     }
 
     // Getter functions
+
+    pub fn get_input(&self, name: &str) -> Option<&&ParserStatement> {
+        self.inputs.get(name)
+    }
+
+    pub fn get_output(&self, name: &str) -> Option<&&ParserStatement> {
+        self.outputs.get(name)
+    }
+
+    pub fn get_state(&self, name: &str) -> Option<&&ParserStatement> {
+        self.states.get(name)
+    }
 
     pub fn get_var(&self, name: &str) -> Option<&&ParserStatement> {
         self.vars.get(name)
@@ -131,6 +170,9 @@ impl<'a> SymbolTable<'a> {
         }
 
         match &symbol_path.components[last_index] {
+            SymbolPathComponent::InputVar(name) => current_scope.get_input(name),
+            SymbolPathComponent::OutputVar(name) => current_scope.get_output(name),
+            SymbolPathComponent::StateVar(name) => current_scope.get_state(name),
             SymbolPathComponent::Var(name) => current_scope.get_var(name),
             SymbolPathComponent::Func(name) => current_scope.get_func(name),
             SymbolPathComponent::TypeDef(name) => {

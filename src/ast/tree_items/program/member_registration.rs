@@ -30,7 +30,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -51,7 +51,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -72,7 +72,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -93,7 +93,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -114,7 +114,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -135,7 +135,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -156,7 +156,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
@@ -177,7 +177,7 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }

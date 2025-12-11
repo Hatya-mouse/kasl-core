@@ -38,19 +38,19 @@ pub fn build_symbol_table<'a>(
                 def_val: _,
                 attrs: _,
             } => {
-                symbol_table.insert_var(name.clone(), &stmt);
+                symbol_table.insert_input(name.clone(), &stmt);
             }
 
             ParserStatementKind::Output {
                 name,
                 value_type: _,
             } => {
-                symbol_table.insert_var(name.clone(), &stmt);
+                symbol_table.insert_output(name.clone(), &stmt);
             }
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    symbol_table.insert_var(var.name.clone(), &stmt);
+                    symbol_table.insert_state(var.name.clone(), &stmt);
                 }
             }
 
