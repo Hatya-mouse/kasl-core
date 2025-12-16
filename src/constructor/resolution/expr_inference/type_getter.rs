@@ -15,88 +15,12 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind,
-    ParserSymbolPath, Program, SymbolPath, SymbolPathComponent, SymbolTable, symbol_path,
+    ConstructorError, ConstructorErrorType, ExprToken, ParserSymbolPath, Program, SymbolPath,
+    SymbolPathComponent, SymbolTable,
 };
 
-pub trait ExprTypeInference {
-    fn infer_expr_type(
-        &self,
-        expr: &[ExprToken],
-        symbol_table: &SymbolTable,
-    ) -> Result<SymbolPath, ConstructorError>;
-}
-
-impl ExprTypeInference for Program {
-    fn infer_expr_type(
-        &self,
-        expr: &[ExprToken],
-        symbol_table: &SymbolTable,
-    ) -> Result<SymbolPath, ConstructorError> {
-        let mut expr_iter = expr.iter().peekable();
-        let mut last_type: Option<SymbolPath> = None;
-
-        while let Some(token) = expr_iter.next() {
-            match token.kind {
-                ExprTokenKind::IntLiteral(_) => match &self.int_literal_type {
-                    Some(int_literal_type) => last_type = Some(int_literal_type.clone()),
-                    None => {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::MissingLiteralBind(
-                                LiteralBind::IntLiteral,
-                            ),
-                            position: token.range,
-                        });
-                    }
-                },
-
-                ExprTokenKind::FloatLiteral(_) => match &self.float_literal_type {
-                    Some(float_literal_type) => last_type = Some(float_literal_type.clone()),
-                    None => {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::MissingLiteralBind(
-                                LiteralBind::FloatLiteral,
-                            ),
-                            position: token.range,
-                        });
-                    }
-                },
-
-                ExprTokenKind::BoolLiteral(_) => match &self.bool_literal_type {
-                    Some(bool_literal_type) => last_type = Some(bool_literal_type.clone()),
-                    None => {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::MissingLiteralBind(
-                                LiteralBind::BoolLiteral,
-                            ),
-                            position: token.range,
-                        });
-                    }
-                },
-
-                ExprTokenKind::Identifier(ref parser_path) => {
-                    let symbol_type = self.get_symbol_type(&parser_path, symbol_table, token)?;
-                    last_type = Some(symbol_type);
-                }
-
-                ExprTokenKind::FuncCall {
-                    path: ref func_parser_path,
-                    args: _,
-                } => {
-                    let func_type = self.get_func_type(func_parser_path, symbol_table, token)?;
-                    last_type = Some(func_type);
-                }
-
-                _ => (),
-            }
-        }
-
-        Ok(symbol_path![])
-    }
-}
-
 impl Program {
-    fn get_symbol_type(
+    pub fn get_symbol_type(
         &self,
         parser_path: &ParserSymbolPath,
         symbol_table: &SymbolTable,
@@ -158,7 +82,7 @@ impl Program {
         }
     }
 
-    fn get_func_type(
+    pub fn get_func_type(
         &self,
         parser_path: &ParserSymbolPath,
         symbol_table: &SymbolTable,

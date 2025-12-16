@@ -20,7 +20,7 @@ use crate::{
     ast::tree_items::variables::VariableTrait,
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
-        expr_inference::ExprTypeInference,
+        expr_inference::expr_type_inference::ExprTypeInference,
     },
 };
 
