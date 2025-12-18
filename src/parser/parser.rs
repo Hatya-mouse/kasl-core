@@ -297,7 +297,14 @@ peg::parser!(pub grammar kash_parser() for str {
                 tokens
             }
         )
-        / "(" _ expr:expression() _ ")" { expr }
+        / l_paren_start:position!() "(" l_paren_end:position!() _ expr:expression() _ r_paren_start:position!() ")" r_paren_end:position!() {
+            let mut tokens = vec![
+                ExprToken { kind: ExprTokenKind::LParen, range: Range::n(l_paren_start, l_paren_end) },
+                ExprToken { kind: ExprTokenKind::RParen, range: Range::n(r_paren_start, r_paren_end) }
+            ];
+            tokens.splice(1..1, expr);
+            tokens
+        }
         / expected!("expression")
 
     rule operator_token() -> ExprToken

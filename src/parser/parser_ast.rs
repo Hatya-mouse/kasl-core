@@ -179,6 +179,8 @@ pub enum ExprTokenKind {
         path: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
+    LParen,
+    RParen,
 }
 
 pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
