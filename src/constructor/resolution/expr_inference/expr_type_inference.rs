@@ -16,7 +16,7 @@
 
 use crate::{ConstructorError, ExprToken, Operator, Program, SymbolPath, SymbolTable, symbol_path};
 
-pub enum ResolvedToken<'a> {
+pub enum TypedToken<'a> {
     Value(SymbolPath), // The type of the value
     Operator(&'a Operator),
     LParen,
@@ -38,6 +38,10 @@ impl<'a> ExprTypeInference<'a> for Program {
         symbol_table: &SymbolTable,
     ) -> Result<SymbolPath, ConstructorError> {
         let mut expr_iter = expr.iter().peekable();
+
+        // 1. Convert tokens to TypedToken so we can easily look up their types
+        // 2. Rearrange tokens to get reverse polish notation
+        // 3. Evaluate the reverse polish notation to get the type of the expression
 
         Ok(symbol_path![])
     }

@@ -24,6 +24,7 @@ use crate::{
     },
 };
 
+/// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
 pub fn resolve_types(
     program: &mut Program,
     symbol_table: &SymbolTable,
@@ -74,6 +75,7 @@ pub fn resolve_types(
                 attrs: _,
             } => {
                 if let Some(type_parser_path) = value_type {
+                    // If the symbol has a type annotation, use it
                     let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
                     process_inference_write(
                         program,
@@ -84,6 +86,7 @@ pub fn resolve_types(
                         type_symbol_path,
                     );
                 } else if let Some(def_val) = def_val {
+                    // If the symbol doesn't have a type annotation, infer it from the default value
                     match program.infer_expr_type(def_val, symbol_table) {
                         Ok(type_symbol_path) => {
                             process_inference_write(
@@ -104,6 +107,7 @@ pub fn resolve_types(
                 name: _,
                 value_type,
             } => {
+                // Output variable must have a type annotation
                 let type_symbol_path = program.resolve_type_def_parser_path(&value_type);
                 process_inference_write(
                     program,
@@ -118,6 +122,7 @@ pub fn resolve_types(
             ParserStatementKind::State { vars } => {
                 for var in vars {
                     if let Some(type_parser_path) = &var.value_type {
+                        // If the symbol has a type annotation, use it
                         let type_symbol_path =
                             program.resolve_type_def_parser_path(&type_parser_path);
                         process_inference_write(
@@ -129,6 +134,7 @@ pub fn resolve_types(
                             type_symbol_path,
                         );
                     } else {
+                        // If the symbol doesn't have a type annotation, infer it from the default value
                         match program.infer_expr_type(&var.def_val, symbol_table) {
                             Ok(type_symbol_path) => {
                                 process_inference_write(
@@ -153,6 +159,7 @@ pub fn resolve_types(
                 def_val,
             } => {
                 if let Some(type_parser_path) = value_type {
+                    // If the symbol has a type annotation, use it
                     let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
                     process_inference_write(
                         program,
@@ -163,6 +170,7 @@ pub fn resolve_types(
                         type_symbol_path,
                     );
                 } else if let Some(def_val) = def_val {
+                    // If the symbol doesn't have a type annotation, infer it from the default value
                     match program.infer_expr_type(def_val, symbol_table) {
                         Ok(type_symbol_path) => {
                             process_inference_write(
@@ -188,6 +196,7 @@ pub fn resolve_types(
             } => {
                 for param in params {
                     if let Some(type_parser_path) = &param.value_type {
+                        // If the symbol has a type annotation, use it
                         let type_symbol_path =
                             program.resolve_type_def_parser_path(&type_parser_path);
                         process_inference_write(
@@ -199,6 +208,7 @@ pub fn resolve_types(
                             type_symbol_path,
                         );
                     } else if let Some(def_val) = &param.def_val {
+                        // If the symbol doesn't have a type annotation, infer it from the default value
                         match program.infer_expr_type(def_val, symbol_table) {
                             Ok(type_symbol_path) => {
                                 process_inference_write(
