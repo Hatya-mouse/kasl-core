@@ -93,7 +93,9 @@ pub fn get_typed_tokens<'a>(
                 result.push(TypedToken::Operator(()));
             }
 
-            _ => (),
+            ExprTokenKind::LParen => result.push(TypedToken::LParen),
+
+            ExprTokenKind::RParen => result.push(TypedToken::RParen),
         }
     }
 
