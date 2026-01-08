@@ -15,8 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
-    SymbolTable, resolution::expr_inference::expr_type_inference::TypedToken,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program, Range, SymbolTable, resolution::expr_inference::expr_type_inference::TypedToken
 };
 
 enum ExpectedTokenKind {
@@ -29,7 +28,7 @@ pub fn get_typed_tokens<'a>(
     program: &Program,
     expr: &[ExprToken],
     symbol_table: &SymbolTable,
-) -> Result<Vec<TypedToken<'a>>, ConstructorError> {
+) -> Result<Vec<TypedToken>, ConstructorError> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
@@ -88,9 +87,13 @@ pub fn get_typed_tokens<'a>(
                 result.push(TypedToken::Value(func_type));
             }
 
-            ExprTokenKind::Operator(_) => {
-                todo!();
-                result.push(TypedToken::Operator(()));
+            ExprTokenKind::Operator(operator_symbol) => {
+                if let Some(last_token) = result.last() {
+                    let next_token = expr_iter.peek();
+                    let typed_operator_token =
+                        handle_operator_token(program, &operator_symbol, &token.range, last_token, next_token)?;
+                    result.push(typed_operator_token);
+                }
             }
 
             ExprTokenKind::LParen => result.push(TypedToken::LParen),
@@ -100,6 +103,43 @@ pub fn get_typed_tokens<'a>(
     }
 
     Ok(result)
+}
+
+fn handle_operator_token(
+    program: &Program,
+    operator_symbol: &str,
+    token_range: &Range,
+    last_token: &TypedToken,
+    next_token: Option<&&ExprToken>,
+) -> Result<TypedToken, ConstructorError> {
+    match last_token {
+        TypedToken::Value(_) | TypedToken::RParen => match next_token {
+            Some(token) => match token.kind {
+                ExprTokenKind::Operator(_) => {
+                    return Ok(TypedToken::PostfixOperator(operator_symbol.to_string()));
+                }
+                ExprTokenKind::RParen => {
+                    return Ok(TypedToken::PostfixOperator(operator_symbol.to_string()));
+                }
+                _ => {
+                    return Ok(TypedToken::InfixOperator(operator_symbol.to_string()));
+                }
+            },
+            None => return Ok(TypedToken::PostfixOperator(operator_symbol.to_string())),
+        },
+        TypedToken::LParen => match next_token {
+            Some(token) => match token.kind {
+                ExprTokenKind::Operator(_) => {}
+            },
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::UnmatchedParentheses,
+                    position: ,
+                });
+            }
+        },
+        _ => (),
+    }
 }
 
 // fn get_typed_tokens<'a>(

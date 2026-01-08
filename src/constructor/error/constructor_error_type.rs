@@ -34,6 +34,7 @@ pub enum ConstructorErrorType {
     DuplicateLiteralBind(LiteralBind),
     MissingLiteralBind(LiteralBind),
     NoReturnFunctionInExpr(SymbolPath),
+    UnmatchedParentheses,
 
     CompilerBug(String),
     Placeholder,
@@ -111,6 +112,9 @@ impl ConstructorErrorType {
                     "This function '{}' does not have a return type despite being used in an expression.",
                     symbol_path
                 )
+            }
+            ConstructorErrorType::UnmatchedParentheses => {
+                format!("Unmatched parentheses.")
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(

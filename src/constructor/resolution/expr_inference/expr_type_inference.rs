@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ExprToken, Operator, Program, SymbolPath, SymbolTable, symbol_path};
+use crate::{ConstructorError, ExprToken, Program, SymbolPath, SymbolTable, symbol_path};
 
-pub enum TypedToken<'a> {
+pub enum TypedToken {
     Value(SymbolPath), // The type of the value
-    Operator(&'a Operator),
+    InfixOperator(String),
+    PrefixOperator(String),
+    PostfixOperator(String),
     LParen,
     RParen,
 }
