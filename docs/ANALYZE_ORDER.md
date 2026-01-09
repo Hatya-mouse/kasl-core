@@ -74,14 +74,6 @@
             -> Defined Types
         - Body
             -> Statement
-    - Postfix
-        - FuncParam
-            -> Defined Types
-            -> Expression
-        - Return Type
-            -> Defined Types
-        - Body
-            -> Statement
     - Block
         -> Statement
 

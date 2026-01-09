@@ -114,12 +114,6 @@ pub enum ParserStatementKind {
         return_type: ParserSymbolPath,
         body: Option<Vec<ParserStatement>>,
     },
-    Postfix {
-        symbol: String,
-        params: Vec<ParserFuncParam>,
-        return_type: ParserSymbolPath,
-        body: Option<Vec<ParserStatement>>,
-    },
     Block {
         statements: Vec<ParserStatement>,
     },

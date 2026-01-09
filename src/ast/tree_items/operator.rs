@@ -34,7 +34,6 @@ pub enum OperatorKind {
         precedence: u8,
     },
     PrefixOperator,
-    PostfixOperator,
 }
 
 impl Debug for OperatorKind {
@@ -42,7 +41,6 @@ impl Debug for OperatorKind {
         match self {
             OperatorKind::InfixOperator { .. } => write!(f, "infix"),
             OperatorKind::PrefixOperator => write!(f, "prefix"),
-            OperatorKind::PostfixOperator => write!(f, "postfix"),
         }
     }
 }

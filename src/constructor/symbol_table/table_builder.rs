@@ -120,12 +120,6 @@ pub fn build_nest_symbol_table<'a>(
                 params: _,
                 return_type: _,
                 body: _,
-            }
-            | ParserStatementKind::Postfix {
-                symbol,
-                params: _,
-                return_type: _,
-                body: _,
             } => {
                 symbol_table.insert_operator(symbol.clone(), &stmt);
             }

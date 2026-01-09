@@ -22,13 +22,6 @@ use crate::{
     symbol_path,
 };
 
-pub enum TypedToken {
-    Value(SymbolPath), // The type of the value
-    Operator(String),
-    LParen,
-    RParen,
-}
-
 pub trait ExprTypeInference<'a> {
     fn infer_expr_type(
         &self,
@@ -45,9 +38,10 @@ impl<'a> ExprTypeInference<'a> for Program {
     ) -> Result<SymbolPath, ConstructorError> {
         // 1. Convert tokens to TypedToken so we can easily look up their types
         let mut typed_tokens = get_typed_tokens(self, expr, symbol_table)?;
-        // 2. Rearrange tokens to get reverse polish notation
+        // 2. Determine the type of each operator
+        // 3. Rearrange tokens to get reverse polish notation
         shunting_yard(&mut typed_tokens);
-        // 3. Evaluate the reverse polish notation to get the type of the expression
+        // 4. Evaluate the reverse polish notation to get the type of the expression
 
         Ok(symbol_path![])
     }

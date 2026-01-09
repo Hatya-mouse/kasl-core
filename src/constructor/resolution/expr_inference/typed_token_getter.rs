@@ -15,16 +15,23 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
-    SymbolTable, resolution::expr_inference::expr_type_inference::TypedToken,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Operator,
+    Program, SymbolPath, SymbolTable,
 };
+
+pub enum TypedToken<'a> {
+    Value(SymbolPath), // The type of the value
+    Operator(&'a Operator),
+    LParen,
+    RParen,
+}
 
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens<'a>(
     program: &Program,
     expr: &[ExprToken],
     symbol_table: &SymbolTable,
-) -> Result<Vec<TypedToken>, ConstructorError> {
+) -> Result<Vec<TypedToken<'a>>, ConstructorError> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
@@ -84,7 +91,7 @@ pub fn get_typed_tokens<'a>(
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
-                result.push(TypedToken::Operator(operator_symbol.to_string()))
+                // result.push(TypedToken::Operator(operator_symbol.to_string()))
             }
 
             ExprTokenKind::LParen => result.push(TypedToken::LParen),

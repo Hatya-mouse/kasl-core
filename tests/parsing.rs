@@ -138,11 +138,6 @@ mod parsing {
                 } {
                     return self * rhs
                 }
-
-                // Postfix operator declaration
-                postfix !() -> Bool {
-                    return self == 0
-                }
             }
 
             struct Float: CompFloat {
@@ -170,9 +165,6 @@ mod parsing {
 
                 // Test prefix operator
                 var inverted_gain = -gain
-
-                // Test postfix operator
-                var is_zero = power!
             }
 
             // Standalone function

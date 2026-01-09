@@ -46,7 +46,6 @@ peg::parser!(pub grammar kash_parser() for str {
         / init_statement()
         / infix_statement()
         / prefix_statement()
-        / postfix_statement()
         / block_statement()
         / expected!("statement")
 
@@ -199,16 +198,6 @@ peg::parser!(pub grammar kash_parser() for str {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
-            }
-        }
-
-    rule postfix_statement() -> ParserStatement
-        = start:position!() "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
-        __? body:statements() __?
-        "}" { body })? end:position!() {
-            ParserStatement {
-                range: Range::n(start, end),
-                kind: ParserStatementKind::Postfix { symbol, params, return_type, body }
             }
         }
 
@@ -376,8 +365,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule reserved()
         = ("input" / "output" / "var" / "state" / "func" / "return"
         / "if" / "else" / "struct" / "init" / "protocol" / "intliteral"
-        / "floatliteral" / "boolliteral" / "infix" / "prefix"
-        / "postfix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+        / "floatliteral" / "boolliteral" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 

@@ -163,7 +163,6 @@ pub enum StatementType {
     Init,
     Infix,
     Prefix,
-    Postfix,
     Block,
 }
 
@@ -185,7 +184,6 @@ impl StatementType {
             StatementType::Init => "initializer".to_string(),
             StatementType::Infix => "infix operator".to_string(),
             StatementType::Prefix => "prefix operator".to_string(),
-            StatementType::Postfix => "postfix operator".to_string(),
             StatementType::Block => "block statement".to_string(),
         }
     }

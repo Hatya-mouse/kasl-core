@@ -73,7 +73,7 @@ ScopeVar {
 
 Operator {
     symbol: String
-    operator_type: Infix / Prefix / Postfix
+    operator_type: Infix / Prefix
     associativity: (Left / Right)?
     priority: Int
     arguments: FunctionArgument[]

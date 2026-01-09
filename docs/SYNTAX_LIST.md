@@ -118,8 +118,4 @@ infix <symbol>(rhs: <type>) -> <type> {
 prefix <symbol>() -> <type> {
     <body>
 }
-
-postfix <symbol>() -> <type> {
-    <body>
-}
 ```

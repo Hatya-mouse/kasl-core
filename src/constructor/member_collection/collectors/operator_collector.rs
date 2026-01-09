@@ -82,28 +82,6 @@ pub fn collect_member_operators(
                 program.register_operator_by_path(operator, scope_path)?;
             }
 
-            ParserStatementKind::Postfix {
-                symbol,
-                params,
-                return_type: _,
-                body: _,
-            } => {
-                if params.len() > 0 {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::InvalidParamForOp,
-                        position: stmt.1.range,
-                    });
-                }
-
-                let operator = Operator {
-                    symbol: symbol.clone(),
-                    return_type: None,
-                    body: Vec::new(),
-                    kind: OperatorKind::PostfixOperator,
-                };
-                program.register_operator_by_path(operator, scope_path)?;
-            }
-
             _ => (),
         }
     }
