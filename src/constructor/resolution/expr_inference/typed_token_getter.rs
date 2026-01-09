@@ -15,23 +15,24 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Operator,
-    Program, SymbolPath, SymbolTable,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program,
+    SymbolPath, SymbolTable,
 };
 
-pub enum TypedToken<'a> {
+pub enum TypedToken {
     Value(SymbolPath), // The type of the value
-    Operator(&'a Operator),
+    PrefixOperator(String),
+    InfixOperator(String),
     LParen,
     RParen,
 }
 
 /// Infer the type of each token in the expression and convert them to TypedTokens.
-pub fn get_typed_tokens<'a>(
+pub fn get_typed_tokens(
     program: &Program,
     expr: &[ExprToken],
     symbol_table: &SymbolTable,
-) -> Result<Vec<TypedToken<'a>>, ConstructorError> {
+) -> Result<Vec<TypedToken>, ConstructorError> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
@@ -91,7 +92,9 @@ pub fn get_typed_tokens<'a>(
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
-                // result.push(TypedToken::Operator(operator_symbol.to_string()))
+                let last_token = result.last();
+                let operator_token = handle_operator_resolution(operator_symbol, last_token);
+                result.push(operator_token);
             }
 
             ExprTokenKind::LParen => result.push(TypedToken::LParen),
@@ -101,4 +104,24 @@ pub fn get_typed_tokens<'a>(
     }
 
     Ok(result)
+}
+
+fn handle_operator_resolution(
+    operator_symbol: &String,
+    last_token: Option<&TypedToken>,
+) -> TypedToken {
+    // Whether the operator is infix or prefix can be determined by the last token
+    let is_infix = match last_token {
+        Some(TypedToken::Value(_)) | Some(TypedToken::RParen) => true,
+        None
+        | Some(TypedToken::LParen)
+        | Some(TypedToken::InfixOperator(_))
+        | Some(TypedToken::PrefixOperator(_)) => false,
+    };
+
+    if is_infix {
+        return TypedToken::InfixOperator(operator_symbol.clone());
+    } else {
+        return TypedToken::PrefixOperator(operator_symbol.clone());
+    }
 }

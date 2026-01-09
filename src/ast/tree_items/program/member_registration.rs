@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, Initializer, InputVar, Operator, OutputVar,
-    Program, Range, ScopeVar, StateVar, SymbolPath, TypeDef,
+    ConstructorError, ConstructorErrorType, Function, InfixOperator, Initializer, InputVar,
+    OutputVar, PrefixOperator, Program, Range, ScopeVar, StateVar, SymbolPath, TypeDef,
 };
 
 impl Program {
@@ -83,10 +83,10 @@ impl Program {
         Ok(())
     }
 
-    /// Register an Operator to the program **by its path**.
-    pub fn register_operator_by_path(
+    /// Register an InfixOperator to the program **by its path**.
+    pub fn register_infix_operator_by_path(
         &mut self,
-        operator: Operator,
+        operator: InfixOperator,
         to_path: &SymbolPath,
     ) -> Result<(), ConstructorError> {
         let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
@@ -99,7 +99,28 @@ impl Program {
             }
         };
 
-        target_scope.register_operator(operator)?;
+        target_scope.register_infix_operator(operator)?;
+
+        Ok(())
+    }
+
+    /// Register an PrefixOperator to the program **by its path**.
+    pub fn register_prefix_operator_by_path(
+        &mut self,
+        operator: PrefixOperator,
+        to_path: &SymbolPath,
+    ) -> Result<(), ConstructorError> {
+        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
+            Some(scope) => scope,
+            None => {
+                return Err(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
+                    position: Range::zero(),
+                });
+            }
+        };
+
+        target_scope.register_prefix_operator(operator)?;
 
         Ok(())
     }

@@ -21,6 +21,7 @@ pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
     SymbolNotFound(Option<SymbolPath>),
+    OperatorNotFound(String),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -51,6 +52,9 @@ impl ConstructorErrorType {
                 Some(path) => format!("Symbol '{}' not found here.", path),
                 None => "Symbol not found here.".to_string(),
             },
+            ConstructorErrorType::OperatorNotFound(operator_symbol) => {
+                format!("Operator '{}' not found here.", operator_symbol)
+            }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
                 let cause_str = cause.to_string();

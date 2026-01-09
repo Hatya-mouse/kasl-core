@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, FuncParam, Function, Initializer, InputVar, Operator, OutputVar, ScopeVar,
-    StateVar, SymbolPath, TypeDef,
+    ConstructorError, FuncParam, Function, InfixOperator, Initializer, InputVar, OutputVar,
+    PrefixOperator, ScopeVar, StateVar, SymbolPath, TypeDef,
 };
 
 pub trait Scope {
@@ -125,18 +125,39 @@ pub trait Scope {
         None
     }
 
-    /// Register the given Operator to the scope.
-    fn register_operator(&mut self, _operator: Operator) -> Result<(), ConstructorError> {
-        panic!("register_operator not implemented on the Scope")
+    /// Register the given InfixOperator to the scope.
+    fn register_infix_operator(
+        &mut self,
+        _operator: InfixOperator,
+    ) -> Result<(), ConstructorError> {
+        panic!("register_infix_operator not implemented on the Scope")
     }
 
-    /// Get an immutable reference to an Operator by its name. Returns None if the Operator is not found.
-    fn get_operator(&self, _name: &str) -> Option<&Operator> {
+    /// Get an immutable reference to an InfixOperator by its name. Returns None if the Operator is not found.
+    fn get_infix_operator(&self, _name: &str) -> Option<&InfixOperator> {
         None
     }
 
-    /// Get a mutable reference to an Operator by its name. Returns None if the Operator is not found.
-    fn get_operator_mut(&mut self, _name: &str) -> Option<&mut Operator> {
+    /// Get a mutable reference to an InfixOperator by its name. Returns None if the Operator is not found.
+    fn get_infix_operator_mut(&mut self, _name: &str) -> Option<&mut InfixOperator> {
+        None
+    }
+
+    /// Register the given PrefixOperator to the scope.
+    fn register_prefix_operator(
+        &mut self,
+        _operator: PrefixOperator,
+    ) -> Result<(), ConstructorError> {
+        panic!("register_prefix_operator not implemented on the Scope")
+    }
+
+    /// Get an immutable reference to a PrefixOperator by its name. Returns None if the Operator is not found.
+    fn get_prefix_operator(&self, _name: &str) -> Option<&PrefixOperator> {
+        None
+    }
+
+    /// Get a mutable reference to a PrefixOperator by its name. Returns None if the Operator is not found.
+    fn get_prefix_operator_mut(&mut self, _name: &str) -> Option<&mut PrefixOperator> {
         None
     }
 

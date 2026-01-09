@@ -19,30 +19,20 @@ use std::fmt::Debug;
 use crate::{FuncParam, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Operator {
+pub struct InfixOperator {
     pub symbol: String,
     pub return_type: Option<SymbolPath>,
     pub body: Vec<Statement>,
-    pub kind: OperatorKind,
+    pub another: FuncParam,
+    pub associativity: OperatorAssociativity,
+    pub precedence: u8,
 }
 
-#[derive(PartialEq, Clone)]
-pub enum OperatorKind {
-    InfixOperator {
-        another: FuncParam,
-        associativity: OperatorAssociativity,
-        precedence: u8,
-    },
-    PrefixOperator,
-}
-
-impl Debug for OperatorKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            OperatorKind::InfixOperator { .. } => write!(f, "infix"),
-            OperatorKind::PrefixOperator => write!(f, "prefix"),
-        }
-    }
+#[derive(Debug, PartialEq, Clone)]
+pub struct PrefixOperator {
+    pub symbol: String,
+    pub return_type: Option<SymbolPath>,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

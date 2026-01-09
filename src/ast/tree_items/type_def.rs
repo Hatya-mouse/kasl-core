@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, Function, Initializer, Operator, Scope, ScopeVar, SymbolPath};
+use crate::{
+    ConstructorError, Function, InfixOperator, Initializer, PrefixOperator, Scope, ScopeVar,
+    SymbolPath,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef {
@@ -24,7 +27,8 @@ pub struct TypeDef {
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
     pub types: Vec<TypeDef>,
-    pub operators: Vec<Operator>,
+    pub infix_operators: Vec<InfixOperator>,
+    pub prefix_operators: Vec<PrefixOperator>,
 }
 
 impl TypeDef {
@@ -36,7 +40,8 @@ impl TypeDef {
             inits: Vec::new(),
             funcs: Vec::new(),
             types: Vec::new(),
-            operators: Vec::new(),
+            infix_operators: Vec::new(),
+            prefix_operators: Vec::new(),
         }
     }
 
@@ -100,16 +105,32 @@ impl Scope for TypeDef {
         self.vars.iter_mut().find(|v| v.name == name)
     }
 
-    fn register_operator(&mut self, operator: Operator) -> Result<(), ConstructorError> {
-        self.operators.push(operator);
+    fn register_infix_operator(&mut self, operator: InfixOperator) -> Result<(), ConstructorError> {
+        self.infix_operators.push(operator);
         Ok(())
     }
 
-    fn get_operator(&self, name: &str) -> Option<&Operator> {
-        self.operators.iter().find(|o| o.symbol == name)
+    fn get_infix_operator(&self, name: &str) -> Option<&InfixOperator> {
+        self.infix_operators.iter().find(|o| o.symbol == name)
     }
 
-    fn get_operator_mut(&mut self, name: &str) -> Option<&mut Operator> {
-        self.operators.iter_mut().find(|o| o.symbol == name)
+    fn get_infix_operator_mut(&mut self, name: &str) -> Option<&mut InfixOperator> {
+        self.infix_operators.iter_mut().find(|o| o.symbol == name)
+    }
+
+    fn register_prefix_operator(
+        &mut self,
+        operator: PrefixOperator,
+    ) -> Result<(), ConstructorError> {
+        self.prefix_operators.push(operator);
+        Ok(())
+    }
+
+    fn get_prefix_operator(&self, name: &str) -> Option<&PrefixOperator> {
+        self.prefix_operators.iter().find(|o| o.symbol == name)
+    }
+
+    fn get_prefix_operator_mut(&mut self, name: &str) -> Option<&mut PrefixOperator> {
+        self.prefix_operators.iter_mut().find(|o| o.symbol == name)
     }
 }

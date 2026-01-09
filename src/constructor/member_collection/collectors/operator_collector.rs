@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, FuncParam, Operator, OperatorAssociativity,
-    OperatorKind, ParserStatementKind, Program, SymbolPath, SymbolTable,
+    ConstructorError, ConstructorErrorType, FuncParam, InfixOperator, OperatorAssociativity,
+    ParserStatementKind, PrefixOperator, Program, SymbolPath, SymbolTable,
 };
 
 pub fn collect_member_operators(
@@ -47,17 +47,15 @@ pub fn collect_member_operators(
                     });
                 };
 
-                let operator = Operator {
+                let operator = InfixOperator {
                     symbol: symbol.clone(),
                     return_type: None,
                     body: Vec::new(),
-                    kind: OperatorKind::InfixOperator {
-                        another: param,
-                        associativity: OperatorAssociativity::Left,
-                        precedence: 0,
-                    },
+                    another: param,
+                    associativity: OperatorAssociativity::Left,
+                    precedence: 0,
                 };
-                program.register_operator_by_path(operator, scope_path)?;
+                program.register_infix_operator_by_path(operator, scope_path)?;
             }
 
             ParserStatementKind::Prefix {
@@ -73,13 +71,12 @@ pub fn collect_member_operators(
                     });
                 }
 
-                let operator = Operator {
+                let operator = PrefixOperator {
                     symbol: symbol.clone(),
                     return_type: None,
                     body: Vec::new(),
-                    kind: OperatorKind::PrefixOperator,
                 };
-                program.register_operator_by_path(operator, scope_path)?;
+                program.register_prefix_operator_by_path(operator, scope_path)?;
             }
 
             _ => (),
