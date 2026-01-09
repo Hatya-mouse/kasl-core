@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FuncParam, Function, Initializer, InputVar, OutputVar, Program, ScopeVar, StateVar, SymbolPath,
-    SymbolPathComponent, TypeDef,
+    FuncParam, Function, InfixOperator, Initializer, InputVar, OutputVar, PrefixOperator, Program,
+    ScopeVar, StateVar, SymbolPath, SymbolPathComponent, TypeDef,
 };
 
 impl Program {
@@ -40,6 +40,46 @@ impl Program {
             SymbolPathComponent::Func(name) => parent_scope.get_func_mut(name),
             _ => None,
         }
+    }
+
+    /// Get an immutable reference to the InfixOperator by its path.
+    pub fn get_infix_operator_by_path(
+        &self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&InfixOperator> {
+        let parent_scope = self.get_to_deepest_scope(&operand_type.components)?;
+        parent_scope.get_infix_operator(operator_symbol)
+    }
+
+    /// Get a mutable reference to the InfixOperator by its path.
+    pub fn get_infix_operator_by_path_mut(
+        &mut self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&mut InfixOperator> {
+        let parent_scope = self.get_to_deepest_scope_mut(&operand_type.components)?;
+        parent_scope.get_infix_operator_mut(operator_symbol)
+    }
+
+    /// Get an immutable reference to the PrefixOperator by its path.
+    pub fn get_prefix_operator_by_path(
+        &self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&PrefixOperator> {
+        let parent_scope = self.get_to_deepest_scope(&operand_type.components)?;
+        parent_scope.get_prefix_operator(operator_symbol)
+    }
+
+    /// Get a mutable reference to the PrefixOperator by its path.
+    pub fn get_prefix_operator_by_path_mut(
+        &mut self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&mut PrefixOperator> {
+        let parent_scope = self.get_to_deepest_scope_mut(&operand_type.components)?;
+        parent_scope.get_prefix_operator_mut(operator_symbol)
     }
 
     /// Get an immutable reference to the Initializer by its path and parameter types.

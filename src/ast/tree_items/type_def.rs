@@ -110,12 +110,12 @@ impl Scope for TypeDef {
         Ok(())
     }
 
-    fn get_infix_operator(&self, name: &str) -> Option<&InfixOperator> {
-        self.infix_operators.iter().find(|o| o.symbol == name)
+    fn get_infix_operator(&self, symbol: &str) -> Option<&InfixOperator> {
+        self.infix_operators.iter().find(|o| o.symbol == symbol)
     }
 
-    fn get_infix_operator_mut(&mut self, name: &str) -> Option<&mut InfixOperator> {
-        self.infix_operators.iter_mut().find(|o| o.symbol == name)
+    fn get_infix_operator_mut(&mut self, symbol: &str) -> Option<&mut InfixOperator> {
+        self.infix_operators.iter_mut().find(|o| o.symbol == symbol)
     }
 
     fn register_prefix_operator(
@@ -126,11 +126,13 @@ impl Scope for TypeDef {
         Ok(())
     }
 
-    fn get_prefix_operator(&self, name: &str) -> Option<&PrefixOperator> {
-        self.prefix_operators.iter().find(|o| o.symbol == name)
+    fn get_prefix_operator(&self, symbol: &str) -> Option<&PrefixOperator> {
+        self.prefix_operators.iter().find(|o| o.symbol == symbol)
     }
 
-    fn get_prefix_operator_mut(&mut self, name: &str) -> Option<&mut PrefixOperator> {
-        self.prefix_operators.iter_mut().find(|o| o.symbol == name)
+    fn get_prefix_operator_mut(&mut self, symbol: &str) -> Option<&mut PrefixOperator> {
+        self.prefix_operators
+            .iter_mut()
+            .find(|o| o.symbol == symbol)
     }
 }

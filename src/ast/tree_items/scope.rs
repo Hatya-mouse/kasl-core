@@ -133,13 +133,13 @@ pub trait Scope {
         panic!("register_infix_operator not implemented on the Scope")
     }
 
-    /// Get an immutable reference to an InfixOperator by its name. Returns None if the Operator is not found.
-    fn get_infix_operator(&self, _name: &str) -> Option<&InfixOperator> {
+    /// Get an immutable reference to an InfixOperator by its symbol. Returns None if the Operator is not found.
+    fn get_infix_operator(&self, _symbol: &str) -> Option<&InfixOperator> {
         None
     }
 
-    /// Get a mutable reference to an InfixOperator by its name. Returns None if the Operator is not found.
-    fn get_infix_operator_mut(&mut self, _name: &str) -> Option<&mut InfixOperator> {
+    /// Get a mutable reference to an InfixOperator by its symbol. Returns None if the Operator is not found.
+    fn get_infix_operator_mut(&mut self, _symbol: &str) -> Option<&mut InfixOperator> {
         None
     }
 
@@ -151,13 +151,13 @@ pub trait Scope {
         panic!("register_prefix_operator not implemented on the Scope")
     }
 
-    /// Get an immutable reference to a PrefixOperator by its name. Returns None if the Operator is not found.
-    fn get_prefix_operator(&self, _name: &str) -> Option<&PrefixOperator> {
+    /// Get an immutable reference to a PrefixOperator by its symbol. Returns None if the Operator is not found.
+    fn get_prefix_operator(&self, _symbol: &str) -> Option<&PrefixOperator> {
         None
     }
 
-    /// Get a mutable reference to a PrefixOperator by its name. Returns None if the Operator is not found.
-    fn get_prefix_operator_mut(&mut self, _name: &str) -> Option<&mut PrefixOperator> {
+    /// Get a mutable reference to a PrefixOperator by its symbol. Returns None if the Operator is not found.
+    fn get_prefix_operator_mut(&mut self, _symbol: &str) -> Option<&mut PrefixOperator> {
         None
     }
 
