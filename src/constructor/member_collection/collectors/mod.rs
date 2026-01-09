@@ -16,10 +16,8 @@
 
 pub mod func_collector;
 pub mod nests_collector;
-pub mod operator_collector;
 pub mod var_collector;
 
 pub use func_collector::collect_member_functions;
 pub use nests_collector::collect_member_nests;
-pub use operator_collector::collect_member_operators;
 pub use var_collector::collect_member_variables;

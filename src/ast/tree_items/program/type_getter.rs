@@ -38,22 +38,22 @@ impl Program {
 
         match symbol_path.components.last() {
             Some(last_component) => match last_component {
-                SymbolPathComponent::InputVar(_) => {
-                    let input_var = self.get_input_by_path(&symbol_path).unwrap();
+                SymbolPathComponent::InputVar(name) => {
+                    let input_var = self.get_input(name).unwrap();
                     input_var.value_type.clone().ok_or(ConstructorError {
                         error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
                         position: token.range,
                     })
                 }
-                SymbolPathComponent::OutputVar(_) => {
-                    let output_var = self.get_output_by_path(&symbol_path).unwrap();
+                SymbolPathComponent::OutputVar(name) => {
+                    let output_var = self.get_output(name).unwrap();
                     output_var.value_type.clone().ok_or(ConstructorError {
                         error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
                         position: token.range,
                     })
                 }
-                SymbolPathComponent::StateVar(_) => {
-                    let state_var = self.get_state_by_path(&symbol_path).unwrap();
+                SymbolPathComponent::StateVar(name) => {
+                    let state_var = self.get_state(name).unwrap();
                     state_var.value_type.clone().ok_or(ConstructorError {
                         error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
                         position: token.range,

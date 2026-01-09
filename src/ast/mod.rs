@@ -19,7 +19,7 @@ pub mod tree_items;
 
 pub use data::{Range, SymbolPath, SymbolPathComponent};
 pub use tree_items::{
-    Expression, FuncCallArg, FuncParam, Function, InfixOperator, Initializer, InputAttribute,
-    InputVar, LiteralBind, OperatorAssociativity, OutputVar, PrefixOperator, Program, Scope,
-    ScopeVar, StateVar, Statement, TypeDef,
+    Expression, FuncCallArg, FuncParam, Function, InfixOperator, InfixOperatorProperties,
+    Initializer, InputAttribute, InputVar, LiteralBind, OperatorAssociativity, OutputVar,
+    PrefixOperator, Program, ScopeItem, ScopeItemMut, ScopeVar, StateVar, Statement, TypeDef,
 };

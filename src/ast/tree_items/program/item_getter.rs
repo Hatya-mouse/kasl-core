@@ -15,177 +15,16 @@
 //
 
 use crate::{
-    FuncParam, Function, InfixOperator, Initializer, InputVar, OutputVar, PrefixOperator, Program,
-    ScopeVar, StateVar, SymbolPath, SymbolPathComponent, TypeDef,
+    FuncParam, Function, Program, ScopeItem, ScopeItemMut, ScopeVar, SymbolPath,
+    SymbolPathComponent,
 };
 
 impl Program {
     /// Get an immutable reference to the Function by its path.
     pub fn get_func_by_path(&self, symbol_path: &SymbolPath) -> Option<&Function> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::Func(name) => parent_scope.get_func(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the Function by its path.
-    pub fn get_func_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut Function> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::Func(name) => parent_scope.get_func_mut(name),
-            _ => None,
-        }
-    }
-
-    /// Get an immutable reference to the InfixOperator by its path.
-    pub fn get_infix_operator_by_path(
-        &self,
-        operand_type: &SymbolPath,
-        operator_symbol: &str,
-    ) -> Option<&InfixOperator> {
-        let parent_scope = self.get_to_deepest_scope(&operand_type.components)?;
-        parent_scope.get_infix_operator(operator_symbol)
-    }
-
-    /// Get a mutable reference to the InfixOperator by its path.
-    pub fn get_infix_operator_by_path_mut(
-        &mut self,
-        operand_type: &SymbolPath,
-        operator_symbol: &str,
-    ) -> Option<&mut InfixOperator> {
-        let parent_scope = self.get_to_deepest_scope_mut(&operand_type.components)?;
-        parent_scope.get_infix_operator_mut(operator_symbol)
-    }
-
-    /// Get an immutable reference to the PrefixOperator by its path.
-    pub fn get_prefix_operator_by_path(
-        &self,
-        operand_type: &SymbolPath,
-        operator_symbol: &str,
-    ) -> Option<&PrefixOperator> {
-        let parent_scope = self.get_to_deepest_scope(&operand_type.components)?;
-        parent_scope.get_prefix_operator(operator_symbol)
-    }
-
-    /// Get a mutable reference to the PrefixOperator by its path.
-    pub fn get_prefix_operator_by_path_mut(
-        &mut self,
-        operand_type: &SymbolPath,
-        operator_symbol: &str,
-    ) -> Option<&mut PrefixOperator> {
-        let parent_scope = self.get_to_deepest_scope_mut(&operand_type.components)?;
-        parent_scope.get_prefix_operator_mut(operator_symbol)
-    }
-
-    /// Get an immutable reference to the Initializer by its path and parameter types.
-    pub fn get_init_by_path(
-        &self,
-        type_path: &SymbolPath,
-        param_types: &[SymbolPath],
-    ) -> Option<&Initializer> {
-        let parent_scope = self.get_to_deepest_scope(&type_path.components)?;
-        parent_scope.get_init(param_types)
-    }
-
-    /// Get a mutable reference to the Initializer by its path and parameter types.
-    pub fn get_init_by_path_mut(
-        &mut self,
-        type_path: &SymbolPath,
-        param_types: &[SymbolPath],
-    ) -> Option<&mut Initializer> {
-        let parent_scope = self.get_to_deepest_scope_mut(&type_path.components)?;
-        parent_scope.get_init_mut(param_types)
-    }
-
-    /// Get an immutable reference to the TypeDef by its path.
-    pub fn get_type_def_by_path(&self, symbol_path: &SymbolPath) -> Option<&TypeDef> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the TypeDef by its path.
-    pub fn get_type_def_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut TypeDef> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::TypeDef(name) => parent_scope.get_type_def_mut(name),
-            _ => None,
-        }
-    }
-
-    /// Get an immutable reference to the InputVar by its path.
-    pub fn get_input_by_path(&self, symbol_path: &SymbolPath) -> Option<&InputVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::InputVar(name) => parent_scope.get_input(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the InputVar by its path.
-    pub fn get_input_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut InputVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::InputVar(name) => parent_scope.get_input_mut(name),
-            _ => None,
-        }
-    }
-
-    /// Get an immutable reference to the OutputVar by its path.
-    pub fn get_output_by_path(&self, symbol_path: &SymbolPath) -> Option<&OutputVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::OutputVar(name) => parent_scope.get_output(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the OutputVar by its path.
-    pub fn get_output_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut OutputVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::OutputVar(name) => parent_scope.get_output_mut(name),
-            _ => None,
-        }
-    }
-
-    /// Get an immutable reference to the StateVar by its path.
-    pub fn get_state_by_path(&self, symbol_path: &SymbolPath) -> Option<&StateVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::StateVar(name) => parent_scope.get_state(name),
-            _ => None,
-        }
-    }
-
-    /// Get a mutable reference to the StateVar by its path.
-    pub fn get_state_by_path_mut(&mut self, symbol_path: &SymbolPath) -> Option<&mut StateVar> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
-
-        match last {
-            SymbolPathComponent::StateVar(name) => parent_scope.get_state_mut(name),
+        let target_scope = self.get_to_deepest_scope(&symbol_path.components)?;
+        match target_scope {
+            ScopeItem::Func(func) => Some(func),
             _ => None,
         }
     }
@@ -196,7 +35,10 @@ impl Program {
         let parent_scope = self.get_to_deepest_scope(parent)?;
 
         match last {
-            SymbolPathComponent::Var(name) => parent_scope.get_var(name),
+            SymbolPathComponent::Var(name) => match parent_scope {
+                ScopeItem::TypeDef(td) => td.get_var(name),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -207,18 +49,10 @@ impl Program {
         let parent_scope = self.get_to_deepest_scope_mut(parent)?;
 
         match last {
-            SymbolPathComponent::Var(name) => parent_scope.get_var_mut(name),
-            _ => None,
-        }
-    }
-
-    /// Get an immutable reference to the FuncParam by its path.
-    pub fn get_func_param_by_path(&self, symbol_path: &SymbolPath) -> Option<&FuncParam> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope(parent)?;
-
-        match last {
-            SymbolPathComponent::FuncParam(name) => parent_scope.get_func_param(name),
+            SymbolPathComponent::Var(name) => match parent_scope {
+                ScopeItemMut::TypeDef(td) => td.get_var_mut(name),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -232,7 +66,10 @@ impl Program {
         let parent_scope = self.get_to_deepest_scope_mut(parent)?;
 
         match last {
-            SymbolPathComponent::FuncParam(name) => parent_scope.get_func_param_mut(name),
+            SymbolPathComponent::FuncParam(name) => match parent_scope {
+                ScopeItemMut::Func(func) => func.get_func_param_mut(name),
+                _ => None,
+            },
             _ => None,
         }
     }

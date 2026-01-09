@@ -16,23 +16,27 @@
 
 use std::fmt::Debug;
 
-use crate::{FuncParam, Statement, SymbolPath};
+use crate::{FuncParam, Statement};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InfixOperator {
     pub symbol: String,
-    pub return_type: Option<SymbolPath>,
+    pub lhs: FuncParam,
+    pub rhs: FuncParam,
     pub body: Vec<Statement>,
-    pub another: FuncParam,
-    pub associativity: OperatorAssociativity,
-    pub precedence: u8,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct PrefixOperator {
     pub symbol: String,
-    pub return_type: Option<SymbolPath>,
+    pub operand: FuncParam,
     pub body: Vec<Statement>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct InfixOperatorProperties {
+    pub precedence: u8,
+    pub associativity: OperatorAssociativity,
 }
 
 #[derive(Debug, PartialEq, Clone)]

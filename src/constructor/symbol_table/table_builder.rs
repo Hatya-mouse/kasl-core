@@ -108,22 +108,6 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_init(&stmt);
             }
 
-            ParserStatementKind::Infix {
-                symbol,
-                params: _,
-                return_type: _,
-                attrs: _,
-                body: _,
-            }
-            | ParserStatementKind::Prefix {
-                symbol,
-                params: _,
-                return_type: _,
-                body: _,
-            } => {
-                symbol_table.insert_operator(symbol.clone(), &stmt);
-            }
-
             ParserStatementKind::StructDecl {
                 name,
                 inherits: _,
@@ -137,6 +121,24 @@ pub fn build_nest_symbol_table<'a>(
                 let mut nested_table = SymbolTable::new();
                 build_nest_symbol_table(&mut nested_table, body);
                 symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
+            }
+
+            ParserStatementKind::OperatorDefine {
+                op_type: _,
+                symbol,
+                attrs: _,
+            } => {
+                symbol_table.insert_operator_define(symbol.clone(), stmt);
+            }
+
+            ParserStatementKind::OperatorImpl {
+                op_type: _,
+                symbol,
+                params: _,
+                return_type: _,
+                body: _,
+            } => {
+                symbol_table.insert_operator_impl(symbol.clone(), stmt);
             }
 
             _ => (),

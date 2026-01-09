@@ -38,7 +38,7 @@ pub fn collect_top_level_symbols(
                     def_val: None,
                     attrs: Vec::new(),
                 };
-                program.register_input_by_path(input, &SymbolPath::root())?;
+                program.register_input(input);
             }
 
             ParserStatementKind::Output {
@@ -49,7 +49,7 @@ pub fn collect_top_level_symbols(
                     name: name.to_string(),
                     value_type: None,
                 };
-                program.register_output_by_path(output, &SymbolPath::root())?;
+                program.register_output(output);
             }
 
             ParserStatementKind::State { vars } => {
@@ -59,7 +59,7 @@ pub fn collect_top_level_symbols(
                         value_type: None,
                         def_val: None,
                     };
-                    program.register_state_by_path(state, &SymbolPath::root())?;
+                    program.register_state(state);
                 }
             }
 
@@ -90,8 +90,22 @@ pub fn collect_top_level_symbols(
                     body: Vec::new(),
                     required_by: None,
                 };
-                program.register_func_by_path(function, &SymbolPath::root())?;
+                program.register_func(function);
             }
+
+            _ => (),
+        }
+    }
+
+    for stmt in &symbol_table.operator_defines {
+        match &stmt.1.kind {
+            ParserStatementKind::OperatorDefine {
+                required_by,
+                name,
+                params: _,
+                return_type: _,
+                body: _,
+            } => {}
 
             _ => (),
         }

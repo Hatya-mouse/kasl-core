@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    ConstructorError, Function, InfixOperator, Initializer, PrefixOperator, Scope, ScopeVar,
-    SymbolPath,
-};
+use crate::{Function, InfixOperator, Initializer, PrefixOperator, ScopeVar, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef {
@@ -45,94 +42,43 @@ impl TypeDef {
         }
     }
 
+    // -- TypeDef --
+    pub fn get_type_def(&self, name: &str) -> Option<&TypeDef> {
+        self.types.iter().find(|s| s.name == name)
+    }
+
     pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
         self.types.iter_mut().find(|s| s.name == name)
     }
-}
 
-impl Scope for TypeDef {
-    fn register_func(&mut self, func: Function) -> Result<(), ConstructorError> {
+    // -- Function --
+    pub fn register_func(&mut self, func: Function) {
         self.funcs.push(func);
-        Ok(())
     }
 
-    fn get_func(&self, name: &str) -> Option<&Function> {
+    pub fn get_func(&self, name: &str) -> Option<&Function> {
         self.funcs.iter().find(|f| f.name == name)
     }
 
-    fn get_func_mut(&mut self, name: &str) -> Option<&mut Function> {
+    pub fn get_func_mut(&mut self, name: &str) -> Option<&mut Function> {
         self.funcs.iter_mut().find(|f| f.name == name)
     }
 
-    fn register_init(&mut self, initializer: Initializer) -> Result<(), ConstructorError> {
-        self.inits.push(initializer);
-        Ok(())
+    // -- Initializer --
+    pub fn register_init(&mut self, init: Initializer) {
+        self.inits.push(init);
     }
 
-    fn get_init(&self, param_types: &[SymbolPath]) -> Option<&Initializer> {
-        self.inits.iter().find(|i| i.does_params_match(param_types))
-    }
-
-    fn get_init_mut(&mut self, param_types: &[SymbolPath]) -> Option<&mut Initializer> {
-        self.inits
-            .iter_mut()
-            .find(|i| i.does_params_match(param_types))
-    }
-
-    fn register_type_def(&mut self, type_def: TypeDef) -> Result<(), ConstructorError> {
-        self.types.push(type_def);
-        Ok(())
-    }
-
-    fn get_type_def(&self, name: &str) -> Option<&TypeDef> {
-        self.types.iter().find(|t| t.name == name)
-    }
-
-    fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
-        self.types.iter_mut().find(|t| t.name == name)
-    }
-
-    fn register_var(&mut self, var: ScopeVar) -> Result<(), ConstructorError> {
+    // -- ScopeVar --
+    pub fn register_var(&mut self, var: ScopeVar) {
         self.vars.push(var);
-        Ok(())
     }
 
-    fn get_var(&self, name: &str) -> Option<&ScopeVar> {
+    pub fn get_var(&self, name: &str) -> Option<&ScopeVar> {
         self.vars.iter().find(|v| v.name == name)
     }
 
-    fn get_var_mut(&mut self, name: &str) -> Option<&mut ScopeVar> {
+    pub fn get_var_mut(&mut self, name: &str) -> Option<&mut ScopeVar> {
         self.vars.iter_mut().find(|v| v.name == name)
-    }
-
-    fn register_infix_operator(&mut self, operator: InfixOperator) -> Result<(), ConstructorError> {
-        self.infix_operators.push(operator);
-        Ok(())
-    }
-
-    fn get_infix_operator(&self, symbol: &str) -> Option<&InfixOperator> {
-        self.infix_operators.iter().find(|o| o.symbol == symbol)
-    }
-
-    fn get_infix_operator_mut(&mut self, symbol: &str) -> Option<&mut InfixOperator> {
-        self.infix_operators.iter_mut().find(|o| o.symbol == symbol)
-    }
-
-    fn register_prefix_operator(
-        &mut self,
-        operator: PrefixOperator,
-    ) -> Result<(), ConstructorError> {
-        self.prefix_operators.push(operator);
-        Ok(())
-    }
-
-    fn get_prefix_operator(&self, symbol: &str) -> Option<&PrefixOperator> {
-        self.prefix_operators.iter().find(|o| o.symbol == symbol)
-    }
-
-    fn get_prefix_operator_mut(&mut self, symbol: &str) -> Option<&mut PrefixOperator> {
-        self.prefix_operators
-            .iter_mut()
-            .find(|o| o.symbol == symbol)
     }
 }

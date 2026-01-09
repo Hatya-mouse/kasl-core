@@ -16,10 +16,7 @@
 
 use crate::{
     ConstructorError, ParserStatementKind, Program, SymbolPath, SymbolPathComponent, SymbolTable,
-    member_collection::{
-        collect_member_functions, collect_member_nests, collect_member_operators,
-        collect_member_variables,
-    },
+    member_collection::{collect_member_functions, collect_member_nests, collect_member_variables},
     symbol_path,
 };
 
@@ -59,7 +56,6 @@ pub fn collect_type_members(
 ) -> Result<(), ConstructorError> {
     collect_member_variables(program, child_symbol_table, &scope_path)?;
     collect_member_functions(program, child_symbol_table, &scope_path)?;
-    collect_member_operators(program, child_symbol_table, &scope_path)?;
     collect_member_nests(program, child_symbol_table, &scope_path)?;
 
     Ok(())

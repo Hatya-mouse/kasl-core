@@ -14,7 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{Function, InputVar, OutputVar, StateVar, SymbolPath, TypeDef};
+use std::collections::HashMap;
+
+use crate::{
+    Function, InfixOperator, InfixOperatorProperties, InputVar, OutputVar, PrefixOperator,
+    StateVar, SymbolPath, TypeDef,
+};
 
 pub struct Program {
     pub main_func: Option<Function>,
@@ -23,6 +28,11 @@ pub struct Program {
     pub states: Vec<StateVar>,
     pub inputs: Vec<InputVar>,
     pub outputs: Vec<OutputVar>,
+
+    pub infix_operator_properties: HashMap<String, InfixOperatorProperties>,
+    pub infix_operators: Vec<InfixOperator>,
+    pub prefix_operator_properties: HashMap<String, u8>,
+    pub prefix_operators: Vec<PrefixOperator>,
 
     pub bool_literal_type: Option<SymbolPath>,
     pub int_literal_type: Option<SymbolPath>,
@@ -38,9 +48,140 @@ impl Program {
             states: Vec::new(),
             inputs: Vec::new(),
             outputs: Vec::new(),
+
+            infix_operator_properties: HashMap::new(),
+            infix_operators: Vec::new(),
+            prefix_operator_properties: HashMap::new(),
+            prefix_operators: Vec::new(),
+
             bool_literal_type: None,
             int_literal_type: None,
             float_literal_type: None,
         }
+    }
+}
+
+impl Program {
+    // -- TypeDef --
+    pub fn get_type_def(&self, name: &str) -> Option<&TypeDef> {
+        self.types.iter().find(|s| s.name == name)
+    }
+
+    pub fn get_type_def_mut(&mut self, name: &str) -> Option<&mut TypeDef> {
+        self.types.iter_mut().find(|s| s.name == name)
+    }
+
+    // -- Function --
+    pub fn register_func(&mut self, func: Function) {
+        self.funcs.push(func);
+    }
+
+    pub fn get_func(&self, name: &str) -> Option<&Function> {
+        self.funcs.iter().find(|s| s.name == name)
+    }
+
+    pub fn get_func_mut(&mut self, name: &str) -> Option<&mut Function> {
+        self.funcs.iter_mut().find(|s| s.name == name)
+    }
+
+    // -- Input --
+    pub fn register_input(&mut self, input: InputVar) {
+        self.inputs.push(input);
+    }
+
+    pub fn get_input(&self, name: &str) -> Option<&InputVar> {
+        self.inputs.iter().find(|s| s.name == name)
+    }
+
+    pub fn get_input_mut(&mut self, name: &str) -> Option<&mut InputVar> {
+        self.inputs.iter_mut().find(|s| s.name == name)
+    }
+
+    // -- Output --
+    pub fn register_output(&mut self, output: OutputVar) {
+        self.outputs.push(output);
+    }
+
+    pub fn get_output(&self, name: &str) -> Option<&OutputVar> {
+        self.outputs.iter().find(|s| s.name == name)
+    }
+
+    pub fn get_output_mut(&mut self, name: &str) -> Option<&mut OutputVar> {
+        self.outputs.iter_mut().find(|s| s.name == name)
+    }
+
+    // -- State --
+    pub fn register_state(&mut self, state: StateVar) {
+        self.states.push(state);
+    }
+
+    pub fn get_state(&self, name: &str) -> Option<&StateVar> {
+        self.states.iter().find(|s| s.name == name)
+    }
+
+    pub fn get_state_mut(&mut self, name: &str) -> Option<&mut StateVar> {
+        self.states.iter_mut().find(|s| s.name == name)
+    }
+
+    // -- InfixOperator --
+    /// Get an immutable reference to the InfixOperator by its path.
+    pub fn get_infix_impl(
+        &self,
+        lhs_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&InfixOperator> {
+        self.infix_operators
+            .iter()
+            .filter(|op| op.symbol == operator_symbol)
+            .find(|op| match &op.lhs.value_type {
+                Some(value_type) => value_type == lhs_type,
+                None => false,
+            })
+    }
+
+    /// Get a mutable reference to the InfixOperator by its path.
+    pub fn get_infix_impl_mut(
+        &mut self,
+        lhs_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&mut InfixOperator> {
+        self.infix_operators
+            .iter_mut()
+            .filter(|op| op.symbol == operator_symbol)
+            .find(|op| match &op.lhs.value_type {
+                Some(value_type) => value_type == lhs_type,
+                None => false,
+            })
+    }
+
+    // -- PrefixOperator --
+    /// Get an immutable reference to the PrefixOperator by its path.
+    pub fn get_prefix_impl(
+        &self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&PrefixOperator> {
+        self.prefix_operators
+            .iter()
+            .filter(|op| op.symbol == operator_symbol)
+            .find(|op| match &op.operand.value_type {
+                Some(value_type) => value_type == operand_type,
+                None => false,
+            })
+    }
+
+    /// Get a mutable reference to the PrefixOperator by its path.
+    pub fn get_prefix_impl_mut(
+        &mut self,
+        operand_type: &SymbolPath,
+        operator_symbol: &str,
+    ) -> Option<&mut PrefixOperator> {
+        self.prefix_operators
+            .iter_mut()
+            .filter(|op| op.symbol == operator_symbol)
+            .find(|op| match &op.operand.value_type {
+                Some(value_type) => value_type == operand_type,
+                None => false,
+            })
     }
 }

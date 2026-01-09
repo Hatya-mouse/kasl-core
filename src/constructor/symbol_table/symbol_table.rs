@@ -25,8 +25,9 @@ pub struct SymbolTable<'a> {
     pub states: HashMap<String, &'a ParserStatement>,
     pub vars: HashMap<String, &'a ParserStatement>,
     pub funcs: HashMap<String, &'a ParserStatement>,
-    pub operators: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
+    pub operator_defines: HashMap<String, &'a ParserStatement>,
+    pub operator_impls: HashMap<String, &'a ParserStatement>,
     pub inits: Vec<&'a ParserStatement>,
 }
 
@@ -38,8 +39,9 @@ impl<'a> SymbolTable<'a> {
             states: HashMap::new(),
             vars: HashMap::new(),
             funcs: HashMap::new(),
-            operators: HashMap::new(),
             type_defs: HashMap::new(),
+            operator_defines: HashMap::new(),
+            operator_impls: HashMap::new(),
             inits: Vec::new(),
         }
     }
@@ -99,10 +101,6 @@ impl<'a> SymbolTable<'a> {
         self.funcs.insert(name, stmt);
     }
 
-    pub fn insert_operator(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.operators.insert(name, stmt);
-    }
-
     pub fn insert_type_def(
         &mut self,
         name: String,
@@ -110,6 +108,14 @@ impl<'a> SymbolTable<'a> {
         sub_table: SymbolTable<'a>,
     ) {
         self.type_defs.insert(name, (stmt, sub_table));
+    }
+
+    pub fn insert_operator_define(&mut self, symbol: String, stmt: &'a ParserStatement) {
+        self.operator_defines.insert(symbol, stmt);
+    }
+
+    pub fn insert_operator_impl(&mut self, symbol: String, stmt: &'a ParserStatement) {
+        self.operator_impls.insert(symbol, stmt);
     }
 
     pub fn insert_init(&mut self, stmt: &'a ParserStatement) {
@@ -138,12 +144,16 @@ impl<'a> SymbolTable<'a> {
         self.funcs.get(name)
     }
 
-    pub fn get_operator(&self, name: &str) -> Option<&&ParserStatement> {
-        self.operators.get(name)
-    }
-
     pub fn get_type_def(&self, name: &str) -> Option<&(&ParserStatement, SymbolTable<'a>)> {
         self.type_defs.get(name)
+    }
+
+    pub fn get_operator_define(&self, symbol: &str) -> Option<&&ParserStatement> {
+        self.operator_defines.get(symbol)
+    }
+
+    pub fn get_operator_impl(&self, symbol: &str) -> Option<&&ParserStatement> {
+        self.operator_impls.get(symbol)
     }
 
     pub fn get_inits(&self) -> &Vec<&ParserStatement> {
