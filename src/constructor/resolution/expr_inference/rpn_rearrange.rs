@@ -36,10 +36,9 @@ pub fn rearrange_tokens_to_rpn(
                     Some(props) => props,
                     None => {
                         return Err(ConstructorError {
-                            error_type: ConstructorErrorType::CompilerBug(format!(
-                                "Infix operator properties for {} not found.",
-                                current_op_symbol
-                            )),
+                            error_type: ConstructorErrorType::OperatorNotFound(
+                                current_op_symbol.clone(),
+                            ),
                             position: current_token.range,
                         });
                     }
@@ -57,10 +56,9 @@ pub fn rearrange_tokens_to_rpn(
                                 Some(props) => props,
                                 None => {
                                     return Err(ConstructorError {
-                                        error_type: ConstructorErrorType::CompilerBug(format!(
-                                            "Infix operator properties for {} not found.",
-                                            top_op_symbol
-                                        )),
+                                        error_type: ConstructorErrorType::OperatorNotFound(
+                                            top_op_symbol.clone(),
+                                        ),
                                         position: top_token.range,
                                     });
                                 }
@@ -87,10 +85,9 @@ pub fn rearrange_tokens_to_rpn(
                                 Some(props) => props,
                                 None => {
                                     return Err(ConstructorError {
-                                        error_type: ConstructorErrorType::CompilerBug(format!(
-                                            "Infix operator properties for {} not found.",
-                                            top_op_symbol
-                                        )),
+                                        error_type: ConstructorErrorType::OperatorNotFound(
+                                            top_op_symbol.clone(),
+                                        ),
                                         position: top_token.range,
                                     });
                                 }
