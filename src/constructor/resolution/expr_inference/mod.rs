@@ -15,8 +15,9 @@
 //
 
 pub mod expr_type_inference;
-pub mod shunting_yard;
+pub mod rpn_rearrange;
 pub mod typed_token_getter;
 
 pub use expr_type_inference::ExprTypeInference;
+pub use rpn_rearrange::rearrange_tokens_to_rpn;
 pub use typed_token_getter::{TypedToken, TypedTokenKind, get_typed_tokens};

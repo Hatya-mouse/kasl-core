@@ -19,7 +19,7 @@ use crate::{
     TypedTokenKind,
 };
 
-pub fn shunting_yard(
+pub fn rearrange_tokens_to_rpn(
     program: &Program,
     tokens: Vec<TypedToken>,
 ) -> Result<Vec<TypedToken>, ConstructorError> {
