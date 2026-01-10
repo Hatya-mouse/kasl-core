@@ -17,7 +17,7 @@
 pub mod parser;
 pub mod parser_ast;
 
-pub use parser::kash_parser;
+pub use parser::kasl_parser;
 pub use parser_ast::{
     ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
     ParserOperatorAttrValue, ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement,

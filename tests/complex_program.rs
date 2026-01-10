@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod complex_program {
-    use kash::kash_parser;
+    use kasl::kasl_parser;
 
     #[test]
     fn complex_program_parses() {
@@ -53,31 +53,32 @@ mod complex_program {
             }
 
             // Global operator properties
-            define infix ** {
+            operator infix ** {
                 associativity: right,
                 precedence: 3
             }
 
             // Specific impl for Int ** Int
-            impl infix **(lhs: Int, rhs: Int) -> Int {
+            func infix **(lhs: Int, rhs: Int) -> Int {
                 return lhs * rhs
             }
 
             // Define a prefix operator (unary minus)
-            define prefix - {
+            operator prefix - {
                 precedence: 4
             }
 
-            impl prefix -(operand: Float) -> Float {
+            func prefix -(operand: Float) -> Float {
                 return operand * -1.0
             }
 
             // Another infix operator to check precedence differences
-            define infix + {
+            operator infix + {
                 associativity: left,
                 precedence: 1
             }
-            impl infix +(lhs: Float, rhs: Float) -> Float {
+
+            func infix +(lhs: Float, rhs: Float) -> Float {
                 return lhs + rhs
             }
 
@@ -120,7 +121,7 @@ mod complex_program {
             }
         "#;
 
-        let parsed = kash_parser::parse(program);
+        let parsed = kasl_parser::parse(program);
         assert!(parsed.is_ok(), "parser failed: {:?}", parsed.err());
     }
 }

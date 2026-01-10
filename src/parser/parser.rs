@@ -21,7 +21,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-peg::parser!(pub grammar kash_parser() for str {
+peg::parser!(pub grammar kasl_parser() for str {
     pub rule parse() -> Vec<ParserStatement>
         = statements()
 
@@ -44,8 +44,8 @@ peg::parser!(pub grammar kash_parser() for str {
         / struct_decl_statement()
         / protocol_decl_statement()
         / init_statement()
-        / operator_impl_statement()
-        / operator_define_statement()
+        / operator_definition_statement()
+        / operator_func_statement()
         / block_statement()
         / expected!("statement")
 
@@ -191,8 +191,8 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     // Operator Definition
-    rule operator_define_statement() -> ParserStatement
-        = start:position!() "define" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() __? attrs:("{"
+    rule operator_definition_statement() -> ParserStatement
+        = start:position!() "operator" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() __? attrs:("{"
         __? attrs:operator_attrs() __?
         "}" { attrs }) end:position!() {
             ParserStatement {
@@ -201,14 +201,14 @@ peg::parser!(pub grammar kash_parser() for str {
             }
         }
 
-    // Operator Implementation
-    rule operator_impl_statement() -> ParserStatement
-        = start:position!() "impl" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
+    // Operator Function
+    rule operator_func_statement() -> ParserStatement
+        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
         "}" { body }) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::OperatorImpl { op_type, symbol, params, return_type, body },
+                kind: ParserStatementKind::OperatorFunc { op_type, symbol, params, return_type, body },
             }
         }
 

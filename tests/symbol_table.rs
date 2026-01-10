@@ -15,7 +15,7 @@
 //
 
 mod symbol_table {
-    use kash::{SymbolTable, kash_parser, symbol_table::build_symbol_table};
+    use kasl::{SymbolTable, kasl_parser, symbol_table::build_symbol_table};
 
     #[test]
     fn table_generation() {
@@ -45,7 +45,7 @@ mod symbol_table {
             }
         ";
 
-        let parsed_program = kash_parser::parse(program).unwrap();
+        let parsed_program = kasl_parser::parse(program).unwrap();
 
         let mut symbol_table = SymbolTable::new();
         build_symbol_table(&mut symbol_table, &parsed_program);

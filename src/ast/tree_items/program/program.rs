@@ -125,38 +125,44 @@ impl Program {
 
     // -- InfixOperator --
     /// Get an immutable reference to the InfixOperator by its path.
-    pub fn get_infix_impl(
+    pub fn get_infix_func(
         &self,
         lhs_type: &SymbolPath,
+        rhs_type: &SymbolPath,
         operator_symbol: &str,
     ) -> Option<&InfixOperator> {
         self.infix_operators
             .iter()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match &op.lhs.value_type {
-                Some(value_type) => value_type == lhs_type,
-                None => false,
+            .find(|op| match (&op.lhs.value_type, &op.rhs.value_type) {
+                (Some(lhs_value_type), Some(rhs_value_type)) => {
+                    lhs_value_type == lhs_type && rhs_value_type == rhs_type
+                }
+                _ => false,
             })
     }
 
     /// Get a mutable reference to the InfixOperator by its path.
-    pub fn get_infix_impl_mut(
+    pub fn get_infix_func_mut(
         &mut self,
         lhs_type: &SymbolPath,
+        rhs_type: &SymbolPath,
         operator_symbol: &str,
     ) -> Option<&mut InfixOperator> {
         self.infix_operators
             .iter_mut()
             .filter(|op| op.symbol == operator_symbol)
-            .find(|op| match &op.lhs.value_type {
-                Some(value_type) => value_type == lhs_type,
-                None => false,
+            .find(|op| match (&op.lhs.value_type, &op.rhs.value_type) {
+                (Some(lhs_value_type), Some(rhs_value_type)) => {
+                    lhs_value_type == lhs_type && rhs_value_type == rhs_type
+                }
+                _ => false,
             })
     }
 
     // -- PrefixOperator --
     /// Get an immutable reference to the PrefixOperator by its path.
-    pub fn get_prefix_impl(
+    pub fn get_prefix_func(
         &self,
         operand_type: &SymbolPath,
         operator_symbol: &str,
@@ -171,7 +177,7 @@ impl Program {
     }
 
     /// Get a mutable reference to the PrefixOperator by its path.
-    pub fn get_prefix_impl_mut(
+    pub fn get_prefix_func_mut(
         &mut self,
         operand_type: &SymbolPath,
         operator_symbol: &str,

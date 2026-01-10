@@ -16,14 +16,14 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{
-        ExprToken, ParserSymbolPathComponent, Range, kash_parser, parser_ast::ExprTokenKind,
+    use kasl::{
+        ExprToken, ParserSymbolPathComponent, Range, kasl_parser, parser_ast::ExprTokenKind,
     };
 
     /// Test parsing of chained expressions.
     #[test]
     fn chaining() {
-        let object = kash_parser::expression("object");
+        let object = kasl_parser::expression("object");
         // println!("{:#?}", object);
         assert_eq!(
             object,
@@ -36,7 +36,7 @@ mod parsing {
             }])
         );
 
-        let object_property = kash_parser::expression("object.property");
+        let object_property = kasl_parser::expression("object.property");
         // println!("{:#?}", object_property);
         assert_eq!(
             object_property,
@@ -85,7 +85,7 @@ mod parsing {
             }
         ";
 
-        let parsed_program = kash_parser::parse(program);
+        let parsed_program = kasl_parser::parse(program);
         // println!("{:#?}", parsed_program);
         assert!(parsed_program.is_ok());
     }

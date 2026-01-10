@@ -104,7 +104,7 @@ pub enum ParserStatementKind {
         symbol: String,
         attrs: HashMap<String, ParserOperatorAttrValue>,
     },
-    OperatorImpl {
+    OperatorFunc {
         op_type: ParserOperatorType,
         symbol: String,
         params: Vec<ParserFuncParam>,

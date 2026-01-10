@@ -131,14 +131,14 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_operator_define(symbol.clone(), stmt);
             }
 
-            ParserStatementKind::OperatorImpl {
+            ParserStatementKind::OperatorFunc {
                 op_type: _,
                 symbol,
                 params: _,
                 return_type: _,
                 body: _,
             } => {
-                symbol_table.insert_operator_impl(symbol.clone(), stmt);
+                symbol_table.insert_operator_func(symbol.clone(), stmt);
             }
 
             _ => (),

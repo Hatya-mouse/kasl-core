@@ -525,14 +525,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "kash"
+name = "kasl"
 version = "0.3.9"
 dependencies = [
  "cranelift-codegen",
  "cranelift-frontend",
  "cranelift-jit",
  "cranelift-module",
- "kash",
+ "kasl",
  "knodiq_engine",
  "lazy_static",
  "peg",
