@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,35 +19,29 @@ use std::fmt::Debug;
 use crate::{FuncParam, Statement, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Operator {
+pub struct InfixOperator {
     pub symbol: String,
+    pub lhs: Option<FuncParam>,
+    pub rhs: Option<FuncParam>,
     pub return_type: Option<SymbolPath>,
     pub body: Vec<Statement>,
-    pub kind: OperatorKind,
-}
-
-#[derive(PartialEq, Clone)]
-pub enum OperatorKind {
-    InfixOperator {
-        another: FuncParam,
-        associativity: OperatorAssociativity,
-        precedence: u8,
-    },
-    PrefixOperator,
-    PostfixOperator,
-}
-
-impl Debug for OperatorKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            OperatorKind::InfixOperator { .. } => write!(f, "infix"),
-            OperatorKind::PrefixOperator => write!(f, "prefix"),
-            OperatorKind::PostfixOperator => write!(f, "postfix"),
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct PrefixOperator {
+    pub symbol: String,
+    pub operand: Option<FuncParam>,
+    pub return_type: Option<SymbolPath>,
+    pub body: Vec<Statement>,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
+pub struct InfixOperatorProperties {
+    pub precedence: u32,
+    pub associativity: OperatorAssociativity,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub enum OperatorAssociativity {
     Left,
     Right,

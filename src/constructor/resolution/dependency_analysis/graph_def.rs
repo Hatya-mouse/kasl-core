@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 use crate::SymbolPath;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct DependencyGraph {
     pub nodes: HashMap<SymbolPath, DependencyGraphNode>,
     pub edges: Vec<DependencyGraphEdge>,

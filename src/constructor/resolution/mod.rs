@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 pub mod dependency_analysis;
 pub mod expr_inference;
-pub mod program_locator;
 pub mod type_resolver;
 
 pub use dependency_analysis::{DependencyGraph, DependencyGraphEdge, DependencyGraphNode};
+pub use expr_inference::{TypedToken, TypedTokenKind, get_typed_tokens};

@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, SymbolPath,
+    SymbolPathComponent, SymbolTable,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
@@ -24,12 +25,20 @@ pub fn build_var_graph(
     root_symbol_table: &SymbolTable,
     var_path: &SymbolPath,
     def_val: &Vec<ExprToken>,
-) {
+) -> Result<(), ConstructorError> {
     // If the default value has any identifiers, thus the variable depends on them
     for expr in def_val {
         match &expr.kind {
             ExprTokenKind::Identifier(path) => {
-                let resolved_path = root_symbol_table.resolve_path(path);
+                let resolved_path = match root_symbol_table.resolve_path(path) {
+                    Some(path) => path,
+                    None => {
+                        return Err(ConstructorError {
+                            error_type: ConstructorErrorType::SymbolNotFound(None),
+                            position: expr.range,
+                        });
+                    }
+                };
 
                 // Normalize the path to remove unnecessary components
                 // Because we just need to infer the type of the top variable or function
@@ -53,4 +62,6 @@ pub fn build_var_graph(
             _ => (),
         }
     }
+
+    Ok(())
 }

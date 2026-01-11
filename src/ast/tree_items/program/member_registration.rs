@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, Initializer, InputVar, Operator, OutputVar,
-    Program, Range, ScopeVar, StateVar, SymbolPath, TypeDef,
+    ConstructorError, ConstructorErrorType, Function, Initializer, Program, Range, ScopeItemMut,
+    ScopeVar, SymbolPath,
 };
 
 impl Program {
@@ -30,13 +30,23 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
         };
 
-        target_scope.register_func(func)?;
+        match target_scope {
+            ScopeItemMut::Program(prog) => prog.register_func(func),
+            ScopeItemMut::TypeDef(td) => td.register_func(func),
+            other => {
+                return Err(unexpected_scope_error(
+                    "register_func_by_path",
+                    to_path,
+                    &format!("{:?}", other),
+                ));
+            }
+        }
 
         Ok(())
     }
@@ -51,55 +61,22 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
         };
 
-        target_scope.register_init(init)?;
-
-        Ok(())
-    }
-
-    /// Register a TypeDef to the program **by its path**.
-    pub fn register_type_def_by_path(
-        &mut self,
-        type_def: TypeDef,
-        to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
-        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
-            Some(scope) => scope,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
-                    position: Range::zero(),
-                });
+        match target_scope {
+            ScopeItemMut::TypeDef(td) => td.register_init(init),
+            other => {
+                return Err(unexpected_scope_error(
+                    "register_init_by_path",
+                    to_path,
+                    &format!("{:?}", other),
+                ));
             }
-        };
-
-        target_scope.register_type_def(type_def)?;
-
-        Ok(())
-    }
-
-    /// Register an Operator to the program **by its path**.
-    pub fn register_operator_by_path(
-        &mut self,
-        operator: Operator,
-        to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
-        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
-            Some(scope) => scope,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
-                    position: Range::zero(),
-                });
-            }
-        };
-
-        target_scope.register_operator(operator)?;
+        }
 
         Ok(())
     }
@@ -114,77 +91,38 @@ impl Program {
             Some(scope) => scope,
             None => {
                 return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
+                    error_type: ConstructorErrorType::SymbolNotFound(Some(to_path.clone())),
                     position: Range::zero(),
                 });
             }
         };
 
-        target_scope.register_var(var)?;
+        match target_scope {
+            ScopeItemMut::TypeDef(td) => td.register_var(var),
+            other => {
+                return Err(unexpected_scope_error(
+                    "register_var_by_path",
+                    to_path,
+                    &format!("{:?}", other),
+                ));
+            }
+        }
 
         Ok(())
     }
+}
 
-    /// Register an InputVar to the program **by its path**.
-    pub fn register_input_by_path(
-        &mut self,
-        var: InputVar,
-        to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
-        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
-            Some(scope) => scope,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
-                    position: Range::zero(),
-                });
-            }
-        };
-
-        target_scope.register_input(var)?;
-
-        Ok(())
-    }
-
-    /// Register an OutputVar to the program **by its path**.
-    pub fn register_output_by_path(
-        &mut self,
-        var: OutputVar,
-        to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
-        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
-            Some(scope) => scope,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
-                    position: Range::zero(),
-                });
-            }
-        };
-
-        target_scope.register_output(var)?;
-
-        Ok(())
-    }
-
-    /// Register a StateVar to the program **by its path**.
-    pub fn register_state_by_path(
-        &mut self,
-        var: StateVar,
-        to_path: &SymbolPath,
-    ) -> Result<(), ConstructorError> {
-        let target_scope = match self.get_to_deepest_scope_mut(&to_path.components) {
-            Some(scope) => scope,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::TypeNotFound(to_path.clone()),
-                    position: Range::zero(),
-                });
-            }
-        };
-
-        target_scope.register_state(var)?;
-
-        Ok(())
+fn unexpected_scope_error(func: &str, path: &SymbolPath, found: &str) -> ConstructorError {
+    debug_assert!(
+        false,
+        "{} reached unexpected scope variant: {} for path {}",
+        func, found, path
+    );
+    ConstructorError {
+        error_type: ConstructorErrorType::CompilerBug(format!(
+            "{}: unexpected scope '{}' for path '{}'",
+            func, found, path
+        )),
+        position: Range::zero(),
     }
 }

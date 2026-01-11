@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
 // limitations under the License.
 //
 
-use crate::{FuncCallArg, Operator, SymbolPath};
+use crate::{InfixOperator, PrefixOperator, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     IntLiteral(u32),
     FloatLiteral(f32),
     BoolLiteral(bool),
-    Operator {
-        operator: Operator,
+    PrefixOperator {
+        operator: PrefixOperator,
         operand: Box<Expression>,
-        args: Vec<FuncCallArg>,
+    },
+    InfixOperator {
+        operator: InfixOperator,
+        left: Box<Expression>,
+        right: Box<Expression>,
     },
     Identifier(SymbolPath),
     FuncCall {

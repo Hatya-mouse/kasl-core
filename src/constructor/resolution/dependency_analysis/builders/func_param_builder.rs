@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,17 @@
 //
 
 use crate::{
-    ExprTokenKind, ParserFuncParam, SymbolPath, SymbolPathComponent, SymbolTable,
+    ConstructorError, ConstructorErrorType, ExprTokenKind, ParserFuncParam, SymbolPath,
+    SymbolPathComponent, SymbolTable,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_func_param_graph(
     graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
-    func_path: SymbolPath,
+    func_path: &SymbolPath,
     params: &[ParserFuncParam],
-) {
+) -> Result<(), ConstructorError> {
     for param in params {
         // Get the default value to infer the type
         if let Some(def_value) = &param.def_val {
@@ -36,7 +37,15 @@ pub fn build_func_param_graph(
                         let mut from_path = func_path.clone();
                         from_path.push(SymbolPathComponent::FuncParam(param.name.clone()));
 
-                        let to_path = root_symbol_table.resolve_path(path);
+                        let to_path = match root_symbol_table.resolve_path(path) {
+                            Some(path) => path,
+                            None => {
+                                return Err(ConstructorError {
+                                    error_type: ConstructorErrorType::SymbolNotFound(None),
+                                    position: expr.range,
+                                });
+                            }
+                        };
 
                         graph.add_edge(&from_path, &to_path);
                         graph.add_node(DependencyGraphNode::new(from_path));
@@ -48,4 +57,6 @@ pub fn build_func_param_graph(
             }
         }
     }
+
+    Ok(())
 }

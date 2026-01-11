@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,5 +14,7 @@
 // limitations under the License.
 //
 
+pub mod complex_program;
+pub mod expression;
 pub mod parsing;
 pub mod symbol_table;

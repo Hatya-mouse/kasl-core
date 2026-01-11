@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ use crate::{LiteralBind, SymbolPath};
 pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
-    TypeNotFound(SymbolPath),
+    SymbolNotFound(Option<SymbolPath>),
+    OperatorNotFound(String),
+    OperatorCannotBeChained(String),
     ExpectType,
     Invalid {
         scope: ScopeType,
@@ -33,8 +35,11 @@ pub enum ConstructorErrorType {
     CannotInferType(SymbolPath),
     DuplicateLiteralBind(LiteralBind),
     MissingLiteralBind(LiteralBind),
-    CompilerBug(String),
+    NoReturnFunctionInExpr(SymbolPath),
+    UnmatchedParentheses,
+    InvalidInfixProperty(String),
 
+    CompilerBug(String),
     Placeholder,
 }
 
@@ -45,8 +50,15 @@ impl ConstructorErrorType {
                 "Consecutive dots are not allowed here.".to_string()
             }
             ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
-            ConstructorErrorType::TypeNotFound(type_name) => {
-                format!("Type '{}' not found here.", type_name)
+            ConstructorErrorType::SymbolNotFound(symbol_path) => match symbol_path {
+                Some(path) => format!("Symbol '{}' not found here.", path),
+                None => "Symbol not found here.".to_string(),
+            },
+            ConstructorErrorType::OperatorNotFound(operator_symbol) => {
+                format!("Operator '{}' not found here.", operator_symbol)
+            }
+            ConstructorErrorType::OperatorCannotBeChained(operator_symbol) => {
+                format!("Infix operator '{}' cannot be chained.", operator_symbol)
             }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
@@ -104,6 +116,18 @@ impl ConstructorErrorType {
                     }
                 )
             }
+            ConstructorErrorType::NoReturnFunctionInExpr(symbol_path) => {
+                format!(
+                    "This function '{}' does not have a return type despite being used in an expression.",
+                    symbol_path
+                )
+            }
+            ConstructorErrorType::UnmatchedParentheses => {
+                format!("Unmatched parentheses.")
+            }
+            ConstructorErrorType::InvalidInfixProperty(attribute) => {
+                format!("Infix property '{}' doesn't exist", attribute)
+            }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(
                     "Compiler bug: \"{}\" Please report to the developer.",
@@ -151,7 +175,6 @@ pub enum StatementType {
     Init,
     Infix,
     Prefix,
-    Postfix,
     Block,
 }
 
@@ -173,7 +196,6 @@ impl StatementType {
             StatementType::Init => "initializer".to_string(),
             StatementType::Infix => "infix operator".to_string(),
             StatementType::Prefix => "prefix operator".to_string(),
-            StatementType::Postfix => "postfix operator".to_string(),
             StatementType::Block => "block statement".to_string(),
         }
     }

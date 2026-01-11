@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, LiteralBind, ParserFuncCallArg, ParserFuncParam,
-    ParserInfixAttrValue, ParserInputAttribute, ParserStateVar, ParserStatement,
-    ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, LiteralBind, OperatorAssociativity,
+    ParserFuncCallArg, ParserFuncParam, ParserInputAttribute, ParserOperatorType, ParserStateVar,
+    ParserStatement, ParserStatementKind, ParserSymbolPath, ParserSymbolPathComponent, Range,
 };
-use std::collections::HashMap;
 
-peg::parser!(pub grammar kash_parser() for str {
+peg::parser!(pub grammar kasl_parser() for str {
     pub rule parse() -> Vec<ParserStatement>
         = statements()
 
@@ -44,9 +43,8 @@ peg::parser!(pub grammar kash_parser() for str {
         / struct_decl_statement()
         / protocol_decl_statement()
         / init_statement()
-        / infix_statement()
-        / prefix_statement()
-        / postfix_statement()
+        / operator_definition_statement()
+        / operator_func_statement()
         / block_statement()
         / expected!("statement")
 
@@ -63,7 +61,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule return_statement() -> ParserStatement
-        = start:position!() "return" value:(_ v:expression() { v })? end:position!() {
+        = start:position!() "return" value:(_ v:oneline_expression() { v })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Return { value }
@@ -71,7 +69,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule input_statement() -> ParserStatement
-        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:expression() { v })? attrs:(_? a:input_attr() { a })* end:position!() {
+        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:oneline_expression() { v })? attrs:(_? a:input_attr() { a })* end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Input { name, value_type, def_val, attrs }
@@ -87,7 +85,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule var_statement() -> ParserStatement
-        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? def_val:expression() { def_val })? end:position!() {
+        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? def_val:oneline_expression() { def_val })? end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Var { required_by, name, value_type, def_val }
@@ -103,7 +101,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule assign_statement() -> ParserStatement
-        = start:position!() target:id_chain() _ "=" _ value:expression() end:position!() {
+        = start:position!() target:id_chain() _ "=" _ value:oneline_expression() end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Assign { target, value }
@@ -119,7 +117,7 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule if_statement() -> ParserStatement
-        = start:position!() "if" _ condition:expression() __ "{"
+        = start:position!() "if" _ condition:oneline_expression() __? "{"
         __? body:statements() __?
         "}" end:position!() {
             ParserStatement {
@@ -129,9 +127,9 @@ peg::parser!(pub grammar kash_parser() for str {
         }
 
     rule if_else_statement() -> ParserStatement
-        = start:position!() "if" _ condition:expression() __ "{"
+        = start:position!() "if" _ condition:oneline_expression() __? "{"
         __? body:statements() __?
-        "}" __ "else" __ "{"
+        "}" __? "else" __? "{"
         __? else_body:statements() __?
         "}" end:position!() {
             ParserStatement {
@@ -180,35 +178,49 @@ peg::parser!(pub grammar kash_parser() for str {
             }
         }
 
-    rule infix_statement() -> ParserStatement
-        = start:position!() "infix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? "{"
-        __? attrs:infix_attrs() __?
-        "}" __? body:("{"
-        __? body:statements() __?
-        "}" { body })? end:position!() {
+    // Infix Operator Properties
+    rule infix_properties() -> InfixOperatorProperties
+        = precedence:precedence_prop() __? comma() __? associativity:associativity_prop() {
+            InfixOperatorProperties { precedence, associativity }
+        }
+        / associativity:associativity_prop() __? comma() __? precedence:precedence_prop() {
+            InfixOperatorProperties { precedence, associativity }
+        }
+
+    rule precedence_prop() -> u32
+        = "precedence" _? ":" _? value:integer() { value }
+
+    rule associativity_prop() -> OperatorAssociativity
+        = "associativity" _? ":" _? value:(
+            "left" { OperatorAssociativity::Left }
+            / "right" { OperatorAssociativity::Right }
+            / "none" { OperatorAssociativity::None }
+        ) { value }
+
+    // Operator Definition
+    rule operator_definition_statement() -> ParserStatement
+        = start:position!() "operator" _ kind:(
+            "infix" _ symbol:operator() __? "{" __? props:infix_properties() __? "}" {
+                ParserStatementKind::InfixDefine { symbol, infix_properties: props }
+            }
+            / "prefix" _ symbol:operator() {
+                ParserStatementKind::PrefixDefine { symbol }
+            }
+        ) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::Infix { symbol, params, return_type, attrs, body }
+                kind,
             }
         }
 
-    rule prefix_statement() -> ParserStatement
-        = start:position!() "prefix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
+    // Operator Function
+    rule operator_func_statement() -> ParserStatement
+        = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:statements() __?
-        "}" { body })? end:position!() {
+        "}" { body }) end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::Prefix { symbol, params, return_type, body }
-            }
-        }
-
-    rule postfix_statement() -> ParserStatement
-        = start:position!() "postfix" _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
-        __? body:statements() __?
-        "}" { body })? end:position!() {
-            ParserStatement {
-                range: Range::n(start, end),
-                kind: ParserStatementKind::Postfix { symbol, params, return_type, body }
+                kind: ParserStatementKind::OperatorFunc { op_type, symbol, params, return_type, body },
             }
         }
 
@@ -224,7 +236,7 @@ peg::parser!(pub grammar kash_parser() for str {
 
     // Function Parameter
     rule func_param() -> ParserFuncParam
-        = start:position!() label:param_label()? name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:expression() { v })? end:position!() {
+        = start:position!() label:param_label()? name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:multiline_expression() { v })? end:position!() {
             ParserFuncParam { label, name, value_type, def_val, range: Range::n(start, end) }
         }
 
@@ -233,7 +245,7 @@ peg::parser!(pub grammar kash_parser() for str {
 
     // Input Attribute
     rule input_attr() -> ParserInputAttribute
-        = start:position!() "#" name:identifier() opt_args:("(" _? args:(expression() ** comma()) comma()? ")" { args })? end:position!() {
+        = start:position!() "#" name:identifier() opt_args:("(" _? args:(multiline_expression() ** comma()) comma()? ")" { args })? end:position!() {
             ParserInputAttribute { name, args: match opt_args {
                 None => vec![],
                 Some(args) => args
@@ -242,13 +254,13 @@ peg::parser!(pub grammar kash_parser() for str {
 
     // State ScopeVar
     rule state_var() -> ParserStateVar
-        = start:position!() name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:expression() end:position!() {
+        = start:position!() name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserStateVar { name, value_type, def_val, range: Range::n(start, end) }
         }
 
     // Function Call Argument
     rule func_call_args() -> Vec<ParserFuncCallArg>
-        = start:position!() entries:((label:(n:identifier() _? ":" _? { n })? value:expression() end:position!() {
+        = start:position!() entries:((label:(n:identifier() _? ":" _? { n })? value:multiline_expression() end:position!() {
             ParserFuncCallArg { label, value, range: Range::n(start, end) }
         }) ** comma()) comma()? {
             entries
@@ -260,60 +272,40 @@ peg::parser!(pub grammar kash_parser() for str {
         / "floatliteral" { LiteralBind::FloatLiteral }
         / "boolliteral" { LiteralBind::BoolLiteral }
 
-    // Infix Attributes
-    rule infix_attrs() -> HashMap<String, ParserInfixAttrValue>
-        = entries:((key:identifier() _? ":" _? value:(
-            v:identifier() { ParserInfixAttrValue::String(v) }
-            / v:integer() { ParserInfixAttrValue::Integer(v)}
-        ) {
-            (key, value)
-        }) ** comma()) comma()? {
-            HashMap::from_iter(entries)
-        }
-
     // --- EXPRESSIONS ---
 
-    pub rule expression() -> Vec<ExprToken>
-        = (
-            !(__? "\n" / __? ")" / __? "}")
-            first:expr_token()?
-            rest:(
-                ops:(__? op:operator_token() { op })+
-                __? token:expr_token() {
-                    (ops, token)
-                }
-            )*
-            last:operator_token()? {
-                let mut tokens = match first {
-                    Some(first) => vec![first],
-                    None => vec![],
-                };
-                for (ops, token) in rest {
-                    tokens.extend(ops);
-                    tokens.push(token);
-                }
-                if let Some(op) = last { tokens.push(op); }
+    pub rule oneline_expression() -> Vec<ExprToken>
+        = parts:( expr_element() ** (_?) ) {
+            parts.into_iter().flatten().collect()
+        }
 
-                tokens
-            }
-        )
-        / "(" _ expr:expression() _ ")" { expr }
-        / expected!("expression")
+    pub rule multiline_expression() -> Vec<ExprToken>
+        = parts:( expr_element() ** (__?) ) {
+            parts.into_iter().flatten().collect()
+        }
 
-    rule operator_token() -> ExprToken
-        = start:position!() op:operator() end:position!() { ExprToken { range: Range::n(start, end), kind: ExprTokenKind::Operator(op) } }
+    rule expr_element() -> Vec<ExprToken>
+        = lparen_start:position!() "(" _? inner:multiline_expression() _? rparen_start:position!() ")" {
+            let mut v = vec![ExprToken::lparen(Range::n(lparen_start, lparen_start + 1))];
+            v.extend(inner);
+            v.push(ExprToken::rparen(Range::n(rparen_start, rparen_start + 1)));
+            v
+        }
+        / single:expr_token() { vec![single] }
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
             literal()
             / func_call()
             / id_chain_token()
-        ) end:position!() { ExprToken { range: Range::n(start, end), kind } }
-
+            / operator_token()
+        ) end:position!() {
+            ExprToken { range: Range::n(start, end), kind }
+        }
 
     rule func_call() -> ExprTokenKind
-        = name:id_chain() _? "(" __? args:func_call_args() ")" {
-            ExprTokenKind::FuncCall { name, args }
+        = path:id_chain() _? "(" __? args:func_call_args() ")" {
+            ExprTokenKind::FuncCall { path, args }
         }
 
     rule literal() -> ExprTokenKind
@@ -323,6 +315,9 @@ peg::parser!(pub grammar kash_parser() for str {
 
     rule id_chain_token() -> ExprTokenKind
         = ids:id_chain() { ExprTokenKind::Identifier(ids) }
+
+    rule operator_token() -> ExprTokenKind
+        = op:operator() { ExprTokenKind::Operator(op) }
 
     // --- TOKENS ---
 
@@ -369,8 +364,7 @@ peg::parser!(pub grammar kash_parser() for str {
     rule reserved()
         = ("input" / "output" / "var" / "state" / "func" / "return"
         / "if" / "else" / "struct" / "init" / "protocol" / "intliteral"
-        / "floatliteral" / "boolliteral" / "infix" / "prefix"
-        / "postfix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
+        / "floatliteral" / "boolliteral" / "define" / "impl" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']
 

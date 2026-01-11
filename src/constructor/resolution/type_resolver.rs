@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ use crate::{
     ast::tree_items::variables::VariableTrait,
     resolution::{
         dependency_analysis::{build_graph, sort_graph},
-        expr_inference::ExprTypeInference,
-        program_locator::ProgramLocator,
+        expr_inference::expr_type_inference::ExprTypeInference,
     },
 };
 
+/// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
 pub fn resolve_types(
     program: &mut Program,
     symbol_table: &SymbolTable,
 ) -> Result<(), Vec<ConstructorError>> {
     // Build the type dependency graph
-    let graph = build_graph(symbol_table);
+    let graph = build_graph(symbol_table).map_err(|err| vec![err])?;
 
     // Then sort symbols based on the dependency graph
     let sorted_list = match sort_graph(&graph) {
@@ -69,78 +69,90 @@ pub fn resolve_types(
         // If not, infer the type
         match &symbol_decl_statement.kind {
             ParserStatementKind::Input {
-                name: _,
+                name,
                 value_type,
                 def_val,
                 attrs: _,
             } => {
-                if let Some(type_parser_path) = value_type {
-                    let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
-                    process_inference_write(
-                        program,
-                        &mut errors,
-                        symbol_path,
-                        symbol_decl_statement.range,
-                        Program::get_inferable_input_mut,
-                        type_symbol_path,
-                    );
+                if let Some(type_symbol_path) = resolve_type_or_push_error(
+                    program,
+                    &mut errors,
+                    value_type.as_ref(),
+                    symbol_decl_statement.range,
+                ) {
+                    // If the symbol has a type annotation, use it
+                    match program.get_input_mut(name) {
+                        Some(input) => input.value_type = Some(type_symbol_path),
+                        None => errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        }),
+                    }
                 } else if let Some(def_val) = def_val {
-                    match program.infer_expr_type(def_val) {
-                        Ok(type_symbol_path) => {
-                            process_inference_write(
-                                program,
-                                &mut errors,
-                                symbol_path,
-                                symbol_decl_statement.range,
-                                Program::get_inferable_input_mut,
-                                Some(type_symbol_path),
-                            );
-                        }
+                    // If the symbol doesn't have a type annotation, infer it from the default value
+                    match program.infer_expr_type(def_val, symbol_table) {
+                        Ok(type_symbol_path) => match program.get_input_mut(name) {
+                            Some(input) => input.value_type = Some(type_symbol_path),
+                            None => errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            }),
+                        },
                         Err(err) => errors.push(err),
                     }
                 }
             }
 
-            ParserStatementKind::Output {
-                name: _,
-                value_type,
-            } => {
-                let type_symbol_path = program.resolve_type_def_parser_path(&value_type);
-                process_inference_write(
-                    program,
-                    &mut errors,
-                    symbol_path,
-                    symbol_decl_statement.range,
-                    Program::get_inferable_output_mut,
-                    type_symbol_path,
-                );
+            ParserStatementKind::Output { name, value_type } => {
+                // Output variable must have a type annotation
+                if let Some(type_symbol_path) = program.resolve_type_def_parser_path(&value_type) {
+                    match program.get_output_mut(name) {
+                        Some(output) => output.value_type = Some(type_symbol_path),
+                        None => errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        }),
+                    }
+                } else {
+                    errors.push(ConstructorError {
+                        error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                        position: symbol_decl_statement.range,
+                    });
+                }
             }
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    if let Some(type_parser_path) = &var.value_type {
-                        let type_symbol_path =
-                            program.resolve_type_def_parser_path(&type_parser_path);
-                        process_inference_write(
-                            program,
-                            &mut errors,
-                            symbol_path,
-                            symbol_decl_statement.range,
-                            Program::get_inferable_state_mut,
-                            type_symbol_path,
-                        );
+                    if let Some(type_symbol_path) = resolve_type_or_push_error(
+                        program,
+                        &mut errors,
+                        var.value_type.as_ref(),
+                        symbol_decl_statement.range,
+                    ) {
+                        // If the symbol has a type annotation, use it
+                        match program.get_state_mut(&var.name) {
+                            Some(state) => state.value_type = Some(type_symbol_path),
+                            None => errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            }),
+                        }
                     } else {
-                        match program.infer_expr_type(&var.def_val) {
-                            Ok(type_symbol_path) => {
-                                process_inference_write(
-                                    program,
-                                    &mut errors,
-                                    symbol_path,
-                                    symbol_decl_statement.range,
-                                    Program::get_inferable_state_mut,
-                                    Some(type_symbol_path),
-                                );
-                            }
+                        // If the symbol doesn't have a type annotation, infer it from the default value
+                        match program.infer_expr_type(&var.def_val, symbol_table) {
+                            Ok(type_symbol_path) => match program.get_state_mut(&var.name) {
+                                Some(state) => state.value_type = Some(type_symbol_path),
+                                None => errors.push(ConstructorError {
+                                    error_type: ConstructorErrorType::CannotInferType(
+                                        symbol_path.clone(),
+                                    ),
+                                    position: symbol_decl_statement.range,
+                                }),
+                            },
                             Err(err) => errors.push(err),
                         }
                     }
@@ -154,24 +166,26 @@ pub fn resolve_types(
                 def_val,
             } => {
                 if let Some(type_parser_path) = value_type {
+                    // If the symbol has a type annotation, use it
                     let type_symbol_path = program.resolve_type_def_parser_path(&type_parser_path);
                     process_inference_write(
                         program,
                         &mut errors,
                         symbol_path,
                         symbol_decl_statement.range,
-                        Program::get_inferable_var_mut,
+                        Program::get_var_by_path_mut,
                         type_symbol_path,
                     );
                 } else if let Some(def_val) = def_val {
-                    match program.infer_expr_type(def_val) {
+                    // If the symbol doesn't have a type annotation, infer it from the default value
+                    match program.infer_expr_type(def_val, symbol_table) {
                         Ok(type_symbol_path) => {
                             process_inference_write(
                                 program,
                                 &mut errors,
                                 symbol_path,
                                 symbol_decl_statement.range,
-                                Program::get_inferable_var_mut,
+                                Program::get_var_by_path_mut,
                                 Some(type_symbol_path),
                             );
                         }
@@ -182,32 +196,59 @@ pub fn resolve_types(
 
             ParserStatementKind::FuncDecl {
                 required_by: _,
-                name: _,
+                name,
                 params,
-                return_type: _,
+                return_type,
                 body: _,
             } => {
+                // If the function has a return type, resolve it
+                if let Some(return_type) = return_type {
+                    if let Some(return_type_path) =
+                        program.resolve_type_def_parser_path(&return_type)
+                    {
+                        match program.get_func_mut(name) {
+                            Some(func) => func.return_type = Some(return_type_path),
+                            None => errors.push(ConstructorError {
+                                error_type: ConstructorErrorType::CannotInferType(
+                                    symbol_path.clone(),
+                                ),
+                                position: symbol_decl_statement.range,
+                            }),
+                        }
+                    } else {
+                        errors.push(ConstructorError {
+                            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
+                            position: symbol_decl_statement.range,
+                        });
+                    }
+                }
+
                 for param in params {
-                    if let Some(type_parser_path) = &param.value_type {
-                        let type_symbol_path =
-                            program.resolve_type_def_parser_path(&type_parser_path);
+                    if let Some(type_symbol_path) = resolve_type_or_push_error(
+                        program,
+                        &mut errors,
+                        param.value_type.as_ref(),
+                        symbol_decl_statement.range,
+                    ) {
+                        // If the symbol has a type annotation, use it
                         process_inference_write(
                             program,
                             &mut errors,
                             symbol_path,
                             symbol_decl_statement.range,
-                            Program::get_inferable_func_param_mut,
-                            type_symbol_path,
+                            Program::get_func_param_by_path_mut,
+                            Some(type_symbol_path),
                         );
                     } else if let Some(def_val) = &param.def_val {
-                        match program.infer_expr_type(def_val) {
+                        // If the symbol doesn't have a type annotation, infer it from the default value
+                        match program.infer_expr_type(def_val, symbol_table) {
                             Ok(type_symbol_path) => {
                                 process_inference_write(
                                     program,
                                     &mut errors,
                                     symbol_path,
                                     symbol_decl_statement.range,
-                                    Program::get_inferable_var_mut,
+                                    Program::get_var_by_path_mut,
                                     Some(type_symbol_path),
                                 );
                             }
@@ -222,6 +263,35 @@ pub fn resolve_types(
     }
 
     Ok(())
+}
+
+/// Try resolve a parser type path to a SymbolPath; on failure push an appropriate error into `errors` and return None.
+///
+/// - `program`: Program reference
+/// - `errors`: error vec to push into
+/// - `type_parser_path_opt`: Option<&ParserSymbolPath> — if None, returns None (caller handles inference-from-default-value)
+/// - `symbol_path`: the declaration symbol path (for error construction)
+/// - `decl_range`: source range for error position
+fn resolve_type_or_push_error(
+    program: &Program,
+    errors: &mut Vec<ConstructorError>,
+    type_parser_path_opt: Option<&crate::ParserSymbolPath>,
+    decl_range: Range,
+) -> Option<SymbolPath> {
+    match type_parser_path_opt {
+        Some(type_parser_path) => match program.resolve_type_def_parser_path(type_parser_path) {
+            Some(tp) => Some(tp),
+            None => {
+                // Type name not found: treat as user-level symbol-not-found error
+                errors.push(ConstructorError {
+                    error_type: ConstructorErrorType::SymbolNotFound(None),
+                    position: decl_range,
+                });
+                None
+            }
+        },
+        None => None,
+    }
 }
 
 /// Process operation for writing inferred type to the Program.

@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 pub mod parser;
 pub mod parser_ast;
 
-pub use parser::kash_parser;
+pub use parser::kasl_parser;
 pub use parser_ast::{
-    ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInfixAttrValue,
-    ParserInputAttribute, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,
+    ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
+    ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,
     ParserSymbolPath, ParserSymbolPathComponent,
 };

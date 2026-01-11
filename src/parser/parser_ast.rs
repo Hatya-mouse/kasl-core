@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-
-use crate::{LiteralBind, Range};
+use crate::{InfixOperatorProperties, LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
@@ -34,8 +32,6 @@ impl PartialEq for ParserStatement {
         self.range == other.range && self.kind == other.kind
     }
 }
-
-impl Eq for ParserStatement {}
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserStatementKind {
@@ -101,28 +97,29 @@ pub enum ParserStatementKind {
         params: Vec<ParserFuncParam>,
         body: Option<Vec<ParserStatement>>,
     },
-    Infix {
+    InfixDefine {
         symbol: String,
-        params: Vec<ParserFuncParam>,
-        return_type: ParserSymbolPath,
-        attrs: HashMap<String, ParserInfixAttrValue>,
-        body: Option<Vec<ParserStatement>>,
+        infix_properties: InfixOperatorProperties,
     },
-    Prefix {
+    PrefixDefine {
         symbol: String,
-        params: Vec<ParserFuncParam>,
-        return_type: ParserSymbolPath,
-        body: Option<Vec<ParserStatement>>,
     },
-    Postfix {
+    OperatorFunc {
+        op_type: ParserOperatorType,
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
-        body: Option<Vec<ParserStatement>>,
+        body: Vec<ParserStatement>,
     },
     Block {
         statements: Vec<ParserStatement>,
     },
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
+pub enum ParserOperatorType {
+    Infix,
+    Prefix,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -157,15 +154,25 @@ pub struct ParserFuncParam {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserInfixAttrValue {
-    String(String),
-    Integer(u32),
-}
-
-#[derive(Debug, PartialEq, Clone)]
 pub struct ExprToken {
     pub range: Range,
     pub kind: ExprTokenKind,
+}
+
+impl ExprToken {
+    pub fn lparen(range: Range) -> Self {
+        Self {
+            range,
+            kind: ExprTokenKind::LParen,
+        }
+    }
+
+    pub fn rparen(range: Range) -> Self {
+        Self {
+            range,
+            kind: ExprTokenKind::RParen,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -176,9 +183,11 @@ pub enum ExprTokenKind {
     Operator(String),
     Identifier(ParserSymbolPath),
     FuncCall {
-        name: ParserSymbolPath,
+        path: ParserSymbolPath,
         args: Vec<ParserFuncCallArg>,
     },
+    LParen,
+    RParen,
 }
 
 pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;

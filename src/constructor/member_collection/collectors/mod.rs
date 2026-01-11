@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 pub mod func_collector;
 pub mod nests_collector;
-pub mod operator_collector;
 pub mod var_collector;
 
 pub use func_collector::collect_member_functions;
 pub use nests_collector::collect_member_nests;
-pub use operator_collector::collect_member_operators;
 pub use var_collector::collect_member_variables;

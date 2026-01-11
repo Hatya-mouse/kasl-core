@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 #[cfg(test)]
 mod parsing {
-    use kash::{
-        ExprToken, ParserSymbolPathComponent, Range, kash_parser, parser_ast::ExprTokenKind,
+    use kasl::{
+        ExprToken, ParserSymbolPathComponent, Range, kasl_parser, parser_ast::ExprTokenKind,
     };
 
     /// Test parsing of chained expressions.
     #[test]
     fn chaining() {
-        let object = kash_parser::expression("object");
+        let object = kasl_parser::oneline_expression("object");
         // println!("{:#?}", object);
         assert_eq!(
             object,
@@ -36,7 +36,7 @@ mod parsing {
             }])
         );
 
-        let object_property = kash_parser::expression("object.property");
+        let object_property = kasl_parser::oneline_expression("object.property");
         // println!("{:#?}", object_property);
         assert_eq!(
             object_property,
@@ -85,117 +85,8 @@ mod parsing {
             }
         ";
 
-        let parsed_program = kash_parser::parse(program);
+        let parsed_program = kasl_parser::parse(program);
         // println!("{:#?}", parsed_program);
-        assert!(parsed_program.is_ok());
-    }
-
-    // Test parsing of complex statements.
-    #[test]
-    fn complex_program() {
-        let program = "// Input declarations
-            input sample_rate: Int = 44100
-            input gain = 0.8
-            input delay_time: Float = 0.5 #range(0.0, 1.0)
-
-            // Output declaration
-            output processed_signal: Float
-
-            // State block
-            state {
-                buffer: Float = 0.0
-                index: Int = 0
-            }
-
-            // Struct declaration
-            struct Delay: Effect {
-                var feedback: Float = 0.5
-
-                init(feedback: Float) {
-                    self.feedback = feedback
-                }
-
-                Effect func process(_ in_value: Float) -> Float {
-                    return in_value * self.feedback
-                }
-            }
-
-            // Protocol declaration
-            protocol Effect {
-                func process(_ in_value: Float) -> Float
-            }
-
-            struct Int: CompInt {
-                // Literal binding
-                intliteral init(_ value: CompInt) {
-                    self.raw = value
-                }
-
-                // Infix operator declaration
-                infix **(rhs: Int) -> Int {
-                    associativity: right,
-                    priority: 2
-                } {
-                    return self * rhs
-                }
-
-                // Postfix operator declaration
-                postfix !() -> Bool {
-                    return self == 0
-                }
-            }
-
-            struct Float: CompFloat {
-                // Literal binding
-                floatliteral init(_ value: CompFloat) {
-                    self.raw = value
-                }
-
-                // Prefix operator declaration
-                prefix -() -> Float {
-                    return self * -1.0
-                }
-            }
-
-            // Main function
-            func main() {
-                var delay = Delay(feedback: 0.7)
-                var input_signal: Float = 1.0
-
-                // Apply delay effect
-                processed_signal = delay.process(input_signal)
-
-                // Test infix operator
-                var power = 2 ** 3
-
-                // Test prefix operator
-                var inverted_gain = -gain
-
-                // Test postfix operator
-                var is_zero = power!
-            }
-
-            // Standalone function
-            func multiply(_ a: Int, _ b: Int) -> Int {
-                return a * b
-            }
-
-            // Protocol conformance
-            struct Multiplier: Effect {
-                var value: Int = 1
-
-                init(_ value: Int) {
-                    self.value = value
-                }
-
-                func process(_ in_value: Float) -> Float {
-                    return in_value * Float(self.value)
-                }
-            }
-            ";
-
-        let parsed_program = kash_parser::parse(program);
-        // println!("{:?}", parsed_program);
         assert!(parsed_program.is_ok());
     }
 }

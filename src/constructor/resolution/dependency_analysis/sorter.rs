@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ pub fn sort_graph(graph: &DependencyGraph) -> Result<Vec<&SymbolPath>, Vec<Symbo
                 queue.push_back(&edge.target);
             }
         }
+    }
+
+    // Drain the remaining nodes that have no incoming edges
+    while let Some(node) = queue.pop_front() {
+        sorted_nodes.push(node);
     }
 
     // Check if the graph is acyclic

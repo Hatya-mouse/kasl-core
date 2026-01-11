@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,24 @@ impl SymbolPath {
     pub fn from(path: &[SymbolPathComponent]) -> Self {
         SymbolPath {
             components: path.to_vec(),
+        }
+    }
+
+    pub fn comp_int() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompInt],
+        }
+    }
+
+    pub fn comp_float() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompFloat],
+        }
+    }
+
+    pub fn comp_bool() -> Self {
+        SymbolPath {
+            components: vec![SymbolPathComponent::CompBool],
         }
     }
 

@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ pub mod expression;
 pub mod function;
 pub mod operator;
 pub mod program;
-pub mod scope;
+pub mod scope_item;
 pub mod statement;
 pub mod type_def;
 pub mod variables;
 
 pub use expression::Expression;
 pub use function::{FuncCallArg, Function, Initializer, LiteralBind};
-pub use operator::{Operator, OperatorAssociativity, OperatorKind};
+pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
 pub use program::Program;
-pub use scope::Scope;
+pub use scope_item::{ScopeItem, ScopeItemMut};
 pub use statement::Statement;
 pub use type_def::TypeDef;
 pub use variables::{FuncParam, InputAttribute, InputVar, OutputVar, ScopeVar, StateVar};

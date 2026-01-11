@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,3 +24,4 @@ pub mod type_collection;
 
 pub use error::{ConstructorError, ConstructorErrorType};
 pub use symbol_table::SymbolTable;
+pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};

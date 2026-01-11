@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ pub mod tree_items;
 
 pub use data::{Range, SymbolPath, SymbolPathComponent};
 pub use tree_items::{
-    Expression, FuncCallArg, FuncParam, Function, Initializer, InputAttribute, InputVar,
-    LiteralBind, Operator, OperatorAssociativity, OperatorKind, OutputVar, Program, Scope,
-    ScopeVar, StateVar, Statement, TypeDef,
+    Expression, FuncCallArg, FuncParam, Function, InfixOperator, InfixOperatorProperties,
+    Initializer, InputAttribute, InputVar, LiteralBind, OperatorAssociativity, OutputVar,
+    PrefixOperator, Program, ScopeItem, ScopeItemMut, ScopeVar, StateVar, Statement, TypeDef,
 };

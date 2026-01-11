@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,16 +36,10 @@ fn collect_nested_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
                 inherits: _,
                 body: _,
             } => {
+                let mut new_type_def = TypeDef::new(name.clone());
                 let nested_types = collect_nested_types(&stmt.1);
-                types.push(TypeDef {
-                    name: name.clone(),
-                    inherits: Vec::new(),
-                    vars: Vec::new(),
-                    inits: Vec::new(),
-                    funcs: Vec::new(),
-                    types: nested_types,
-                    operators: Vec::new(),
-                })
+                new_type_def.types = nested_types;
+                types.push(new_type_def);
             }
 
             _ => {
