@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Shuntaro Kasatani
+// Copyright 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,37 +14,34 @@
 // limitations under the License.
 //
 
-use crate::{ConstructorError, ExprToken, ExprTokenKind, Expression, Program, TypedTokenKind};
+use crate::{
+    ConstructorError, ExprToken, Expression, Program, SymbolTable, get_typed_tokens,
+    resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
+};
 
-pub fn build_expr_tree(
-    program: &Program,
-    rpn_tokens: Vec<ExprToken>,
-) -> Result<Expression, ConstructorError> {
-    let stack = Vec::new();
+pub trait ExprTreeBuilder<'a> {
+    /// Build a typed Expression from `expr` tokens using the provided `SymbolTable`.
+    /// Returns a ConstructorError if typing, RPN conversion, or tree construction fails.
+    fn build_expr_tree_from_raw_tokens(
+        &self,
+        expr: &[ExprToken],
+        symbol_table: &SymbolTable,
+    ) -> Result<Expression, Vec<ConstructorError>>;
+}
 
-    for current_token in rpn_tokens.into_iter() {
-        match current_token.kind {
-            TypedTokenKind::Value {
-                expr_token,
-                value_type,
-            } => match expr_token.kind {
-                ExprTokenKind::
-            },
+impl<'a> ExprTreeBuilder<'a> for Program {
+    fn build_expr_tree_from_raw_tokens(
+        &self,
+        expr: &[ExprToken],
+        symbol_table: &SymbolTable,
+    ) -> Result<Expression, Vec<ConstructorError>> {
+        // 1. Convert tokens to TypedToken so we can easily look up their types
+        let typed_tokens = get_typed_tokens(self, symbol_table, expr).map_err(|err| vec![err])?;
+        // 2. Rearrange tokens to get reverse polish notation
+        let rpn_tokens = rearrange_tokens_to_rpn(self, typed_tokens).map_err(|err| vec![err])?;
+        // 3. Evaluate the reverse polish notation to get the type of the expression
+        let expr_tree = build_expr_tree_from_rpn(self, symbol_table, rpn_tokens)?;
 
-            // AI Suggestion:
-            // Good — here's a short, simple recipe.
-            //
-            // Use a stack of nodes (`Node`).
-            // For each token in the `RPN` sequence:
-            //   - If token is a `Value` (literal/identifier): push a leaf `Node(Value)`.
-            //   - If token is a `PrefixOperator`: pop 1 node (operand), create `Node(Operator, operand)`, push it.
-            //   - If token is an `InfixOperator`: pop right then left (order matters), create `Node(Operator, left, right)`, push it.
-            // After all tokens, the stack must contain exactly one node — that is the expression tree root. If not, return an error (`ArityMismatch` or `TrailingValues`).
-            // Error cases to check: insufficient operands when popping, multiple items left at end, unknown operator arity.
-            //
-            // That’s it — stack-based rebuild from RPN produces the tree.
-        }
+        Ok(expr_tree)
     }
-
-    Ok(())
 }

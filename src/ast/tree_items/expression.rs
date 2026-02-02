@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{InfixOperator, PrefixOperator, SymbolPath};
+use crate::{FuncCallArg, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
@@ -22,17 +22,20 @@ pub enum Expression {
     FloatLiteral(f32),
     BoolLiteral(bool),
     PrefixOperator {
-        operator: PrefixOperator,
         operand: Box<Expression>,
+        operand_type: SymbolPath,
+        return_type: SymbolPath,
     },
     InfixOperator {
-        operator: InfixOperator,
-        left: Box<Expression>,
-        right: Box<Expression>,
+        lhs: Box<Expression>,
+        lhs_type: SymbolPath,
+        rhs: Box<Expression>,
+        rhs_type: SymbolPath,
+        return_type: SymbolPath,
     },
     Identifier(SymbolPath),
     FuncCall {
         name: SymbolPath,
-        arguments: Vec<Expression>,
+        args: Vec<FuncCallArg>,
     },
 }

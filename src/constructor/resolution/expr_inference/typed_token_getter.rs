@@ -46,8 +46,8 @@ pub enum TypedTokenKind {
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens(
     program: &Program,
-    expr: &[ExprToken],
     symbol_table: &SymbolTable,
+    expr: &[ExprToken],
 ) -> Result<Vec<TypedToken>, ConstructorError> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
@@ -123,7 +123,18 @@ pub fn get_typed_tokens(
                 path: func_parser_path,
                 args: _,
             } => {
-                let func_type = program.get_func_type(func_parser_path, symbol_table, token)?;
+                let func_type = program
+                    // Should refactor this function: ↓
+                    .get_func_type(func_parser_path, symbol_table)
+                    .ok_or_else(|| ConstructorError {
+                        error_type: ConstructorErrorType::NoReturnFunctionInExpr(
+                            func_parser_path
+                                .last()
+                                .map(|component| component.symbol.clone())
+                                .unwrap_or("".to_string()),
+                        ),
+                        position: token.range,
+                    })?;
                 result.push(TypedToken::new(
                     TypedTokenKind::Value {
                         expr_token: token.clone(),

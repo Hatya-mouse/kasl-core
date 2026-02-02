@@ -87,32 +87,20 @@ impl Program {
         &self,
         parser_path: &ParserSymbolPath,
         symbol_table: &SymbolTable,
-        token: &ExprToken,
-    ) -> Result<SymbolPath, ConstructorError> {
+    ) -> Option<SymbolPath> {
         let func_symbol_path = match symbol_table.resolve_path(parser_path) {
             Some(path) => path,
             None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(None),
-                    position: token.range,
-                });
+                return None;
             }
         };
         let func = match self.get_func_by_path(&func_symbol_path) {
             Some(func) => func,
             None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(Some(
-                        func_symbol_path.clone(),
-                    )),
-                    position: token.range,
-                });
+                return None;
             }
         };
 
-        func.return_type.clone().ok_or(ConstructorError {
-            error_type: ConstructorErrorType::NoReturnFunctionInExpr(func_symbol_path),
-            position: token.range,
-        })
+        func.return_type.clone()
     }
 }

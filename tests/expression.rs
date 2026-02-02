@@ -19,7 +19,7 @@ mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
         SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
-        resolution::{expr_inference::rearrange_tokens_to_rpn, type_resolver::resolve_types},
+        resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
         symbol_collection::collect_top_level_symbols,
         symbol_path,
         symbol_table::build_symbol_table,
@@ -27,7 +27,16 @@ mod expression {
     };
 
     fn v() -> TypedToken {
-        TypedToken::new(TypedTokenKind::Value(SymbolPath::comp_int()), Range::zero())
+        TypedToken::new(
+            TypedTokenKind::Value {
+                expr_token: ExprToken {
+                    kind: ExprTokenKind::IntLiteral(0),
+                    range: Range::zero(),
+                },
+                value_type: SymbolPath::comp_int(),
+            },
+            Range::zero(),
+        )
     }
 
     fn inf(sym: &str) -> TypedToken {
@@ -58,7 +67,10 @@ mod expression {
         tokens
             .iter()
             .map(|t| match &t.kind {
-                TypedTokenKind::Value(ty) => format!("V<{}>", ty),
+                TypedTokenKind::Value {
+                    value_type: ty,
+                    expr_token: _,
+                } => format!("V<{}>", ty),
                 TypedTokenKind::PrefixOperator(s) => format!("pre{}", s),
                 TypedTokenKind::InfixOperator(s) => s.clone(),
                 TypedTokenKind::LParen => "(".to_string(),
@@ -81,7 +93,7 @@ mod expression {
         }];
 
         // Convert the token to TypedToken, and then rearrange it to RPN
-        let typed_tokens = get_typed_tokens(&program, &expr_tokens, &symbol_table)
+        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
             .unwrap_or_else(|e| panic!("Couldn't convert tokens to typed tokens:\n{}", e));
         let res = rearrange_tokens_to_rpn(&program, typed_tokens)
             .unwrap_or_else(|e| panic!("Couldn't rearrange tokens to RPN order:\n{}", e));
@@ -331,7 +343,6 @@ input e: Int = 0
         build_symbol_table(&mut symbol_table, &parsed_program);
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
-        resolve_types(&mut program, &symbol_table).unwrap();
 
         // 2. --- Parsing ---
         // Parse the string directly using the `kasl_parser::expression` rule
@@ -340,7 +351,7 @@ input e: Int = 0
             .unwrap_or_else(|e| panic!("Parser failed: {}", e));
 
         // 3. --- Typing & RPN Conversion ---
-        let typed_tokens = get_typed_tokens(&program, &expr_tokens, &symbol_table)
+        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
             .unwrap_or_else(|e| panic!("get_typed_tokens failed: {}", e));
 
         let rpn_tokens = rearrange_tokens_to_rpn(&program, typed_tokens)
@@ -362,5 +373,8 @@ input e: Int = 0
         ];
 
         assert_eq!(got, want, "The RPN sequence did not match the expectation.");
+
+        let expr_result = build_expr_tree_from_rpn(&program, &symbol_table, rpn_tokens);
+        expr_result.unwrap();
     }
 }

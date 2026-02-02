@@ -35,9 +35,12 @@ pub enum ConstructorErrorType {
     CannotInferType(SymbolPath),
     DuplicateLiteralBind(LiteralBind),
     MissingLiteralBind(LiteralBind),
-    NoReturnFunctionInExpr(SymbolPath),
+    NoReturnFunctionInExpr(String),
     UnmatchedParentheses,
     InvalidInfixProperty(String),
+    ArityMismatch(String, usize),
+    ExprSyntaxError,
+    ArgumentNotFound(Option<String>),
 
     CompilerBug(String),
     Placeholder,
@@ -116,17 +119,29 @@ impl ConstructorErrorType {
                     }
                 )
             }
-            ConstructorErrorType::NoReturnFunctionInExpr(symbol_path) => {
-                format!(
-                    "This function '{}' does not have a return type despite being used in an expression.",
-                    symbol_path
-                )
+            ConstructorErrorType::NoReturnFunctionInExpr(name) => {
+                format!("This function '{}' does not have a return type.", name)
             }
             ConstructorErrorType::UnmatchedParentheses => {
                 format!("Unmatched parentheses.")
             }
             ConstructorErrorType::InvalidInfixProperty(attribute) => {
                 format!("Infix property '{}' doesn't exist", attribute)
+            }
+            ConstructorErrorType::ArityMismatch(function_name, expected) => {
+                format!(
+                    "Operator '{}' expects {} arguments",
+                    function_name, expected
+                )
+            }
+            ConstructorErrorType::ArgumentNotFound(argument_name) => {
+                format!(
+                    "Argument '{}' not found",
+                    argument_name.clone().unwrap_or("unknown".to_string())
+                )
+            }
+            ConstructorErrorType::ExprSyntaxError => {
+                format!("Syntax error in expression.")
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(

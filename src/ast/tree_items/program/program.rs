@@ -144,7 +144,7 @@ impl Program {
         self.infix_operators.push(operator);
     }
 
-    /// Get an immutable reference to the InfixOperator by its path.
+    /// Get an immutable reference to the InfixOperator by the types of its operands.
     pub fn get_infix_func(
         &self,
         lhs_type: &SymbolPath,
@@ -166,7 +166,7 @@ impl Program {
             })
     }
 
-    /// Get a mutable reference to the InfixOperator by its path.
+    /// Get a mutable reference to the InfixOperator by the types of its operands.
     pub fn get_infix_func_mut(
         &mut self,
         lhs_type: &SymbolPath,
@@ -194,17 +194,12 @@ impl Program {
         self.prefix_operator_symbols.push(symbol);
     }
 
-    /// Check if a prefix operator is registered.
-    pub fn has_prefix_operator(&self, symbol: &String) -> bool {
-        self.prefix_operator_symbols.contains(symbol)
-    }
-
     /// Register a PrefixOperator to the program
     pub fn register_prefix_func(&mut self, operator: PrefixOperator) {
         self.prefix_operators.push(operator);
     }
 
-    /// Get an immutable reference to the PrefixOperator by its path.
+    /// Get an immutable reference to the PrefixOperator by the type of its operand.
     pub fn get_prefix_func(
         &self,
         operand_type: &SymbolPath,
@@ -223,7 +218,7 @@ impl Program {
             })
     }
 
-    /// Get a mutable reference to the PrefixOperator by its path.
+    /// Get a mutable reference to the PrefixOperator by the type of its operand.
     pub fn get_prefix_func_mut(
         &mut self,
         operand_type: &SymbolPath,
