@@ -117,7 +117,7 @@ pub fn build_expr_tree_from_rpn(
 
                     stack.push((
                         Expression::FuncCall {
-                            name: resolved_func_path,
+                            path: resolved_func_path,
                             args: parsed_arguments,
                         },
                         value_type,

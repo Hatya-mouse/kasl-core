@@ -40,9 +40,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the child type
                 let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
-                if let Some(def_val) = def_val {
-                    build_var_graph(&mut graph, symbol_table, &var_path, def_val)?;
-                }
+                build_var_graph(&mut graph, symbol_table, &var_path, def_val)?;
                 graph.add_node(DependencyGraphNode::new(var_path));
             }
 
@@ -55,6 +53,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             ParserStatementKind::Output {
                 name,
                 value_type: _,
+                def_val: _,
             } => {
                 // Combine variable name to create a new path for the child type
                 let var_path = symbol_path![SymbolPathComponent::OutputVar(name.to_string())];

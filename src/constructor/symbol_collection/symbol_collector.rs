@@ -50,10 +50,12 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::Output {
                 name,
                 value_type: _,
+                def_val: _,
             } => {
                 let output = OutputVar {
                     name: name.to_string(),
                     value_type: None,
+                    def_val: None,
                 };
                 program.register_output(output);
             }

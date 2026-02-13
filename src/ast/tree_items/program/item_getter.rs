@@ -61,15 +61,12 @@ impl Program {
     pub fn get_func_param_by_path_mut(
         &mut self,
         symbol_path: &SymbolPath,
+        param_name: &str,
     ) -> Option<&mut FuncParam> {
-        let (last, parent) = symbol_path.components.split_last()?;
-        let parent_scope = self.get_to_deepest_scope_mut(parent)?;
+        let parent_scope = self.get_to_deepest_scope_mut(&symbol_path.components)?;
 
-        match last {
-            SymbolPathComponent::FuncParam(name) => match parent_scope {
-                ScopeItemMut::Func(func) => func.get_func_param_mut(name),
-                _ => None,
-            },
+        match parent_scope {
+            ScopeItemMut::Func(func) => func.get_func_param_mut(param_name),
             _ => None,
         }
     }

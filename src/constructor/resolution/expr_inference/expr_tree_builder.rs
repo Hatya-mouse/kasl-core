@@ -19,7 +19,7 @@ use crate::{
     resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
 };
 
-pub trait ExprTreeBuilder<'a> {
+pub trait ExprTreeBuilder {
     /// Build a typed Expression from `expr` tokens using the provided `SymbolTable`.
     /// Returns a ConstructorError if typing, RPN conversion, or tree construction fails.
     fn build_expr_tree_from_raw_tokens(
@@ -29,7 +29,7 @@ pub trait ExprTreeBuilder<'a> {
     ) -> Result<Expression, Vec<ConstructorError>>;
 }
 
-impl<'a> ExprTreeBuilder<'a> for Program {
+impl ExprTreeBuilder for Program {
     fn build_expr_tree_from_raw_tokens(
         &self,
         expr: &[ExprToken],

@@ -41,6 +41,7 @@ pub enum ConstructorErrorType {
     ArityMismatch(String, usize),
     ExprSyntaxError,
     ArgumentNotFound(Option<String>),
+    TypeMismatch(SymbolPath, SymbolPath),
 
     CompilerBug(String),
     Placeholder,
@@ -142,6 +143,12 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::ExprSyntaxError => {
                 format!("Syntax error in expression.")
+            }
+            ConstructorErrorType::TypeMismatch(value_type, annotation_type) => {
+                format!(
+                    "Default value is a value of the type '{}', but the type annotation is '{}'",
+                    value_type, annotation_type
+                )
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(

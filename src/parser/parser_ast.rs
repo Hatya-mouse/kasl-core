@@ -48,18 +48,19 @@ pub enum ParserStatementKind {
     Input {
         name: String,
         value_type: Option<ParserSymbolPath>,
-        def_val: Option<Vec<ExprToken>>,
+        def_val: Vec<ExprToken>,
         attrs: Vec<ParserInputAttribute>,
     },
     Output {
         name: String,
-        value_type: ParserSymbolPath,
+        value_type: Option<ParserSymbolPath>,
+        def_val: Vec<ExprToken>,
     },
     Var {
         required_by: Option<ParserSymbolPath>,
         name: String,
         value_type: Option<ParserSymbolPath>,
-        def_val: Option<Vec<ExprToken>>,
+        def_val: Vec<ExprToken>,
     },
     State {
         vars: Vec<ParserStateVar>,

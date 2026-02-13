@@ -44,6 +44,7 @@ pub fn build_symbol_table<'a>(
             ParserStatementKind::Output {
                 name,
                 value_type: _,
+                def_val: _,
             } => {
                 symbol_table.insert_output(name.clone(), &stmt);
             }
