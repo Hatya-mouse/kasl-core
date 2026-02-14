@@ -89,9 +89,10 @@ mod expression {
     fn only_variable() {
         let mut program = Program::new();
         let symbol_table = SymbolTable::new();
+        let mut ec = ErrorCollector::new();
 
         let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
-        program.set_int_literal(int_type).unwrap();
+        program.set_int_literal(&mut ec, int_type, Range::zero());
 
         let expr_tokens = vec![ExprToken {
             kind: ExprTokenKind::IntLiteral(5),
@@ -299,7 +300,7 @@ mod expression {
         // Set types for literals and variables
         let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
         // let float_type = symbol_path![SymbolPathComponent::TypeDef("Float".to_string())];
-        program.set_int_literal(int_type.clone()).unwrap();
+        program.set_int_literal(&mut ec, int_type.clone(), Range::zero());
 
         // Build a symbol table by parsing a small program that declares the needed symbols.
         // Use top-level inputs and a valid function name (no dot in identifier).
