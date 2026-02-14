@@ -62,7 +62,7 @@ impl ErrorCollector {
     pub fn canonicalize(&self, payload: &Payload) -> CanonicalMeta {
         match payload {
             Payload::None => CanonicalMeta::None,
-            _ => todo!(),
+            Payload::Sym(str) => CanonicalMeta::Str(str.to_string()),
         }
     }
 }

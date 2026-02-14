@@ -23,4 +23,5 @@ pub enum Payload<'a> {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum CanonicalMeta {
     None,
+    Str(String),
 }
