@@ -18,15 +18,16 @@ use crate::{
     ConstructorError, ParserStatement, Program, SymbolTable, error::ErrorCollector,
     member_collection::collect_all_type_members, resolution::type_resolver::resolve_types,
     symbol_collection::collect_top_level_symbols, symbol_table::build_symbol_table,
-    type_collection::collect_all_types,
+    type_collection::collect_all_types, validation::validator::validate,
 };
 
 /// Process order:
 /// 1. `symbol_table`: Build symbol table
 /// 2. `type_collection`: Collect types
-/// 3. `symbol_collection`: Collect top-level symbols
-/// 4. `member_collection`: Collect all type members
-/// 5. `type_resolution`: Resolve types
+/// 3. `validation`: Validate program
+/// 4. `symbol_collection`: Collect top-level symbols
+/// 5. `member_collection`: Collect all type members
+/// 6. `type_resolution`: Resolve types
 pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ConstructorError>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
@@ -38,13 +39,16 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Con
     // 2. Collect types
     collect_all_types(&mut program, &symbol_table);
 
-    // 3. Collect top-level symbols
-    collect_top_level_symbols(&mut program, &symbol_table).map_err(|err| vec![err])?;
+    // 3. Validate program
+    validate(&mut error_collector, &symbol_table);
 
-    // 4. Collect all type members
+    // 4. Collect top-level symbols
+    collect_top_level_symbols(&mut error_collector, &mut program, &symbol_table);
+
+    // 5. Collect all type members
     collect_all_type_members(&mut program, &symbol_table).map_err(|err| vec![err])?;
 
-    // 5. Infer the types of symbols
+    // 6. Infer the types of symbols
     resolve_types(&mut program, &symbol_table)?;
 
     Ok(())

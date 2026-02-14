@@ -63,6 +63,7 @@ impl ErrorCollector {
         match payload {
             Payload::None => CanonicalMeta::None,
             Payload::Sym(str) => CanonicalMeta::Str(str.to_string()),
+            Payload::Num(num) => CanonicalMeta::Num(*num),
         }
     }
 }

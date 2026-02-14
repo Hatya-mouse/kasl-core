@@ -20,4 +20,19 @@ pub enum ErrorKind {
     /// Phase: SymbolTableConstruction
     /// Payload: Name of the duplicate symbol
     DuplicateSymbol,
+
+    /// Title: RequiredByOutsideType
+    /// Phase: TopLevelCollection
+    /// Payload: None
+    RequiredByOutsideType,
+
+    /// Title: InvalidParamNumbersForInfix
+    /// Phase: TopLevelCollection
+    /// Payload: None
+    InvalidParamNumbersForInfix,
+
+    /// Title: InvalidParamNumbersForPrefix
+    /// Phase: TopLevelCollection
+    /// Payload: None
+    InvalidParamNumbersForPrefix,
 }

@@ -23,4 +23,38 @@ impl ErrorCollector {
     pub fn dup_sym(&mut self, range: Range, phase: Phase, sym: &str) {
         self.emit(EK::DuplicateSymbol, range, phase, Sv::Error, Pl::Sym(sym));
     }
+
+    pub fn req_by_outside_type(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::RequiredByOutsideType, range, phase, Sv::Error, Pl::None);
+    }
+
+    pub fn invalid_param_numbers_for_infix(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        got_params: usize,
+    ) {
+        self.emit(
+            EK::InvalidParamNumbersForInfix,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Num(got_params),
+        );
+    }
+
+    pub fn invalid_param_numbers_for_prefix(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        got_params: usize,
+    ) {
+        self.emit(
+            EK::InvalidParamNumbersForPrefix,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Num(got_params),
+        );
+    }
 }

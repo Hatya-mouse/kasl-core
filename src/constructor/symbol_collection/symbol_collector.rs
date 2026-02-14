@@ -15,16 +15,17 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserOperatorType,
-    ParserStatement, ParserStatementKind, Program, StateVar, SymbolTable,
+    Function, InputVar, OutputVar, ParserStatementKind, Program, StateVar, SymbolTable,
+    error::{ErrorCollector, Ph},
     member_collection::collectors::construct_func_params,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
 pub fn collect_top_level_symbols(
+    ec: &mut ErrorCollector,
     program: &mut Program,
     symbol_table: &SymbolTable,
-) -> Result<(), ConstructorError> {
+) {
     for stmt in &symbol_table.inputs {
         match &stmt.1.kind {
             ParserStatementKind::Input {
@@ -92,10 +93,7 @@ pub fn collect_top_level_symbols(
                 body: _,
             } => {
                 if required_by.is_some() {
-                    return Err(ConstructorError {
-                        position: stmt.1.range,
-                        error_type: ConstructorErrorType::InvalidRequiredBy,
-                    });
+                    ec.req_by_outside_type(stmt.1.range, Ph::TopLevelCollection);
                 }
 
                 let func_params = construct_func_params(params);
@@ -131,64 +129,4 @@ pub fn collect_top_level_symbols(
             _ => (),
         }
     }
-
-    let infix_funcs = &symbol_table
-        .infix_funcs
-        .values()
-        .flatten()
-        .collect::<Vec<&&ParserStatement>>();
-
-    for stmt in infix_funcs {
-        match &stmt.kind {
-            ParserStatementKind::OperatorFunc {
-                op_type,
-                symbol,
-                params,
-                return_type: _,
-                body: _,
-            } => match op_type {
-                ParserOperatorType::Infix => {
-                    if params.len() != 2 {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
-                            position: stmt.range,
-                        });
-                    }
-                }
-                _ => (),
-            },
-            _ => (),
-        }
-    }
-
-    let prefix_funcs = &symbol_table
-        .prefix_funcs
-        .values()
-        .flatten()
-        .collect::<Vec<&&ParserStatement>>();
-
-    for stmt in prefix_funcs {
-        match &stmt.kind {
-            ParserStatementKind::OperatorFunc {
-                op_type,
-                symbol,
-                params,
-                return_type: _,
-                body: _,
-            } => match op_type {
-                ParserOperatorType::Prefix => {
-                    if params.len() != 1 {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
-                            position: stmt.range,
-                        });
-                    }
-                }
-                _ => (),
-            },
-            _ => (),
-        }
-    }
-
-    Ok(())
 }

@@ -345,7 +345,7 @@ input e: Int = 0
             .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
         build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
         collect_all_types(&mut program, &symbol_table);
-        collect_top_level_symbols(&mut program, &symbol_table).unwrap();
+        collect_top_level_symbols(&mut ec, &mut program, &symbol_table);
         collect_all_type_members(&mut program, &symbol_table).unwrap();
         resolve_types(&mut program, &symbol_table).unwrap();
 
