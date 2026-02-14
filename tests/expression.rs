@@ -18,11 +18,12 @@
 mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
-        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
-        constructor::constructor::construct_program,
-        get_typed_tokens,
-        member_collection::collect_type_members,
-        resolution::{expr_inference::rearrange_tokens_to_rpn, type_resolver::resolve_types},
+        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
+        member_collection::collect_all_type_members,
+        resolution::{
+            expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
+            type_resolver::resolve_types,
+        },
         symbol_collection::collect_top_level_symbols,
         symbol_path,
         symbol_table::build_symbol_table,
@@ -30,7 +31,16 @@ mod expression {
     };
 
     fn v() -> TypedToken {
-        TypedToken::new(TypedTokenKind::Value(SymbolPath::comp_int()), Range::zero())
+        TypedToken::new(
+            TypedTokenKind::Value {
+                expr_token: ExprToken {
+                    kind: ExprTokenKind::IntLiteral(0),
+                    range: Range::zero(),
+                },
+                value_type: SymbolPath::comp_int(),
+            },
+            Range::zero(),
+        )
     }
 
     fn inf(sym: &str) -> TypedToken {
@@ -61,7 +71,10 @@ mod expression {
         tokens
             .iter()
             .map(|t| match &t.kind {
-                TypedTokenKind::Value(ty) => format!("V<{}>", ty),
+                TypedTokenKind::Value {
+                    value_type: ty,
+                    expr_token: _,
+                } => format!("V<{}>", ty),
                 TypedTokenKind::PrefixOperator(s) => format!("pre{}", s),
                 TypedTokenKind::InfixOperator(s) => s.clone(),
                 TypedTokenKind::LParen => "(".to_string(),
@@ -84,7 +97,7 @@ mod expression {
         }];
 
         // Convert the token to TypedToken, and then rearrange it to RPN
-        let typed_tokens = get_typed_tokens(&program, &expr_tokens, &symbol_table)
+        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
             .unwrap_or_else(|e| panic!("Couldn't convert tokens to typed tokens:\n{}", e));
         let res = rearrange_tokens_to_rpn(&program, typed_tokens)
             .unwrap_or_else(|e| panic!("Couldn't rearrange tokens to RPN order:\n{}", e));
@@ -100,7 +113,7 @@ mod expression {
         // => (a - b) - c
         // => RPN: a b - c -
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "-".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -124,14 +137,14 @@ mod expression {
         // => RPN: a b c * -
         let mut program = Program::new();
 
-        program.register_infix_properties(
+        program.register_infix_operator(
             "-".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
                 associativity: OperatorAssociativity::Left,
             },
         );
-        program.register_infix_properties(
+        program.register_infix_operator(
             "*".to_string(),
             InfixOperatorProperties {
                 precedence: 20,
@@ -156,14 +169,14 @@ mod expression {
         let mut program = Program::new();
 
         program.register_prefix_operator("-".to_string());
-        program.register_infix_properties(
+        program.register_infix_operator(
             "*".to_string(),
             InfixOperatorProperties {
                 precedence: 20,
                 associativity: OperatorAssociativity::Left,
             },
         );
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -186,7 +199,7 @@ mod expression {
     fn non_associative_chain_error() {
         // a < b < c where '<' is non-associative should error OperatorCannotBeChained
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "<".to_string(),
             InfixOperatorProperties {
                 precedence: 5,
@@ -210,7 +223,7 @@ mod expression {
     fn unmatched_parentheses_detected_on_drain() {
         // (a + b  -- missing closing paren -> should error UnmatchedParentheses on final drain
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -234,7 +247,7 @@ mod expression {
     fn unmatched_parentheses_right_paren_error() {
         // a + b )  -- extra right paren should be detected when encountering RParen
         let mut program = Program::new();
-        program.register_infix_properties(
+        program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
                 precedence: 10,
@@ -280,37 +293,6 @@ mod expression {
         let mut program = Program::new();
         let mut symbol_table = SymbolTable::new();
 
-        // Register operator properties
-        program.register_infix_properties(
-            "+".to_string(),
-            InfixOperatorProperties {
-                precedence: 10,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "-".to_string(),
-            InfixOperatorProperties {
-                precedence: 10,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "*".to_string(),
-            InfixOperatorProperties {
-                precedence: 20,
-                associativity: OperatorAssociativity::Left,
-            },
-        );
-        program.register_infix_properties(
-            "^".to_string(),
-            InfixOperatorProperties {
-                precedence: 30,
-                associativity: OperatorAssociativity::Right,
-            },
-        );
-        program.register_prefix_operator("-".to_string());
-
         // Set types for literals and variables
         let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
         // let float_type = symbol_path![SymbolPathComponent::TypeDef("Float".to_string())];
@@ -319,6 +301,33 @@ mod expression {
         // Build a symbol table by parsing a small program that declares the needed symbols.
         // Use top-level inputs and a valid function name (no dot in identifier).
         let program_src = r#"
+operator infix + {
+    precedence: 10,
+    associativity: left
+}
+func infix + (lhs: Int, rhs: Int) -> Int {}
+
+operator infix - {
+    precedence: 10,
+    associativity: left
+}
+func infix - (lhs: Float, rhs: Int) -> Float {}
+
+operator infix * {
+    precedence: 20,
+    associativity: left
+}
+func infix * (lhs: Float, rhs: Int) -> Float {}
+
+operator infix ^ {
+    precedence: 30,
+    associativity: right
+}
+func infix ^ (lhs: Int, rhs: Int) -> Int {}
+
+operator prefix -
+func prefix - (value: Int) -> Int {}
+
 struct Int {}
 struct Float {}
 func foo_bar(x: Int) -> Float { }
@@ -331,9 +340,10 @@ input e: Int = 0
 
         let parsed_program = kasl::kasl_parser::parse(program_src)
             .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
-        build_symbol_table(&mut symbol_table, &parsed_program);
+        build_symbol_table(&mut symbol_table, &parsed_program).unwrap();
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
+        collect_all_type_members(&mut program, &symbol_table).unwrap();
         resolve_types(&mut program, &symbol_table).unwrap();
 
         // 2. --- Parsing ---
@@ -343,7 +353,7 @@ input e: Int = 0
             .unwrap_or_else(|e| panic!("Parser failed: {}", e));
 
         // 3. --- Typing & RPN Conversion ---
-        let typed_tokens = get_typed_tokens(&program, &expr_tokens, &symbol_table)
+        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
             .unwrap_or_else(|e| panic!("get_typed_tokens failed: {}", e));
 
         let rpn_tokens = rearrange_tokens_to_rpn(&program, typed_tokens)
@@ -365,5 +375,8 @@ input e: Int = 0
         ];
 
         assert_eq!(got, want, "The RPN sequence did not match the expectation.");
+
+        let expr_result = build_expr_tree_from_rpn(&program, &symbol_table, rpn_tokens);
+        expr_result.unwrap();
     }
 }

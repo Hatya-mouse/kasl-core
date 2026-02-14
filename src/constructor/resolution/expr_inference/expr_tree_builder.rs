@@ -15,30 +15,33 @@
 //
 
 use crate::{
-    ConstructorError, ExprToken, Program, SymbolPath, SymbolTable, get_typed_tokens,
-    resolution::expr_inference::rearrange_tokens_to_rpn, symbol_path,
+    ConstructorError, ExprToken, Expression, Program, SymbolTable, get_typed_tokens,
+    resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
 };
 
-pub trait ExprTypeInference<'a> {
-    fn infer_expr_type(
+pub trait ExprTreeBuilder {
+    /// Build a typed Expression from `expr` tokens using the provided `SymbolTable`.
+    /// Returns a ConstructorError if typing, RPN conversion, or tree construction fails.
+    fn build_expr_tree_from_raw_tokens(
         &self,
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
-    ) -> Result<SymbolPath, ConstructorError>;
+    ) -> Result<Expression, Vec<ConstructorError>>;
 }
 
-impl<'a> ExprTypeInference<'a> for Program {
-    fn infer_expr_type(
+impl ExprTreeBuilder for Program {
+    fn build_expr_tree_from_raw_tokens(
         &self,
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
-    ) -> Result<SymbolPath, ConstructorError> {
+    ) -> Result<Expression, Vec<ConstructorError>> {
         // 1. Convert tokens to TypedToken so we can easily look up their types
-        let typed_tokens = get_typed_tokens(self, expr, symbol_table)?;
+        let typed_tokens = get_typed_tokens(self, symbol_table, expr).map_err(|err| vec![err])?;
         // 2. Rearrange tokens to get reverse polish notation
-        let rpn_tokens = rearrange_tokens_to_rpn(self, typed_tokens);
+        let rpn_tokens = rearrange_tokens_to_rpn(self, typed_tokens).map_err(|err| vec![err])?;
         // 3. Evaluate the reverse polish notation to get the type of the expression
+        let expr_tree = build_expr_tree_from_rpn(self, symbol_table, rpn_tokens)?;
 
-        Ok(symbol_path![])
+        Ok(expr_tree)
     }
 }

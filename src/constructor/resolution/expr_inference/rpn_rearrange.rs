@@ -28,11 +28,14 @@ pub fn rearrange_tokens_to_rpn(
 
     for current_token in tokens.into_iter() {
         match current_token.kind {
-            TypedTokenKind::Value(_) => output_queue.push(current_token),
+            TypedTokenKind::Value {
+                expr_token: _,
+                value_type: _,
+            } => output_queue.push(current_token),
             TypedTokenKind::PrefixOperator(_) => operator_stack.push(current_token),
             TypedTokenKind::InfixOperator(ref current_op_symbol) => {
                 // Get the precedence and associativity of the current operator
-                let current_props = match program.get_infix_properties(current_op_symbol) {
+                let current_props = match program.get_infix_operator(current_op_symbol) {
                     Some(props) => props,
                     None => {
                         return Err(ConstructorError {
@@ -52,7 +55,7 @@ pub fn rearrange_tokens_to_rpn(
                         }
                         TypedTokenKind::InfixOperator(ref top_op_symbol) => {
                             // Get the precedence and associativity of the operator from the stack
-                            let top_props = match program.get_infix_properties(top_op_symbol) {
+                            let top_props = match program.get_infix_operator(top_op_symbol) {
                                 Some(props) => props,
                                 None => {
                                     return Err(ConstructorError {
@@ -81,7 +84,7 @@ pub fn rearrange_tokens_to_rpn(
                     if let Some(top_token) = operator_stack.last() {
                         if let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind {
                             // Get the precedence and associativity of the operator from the stack
-                            let top_props = match program.get_infix_properties(top_op_symbol) {
+                            let top_props = match program.get_infix_operator(top_op_symbol) {
                                 Some(props) => props,
                                 None => {
                                     return Err(ConstructorError {

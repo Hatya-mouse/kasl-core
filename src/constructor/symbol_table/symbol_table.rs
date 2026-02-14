@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent};
+use crate::{
+    ConstructorError, ConstructorErrorType, ParserStatement, ParserSymbolPath, SymbolPath,
+    SymbolPathComponent,
+};
 use std::collections::HashMap;
 
 /// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
@@ -27,10 +30,15 @@ pub struct SymbolTable<'a> {
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
     pub infix_defines: HashMap<String, &'a ParserStatement>,
+    pub infix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub prefix_defines: HashMap<String, &'a ParserStatement>,
-    pub infix_funcs: HashMap<String, &'a ParserStatement>,
-    pub prefix_funcs: HashMap<String, &'a ParserStatement>,
+    pub prefix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub inits: Vec<&'a ParserStatement>,
+}
+
+pub enum StatementLookup<'a> {
+    Single(&'a ParserStatement),
+    Multiple(&'a [&'a ParserStatement]),
 }
 
 impl<'a> SymbolTable<'a> {
@@ -114,20 +122,46 @@ impl<'a> SymbolTable<'a> {
         self.type_defs.insert(name, (stmt, sub_table));
     }
 
-    pub fn insert_infix_define(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.infix_defines.insert(symbol, stmt);
+    pub fn insert_infix_define(
+        &mut self,
+        symbol: String,
+        stmt: &'a ParserStatement,
+    ) -> Result<(), ConstructorError> {
+        if self.infix_defines.contains_key(&symbol) {
+            Err(ConstructorError {
+                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
+                position: stmt.range,
+            })
+        } else {
+            self.infix_defines.insert(symbol, stmt);
+            Ok(())
+        }
     }
 
-    pub fn insert_prefix_define(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.prefix_defines.insert(symbol, stmt);
+    pub fn insert_prefix_define(
+        &mut self,
+        symbol: String,
+        stmt: &'a ParserStatement,
+    ) -> Result<(), ConstructorError> {
+        if self.prefix_defines.contains_key(&symbol) {
+            Err(ConstructorError {
+                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
+                position: stmt.range,
+            })
+        } else {
+            self.prefix_defines.insert(symbol, stmt);
+            Ok(())
+        }
     }
 
     pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.infix_funcs.insert(symbol, stmt);
+        let target_vec = self.infix_funcs.entry(symbol).or_insert_with(Vec::new);
+        target_vec.push(stmt);
     }
 
     pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        self.prefix_funcs.insert(symbol, stmt);
+        let target_vec = self.prefix_funcs.entry(symbol).or_insert_with(Vec::new);
+        target_vec.push(stmt);
     }
 
     pub fn insert_init(&mut self, stmt: &'a ParserStatement) {
@@ -136,43 +170,43 @@ impl<'a> SymbolTable<'a> {
 
     // Getter functions
 
-    pub fn get_input(&self, name: &str) -> Option<&&ParserStatement> {
-        self.inputs.get(name)
+    pub fn get_input(&self, name: &str) -> Option<&ParserStatement> {
+        self.inputs.get(name).map(|x| *x)
     }
 
-    pub fn get_output(&self, name: &str) -> Option<&&ParserStatement> {
-        self.outputs.get(name)
+    pub fn get_output(&self, name: &str) -> Option<&ParserStatement> {
+        self.outputs.get(name).map(|x| *x)
     }
 
-    pub fn get_state(&self, name: &str) -> Option<&&ParserStatement> {
-        self.states.get(name)
+    pub fn get_state(&self, name: &str) -> Option<&ParserStatement> {
+        self.states.get(name).map(|x| *x)
     }
 
-    pub fn get_var(&self, name: &str) -> Option<&&ParserStatement> {
-        self.vars.get(name)
+    pub fn get_var(&self, name: &str) -> Option<&ParserStatement> {
+        self.vars.get(name).map(|x| *x)
     }
 
-    pub fn get_func(&self, name: &str) -> Option<&&ParserStatement> {
-        self.funcs.get(name)
+    pub fn get_func(&self, name: &str) -> Option<&ParserStatement> {
+        self.funcs.get(name).map(|x| *x)
     }
 
     pub fn get_type_def(&self, name: &str) -> Option<&(&ParserStatement, SymbolTable<'a>)> {
         self.type_defs.get(name)
     }
 
-    pub fn get_infix_define(&self, symbol: &str) -> Option<&&ParserStatement> {
-        self.infix_defines.get(symbol)
+    pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
+        self.infix_defines.get(symbol).map(|x| *x)
     }
 
-    pub fn get_prefix_define(&self, symbol: &str) -> Option<&&ParserStatement> {
-        self.prefix_defines.get(symbol)
+    pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
+        self.prefix_defines.get(symbol).map(|x| *x)
     }
 
-    pub fn get_infix_func(&self, symbol: &str) -> Option<&&ParserStatement> {
+    pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {
         self.infix_funcs.get(symbol)
     }
 
-    pub fn get_prefix_func(&self, symbol: &str) -> Option<&&ParserStatement> {
+    pub fn get_prefix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {
         self.prefix_funcs.get(symbol)
     }
 
@@ -182,7 +216,10 @@ impl<'a> SymbolTable<'a> {
 
     /// Gets the statement by SymbolPath.
     /// Componenets except the last one must be a Type statement.
-    pub fn get_statement_by_path(&self, symbol_path: &SymbolPath) -> Option<&&ParserStatement> {
+    pub fn get_statement_by_path(
+        &'a self,
+        symbol_path: &SymbolPath,
+    ) -> Option<StatementLookup<'a>> {
         let mut current_scope = self;
         let last_index = symbol_path.components.len().checked_sub(1)?;
 
@@ -200,14 +237,31 @@ impl<'a> SymbolTable<'a> {
         }
 
         match &symbol_path.components[last_index] {
-            SymbolPathComponent::InputVar(name) => current_scope.get_input(name),
-            SymbolPathComponent::OutputVar(name) => current_scope.get_output(name),
-            SymbolPathComponent::StateVar(name) => current_scope.get_state(name),
-            SymbolPathComponent::Var(name) => current_scope.get_var(name),
-            SymbolPathComponent::Func(name) => current_scope.get_func(name),
-            SymbolPathComponent::TypeDef(name) => {
-                current_scope.get_type_def(name).map(|entry| &entry.0)
+            SymbolPathComponent::InputVar(name) => {
+                current_scope.get_input(name).map(StatementLookup::Single)
             }
+            SymbolPathComponent::OutputVar(name) => {
+                current_scope.get_output(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::StateVar(name) => {
+                current_scope.get_state(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::Var(name) => {
+                current_scope.get_var(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::Func(name) => {
+                current_scope.get_func(name).map(StatementLookup::Single)
+            }
+            SymbolPathComponent::InfixFunc(symbol) => current_scope
+                .get_infix_funcs(symbol)
+                .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::PrefixFunc(symbol) => current_scope
+                .get_prefix_funcs(symbol)
+                .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::TypeDef(name) => current_scope
+                .get_type_def(name)
+                .map(|entry| entry.0)
+                .map(StatementLookup::Single),
             _ => None,
         }
     }

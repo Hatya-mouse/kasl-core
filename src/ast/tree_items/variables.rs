@@ -19,6 +19,7 @@ use crate::{Expression, SymbolPath};
 /// Trait for all type of variables.
 pub trait VariableTrait {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>);
+    fn set_default_value(&mut self, default_value: Option<Expression>);
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,6 +34,10 @@ impl VariableTrait for InputVar {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
         self.value_type = type_path;
     }
+
+    fn set_default_value(&mut self, default_value: Option<Expression>) {
+        self.def_val = default_value;
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -45,11 +50,16 @@ pub struct InputAttribute {
 pub struct OutputVar {
     pub name: String,
     pub value_type: Option<SymbolPath>,
+    pub def_val: Option<Expression>,
 }
 
 impl VariableTrait for OutputVar {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
         self.value_type = type_path;
+    }
+
+    fn set_default_value(&mut self, default_value: Option<Expression>) {
+        self.def_val = default_value;
     }
 }
 
@@ -63,6 +73,10 @@ pub struct StateVar {
 impl VariableTrait for StateVar {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
         self.value_type = type_path;
+    }
+
+    fn set_default_value(&mut self, default_value: Option<Expression>) {
+        self.def_val = default_value;
     }
 }
 
@@ -78,6 +92,10 @@ impl VariableTrait for ScopeVar {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
         self.value_type = type_path;
     }
+
+    fn set_default_value(&mut self, default_value: Option<Expression>) {
+        self.def_val = default_value;
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -91,5 +109,9 @@ pub struct FuncParam {
 impl VariableTrait for FuncParam {
     fn set_value_type(&mut self, type_path: Option<SymbolPath>) {
         self.value_type = type_path;
+    }
+
+    fn set_default_value(&mut self, default_value: Option<Expression>) {
+        self.def_val = default_value.map(Box::new);
     }
 }

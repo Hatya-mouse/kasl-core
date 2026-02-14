@@ -61,7 +61,7 @@ mod parsing {
     fn easy_program() {
         let program = "input integer: Int = 14
             input fac = 5 #range(0, 100)
-            output out_value: Int
+            output out_value: Int = 0
 
             struct Multiplier {
                 var value = 1

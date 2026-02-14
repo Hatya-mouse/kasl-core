@@ -15,8 +15,9 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, Function, InfixOperator, InputVar, OutputVar,
-    ParserOperatorType, ParserStatementKind, PrefixOperator, Program, StateVar, SymbolTable,
+    ConstructorError, ConstructorErrorType, Function, InputVar, OutputVar, ParserOperatorType,
+    ParserStatement, ParserStatementKind, Program, StateVar, SymbolTable,
+    member_collection::collectors::construct_func_params,
 };
 
 // Collect all symbols from top-level and add them to the symbol table.
@@ -50,10 +51,12 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::Output {
                 name,
                 value_type: _,
+                def_val: _,
             } => {
                 let output = OutputVar {
                     name: name.to_string(),
                     value_type: None,
+                    def_val: None,
                 };
                 program.register_output(output);
             }
@@ -84,7 +87,7 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::FuncDecl {
                 required_by,
                 name,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => {
@@ -95,9 +98,10 @@ pub fn collect_top_level_symbols(
                     });
                 }
 
+                let func_params = construct_func_params(params);
                 let function = Function {
                     name: name.to_string(),
-                    params: Vec::new(),
+                    params: func_params,
                     return_type: None,
                     body: Vec::new(),
                     required_by: None,
@@ -114,7 +118,7 @@ pub fn collect_top_level_symbols(
             ParserStatementKind::InfixDefine {
                 symbol,
                 infix_properties,
-            } => program.register_infix_properties(symbol.to_string(), infix_properties.clone()),
+            } => program.register_infix_operator(symbol.to_string(), infix_properties.clone()),
             _ => (),
         }
     }
@@ -128,24 +132,28 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    for stmt in &symbol_table.infix_funcs {
-        match &stmt.1.kind {
+    let infix_funcs = &symbol_table
+        .infix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in infix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => match op_type {
                 ParserOperatorType::Infix => {
-                    let infix = InfixOperator {
-                        symbol: symbol.to_string(),
-                        lhs: None,
-                        rhs: None,
-                        return_type: None,
-                        body: Vec::new(),
-                    };
-                    program.register_infix_func(infix);
+                    if params.len() != 2 {
+                        return Err(ConstructorError {
+                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
+                            position: stmt.range,
+                        });
+                    }
                 }
                 _ => (),
             },
@@ -153,23 +161,28 @@ pub fn collect_top_level_symbols(
         }
     }
 
-    for stmt in &symbol_table.prefix_funcs {
-        match &stmt.1.kind {
+    let prefix_funcs = &symbol_table
+        .prefix_funcs
+        .values()
+        .flatten()
+        .collect::<Vec<&&ParserStatement>>();
+
+    for stmt in prefix_funcs {
+        match &stmt.kind {
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
-                params: _,
+                params,
                 return_type: _,
                 body: _,
             } => match op_type {
                 ParserOperatorType::Prefix => {
-                    let prefix = PrefixOperator {
-                        symbol: symbol.to_string(),
-                        operand: None,
-                        return_type: None,
-                        body: Vec::new(),
-                    };
-                    program.register_prefix_func(prefix);
+                    if params.len() != 1 {
+                        return Err(ConstructorError {
+                            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.clone()),
+                            position: stmt.range,
+                        });
+                    }
                 }
                 _ => (),
             },

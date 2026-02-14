@@ -33,7 +33,7 @@ impl Function {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FuncCallArg {
-    pub label: String,
+    pub name: String,
     pub value: Expression,
 }
 

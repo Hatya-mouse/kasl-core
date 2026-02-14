@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{InfixOperator, PrefixOperator, SymbolPath};
+use crate::{FuncCallArg, Program, SymbolPath};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
@@ -22,17 +22,40 @@ pub enum Expression {
     FloatLiteral(f32),
     BoolLiteral(bool),
     PrefixOperator {
-        operator: PrefixOperator,
         operand: Box<Expression>,
+        operand_type: SymbolPath,
+        return_type: SymbolPath,
     },
     InfixOperator {
-        operator: InfixOperator,
-        left: Box<Expression>,
-        right: Box<Expression>,
+        lhs: Box<Expression>,
+        lhs_type: SymbolPath,
+        rhs: Box<Expression>,
+        rhs_type: SymbolPath,
+        return_type: SymbolPath,
     },
     Identifier(SymbolPath),
     FuncCall {
-        name: SymbolPath,
-        arguments: Vec<Expression>,
+        path: SymbolPath,
+        args: Vec<FuncCallArg>,
     },
+}
+
+impl Expression {
+    pub fn get_type(&self, program: &Program) -> Option<SymbolPath> {
+        match self {
+            Expression::IntLiteral(_) => program.int_literal_type.clone(),
+            Expression::FloatLiteral(_) => program.float_literal_type.clone(),
+            Expression::BoolLiteral(_) => program.bool_literal_type.clone(),
+            Expression::PrefixOperator { return_type, .. } => Some(return_type.clone()),
+            Expression::InfixOperator { return_type, .. } => Some(return_type.clone()),
+            Expression::Identifier(symbol_path) => Some(symbol_path.clone()),
+            Expression::FuncCall { path, .. } => {
+                if let Some(func) = program.get_func_by_path(path) {
+                    func.return_type.clone()
+                } else {
+                    None
+                }
+            }
+        }
+    }
 }

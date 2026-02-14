@@ -69,7 +69,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule input_statement() -> ParserStatement
-        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? v:oneline_expression() { v })? attrs:(_? a:input_attr() { a })* end:position!() {
+        = start:position!() "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() attrs:(_? a:input_attr() { a })* end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Input { name, value_type, def_val, attrs }
@@ -77,15 +77,15 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule output_statement() -> ParserStatement
-        = start:position!() "output" _ name:identifier() _? ":" _? value_type:id_chain() end:position!() {
+        = start:position!() "output" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
-                kind: ParserStatementKind::Output { name, value_type }
+                kind: ParserStatementKind::Output { name, value_type, def_val }
             }
         }
 
     rule var_statement() -> ParserStatement
-        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? def_val:(_? "=" _? def_val:oneline_expression() { def_val })? end:position!() {
+        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserStatement {
                 range: Range::n(start, end),
                 kind: ParserStatementKind::Var { required_by, name, value_type, def_val }

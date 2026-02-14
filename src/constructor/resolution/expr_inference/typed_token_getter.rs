@@ -19,7 +19,7 @@ use crate::{
     SymbolPath, SymbolTable,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TypedToken {
     pub kind: TypedTokenKind,
     pub range: Range,
@@ -31,9 +31,12 @@ impl TypedToken {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TypedTokenKind {
-    Value(SymbolPath), // The type of the value
+    Value {
+        expr_token: ExprToken,
+        value_type: SymbolPath,
+    },
     PrefixOperator(String),
     InfixOperator(String),
     LParen,
@@ -43,8 +46,8 @@ pub enum TypedTokenKind {
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens(
     program: &Program,
-    expr: &[ExprToken],
     symbol_table: &SymbolTable,
+    expr: &[ExprToken],
 ) -> Result<Vec<TypedToken>, ConstructorError> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
@@ -53,7 +56,10 @@ pub fn get_typed_tokens(
         match &token.kind {
             ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
                 Some(int_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value(int_literal_type.clone()),
+                    TypedTokenKind::Value {
+                        expr_token: token.clone(),
+                        value_type: int_literal_type.clone(),
+                    },
                     token.range.clone(),
                 )),
                 None => {
@@ -68,7 +74,10 @@ pub fn get_typed_tokens(
 
             ExprTokenKind::FloatLiteral(_) => match &program.float_literal_type {
                 Some(float_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value(float_literal_type.clone()),
+                    TypedTokenKind::Value {
+                        expr_token: token.clone(),
+                        value_type: float_literal_type.clone(),
+                    },
                     token.range.clone(),
                 )),
                 None => {
@@ -83,7 +92,10 @@ pub fn get_typed_tokens(
 
             ExprTokenKind::BoolLiteral(_) => match &program.bool_literal_type {
                 Some(bool_literal_type) => result.push(TypedToken::new(
-                    TypedTokenKind::Value(bool_literal_type.clone()),
+                    TypedTokenKind::Value {
+                        expr_token: token.clone(),
+                        value_type: bool_literal_type.clone(),
+                    },
                     token.range.clone(),
                 )),
                 None => {
@@ -99,7 +111,10 @@ pub fn get_typed_tokens(
             ExprTokenKind::Identifier(parser_path) => {
                 let symbol_type = program.get_symbol_type(&parser_path, symbol_table, token)?;
                 result.push(TypedToken::new(
-                    TypedTokenKind::Value(symbol_type),
+                    TypedTokenKind::Value {
+                        expr_token: token.clone(),
+                        value_type: symbol_type.clone(),
+                    },
                     token.range.clone(),
                 ));
             }
@@ -108,9 +123,23 @@ pub fn get_typed_tokens(
                 path: func_parser_path,
                 args: _,
             } => {
-                let func_type = program.get_func_type(func_parser_path, symbol_table, token)?;
+                let func_type = program
+                    // Should refactor this function: ↓
+                    .get_func_type(func_parser_path, symbol_table)
+                    .ok_or_else(|| ConstructorError {
+                        error_type: ConstructorErrorType::NoReturnFunctionInExpr(
+                            func_parser_path
+                                .last()
+                                .map(|component| component.symbol.clone())
+                                .unwrap_or("".to_string()),
+                        ),
+                        position: token.range,
+                    })?;
                 result.push(TypedToken::new(
-                    TypedTokenKind::Value(func_type),
+                    TypedTokenKind::Value {
+                        expr_token: token.clone(),
+                        value_type: func_type.clone(),
+                    },
                     token.range.clone(),
                 ));
             }
@@ -143,7 +172,11 @@ fn handle_operator_resolution(
     // Whether the operator is infix or prefix can be determined by the last token
     let is_infix = match last_token {
         Some(unwrapped_token) => match unwrapped_token.kind {
-            TypedTokenKind::Value(_) | TypedTokenKind::RParen => true,
+            TypedTokenKind::Value {
+                expr_token: _,
+                value_type: _,
+            }
+            | TypedTokenKind::RParen => true,
             _ => false,
         },
         None => false,

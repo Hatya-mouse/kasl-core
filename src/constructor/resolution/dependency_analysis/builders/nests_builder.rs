@@ -33,12 +33,10 @@ pub fn build_struct_and_protocol_graph(
                 value_type: _,
                 def_val,
             } => {
-                if let Some(def_val) = def_val {
-                    // Combine variable name to create a new path for the child type
-                    let mut var_path = type_path.clone();
-                    var_path.push(SymbolPathComponent::Var(name.to_string()));
-                    build_var_graph(graph, root_symbol_table, &var_path, def_val)?;
-                }
+                // Combine variable name to create a new path for the child type
+                let mut var_path = type_path.clone();
+                var_path.push(SymbolPathComponent::Var(name.to_string()));
+                build_var_graph(graph, root_symbol_table, &var_path, def_val)?;
             }
 
             _ => (),

@@ -20,7 +20,9 @@ use crate::{LiteralBind, SymbolPath};
 pub enum ConstructorErrorType {
     ConsecutiveDots,
     TrailingDot,
+    InvalidOperatorParams(String),
     SymbolNotFound(Option<SymbolPath>),
+    DuplicateSymbol(String),
     OperatorNotFound(String),
     OperatorCannotBeChained(String),
     ExpectType,
@@ -35,9 +37,13 @@ pub enum ConstructorErrorType {
     CannotInferType(SymbolPath),
     DuplicateLiteralBind(LiteralBind),
     MissingLiteralBind(LiteralBind),
-    NoReturnFunctionInExpr(SymbolPath),
+    NoReturnFunctionInExpr(String),
     UnmatchedParentheses,
     InvalidInfixProperty(String),
+    ArityMismatch(String, usize),
+    ExprSyntaxError,
+    ArgumentNotFound(Option<String>),
+    TypeMismatch(SymbolPath, SymbolPath),
 
     CompilerBug(String),
     Placeholder,
@@ -50,6 +56,12 @@ impl ConstructorErrorType {
                 "Consecutive dots are not allowed here.".to_string()
             }
             ConstructorErrorType::TrailingDot => "Trailing dot is not allowed here.".to_string(),
+            ConstructorErrorType::InvalidOperatorParams(operator_symbol) => {
+                format!(
+                    "Operator '{}' has wrong number of parameters.",
+                    operator_symbol,
+                )
+            }
             ConstructorErrorType::SymbolNotFound(symbol_path) => match symbol_path {
                 Some(path) => format!("Symbol '{}' not found here.", path),
                 None => "Symbol not found here.".to_string(),
@@ -59,6 +71,9 @@ impl ConstructorErrorType {
             }
             ConstructorErrorType::OperatorCannotBeChained(operator_symbol) => {
                 format!("Infix operator '{}' cannot be chained.", operator_symbol)
+            }
+            ConstructorErrorType::DuplicateSymbol(symbol) => {
+                format!("Symbol '{}' is already defined.", symbol)
             }
             ConstructorErrorType::ExpectType => "Type name is expected.".to_string(),
             ConstructorErrorType::Invalid { scope, cause } => {
@@ -116,17 +131,35 @@ impl ConstructorErrorType {
                     }
                 )
             }
-            ConstructorErrorType::NoReturnFunctionInExpr(symbol_path) => {
-                format!(
-                    "This function '{}' does not have a return type despite being used in an expression.",
-                    symbol_path
-                )
+            ConstructorErrorType::NoReturnFunctionInExpr(name) => {
+                format!("This function '{}' does not have a return type.", name)
             }
             ConstructorErrorType::UnmatchedParentheses => {
                 format!("Unmatched parentheses.")
             }
             ConstructorErrorType::InvalidInfixProperty(attribute) => {
                 format!("Infix property '{}' doesn't exist", attribute)
+            }
+            ConstructorErrorType::ArityMismatch(function_name, expected) => {
+                format!(
+                    "Operator '{}' expects {} arguments",
+                    function_name, expected
+                )
+            }
+            ConstructorErrorType::ArgumentNotFound(argument_name) => {
+                format!(
+                    "Argument '{}' not found",
+                    argument_name.clone().unwrap_or("unknown".to_string())
+                )
+            }
+            ConstructorErrorType::ExprSyntaxError => {
+                format!("Syntax error in expression.")
+            }
+            ConstructorErrorType::TypeMismatch(value_type, annotation_type) => {
+                format!(
+                    "Default value is a value of the type '{}', but the type annotation is '{}'",
+                    value_type, annotation_type
+                )
             }
             ConstructorErrorType::CompilerBug(message) => {
                 format!(
