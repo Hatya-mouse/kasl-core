@@ -30,8 +30,10 @@ pub struct SymbolTable<'a> {
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
     pub infix_defines: HashMap<String, &'a ParserStatement>,
+    /// Infix functions with the same symbol can be defined, so they are stored in a vector.
     pub infix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub prefix_defines: HashMap<String, &'a ParserStatement>,
+    /// Prefix functions with the same symbol can be defined, so they are stored in a vector.
     pub prefix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub inits: Vec<&'a ParserStatement>,
 }
