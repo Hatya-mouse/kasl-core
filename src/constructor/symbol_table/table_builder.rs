@@ -16,12 +16,14 @@
 
 use crate::{
     ConstructorError, ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable,
+    error::ErrorCollector,
 };
 
 pub fn build_symbol_table<'a>(
+    ec: &mut ErrorCollector,
     symbol_table: &mut SymbolTable<'a>,
     statements: &'a [ParserStatement],
-) -> Result<(), ConstructorError> {
+) {
     for stmt in statements {
         match &stmt.kind {
             ParserStatementKind::FuncDecl {
@@ -31,7 +33,7 @@ pub fn build_symbol_table<'a>(
                 return_type: _,
                 body: _,
             } => {
-                symbol_table.insert_func(name.clone(), &stmt);
+                symbol_table.insert_func(ec, name.clone(), &stmt);
             }
 
             ParserStatementKind::Input {
@@ -40,7 +42,7 @@ pub fn build_symbol_table<'a>(
                 def_val: _,
                 attrs: _,
             } => {
-                symbol_table.insert_input(name.clone(), &stmt);
+                symbol_table.insert_input(ec, name.clone(), &stmt);
             }
 
             ParserStatementKind::Output {
@@ -48,12 +50,12 @@ pub fn build_symbol_table<'a>(
                 value_type: _,
                 def_val: _,
             } => {
-                symbol_table.insert_output(name.clone(), &stmt);
+                symbol_table.insert_output(ec, name.clone(), &stmt);
             }
 
             ParserStatementKind::State { vars } => {
                 for var in vars {
-                    symbol_table.insert_state(var.name.clone(), &stmt);
+                    symbol_table.insert_state(ec, var.name.clone(), &stmt);
                 }
             }
 
@@ -68,16 +70,16 @@ pub fn build_symbol_table<'a>(
                 body,
             } => {
                 let mut nested_table = SymbolTable::new();
-                build_nest_symbol_table(&mut nested_table, body)?;
+                build_nest_symbol_table(ec, &mut nested_table, body);
                 symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
             ParserStatementKind::InfixDefine { symbol, .. } => {
-                symbol_table.insert_infix_define(symbol.clone(), &stmt)?;
+                symbol_table.insert_infix_define(ec, symbol.clone(), &stmt);
             }
 
             ParserStatementKind::PrefixDefine { symbol } => {
-                symbol_table.insert_prefix_define(symbol.clone(), &stmt)?;
+                symbol_table.insert_prefix_define(ec, symbol.clone(), &stmt);
             }
 
             ParserStatementKind::OperatorFunc {
@@ -92,14 +94,13 @@ pub fn build_symbol_table<'a>(
             _ => {}
         }
     }
-
-    Ok(())
 }
 
 pub fn build_nest_symbol_table<'a>(
+    ec: &mut ErrorCollector,
     symbol_table: &mut SymbolTable<'a>,
     statements: &'a [ParserStatement],
-) -> Result<(), ConstructorError> {
+) {
     for stmt in statements {
         match &stmt.kind {
             ParserStatementKind::Var {
@@ -108,7 +109,7 @@ pub fn build_nest_symbol_table<'a>(
                 value_type: _,
                 def_val: _,
             } => {
-                symbol_table.insert_var(name.clone(), &stmt);
+                symbol_table.insert_var(ec, name.clone(), &stmt);
             }
 
             ParserStatementKind::FuncDecl {
@@ -118,7 +119,7 @@ pub fn build_nest_symbol_table<'a>(
                 return_type: _,
                 body: _,
             } => {
-                symbol_table.insert_func(name.clone(), &stmt);
+                symbol_table.insert_func(ec, name.clone(), &stmt);
             }
 
             ParserStatementKind::Init {
@@ -141,7 +142,7 @@ pub fn build_nest_symbol_table<'a>(
                 body,
             } => {
                 let mut nested_table = SymbolTable::new();
-                build_nest_symbol_table(&mut nested_table, body)?;
+                build_nest_symbol_table(ec, &mut nested_table, body);
                 symbol_table.insert_type_def(name.clone(), &stmt, nested_table);
             }
 
@@ -149,11 +150,11 @@ pub fn build_nest_symbol_table<'a>(
                 symbol,
                 infix_properties: _,
             } => {
-                symbol_table.insert_infix_define(symbol.clone(), stmt)?;
+                symbol_table.insert_infix_define(ec, symbol.clone(), stmt);
             }
 
             ParserStatementKind::PrefixDefine { symbol } => {
-                symbol_table.insert_prefix_define(symbol.clone(), stmt)?;
+                symbol_table.insert_prefix_define(ec, symbol.clone(), stmt);
             }
 
             ParserStatementKind::OperatorFunc {
@@ -170,6 +171,4 @@ pub fn build_nest_symbol_table<'a>(
             _ => (),
         }
     }
-
-    Ok(())
 }

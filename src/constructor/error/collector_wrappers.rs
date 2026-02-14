@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-#[derive(Clone, Debug)]
-pub enum Payload<'a> {
-    None,
-    Sym(&'a str),
-}
+use crate::{
+    Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
+};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum CanonicalMeta {
-    None,
+impl ErrorCollector {
+    pub fn dup_sym(&mut self, range: Range, phase: Phase, sym: &str) {
+        self.emit(EK::DuplicateSymbol, range, phase, Sv::Error, Pl::Sym(sym));
+    }
 }

@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{Range, error::CanonicalMeta};
+use crate::{
+    Range,
+    error::{CanonicalMeta, ErrorKind},
+};
 use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
@@ -26,15 +29,9 @@ pub struct ErrorRecord {
 }
 
 impl ErrorRecord {
-    pub fn new(
-        kind: ErrorKind,
-        range: Range,
-        phase: Phase,
-        severity: Severity,
-        meta: CanonicalMeta,
-    ) -> Self {
+    pub fn new(key: ErrorKey, range: Range, phase: Phase, severity: Severity) -> Self {
         ErrorRecord {
-            key: ErrorKey::new(kind, meta),
+            key,
             earliest_phase: phase,
             ranges: HashSet::from([range]),
             severity,
@@ -60,9 +57,6 @@ impl ErrorKey {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum ErrorKind {}
-
 #[repr(i32)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Phase {
@@ -76,4 +70,8 @@ pub enum Phase {
 }
 
 #[derive(Clone, Debug)]
-pub struct Severity {}
+pub enum Severity {
+    Error,
+    Warning,
+    Info,
+}

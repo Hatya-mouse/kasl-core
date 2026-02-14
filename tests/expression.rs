@@ -18,7 +18,9 @@
 mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
-        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind, get_typed_tokens,
+        SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
+        error::ErrorCollector,
+        get_typed_tokens,
         member_collection::collect_all_type_members,
         resolution::{
             expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
@@ -292,6 +294,7 @@ mod expression {
         // 1. --- Setup ---
         let mut program = Program::new();
         let mut symbol_table = SymbolTable::new();
+        let mut ec = ErrorCollector::new();
 
         // Set types for literals and variables
         let int_type = symbol_path![SymbolPathComponent::TypeDef("Int".to_string())];
@@ -340,7 +343,7 @@ input e: Int = 0
 
         let parsed_program = kasl::kasl_parser::parse(program_src)
             .unwrap_or_else(|e| panic!("Failed to parse helper program: {}", e));
-        build_symbol_table(&mut symbol_table, &parsed_program).unwrap();
+        build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut program, &symbol_table).unwrap();
         collect_all_type_members(&mut program, &symbol_table).unwrap();

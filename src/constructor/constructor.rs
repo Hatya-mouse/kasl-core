@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatement, Program, SymbolTable,
+    ConstructorError, ParserStatement, Program, SymbolTable, error::ErrorCollector,
     member_collection::collect_all_type_members, resolution::type_resolver::resolve_types,
     symbol_collection::collect_top_level_symbols, symbol_table::build_symbol_table,
     type_collection::collect_all_types,
@@ -30,9 +30,10 @@ use crate::{
 pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ConstructorError>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
+    let mut error_collector = ErrorCollector::new();
 
     // 1. Build symbol table
-    build_symbol_table(&mut symbol_table, &statements).map_err(|err| vec![err])?;
+    build_symbol_table(&mut error_collector, &mut symbol_table, &statements);
 
     // 2. Collect types
     collect_all_types(&mut program, &symbol_table);

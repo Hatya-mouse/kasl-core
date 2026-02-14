@@ -32,7 +32,7 @@ impl ErrorCollector {
         }
     }
 
-    pub fn add(
+    pub fn emit(
         &mut self,
         kind: ErrorKind,
         range: Range,
@@ -54,7 +54,7 @@ impl ErrorCollector {
             }
             record.add_range(range);
         } else {
-            let new_record = ErrorRecord::new(kind, range, phase, severity, meta);
+            let new_record = ErrorRecord::new(key.clone(), range, phase, severity);
             self.records.insert(key, new_record);
         }
     }
@@ -62,6 +62,7 @@ impl ErrorCollector {
     pub fn canonicalize(&self, payload: &Payload) -> CanonicalMeta {
         match payload {
             Payload::None => CanonicalMeta::None,
+            _ => todo!(),
         }
     }
 }

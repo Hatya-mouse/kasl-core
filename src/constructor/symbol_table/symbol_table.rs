@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ParserStatement, ParserSymbolPath, SymbolPath,
-    SymbolPathComponent,
+    ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent,
+    error::{ErrorCollector, Ph},
 };
 use std::collections::HashMap;
 
@@ -93,26 +93,76 @@ impl<'a> SymbolTable<'a> {
         Some(result_path)
     }
 
+    /// Checks if the symbol is already defined in the current scope.
+    pub fn is_symbol_defined(&self, name: &str) -> bool {
+        self.vars.contains_key(name)
+            || self.funcs.contains_key(name)
+            || self.type_defs.contains_key(name)
+            || self.inputs.contains_key(name)
+            || self.outputs.contains_key(name)
+            || self.states.contains_key(name)
+    }
+
     // Insert functions
 
-    pub fn insert_input(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.inputs.insert(name, stmt);
+    pub fn insert_input(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.inputs.insert(name, stmt);
+        }
     }
 
-    pub fn insert_output(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.outputs.insert(name, stmt);
+    pub fn insert_output(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.outputs.insert(name, stmt);
+        }
     }
 
-    pub fn insert_state(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.states.insert(name, stmt);
+    pub fn insert_state(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.states.insert(name, stmt);
+        }
     }
 
-    pub fn insert_var(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.vars.insert(name, stmt);
+    pub fn insert_var(&mut self, ec: &mut ErrorCollector, name: String, stmt: &'a ParserStatement) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.vars.insert(name, stmt);
+        }
     }
 
-    pub fn insert_func(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.funcs.insert(name, stmt);
+    pub fn insert_func(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.funcs.insert(name, stmt);
+        }
     }
 
     pub fn insert_type_def(
@@ -126,33 +176,27 @@ impl<'a> SymbolTable<'a> {
 
     pub fn insert_infix_define(
         &mut self,
+        ec: &mut ErrorCollector,
         symbol: String,
         stmt: &'a ParserStatement,
-    ) -> Result<(), ConstructorError> {
+    ) {
         if self.infix_defines.contains_key(&symbol) {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
-                position: stmt.range,
-            })
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &symbol);
         } else {
             self.infix_defines.insert(symbol, stmt);
-            Ok(())
         }
     }
 
     pub fn insert_prefix_define(
         &mut self,
+        ec: &mut ErrorCollector,
         symbol: String,
         stmt: &'a ParserStatement,
-    ) -> Result<(), ConstructorError> {
+    ) {
         if self.prefix_defines.contains_key(&symbol) {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
-                position: stmt.range,
-            })
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &symbol);
         } else {
             self.prefix_defines.insert(symbol, stmt);
-            Ok(())
         }
     }
 
