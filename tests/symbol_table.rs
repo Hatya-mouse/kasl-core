@@ -21,7 +21,7 @@ mod symbol_table {
     fn table_generation() {
         let program = "input integer: Int = 14
             input fac = 5
-            output out_value: Int
+            output out_value: Int = 0
 
             struct Multiplier {
                 var value = 1
@@ -51,7 +51,5 @@ mod symbol_table {
         build_symbol_table(&mut symbol_table, &parsed_program).unwrap();
 
         symbol_table.get_func("main");
-
-        // println!("{:#?}", symbol_table);
     }
 }
