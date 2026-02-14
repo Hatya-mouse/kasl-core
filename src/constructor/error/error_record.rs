@@ -62,8 +62,8 @@ impl ErrorKey {
 pub enum Phase {
     Parse = 0,
     SymbolTableConstruction = 10,
-    Validation = 20,
-    TypeCollection = 30,
+    TypeCollection = 20,
+    Validation = 30,
     TopLevelCollection = 40,
     MemberCollection = 50,
     TypeResolution = 60,
