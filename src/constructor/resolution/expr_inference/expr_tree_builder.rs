@@ -23,7 +23,6 @@ use crate::{
 
 pub trait ExprTreeBuilder {
     /// Build a typed Expression from `expr` tokens using the provided `SymbolTable`.
-    /// Returns a ConstructorError if typing, RPN conversion, or tree construction fails.
     fn build_expr_tree_from_raw_tokens(
         &self,
         ec: &mut ErrorCollector,

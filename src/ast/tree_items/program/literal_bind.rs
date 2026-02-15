@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl Program {
-    /// Set a int literal type. If it already exists, this will return a ConstructorError.
+    /// Set a int literal type. If it already exists, this will throw an error.
     pub fn set_int_literal(
         &mut self,
         ec: &mut ErrorCollector,
@@ -34,7 +34,7 @@ impl Program {
         }
     }
 
-    /// Set a int literal initializer. If it already exists, this will return a ConstructorError.
+    /// Set a int literal initializer. If it already exists, this will throw an error.
     pub fn set_float_literal(
         &mut self,
         ec: &mut ErrorCollector,
@@ -52,7 +52,7 @@ impl Program {
         }
     }
 
-    /// Set a int literal initializer. If it already exists, this will return a ConstructorError.
+    /// Set a int literal initializer. If it already exists, this will throw an error.
     pub fn set_bool_literal(
         &mut self,
         ec: &mut ErrorCollector,
