@@ -21,23 +21,18 @@ pub enum ErrorKind {
     /// Payload: Name of the duplicate symbol
     DuplicateSymbol,
 
-    /// Title: RequiredByOutsideType
-    /// Phase: TopLevelCollection
-    /// Payload: None
-    RequiredByOutsideType,
-
     /// Title: InvalidParamNumbersForInfix
-    /// Phase: TopLevelCollection
+    /// Phase: Validation
     /// Payload: None
     InvalidParamNumbersForInfix,
 
     /// Title: InvalidParamNumbersForPrefix
-    /// Phase: TopLevelCollection
+    /// Phase: Validation
     /// Payload: None
     InvalidParamNumbersForPrefix,
 
     /// Title: DuplicateLiteralBind
-    /// Phase: MemberCollection
+    /// Phase: TypeResolution
     /// Payload: Type of the duplicate literal bind
     DuplicateLiteralBind,
 
@@ -92,20 +87,15 @@ pub enum ErrorKind {
     /// Payload: None
     InvalidExprSyntax,
 
-    /// Title: MissingDefaultValue
-    /// Phase: TypeResolution
-    /// Payload: Path to the symbol which doesn't have a default value
-    MissingDefaultValue,
-
     /// Title: ParamWithoutType
     /// Phase: TypeResolution
     /// Payload: Name of the parameter which doesn't have a type annotation
     ParamWithoutType,
 
-    /// Title: OperatorHasDefaultValue
+    /// Title: OpCannotHaveDefaultValue
     /// Phase: TypeResolution
     /// Payload: Name of the operator which has a default value
-    OperatorHasDefaultValue,
+    OpCannotHaveDefaultValue,
 
     /// Title: TypeMismatch
     /// Phase: TypeResolution

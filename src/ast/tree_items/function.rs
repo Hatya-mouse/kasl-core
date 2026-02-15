@@ -23,8 +23,8 @@ pub struct Function {
     pub name: String,
     pub params: Vec<FuncParam>,
     pub return_type: Option<SymbolPath>,
-    pub body: Vec<Statement>,
     pub required_by: Option<SymbolPath>,
+    pub body: Vec<Statement>,
 }
 
 impl Function {
@@ -43,8 +43,8 @@ pub struct FuncCallArg {
 pub struct Initializer {
     pub literal_bind: Option<LiteralBind>,
     pub params: Vec<FuncParam>,
-    pub body: Vec<Statement>,
     pub required_by: Option<SymbolPath>,
+    pub body: Vec<Statement>,
 }
 
 impl Initializer {

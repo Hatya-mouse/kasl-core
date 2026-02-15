@@ -28,7 +28,7 @@ impl Program {
         func_range: Range,
     ) {
         if self.int_literal_type.is_some() {
-            ec.dup_literal_bind(func_range, Phase::MemberCollection, LiteralBind::IntLiteral);
+            ec.dup_literal_bind(func_range, Phase::TypeResolution, LiteralBind::IntLiteral);
         } else {
             self.int_literal_type = Some(literal_type);
         }
@@ -42,11 +42,7 @@ impl Program {
         func_range: Range,
     ) {
         if self.int_literal_type.is_some() {
-            ec.dup_literal_bind(
-                func_range,
-                Phase::MemberCollection,
-                LiteralBind::FloatLiteral,
-            );
+            ec.dup_literal_bind(func_range, Phase::TypeResolution, LiteralBind::FloatLiteral);
         } else {
             self.float_literal_type = Some(literal_type);
         }
@@ -60,11 +56,7 @@ impl Program {
         func_range: Range,
     ) {
         if self.int_literal_type.is_some() {
-            ec.dup_literal_bind(
-                func_range,
-                Phase::MemberCollection,
-                LiteralBind::BoolLiteral,
-            );
+            ec.dup_literal_bind(func_range, Phase::TypeResolution, LiteralBind::BoolLiteral);
         } else {
             self.bool_literal_type = Some(literal_type);
         }

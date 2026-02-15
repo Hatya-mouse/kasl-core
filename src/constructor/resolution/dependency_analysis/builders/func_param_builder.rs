@@ -40,7 +40,7 @@ pub fn build_func_param_graph(
                             None => {
                                 ec.var_not_found(
                                     expr.range,
-                                    Phase::TypeResolution,
+                                    Phase::GraphConstruction,
                                     &path.to_string(),
                                 );
                                 return;
@@ -58,7 +58,7 @@ pub fn build_func_param_graph(
                             None => {
                                 ec.func_not_found(
                                     expr.range,
-                                    Phase::TypeResolution,
+                                    Phase::GraphConstruction,
                                     &path.to_string(),
                                 );
                                 return;

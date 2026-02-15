@@ -34,7 +34,7 @@ impl Program {
             None => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!("Could not reach the deepest scope for path {:?}", to_path),
                 );
                 return;
@@ -47,7 +47,7 @@ impl Program {
             other => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!(
                         "Expected TypeDef or Program scope for path {:?}, found {:?}",
                         to_path, other
@@ -70,7 +70,7 @@ impl Program {
             None => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!("Could not reach the deepest scope for path {:?}", to_path),
                 );
                 return;
@@ -82,7 +82,7 @@ impl Program {
             other => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!(
                         "Expected TypeDef scope for path {:?}, found {:?}",
                         to_path, other
@@ -105,7 +105,7 @@ impl Program {
             None => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!("Could not reach the deepest scope for path {:?}", to_path),
                 );
                 return;
@@ -117,7 +117,7 @@ impl Program {
             other => {
                 ec.comp_bug(
                     decl_range,
-                    Phase::MemberCollection,
+                    Phase::TypeResolution,
                     &format!(
                         "Expected TypeDef scope for path {:?}, found {:?}",
                         to_path, other

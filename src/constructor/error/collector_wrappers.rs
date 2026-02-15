@@ -33,11 +33,6 @@ impl ErrorCollector {
         );
     }
 
-    /// Wrapper function for RequiredByOutsideType error.
-    pub fn req_by_outside_type(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::RequiredByOutsideType, range, phase, Sv::Error, Pl::None);
-    }
-
     /// Wrapper function for InvalidParamNumbersForInfix error.
     pub fn invalid_param_numbers_for_infix(
         &mut self,
@@ -179,17 +174,6 @@ impl ErrorCollector {
         self.emit(EK::InvalidExprSyntax, range, phase, Sv::Error, Pl::None);
     }
 
-    /// Wrapper function for MissingDefaultValue error.
-    pub fn missing_def_val(&mut self, range: Range, phase: Phase, path: &str) {
-        self.emit(
-            EK::MissingDefaultValue,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(path.to_string()),
-        );
-    }
-
     /// Wrapper function for ParamWithoutType error.
     pub fn param_without_type(&mut self, range: Range, phase: Phase, path: &str) {
         self.emit(
@@ -202,9 +186,9 @@ impl ErrorCollector {
     }
 
     /// Wrapper function for OperatorHasDefaultValue error.
-    pub fn default_value_for_operator(&mut self, range: Range, phase: Phase, symbol: &str) {
+    pub fn op_def_val(&mut self, range: Range, phase: Phase, symbol: &str) {
         self.emit(
-            EK::OperatorHasDefaultValue,
+            EK::OpCannotHaveDefaultValue,
             range,
             phase,
             Sv::Error,

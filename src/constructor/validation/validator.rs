@@ -38,7 +38,7 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
             && op_type == &ParserOperatorType::Infix
             && params.len() != 2
         {
-            ec.invalid_param_numbers_for_infix(stmt.range, Ph::TopLevelCollection, params.len());
+            ec.invalid_param_numbers_for_infix(stmt.range, Ph::Validation, params.len());
         }
     }
 
@@ -59,7 +59,7 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
             && op_type == &ParserOperatorType::Prefix
             && params.len() != 1
         {
-            ec.invalid_param_numbers_for_prefix(stmt.range, Ph::TopLevelCollection, params.len());
+            ec.invalid_param_numbers_for_prefix(stmt.range, Ph::Validation, params.len());
         }
     }
 }

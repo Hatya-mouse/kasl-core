@@ -34,7 +34,7 @@ pub fn build_var_graph(
                 let resolved_path = match root_symbol_table.resolve_path(path) {
                     Some(path) => path,
                     None => {
-                        ec.var_not_found(expr.range, Phase::TypeResolution, &path.to_string());
+                        ec.var_not_found(expr.range, Phase::GraphConstruction, &path.to_string());
                         return;
                     }
                 };
@@ -63,7 +63,7 @@ pub fn build_var_graph(
                 let to_path = match root_symbol_table.resolve_path(path) {
                     Some(path) => path,
                     None => {
-                        ec.func_not_found(expr.range, Phase::TypeResolution, &path.to_string());
+                        ec.func_not_found(expr.range, Phase::GraphConstruction, &path.to_string());
                         return;
                     }
                 };

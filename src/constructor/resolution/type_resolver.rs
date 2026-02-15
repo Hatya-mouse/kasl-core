@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserStatementKind, Program, Range, SymbolTable,
+    ParserOperatorType, ParserStatement, ParserStatementKind, Program, Range, SymbolPath,
+    SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
         TypeResolveCtx,
@@ -33,69 +34,15 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
     };
 
     // Then sort symbols based on the dependency graph
-    let sorted_list = match sort_graph(&graph) {
-        Ok(sorted_list) => sorted_list,
-        Err(causative_symbols) => {
-            for symbol_path in causative_symbols {
-                if let Some(current_stmt) = symbol_table.get_statement_by_path(&symbol_path) {
-                    match current_stmt {
-                        StatementLookup::Single(stmt) => {
-                            // And get the range in which the statement is declared
-                            ec.dep_cycle(
-                                stmt.range,
-                                Phase::TypeResolution,
-                                &symbol_path.to_string(),
-                            );
-                        }
-                        StatementLookup::Multiple(stmts) => {
-                            // Iterate over each statement and push an error for each one
-                            for stmt in stmts {
-                                ec.dep_cycle(
-                                    stmt.range,
-                                    Phase::TypeResolution,
-                                    &symbol_path.to_string(),
-                                );
-                            }
-                        }
-                    }
-                } else {
-                    ec.dep_cycle(
-                        Range::zero(),
-                        Phase::TypeResolution,
-                        &symbol_path.to_string(),
-                    );
-                }
-            }
-            return;
-        }
+    let sorted_list = match sort_graph(ec, symbol_table, &graph) {
+        Some(sorted_list) => sorted_list,
+        None => return,
     };
 
-    let mut statements = Vec::new();
-    for symbol_path in sorted_list {
-        // Get the symbol declaration statement
-        if let Some(current_stmt) = symbol_table.get_statement_by_path(symbol_path) {
-            match current_stmt {
-                StatementLookup::Single(stmt) => {
-                    statements.push((symbol_path, stmt));
-                }
-                StatementLookup::Multiple(stmts) => {
-                    for stmt in stmts {
-                        statements.push((symbol_path, stmt));
-                    }
-                }
-            }
-        } else {
-            ec.comp_bug(
-                Range::zero(),
-                Phase::TypeResolution,
-                &format!(
-                    "SymbolPath(s) in the dependency graph must be valid: {:?}",
-                    symbol_path
-                ),
-            );
-        }
-    }
+    // Get references from the sorted symbol paths
+    let statements = get_statements(ec, symbol_table, sorted_list);
 
+    // Create a TypeResolveCtx instance
     let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
 
     // Infer the type of each symbol in the sorted order
@@ -156,6 +103,19 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 current_stmt.range,
             ),
 
+            ParserStatementKind::Init {
+                required_by,
+                literal_bind,
+                params,
+                body: _,
+            } => ctx.resolve_init(
+                symbol_path,
+                literal_bind.as_ref(),
+                params,
+                required_by.as_ref(),
+                current_stmt.range,
+            ),
+
             ParserStatementKind::OperatorFunc {
                 op_type,
                 symbol,
@@ -181,4 +141,39 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
             _ => (),
         }
     }
+}
+
+fn get_statements<'a>(
+    ec: &mut ErrorCollector,
+    symbol_table: &'a SymbolTable,
+    symbol_paths: Vec<&'a SymbolPath>,
+) -> Vec<(&'a SymbolPath, &'a ParserStatement)> {
+    let mut statements = Vec::new();
+
+    for symbol_path in symbol_paths {
+        // Get the symbol declaration statement
+        if let Some(current_stmt) = symbol_table.get_statement_by_path(symbol_path) {
+            match current_stmt {
+                StatementLookup::Single(stmt) => {
+                    statements.push((symbol_path, stmt));
+                }
+                StatementLookup::Multiple(stmts) => {
+                    for stmt in stmts {
+                        statements.push((symbol_path, stmt));
+                    }
+                }
+            }
+        } else {
+            ec.comp_bug(
+                Range::zero(),
+                Phase::GraphConstruction,
+                &format!(
+                    "SymbolPath(s) in the dependency graph must be valid: {:?}",
+                    symbol_path
+                ),
+            );
+        }
+    }
+
+    statements
 }

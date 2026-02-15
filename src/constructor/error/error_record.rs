@@ -64,9 +64,8 @@ pub enum Phase {
     SymbolTableConstruction = 10,
     TypeCollection = 20,
     Validation = 30,
-    TopLevelCollection = 40,
-    MemberCollection = 50,
-    TypeResolution = 60,
+    GraphConstruction = 40,
+    TypeResolution = 50,
 }
 
 #[derive(Clone, Debug)]
