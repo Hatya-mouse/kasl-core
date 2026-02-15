@@ -107,8 +107,22 @@ impl<'a> TypeResolveCtx<'a> {
                 value_type,
                 def_val,
             };
+
+            // Obtain the path to the parent scope of the variable
+            let parent_path = match symbol_path.parent() {
+                Some(path) => path,
+                None => {
+                    self.ec.comp_bug(
+                        decl_range,
+                        Phase::TypeResolution,
+                        "The symbol path should include one component at least.",
+                    );
+                    return;
+                }
+            };
+            // Register the variable in the parent scope
             self.program
-                .register_var_by_path(self.ec, var, symbol_path, decl_range);
+                .register_var_by_path(self.ec, var, &parent_path, decl_range);
         }
     }
 }

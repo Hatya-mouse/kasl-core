@@ -85,7 +85,14 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 }
             }
         } else {
-            ec.comp_bug(Range::zero(), Phase::TypeResolution, "");
+            ec.comp_bug(
+                Range::zero(),
+                Phase::TypeResolution,
+                &format!(
+                    "SymbolPath(s) in the dependency graph must be valid: {:?}",
+                    symbol_path
+                ),
+            );
         }
     }
 

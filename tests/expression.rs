@@ -351,6 +351,8 @@ input e: Int = 0
     collect_all_types(&mut program, &symbol_table);
     resolve_types(&mut ec, &mut program, &symbol_table);
 
+    println!("{:#?}", program);
+
     // 2. --- Parsing ---
     // Parse the string directly using the `kasl_parser::expression` rule
     let expr_str = "(foo_bar(a + 2) * -b) - (c ^ (d + e))";

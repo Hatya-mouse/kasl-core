@@ -310,9 +310,15 @@ impl<'a> SymbolTable<'a> {
             SymbolPathComponent::Func(name) => {
                 current_scope.get_func(name).map(StatementLookup::Single)
             }
+            SymbolPathComponent::InfixDef(symbol) => current_scope
+                .get_infix_define(symbol)
+                .map(StatementLookup::Single),
             SymbolPathComponent::InfixFunc(symbol) => current_scope
                 .get_infix_funcs(symbol)
                 .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::PrefixDef(symbol) => current_scope
+                .get_prefix_define(symbol)
+                .map(StatementLookup::Single),
             SymbolPathComponent::PrefixFunc(symbol) => current_scope
                 .get_prefix_funcs(symbol)
                 .map(|stmts| StatementLookup::Multiple(stmts)),
@@ -320,7 +326,9 @@ impl<'a> SymbolTable<'a> {
                 .get_type_def(name)
                 .map(|entry| entry.0)
                 .map(StatementLookup::Single),
-            _ => None,
+            SymbolPathComponent::CompInt
+            | SymbolPathComponent::CompFloat
+            | SymbolPathComponent::CompBool => None,
         }
     }
 }

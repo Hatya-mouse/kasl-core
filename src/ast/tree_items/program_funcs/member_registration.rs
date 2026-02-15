@@ -21,6 +21,7 @@ use crate::{
 
 impl Program {
     /// Register a Function to the program **by its path**.
+    /// The path should not include the function.
     pub fn register_func_by_path(
         &mut self,
         ec: &mut ErrorCollector,

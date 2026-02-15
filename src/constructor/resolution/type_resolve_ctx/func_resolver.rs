@@ -79,8 +79,20 @@ impl<'a> TypeResolveCtx<'a> {
             body: Vec::new(),
         };
 
+        // Obtain the path to the parent scope of the function
+        let parent_path = match symbol_path.parent() {
+            Some(path) => path,
+            None => {
+                self.ec.comp_bug(
+                    decl_range,
+                    Phase::TypeResolution,
+                    "The symbol path should include one component at least.",
+                );
+                return;
+            }
+        };
         // Register the function to the Program
         self.program
-            .register_func_by_path(self.ec, func, symbol_path, decl_range);
+            .register_func_by_path(self.ec, func, &parent_path, decl_range);
     }
 }

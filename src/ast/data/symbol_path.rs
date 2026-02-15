@@ -67,6 +67,16 @@ impl SymbolPath {
     pub fn push(&mut self, component: SymbolPathComponent) {
         self.components.push(component);
     }
+
+    pub fn parent(&self) -> Option<SymbolPath> {
+        if self.components.is_empty() {
+            None
+        } else {
+            Some(SymbolPath {
+                components: self.components[..self.components.len() - 1].to_vec(),
+            })
+        }
+    }
 }
 
 impl Index<usize> for SymbolPath {
