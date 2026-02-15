@@ -85,9 +85,7 @@ pub fn build_symbol_table<'a>(
                 op_type, symbol, ..
             } => match op_type {
                 ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), stmt),
-                ParserOperatorType::Prefix => {
-                    symbol_table.insert_prefix_func(symbol.clone(), stmt)
-                }
+                ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
             },
 
             _ => {}

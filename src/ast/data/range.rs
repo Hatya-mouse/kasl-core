@@ -22,10 +22,7 @@ pub struct Range {
 
 impl Range {
     pub fn n(start: usize, end: usize) -> Self {
-        Range {
-            start,
-            end,
-        }
+        Range { start, end }
     }
 
     pub fn zero() -> Self {

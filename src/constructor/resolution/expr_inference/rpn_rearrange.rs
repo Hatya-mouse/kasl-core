@@ -83,31 +83,32 @@ pub fn rearrange_tokens_to_rpn(
 
                 if current_props.associativity == OperatorAssociativity::None
                     && let Some(top_token) = operator_stack.last()
-                        && let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind {
-                            // Get the precedence and associativity of the operator from the stack
-                            let top_props = match program.get_infix_operator(top_op_symbol) {
-                                Some(props) => props,
-                                None => {
-                                    ec.operator_not_found(
-                                        current_token.range,
-                                        Phase::TypeResolution,
-                                        current_op_symbol,
-                                    );
-                                    return None;
-                                }
-                            };
-
-                            // If the top operator in the stack has the same precedence as the current operator,
-                            // it means that the current operator is chained which is illegal when the associativity is set to None.
-                            if top_props.precedence == current_props.precedence {
-                                ec.op_chained(
-                                    current_token.range,
-                                    Phase::TypeResolution,
-                                    current_op_symbol,
-                                );
-                                return None;
-                            }
+                    && let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind
+                {
+                    // Get the precedence and associativity of the operator from the stack
+                    let top_props = match program.get_infix_operator(top_op_symbol) {
+                        Some(props) => props,
+                        None => {
+                            ec.operator_not_found(
+                                current_token.range,
+                                Phase::TypeResolution,
+                                current_op_symbol,
+                            );
+                            return None;
                         }
+                    };
+
+                    // If the top operator in the stack has the same precedence as the current operator,
+                    // it means that the current operator is chained which is illegal when the associativity is set to None.
+                    if top_props.precedence == current_props.precedence {
+                        ec.op_chained(
+                            current_token.range,
+                            Phase::TypeResolution,
+                            current_op_symbol,
+                        );
+                        return None;
+                    }
+                }
 
                 operator_stack.push(current_token);
             }

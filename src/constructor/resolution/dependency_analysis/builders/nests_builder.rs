@@ -29,11 +29,12 @@ pub fn build_struct_and_protocol_graph(
 ) {
     for stmt in &child_symbol_table.vars {
         if let ParserStatementKind::Var {
-                required_by: _,
-                name,
-                value_type: _,
-                def_val,
-            } = &stmt.1.kind {
+            required_by: _,
+            name,
+            value_type: _,
+            def_val,
+        } = &stmt.1.kind
+        {
             // Combine variable name to create a new path for the child type
             let mut var_path = type_path.clone();
             var_path.push(SymbolPathComponent::Var(name.to_string()));
@@ -43,12 +44,13 @@ pub fn build_struct_and_protocol_graph(
 
     for stmt in &child_symbol_table.funcs {
         if let ParserStatementKind::FuncDecl {
-                required_by: _,
-                name,
-                params,
-                return_type: _,
-                body: _,
-            } = &stmt.1.kind {
+            required_by: _,
+            name,
+            params,
+            return_type: _,
+            body: _,
+        } = &stmt.1.kind
+        {
             // Combine function name to create a new path for the function
             let mut func_path = type_path.clone();
             func_path.push(SymbolPathComponent::Func(name.to_string()));

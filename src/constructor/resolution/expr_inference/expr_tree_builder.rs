@@ -43,7 +43,6 @@ impl ExprTreeBuilder for Program {
         // 2. Rearrange tokens to get reverse polish notation
         let rpn_tokens = rearrange_tokens_to_rpn(ec, self, typed_tokens)?;
         // 3. Evaluate the reverse polish notation to get the type of the expression
-        
 
         build_expr_tree_from_rpn(ec, self, symbol_table, rpn_tokens)
     }
