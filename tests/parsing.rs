@@ -17,7 +17,8 @@
 #[cfg(test)]
 mod parsing {
     use kasl::{
-        ExprToken, ParserSymbolPathComponent, Range, kasl_parser, parser_ast::ExprTokenKind,
+        ExprToken, ParserSymbolPath, ParserSymbolPathComponent, Range, kasl_parser,
+        parser_ast::ExprTokenKind,
     };
 
     /// Test parsing of chained expressions.
@@ -29,10 +30,12 @@ mod parsing {
             object,
             Ok(vec![ExprToken {
                 range: Range::n(0, 6),
-                kind: ExprTokenKind::Identifier(vec![ParserSymbolPathComponent {
-                    range: Range::n(0, 6),
-                    symbol: "object".to_string(),
-                }])
+                kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
+                    ParserSymbolPathComponent {
+                        range: Range::n(0, 6),
+                        symbol: "object".to_string(),
+                    }
+                ]))
             }])
         );
 
@@ -42,7 +45,7 @@ mod parsing {
             object_property,
             Ok(vec![ExprToken {
                 range: Range::n(0, 15),
-                kind: ExprTokenKind::Identifier(vec![
+                kind: ExprTokenKind::Identifier(ParserSymbolPath::new(vec![
                     ParserSymbolPathComponent {
                         range: Range::n(0, 6),
                         symbol: "object".to_string()
@@ -51,7 +54,7 @@ mod parsing {
                         range: Range::n(6, 15),
                         symbol: "property".to_string()
                     }
-                ])
+                ]))
             }])
         );
     }

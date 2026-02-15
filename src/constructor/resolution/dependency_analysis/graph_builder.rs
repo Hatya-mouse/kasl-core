@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatement, ParserStatementKind, SymbolPathComponent, SymbolTable,
+    ParserStatement, ParserStatementKind, SymbolPathComponent, SymbolTable,
+    error::ErrorCollector,
     resolution::{
         DependencyGraphNode,
         dependency_analysis::{
@@ -26,7 +27,7 @@ use crate::{
     symbol_path,
 };
 
-pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, ConstructorError> {
+pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Option<DependencyGraph> {
     let mut graph = DependencyGraph::new();
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
@@ -40,7 +41,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the child type
                 let var_path = symbol_path![SymbolPathComponent::InputVar(name.to_string())];
-                build_var_graph(&mut graph, symbol_table, &var_path, def_val)?;
+                build_var_graph(ec, &mut graph, symbol_table, &var_path, def_val);
                 graph.add_node(DependencyGraphNode::new(var_path));
             }
 
@@ -71,7 +72,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
                     // Combine variable name to create a new path for the child type
                     let var_path =
                         symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
-                    build_var_graph(&mut graph, symbol_table, &var_path, &var.def_val)?;
+                    build_var_graph(ec, &mut graph, symbol_table, &var_path, &var.def_val);
                     graph.add_node(DependencyGraphNode::new(var_path));
                 }
             }
@@ -91,7 +92,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the function
                 let func_path = symbol_path![SymbolPathComponent::Func(name.to_string())];
-                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
                 graph.add_node(DependencyGraphNode::new(func_path));
             }
 
@@ -117,11 +118,12 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
                         symbol_path![SymbolPathComponent::TypeDef(name.to_string())];
 
                     build_struct_and_protocol_graph(
+                        ec,
                         &mut graph,
                         &child_type_path,
                         symbol_table,
                         child_symbol_table,
-                    )?;
+                    );
                 }
             }
 
@@ -146,7 +148,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the function
                 let func_path = symbol_path![SymbolPathComponent::InfixFunc(symbol.to_string())];
-                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
                 graph.add_node(DependencyGraphNode::new(func_path));
             }
 
@@ -171,7 +173,7 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
             } => {
                 // Combine variable name to create a new path for the function
                 let func_path = symbol_path![SymbolPathComponent::PrefixFunc(symbol.to_string())];
-                build_func_param_graph(&mut graph, symbol_table, &func_path, params)?;
+                build_func_param_graph(ec, &mut graph, symbol_table, &func_path, params);
                 graph.add_node(DependencyGraphNode::new(func_path));
             }
 
@@ -179,5 +181,5 @@ pub fn build_graph(symbol_table: &SymbolTable) -> Result<DependencyGraph, Constr
         }
     }
 
-    Ok(graph)
+    Some(graph)
 }

@@ -18,5 +18,7 @@
 pub enum Payload {
     None,
     Str(String),
+    StrPair(String, String),
     Num(usize),
+    NumPair(usize, usize),
 }

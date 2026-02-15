@@ -65,7 +65,7 @@ impl<'a> SymbolTable<'a> {
         let mut result_path = SymbolPath::new();
         let mut current_scope = self;
 
-        for component in parser_path {
+        for component in &parser_path.path {
             if &component.symbol == "CompInt" {
                 result_path.push(SymbolPathComponent::CompInt);
             } else if &component.symbol == "CompFloat" {

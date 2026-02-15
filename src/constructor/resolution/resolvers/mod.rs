@@ -15,4 +15,5 @@
 //
 
 pub mod infix_operator_resolver;
+pub mod param_resolver;
 pub mod prefix_operator_resolver;

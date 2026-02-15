@@ -19,7 +19,7 @@ mod expression {
     use kasl::{
         ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, Program, Range,
         SymbolPath, SymbolPathComponent, SymbolTable, TypedToken, TypedTokenKind,
-        error::ErrorCollector,
+        error::{EK, ErrorCollector, ErrorKey, Pl},
         get_typed_tokens,
         member_collection::collect_all_type_members,
         resolution::{
@@ -32,6 +32,7 @@ mod expression {
         type_collection::collect_all_types,
     };
 
+    /// Create a new value token.
     fn v() -> TypedToken {
         TypedToken::new(
             TypedTokenKind::Value {
@@ -45,6 +46,7 @@ mod expression {
         )
     }
 
+    /// Create a new infix operator token.
     fn inf(sym: &str) -> TypedToken {
         TypedToken::new(
             TypedTokenKind::InfixOperator(sym.to_string()),
@@ -52,6 +54,7 @@ mod expression {
         )
     }
 
+    /// Create a new prefix operator token.
     fn pre(sym: &str) -> TypedToken {
         TypedToken::new(
             TypedTokenKind::PrefixOperator(sym.to_string()),
@@ -59,10 +62,12 @@ mod expression {
         )
     }
 
+    /// Create a new left parenthesis token.
     fn lpar() -> TypedToken {
         TypedToken::new(TypedTokenKind::LParen, Range::zero())
     }
 
+    /// Create a new right parenthesis token.
     fn rpar() -> TypedToken {
         TypedToken::new(TypedTokenKind::RParen, Range::zero())
     }
@@ -100,10 +105,14 @@ mod expression {
         }];
 
         // Convert the token to TypedToken, and then rearrange it to RPN
-        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
-            .unwrap_or_else(|e| panic!("Couldn't convert tokens to typed tokens:\n{}", e));
-        let res = rearrange_tokens_to_rpn(&program, typed_tokens)
-            .unwrap_or_else(|e| panic!("Couldn't rearrange tokens to RPN order:\n{}", e));
+        let typed_tokens = match get_typed_tokens(&mut ec, &program, &symbol_table, &expr_tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't convert tokens to typed tokens:\n{:#?}", ec),
+        };
+        let res = match rearrange_tokens_to_rpn(&mut ec, &program, typed_tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't rearrange tokens to RPN order:\n{:#?}", ec),
+        };
 
         let got = short_repr(&res);
         let expected = vec!["V<Int>"];
@@ -116,6 +125,8 @@ mod expression {
         // => (a - b) - c
         // => RPN: a b - c -
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
+
         program.register_infix_operator(
             "-".to_string(),
             InfixOperatorProperties {
@@ -125,8 +136,10 @@ mod expression {
         );
 
         let tokens = vec![v(), inf("-"), v(), inf("-"), v()];
-        let res =
-            rearrange_tokens_to_rpn(&program, tokens).expect("Expected successful RPN rearrange");
+        let res = match rearrange_tokens_to_rpn(&mut ec, &program, tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't rearrange tokens to RPN order:\n{:#?}", ec),
+        };
 
         let got = short_repr(&res);
         let want = vec!["V<CompInt>", "V<CompInt>", "-", "V<CompInt>", "-"];
@@ -139,6 +152,7 @@ mod expression {
         // => a - (b * c)
         // => RPN: a b c * -
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
 
         program.register_infix_operator(
             "-".to_string(),
@@ -156,8 +170,10 @@ mod expression {
         );
 
         let tokens = vec![v(), inf("-"), v(), inf("*"), v()];
-        let res =
-            rearrange_tokens_to_rpn(&program, tokens).expect("Expected successful RPN rearrange");
+        let res = match rearrange_tokens_to_rpn(&mut ec, &program, tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't rearrange tokens to RPN order:\n{:#?}", ec),
+        };
 
         let got = short_repr(&res);
         let want = vec!["V<CompInt>", "V<CompInt>", "V<CompInt>", "*", "-"];
@@ -170,6 +186,7 @@ mod expression {
         // => ((-a) * b) + c
         // => RPN: a pre- b * c +
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
 
         program.register_prefix_operator("-".to_string());
         program.register_infix_operator(
@@ -188,8 +205,10 @@ mod expression {
         );
 
         let tokens = vec![pre("-"), v(), inf("*"), v(), inf("+"), v()];
-        let res =
-            rearrange_tokens_to_rpn(&program, tokens).expect("Expected successful RPN rearrange");
+        let res = match rearrange_tokens_to_rpn(&mut ec, &program, tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't rearrange tokens to RPN order:\n{:#?}", ec),
+        };
 
         let got = short_repr(&res);
         let want = vec!["V<CompInt>", "pre-", "V<CompInt>", "*", "V<CompInt>", "+"];
@@ -202,6 +221,8 @@ mod expression {
     fn non_associative_chain_error() {
         // a < b < c where '<' is non-associative should error OperatorCannotBeChained
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
+
         program.register_infix_operator(
             "<".to_string(),
             InfixOperatorProperties {
@@ -212,20 +233,23 @@ mod expression {
 
         // Chaining operator with associativity "None", which should cause an error
         let tokens = vec![v(), inf("<"), v(), inf("<"), v()];
-        let res = rearrange_tokens_to_rpn(&program, tokens);
-        assert!(res.is_err());
+        rearrange_tokens_to_rpn(&mut ec, &program, tokens);
+        assert!(ec.has_error());
 
-        let err = res.err().unwrap();
-        assert_eq!(
-            err.error_type,
-            kasl::ConstructorErrorType::OperatorCannotBeChained("<".to_string())
-        );
+        ec.records
+            .get(&ErrorKey::new(
+                EK::OpCannotBeChained,
+                Pl::Str("<".to_string()),
+            ))
+            .unwrap();
     }
 
     #[test]
     fn unmatched_parentheses_detected_on_drain() {
         // (a + b  -- missing closing paren -> should error UnmatchedParentheses on final drain
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
+
         program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
@@ -236,20 +260,20 @@ mod expression {
 
         // Expression with no closing pharenthesis
         let tokens = vec![lpar(), v(), inf("+"), v()];
-        let res = rearrange_tokens_to_rpn(&program, tokens);
-        assert!(res.is_err());
+        rearrange_tokens_to_rpn(&mut ec, &program, tokens);
+        assert!(ec.has_error());
 
-        let err = res.err().unwrap();
-        assert_eq!(
-            err.error_type,
-            kasl::ConstructorErrorType::UnmatchedParentheses
-        );
+        ec.records
+            .get(&ErrorKey::new(EK::UnmatchedParentheses, Pl::None))
+            .unwrap();
     }
 
     #[test]
     fn unmatched_parentheses_right_paren_error() {
         // a + b )  -- extra right paren should be detected when encountering RParen
         let mut program = Program::new();
+        let mut ec = ErrorCollector::new();
+
         program.register_infix_operator(
             "+".to_string(),
             InfixOperatorProperties {
@@ -259,29 +283,30 @@ mod expression {
         );
 
         let tokens = vec![v(), inf("+"), v(), rpar()];
-        let res = rearrange_tokens_to_rpn(&program, tokens);
-        assert!(res.is_err());
+        rearrange_tokens_to_rpn(&mut ec, &program, tokens);
+        assert!(ec.has_error());
 
-        let err = res.err().unwrap();
-        assert_eq!(
-            err.error_type,
-            kasl::ConstructorErrorType::UnmatchedParentheses
-        );
+        ec.records
+            .get(&ErrorKey::new(EK::UnmatchedParentheses, Pl::None))
+            .unwrap();
     }
 
     #[test]
     fn operator_not_found_error() {
         // Using an infix operator with no registered properties should return CompilerBug
         let program = Program::new();
-        let tokens = vec![v(), inf("$unknown$"), v()];
-        let res = rearrange_tokens_to_rpn(&program, tokens);
-        assert!(res.is_err());
+        let mut ec = ErrorCollector::new();
 
-        let err = res.err().unwrap();
-        match err.error_type {
-            kasl::ConstructorErrorType::OperatorNotFound(_) => {}
-            other => panic!("expected OperatorNotFound, got {:?}", other),
-        }
+        let tokens = vec![v(), inf("$unknown$"), v()];
+        rearrange_tokens_to_rpn(&mut ec, &program, tokens);
+        assert!(ec.has_error());
+
+        ec.records
+            .get(&ErrorKey::new(
+                EK::OperatorNotFound,
+                Pl::Str("$unknown$".to_string()),
+            ))
+            .unwrap();
     }
 
     #[test]
@@ -348,7 +373,7 @@ input e: Int = 0
         collect_all_types(&mut program, &symbol_table);
         collect_top_level_symbols(&mut ec, &mut program, &symbol_table);
         collect_all_type_members(&mut ec, &mut program, &symbol_table);
-        resolve_types(&mut program, &symbol_table).unwrap();
+        resolve_types(&mut ec, &mut program, &symbol_table);
 
         // 2. --- Parsing ---
         // Parse the string directly using the `kasl_parser::expression` rule
@@ -357,11 +382,15 @@ input e: Int = 0
             .unwrap_or_else(|e| panic!("Parser failed: {}", e));
 
         // 3. --- Typing & RPN Conversion ---
-        let typed_tokens = get_typed_tokens(&program, &symbol_table, &expr_tokens)
-            .unwrap_or_else(|e| panic!("get_typed_tokens failed: {}", e));
+        let typed_tokens = match get_typed_tokens(&mut ec, &program, &symbol_table, &expr_tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't convert tokens to typed tokens:\n{:#?}", ec),
+        };
 
-        let rpn_tokens = rearrange_tokens_to_rpn(&program, typed_tokens)
-            .unwrap_or_else(|e| panic!("rearrange_tokens_to_rpn failed: {}", e));
+        let rpn_tokens = match rearrange_tokens_to_rpn(&mut ec, &program, typed_tokens) {
+            Some(tokens) => tokens,
+            None => panic!("Couldn't convert typed tokens to RPN:\n{:#?}", ec),
+        };
 
         // 4. --- Validation ---
         let got = short_repr(&rpn_tokens);
@@ -380,7 +409,10 @@ input e: Int = 0
 
         assert_eq!(got, want, "The RPN sequence did not match the expectation.");
 
-        let expr_result = build_expr_tree_from_rpn(&program, &symbol_table, rpn_tokens);
-        expr_result.unwrap();
+        let expr_result = build_expr_tree_from_rpn(&mut ec, &program, &symbol_table, rpn_tokens);
+        expr_result.expect(&format!(
+            "Couldn't build expression tree from the tokens:\n{:#?}",
+            ec
+        ));
     }
 }

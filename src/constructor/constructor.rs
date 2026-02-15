@@ -49,7 +49,7 @@ pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<Con
     collect_all_type_members(&mut error_collector, &mut program, &symbol_table);
 
     // 6. Infer the types of symbols
-    resolve_types(&mut program, &symbol_table)?;
+    resolve_types(&mut error_collector, &mut program, &symbol_table);
 
     Ok(())
 }

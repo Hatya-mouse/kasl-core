@@ -15,71 +15,45 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, FuncParam, InfixOperator, ParserFuncParam,
-    ParserSymbolPath, Program, Range, SymbolPath,
+    InfixOperator, ParserFuncParam, ParserSymbolPath, Program, Range, SymbolTable,
+    error::{ErrorCollector, Phase},
+    resolution::resolvers::param_resolver::resolve_param,
 };
 
 pub fn resolve_infix_func(
+    ec: &mut ErrorCollector,
     program: &mut Program,
+    symbol_table: &SymbolTable,
     symbol: &str,
-    symbol_path: &SymbolPath,
     params: &[ParserFuncParam],
     return_type: &ParserSymbolPath,
     decl_range: Range,
-) -> Result<(), ConstructorError> {
-    if params.len() != 2 {
-        return Err(ConstructorError {
-            error_type: ConstructorErrorType::InvalidOperatorParams(symbol.to_string()),
-            position: decl_range,
-        });
-    }
-
-    let mut types = Vec::new();
-    for param in params {
-        if let Some(value_type) = &param.value_type {
-            if let Some(type_symbol_path) = program.resolve_type_def_parser_path(&value_type) {
-                // If the symbol has a type annotation, use it
-                types.push(type_symbol_path.clone());
-            } else {
-                // If the type annotation is not found, push an error
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
-                    position: decl_range,
-                });
-            }
-        };
-    }
-
-    let lhs_type = types[0].clone();
-    let rhs_type = types[1].clone();
-
+) {
     // Get the return type
-    let return_type_path = program
-        .resolve_type_def_parser_path(return_type)
-        .ok_or_else(|| ConstructorError {
-            error_type: ConstructorErrorType::CannotInferType(symbol_path.clone()),
-            position: decl_range,
-        })?;
+    let return_type_path = match program.resolve_type_def_parser_path(return_type) {
+        Some(path) => path,
+        None => {
+            ec.type_not_found(decl_range, Phase::TypeResolution, &return_type.to_string());
+            return;
+        }
+    };
+
+    let lhs = match resolve_param(ec, program, symbol_table, symbol, &params[0], decl_range) {
+        Some(operand) => operand,
+        None => return,
+    };
+    let rhs = match resolve_param(ec, program, symbol_table, symbol, &params[1], decl_range) {
+        Some(operand) => operand,
+        None => return,
+    };
 
     // Once we've got the types, we can get the exact operator
     let infix = InfixOperator {
         symbol: symbol.to_string(),
-        lhs: FuncParam {
-            label: params[0].label.clone(),
-            name: params[0].name.clone(),
-            value_type: Some(lhs_type),
-            def_val: None,
-        },
-        rhs: FuncParam {
-            label: params[1].label.clone(),
-            name: params[1].name.clone(),
-            value_type: Some(rhs_type),
-            def_val: None,
-        },
+        lhs,
+        rhs,
         return_type: Some(return_type_path),
         body: Vec::new(),
     };
     program.register_infix_func(infix);
-
-    Ok(())
 }

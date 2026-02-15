@@ -21,8 +21,9 @@ use crate::{
     error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
 };
 
+#[derive(Debug, Clone)]
 pub struct ErrorCollector {
-    records: HashMap<ErrorKey, ErrorRecord>,
+    pub records: HashMap<ErrorKey, ErrorRecord>,
 }
 
 impl ErrorCollector {
@@ -54,5 +55,9 @@ impl ErrorCollector {
             let new_record = ErrorRecord::new(key.clone(), range, phase, severity);
             self.records.insert(key, new_record);
         }
+    }
+
+    pub fn has_error(&self) -> bool {
+        !self.records.is_empty()
     }
 }

@@ -14,75 +14,43 @@
 // limitations under the License.
 //
 
-use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ParserSymbolPath, Program, SymbolPath,
-    SymbolPathComponent, SymbolTable,
-};
+use crate::{ParserSymbolPath, Program, SymbolPath, SymbolPathComponent, SymbolTable};
 
 impl Program {
-    pub fn get_symbol_type(
+    pub fn get_var_type(
         &self,
         parser_path: &ParserSymbolPath,
         symbol_table: &SymbolTable,
-        token: &ExprToken,
-    ) -> Result<SymbolPath, ConstructorError> {
+    ) -> Option<SymbolPath> {
         let symbol_path = match symbol_table.resolve_path(parser_path) {
             Some(path) => path,
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(None),
-                    position: token.range,
-                });
-            }
+            None => return None,
         };
 
         match symbol_path.components.last() {
             Some(last_component) => match last_component {
                 SymbolPathComponent::InputVar(name) => {
                     // The path has been resolved so we can safely unwrap the input variable
-                    let input_var = self.get_input(name).unwrap();
-                    input_var.value_type.clone().ok_or(ConstructorError {
-                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                        position: token.range,
-                    })
+                    self.get_input(name).unwrap().value_type.clone()
                 }
                 SymbolPathComponent::OutputVar(name) => {
-                    let output_var = self.get_output(name).unwrap();
-                    output_var.value_type.clone().ok_or(ConstructorError {
-                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                        position: token.range,
-                    })
+                    self.get_output(name).unwrap().value_type.clone()
                 }
                 SymbolPathComponent::StateVar(name) => {
-                    let state_var = self.get_state(name).unwrap();
-                    state_var.value_type.clone().ok_or(ConstructorError {
-                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                        position: token.range,
-                    })
+                    self.get_state(name).unwrap().value_type.clone()
                 }
-                SymbolPathComponent::Var(_) => {
-                    let scope_var = self.get_var_by_path(&symbol_path).unwrap();
-                    scope_var.value_type.clone().ok_or(ConstructorError {
-                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                        position: token.range,
-                    })
-                }
-                _ => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                        position: token.range,
-                    });
-                }
+                SymbolPathComponent::Var(_) => self
+                    .get_var_by_path(&symbol_path)
+                    .unwrap()
+                    .value_type
+                    .clone(),
+                _ => None,
             },
-            None => {
-                return Err(ConstructorError {
-                    error_type: ConstructorErrorType::SymbolNotFound(Some(symbol_path.clone())),
-                    position: token.range,
-                });
-            }
+            None => None,
         }
     }
 
+    /// Get the return type of a function.
     pub fn get_func_type(
         &self,
         parser_path: &ParserSymbolPath,

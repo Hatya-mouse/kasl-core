@@ -41,6 +41,72 @@ pub enum ErrorKind {
     /// Payload: Type of the duplicate literal bind
     DuplicateLiteralBind,
 
+    /// Title: VariableNotFound
+    /// Phase: TypeResolution
+    /// Payload: Path of the variable which could not be found
+    VariableNotFound,
+
+    /// Title: FunctionNotFound
+    /// Phase: TypeResolution
+    /// Payload: Path of the function which could not be found
+    FunctionNotFound,
+
+    /// Title: OperatorNotFound
+    /// Phase: TypeResolution
+    /// Payload: Path of the operator which could not be found
+    OperatorNotFound,
+
+    /// Title: TypeNotFound
+    /// Phase: TypeResolution
+    /// Payload: Path of the type which could not be found
+    TypeNotFound,
+
+    /// Title: DependencyCycle
+    /// Phase: TypeResolution
+    /// Payload: Path to the cycle symbols
+    DependencyCycle,
+
+    /// Title: NoLiteralBind
+    /// Phase: TypeResolution
+    /// Payload: Type of the literal bind
+    NoLiteralBind,
+
+    /// Title: OpCannotBeChained
+    /// Phase: TypeResolution
+    /// Payload: None
+    /// Caused when the operator with the associativity of none is chained.
+    OpCannotBeChained,
+
+    /// Title: UnmatchedParentheses
+    /// Phase: TypeResolution
+    /// Payload: None
+    UnmatchedParentheses,
+
+    /// Title: ArityMismatch
+    /// Phase: TypeResolution
+    /// Payload: Expected and actual arity
+    ArityMismatch,
+
+    /// Title: InvalidExprSyntax
+    /// Phase: TypeResolution
+    /// Payload: None
+    InvalidExprSyntax,
+
+    /// Title: MissingTypeAnnotation
+    /// Phase: TypeResolution
+    /// Payload: Name of the symbol which doesn't have a type annotation
+    MissingTypeAnnotation,
+
+    /// Title: OperatorHasDefaultValue
+    /// Phase: TypeResolution
+    /// Payload: Name of the operator which has a default value
+    OperatorHasDefaultValue,
+
+    /// Title: TypeMismatch
+    /// Phase: TypeResolution
+    /// Payload: Type from the type annotation and the type of the default value
+    TypeMismatch,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

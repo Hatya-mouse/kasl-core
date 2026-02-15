@@ -15,17 +15,18 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, SymbolPath,
-    SymbolPathComponent, SymbolTable,
+    ExprToken, ExprTokenKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    error::{ErrorCollector, Phase},
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_var_graph(
+    ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
     var_path: &SymbolPath,
     def_val: &Vec<ExprToken>,
-) -> Result<(), ConstructorError> {
+) {
     // If the default value has any identifiers, thus the variable depends on them
     for expr in def_val {
         match &expr.kind {
@@ -33,10 +34,8 @@ pub fn build_var_graph(
                 let resolved_path = match root_symbol_table.resolve_path(path) {
                     Some(path) => path,
                     None => {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::SymbolNotFound(None),
-                            position: expr.range,
-                        });
+                        ec.var_not_found(expr.range, Phase::TypeResolution, &path.to_string());
+                        return;
                     }
                 };
 
@@ -55,13 +54,26 @@ pub fn build_var_graph(
                 }
 
                 if !to_path.components.is_empty() {
-                    graph.add_edge(var_path, &to_path);
+                    graph.add_edge(&var_path, &to_path);
                     graph.add_node(DependencyGraphNode::new(to_path));
                 }
             }
+
+            ExprTokenKind::FuncCall { path, .. } => {
+                let to_path = match root_symbol_table.resolve_path(path) {
+                    Some(path) => path,
+                    None => {
+                        ec.func_not_found(expr.range, Phase::TypeResolution, &path.to_string());
+                        return;
+                    }
+                };
+
+                graph.add_edge(&var_path, &to_path);
+                graph.add_node(DependencyGraphNode::new(var_path.clone()));
+                graph.add_node(DependencyGraphNode::new(to_path));
+            }
+
             _ => (),
         }
     }
-
-    Ok(())
 }

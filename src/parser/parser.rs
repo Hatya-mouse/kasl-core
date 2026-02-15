@@ -342,7 +342,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         })* {
             let mut path = vec![parent];
             path.extend(children);
-            path
+            ParserSymbolPath { path }
         }
 
     rule operator() -> String

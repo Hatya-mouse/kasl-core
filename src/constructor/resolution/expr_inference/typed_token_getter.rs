@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program, Range,
-    SymbolPath, SymbolTable,
+    ExprToken, ExprTokenKind, LiteralBind, Program, Range, SymbolPath, SymbolTable,
+    error::{ErrorCollector, Phase},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -45,10 +45,11 @@ pub enum TypedTokenKind {
 
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens(
+    ec: &mut ErrorCollector,
     program: &Program,
     symbol_table: &SymbolTable,
     expr: &[ExprToken],
-) -> Result<Vec<TypedToken>, ConstructorError> {
+) -> Option<Vec<TypedToken>> {
     let mut expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
@@ -63,12 +64,8 @@ pub fn get_typed_tokens(
                     token.range.clone(),
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::IntLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(token.range, Phase::TypeResolution, LiteralBind::IntLiteral);
+                    return None;
                 }
             },
 
@@ -81,12 +78,12 @@ pub fn get_typed_tokens(
                     token.range.clone(),
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::FloatLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(
+                        token.range,
+                        Phase::TypeResolution,
+                        LiteralBind::FloatLiteral,
+                    );
+                    return None;
                 }
             },
 
@@ -99,21 +96,31 @@ pub fn get_typed_tokens(
                     token.range.clone(),
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::BoolLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(
+                        token.range,
+                        Phase::TypeResolution,
+                        LiteralBind::FloatLiteral,
+                    );
+                    return None;
                 }
             },
 
             ExprTokenKind::Identifier(parser_path) => {
-                let symbol_type = program.get_symbol_type(&parser_path, symbol_table, token)?;
+                let var_type = match program.get_var_type(&parser_path, symbol_table) {
+                    Some(var_type) => var_type,
+                    None => {
+                        ec.var_not_found(
+                            token.range,
+                            Phase::TypeResolution,
+                            &parser_path.to_string(),
+                        );
+                        return None;
+                    }
+                };
                 result.push(TypedToken::new(
                     TypedTokenKind::Value {
                         expr_token: token.clone(),
-                        value_type: symbol_type.clone(),
+                        value_type: var_type.clone(),
                     },
                     token.range.clone(),
                 ));
@@ -123,18 +130,17 @@ pub fn get_typed_tokens(
                 path: func_parser_path,
                 args: _,
             } => {
-                let func_type = program
-                    // Should refactor this function: ↓
-                    .get_func_type(func_parser_path, symbol_table)
-                    .ok_or_else(|| ConstructorError {
-                        error_type: ConstructorErrorType::NoReturnFunctionInExpr(
-                            func_parser_path
-                                .last()
-                                .map(|component| component.symbol.clone())
-                                .unwrap_or("".to_string()),
-                        ),
-                        position: token.range,
-                    })?;
+                let func_type = match program.get_func_type(func_parser_path, symbol_table) {
+                    Some(func_type) => func_type,
+                    None => {
+                        ec.func_not_found(
+                            token.range,
+                            Phase::TypeResolution,
+                            &func_parser_path.to_string(),
+                        );
+                        return None;
+                    }
+                };
                 result.push(TypedToken::new(
                     TypedTokenKind::Value {
                         expr_token: token.clone(),
@@ -161,7 +167,7 @@ pub fn get_typed_tokens(
         }
     }
 
-    Ok(result)
+    Some(result)
 }
 
 fn handle_operator_resolution(
