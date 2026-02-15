@@ -526,7 +526,7 @@ dependencies = [
 
 [[package]]
 name = "kasl"
-version = "0.3.9"
+version = "0.0.0"
 dependencies = [
  "cranelift-codegen",
  "cranelift-frontend",
