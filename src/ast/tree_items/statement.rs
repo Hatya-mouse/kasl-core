@@ -21,7 +21,7 @@ pub enum Statement {
     Return {
         value: Option<Expression>,
     },
-    Var {
+    VarDecl {
         name: String,
         value_type: SymbolPath,
         def_val: Expression,
