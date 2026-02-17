@@ -14,16 +14,4 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, ParserFuncParam};
-
-pub fn construct_func_params(parser_params: &[ParserFuncParam]) -> Vec<FuncParam> {
-    parser_params
-        .iter()
-        .map(|param| FuncParam {
-            label: param.label.clone(),
-            name: param.name.clone(),
-            value_type: None,
-            def_val: None,
-        })
-        .collect()
-}
+pub mod validator;

@@ -15,18 +15,24 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprTokenKind, Expression, FuncCallArg, Program, Range,
-    SymbolTable, TypedToken, TypedTokenKind, resolution::expr_inference::ExprTreeBuilder,
+    ExprTokenKind, Expression, FuncCallArg, Program, Range, SymbolTable, TypedToken,
+    TypedTokenKind,
+    error::{ErrorCollector, Phase},
+    resolution::expr_inference::ExprTreeBuilder,
 };
 
 /// Convert an RPN sequence of TypedToken into an Expression tree.
 /// Returns Err on arity errors, unknown symbols, or missing operator implementations.
 pub fn build_expr_tree_from_rpn(
+    ec: &mut ErrorCollector,
     program: &Program,
     symbol_table: &SymbolTable,
     rpn_tokens: Vec<TypedToken>,
-) -> Result<Expression, Vec<ConstructorError>> {
+) -> Option<Expression> {
     let mut stack = Vec::new();
+    let expr_range = rpn_tokens
+        .first()
+        .map_or(Range::zero(), |token| token.range);
 
     for current_token in rpn_tokens.into_iter() {
         match current_token.kind {
@@ -44,55 +50,61 @@ pub fn build_expr_tree_from_rpn(
                     stack.push((Expression::BoolLiteral(value), value_type))
                 }
                 ExprTokenKind::Identifier(ref path) => {
-                    let resolved_path = symbol_table.resolve_path(path).ok_or_else(|| {
-                        vec![ConstructorError {
-                            error_type: ConstructorErrorType::SymbolNotFound(None),
-                            position: current_token.range,
-                        }]
-                    })?;
-                    stack.push((Expression::Identifier(resolved_path), value_type))
+                    let resolved_var_path = match symbol_table.resolve_path(path) {
+                        Some(path) => path,
+                        None => {
+                            ec.var_not_found(
+                                current_token.range,
+                                Phase::TypeResolution,
+                                &path.to_string(),
+                            );
+                            return None;
+                        }
+                    };
+                    stack.push((Expression::Identifier(resolved_var_path), value_type))
                 }
                 ExprTokenKind::FuncCall { ref path, args } => {
-                    let resolved_func_path = symbol_table.resolve_path(path).ok_or_else(|| {
-                        vec![ConstructorError {
-                            error_type: ConstructorErrorType::SymbolNotFound(None),
-                            position: current_token.range,
-                        }]
-                    })?;
+                    let resolved_func_path = match symbol_table.resolve_path(path) {
+                        Some(path) => path,
+                        None => {
+                            ec.func_not_found(
+                                current_token.range,
+                                Phase::TypeResolution,
+                                &path.to_string(),
+                            );
+                            return None;
+                        }
+                    };
 
-                    let function =
-                        program
-                            .get_func_by_path(&resolved_func_path)
-                            .ok_or_else(|| {
-                                vec![ConstructorError {
-                                    error_type: ConstructorErrorType::SymbolNotFound(Some(
-                                        resolved_func_path.clone(),
-                                    )),
-                                    position: current_token.range,
-                                }]
-                            })?;
+                    let function = match program.get_func_by_path(&resolved_func_path) {
+                        Some(func) => func,
+                        None => {
+                            ec.func_not_found(
+                                current_token.range,
+                                Phase::TypeResolution,
+                                &resolved_func_path.to_string(),
+                            );
+                            return None;
+                        }
+                    };
 
                     // Build expression tree for arguments
                     let mut parsed_arguments = Vec::new();
-                    let mut errors = Vec::new();
-                    for i in 0..args.len() {
-                        let arg = &args[i];
-
+                    for (i, arg) in args.iter().enumerate() {
                         // Check if the function has enough number of arguments
                         if i < function.params.len() {
                             // Build expression tree for an argument
-                            let tree_expr = match program
-                                .build_expr_tree_from_raw_tokens(&arg.value, symbol_table)
-                            {
-                                Ok(expr) => expr,
-                                Err(err) => {
-                                    errors.extend(err);
-                                    break;
-                                }
+                            let tree_expr = match program.build_expr_tree_from_raw_tokens(
+                                ec,
+                                &arg.value,
+                                symbol_table,
+                            ) {
+                                Some(expr) => expr,
+                                None => continue,
                             };
 
                             // Check if the argument label matches any parameter name or label
-                            // If the argument label is not specified, use the parameter of the number
+                            // If the argument label is not specified, use the parameter in the index
                             if let Some(target_param) = function.params.iter().find(|param| {
                                 Some(&param.name) == arg.label.as_ref() || param.label == arg.label
                             }) {
@@ -108,11 +120,6 @@ pub fn build_expr_tree_from_rpn(
                                 });
                             }
                         }
-
-                        errors.push(ConstructorError {
-                            error_type: ConstructorErrorType::ArgumentNotFound(arg.label.clone()),
-                            position: arg.range,
-                        });
                     }
 
                     stack.push((
@@ -126,100 +133,82 @@ pub fn build_expr_tree_from_rpn(
                 _ => (),
             },
             TypedTokenKind::PrefixOperator(ref symbol) => {
-                let (operand, operand_type) = stack.pop().ok_or_else(|| {
-                    vec![ConstructorError {
-                        error_type: ConstructorErrorType::ArityMismatch(symbol.clone(), 1),
-                        position: current_token.range,
-                    }]
-                })?;
+                let (operand, operand_type) = match stack.pop() {
+                    Some((operand, operand_type)) => (operand, operand_type),
+                    None => {
+                        ec.arity_mismatch(current_token.range, Phase::TypeResolution, 1, 0);
+                        return None;
+                    }
+                };
 
                 // Get the operator in order to determine the return type
-                let operator = program
-                    .get_prefix_func(&operand_type, symbol)
-                    .ok_or_else(|| {
-                        vec![ConstructorError {
-                            error_type: ConstructorErrorType::OperatorNotFound(symbol.clone()),
-                            position: current_token.range,
-                        }]
-                    })?;
-
-                let operator_return_type = operator.return_type.as_ref().ok_or_else(|| {
-                    vec![ConstructorError {
-                        error_type: ConstructorErrorType::CompilerBug(
-                            "Operator return type should have already been determined.".to_string(),
-                        ),
-                        position: current_token.range,
-                    }]
-                })?;
+                let operator = match program.get_prefix_func(&operand_type, symbol) {
+                    Some(operator) => operator,
+                    None => {
+                        ec.operator_not_found(current_token.range, Phase::TypeResolution, symbol);
+                        return None;
+                    }
+                };
 
                 let operator_expr = Expression::PrefixOperator {
                     operand: Box::new(operand),
                     operand_type,
-                    return_type: operator_return_type.clone(),
+                    return_type: operator.return_type.clone(),
                 };
 
-                stack.push((operator_expr, operator_return_type.clone()));
+                stack.push((operator_expr, operator.return_type.clone()));
             }
             TypedTokenKind::InfixOperator(ref symbol) => {
-                let (rhs, rhs_type) = stack.pop().ok_or_else(|| {
-                    vec![ConstructorError {
-                        error_type: ConstructorErrorType::ArityMismatch(symbol.clone(), 2),
-                        position: current_token.range,
-                    }]
-                })?;
-                let (lhs, lhs_type) = stack.pop().ok_or_else(|| {
-                    vec![ConstructorError {
-                        error_type: ConstructorErrorType::ArityMismatch(symbol.clone(), 2),
-                        position: current_token.range,
-                    }]
-                })?;
+                let (rhs, rhs_type) = match stack.pop() {
+                    Some((rhs, rhs_type)) => (rhs, rhs_type),
+                    None => {
+                        ec.arity_mismatch(current_token.range, Phase::TypeResolution, 2, 0);
+                        return None;
+                    }
+                };
+                let (lhs, lhs_type) = match stack.pop() {
+                    Some((lhs, lhs_type)) => (lhs, lhs_type),
+                    None => {
+                        ec.arity_mismatch(current_token.range, Phase::TypeResolution, 2, 1);
+                        return None;
+                    }
+                };
 
                 // Get the operator in order to determine the return type
-                let operator = program
-                    .get_infix_func(&lhs_type, &rhs_type, symbol)
-                    .ok_or_else(|| {
-                        vec![ConstructorError {
-                            error_type: ConstructorErrorType::OperatorNotFound(symbol.clone()),
-                            position: current_token.range,
-                        }]
-                    })?;
-                let operator_return_type = operator.return_type.as_ref().ok_or_else(|| {
-                    vec![ConstructorError {
-                        error_type: ConstructorErrorType::CompilerBug(
-                            "Operator return type should have already been determined.".to_string(),
-                        ),
-                        position: current_token.range,
-                    }]
-                })?;
+                let operator = match program.get_infix_func(&lhs_type, &rhs_type, symbol) {
+                    Some(operator) => operator,
+                    None => {
+                        ec.operator_not_found(current_token.range, Phase::TypeResolution, symbol);
+                        return None;
+                    }
+                };
 
                 let operator_expr = Expression::InfixOperator {
                     lhs: Box::new(lhs),
                     lhs_type,
                     rhs: Box::new(rhs),
                     rhs_type,
-                    return_type: operator_return_type.clone(),
+                    return_type: operator.return_type.clone(),
                 };
 
-                stack.push((operator_expr, operator_return_type.clone()));
+                stack.push((operator_expr, operator.return_type.clone()));
             }
             _ => {
-                return Err(vec![ConstructorError {
-                    error_type: ConstructorErrorType::CompilerBug(
-                        "Parenthesis should not be in the RPN token list.".to_string(),
-                    ),
-                    position: current_token.range,
-                }]);
+                ec.comp_bug(
+                    current_token.range,
+                    Phase::TypeResolution,
+                    "Parentheses should not be in the RPN token list.",
+                );
+                return None;
             }
         }
     }
 
     if stack.len() != 1 {
-        Err(vec![ConstructorError {
-            error_type: ConstructorErrorType::ExprSyntaxError,
-            position: Range::zero(),
-        }])
+        ec.invalid_expr_syntax(expr_range, Phase::TypeResolution);
+        None
     } else {
         let root = stack.pop().unwrap();
-        Ok(root.0)
+        Some(root.0)
     }
 }

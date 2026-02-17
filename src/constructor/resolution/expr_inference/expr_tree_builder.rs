@@ -15,33 +15,35 @@
 //
 
 use crate::{
-    ConstructorError, ExprToken, Expression, Program, SymbolTable, get_typed_tokens,
+    ExprToken, Expression, Program, SymbolTable,
+    error::ErrorCollector,
+    get_typed_tokens,
     resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
 };
 
 pub trait ExprTreeBuilder {
     /// Build a typed Expression from `expr` tokens using the provided `SymbolTable`.
-    /// Returns a ConstructorError if typing, RPN conversion, or tree construction fails.
     fn build_expr_tree_from_raw_tokens(
         &self,
+        ec: &mut ErrorCollector,
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
-    ) -> Result<Expression, Vec<ConstructorError>>;
+    ) -> Option<Expression>;
 }
 
 impl ExprTreeBuilder for Program {
     fn build_expr_tree_from_raw_tokens(
         &self,
+        ec: &mut ErrorCollector,
         expr: &[ExprToken],
         symbol_table: &SymbolTable,
-    ) -> Result<Expression, Vec<ConstructorError>> {
+    ) -> Option<Expression> {
         // 1. Convert tokens to TypedToken so we can easily look up their types
-        let typed_tokens = get_typed_tokens(self, symbol_table, expr).map_err(|err| vec![err])?;
+        let typed_tokens = get_typed_tokens(ec, self, symbol_table, expr)?;
         // 2. Rearrange tokens to get reverse polish notation
-        let rpn_tokens = rearrange_tokens_to_rpn(self, typed_tokens).map_err(|err| vec![err])?;
+        let rpn_tokens = rearrange_tokens_to_rpn(ec, self, typed_tokens)?;
         // 3. Evaluate the reverse polish notation to get the type of the expression
-        let expr_tree = build_expr_tree_from_rpn(self, symbol_table, rpn_tokens)?;
 
-        Ok(expr_tree)
+        build_expr_tree_from_rpn(ec, self, symbol_table, rpn_tokens)
     }
 }

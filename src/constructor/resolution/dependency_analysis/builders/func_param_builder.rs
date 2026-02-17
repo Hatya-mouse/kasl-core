@@ -15,17 +15,18 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprTokenKind, ParserFuncParam, SymbolPath,
-    SymbolTable,
+    ExprTokenKind, ParserFuncParam, SymbolPath, SymbolTable,
+    error::{ErrorCollector, Phase},
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_func_param_graph(
+    ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
     root_symbol_table: &SymbolTable,
     func_path: &SymbolPath,
     params: &[ParserFuncParam],
-) -> Result<(), ConstructorError> {
+) {
     for param in params {
         // Get the default value to infer the type
         if let Some(def_value) = &param.def_val {
@@ -34,20 +35,38 @@ pub fn build_func_param_graph(
                     // If the default value has an identifier in it,
                     // the parameter depends on the identifier
                     ExprTokenKind::Identifier(path) => {
-                        let from_path = func_path.clone();
-
                         let to_path = match root_symbol_table.resolve_path(path) {
                             Some(path) => path,
                             None => {
-                                return Err(ConstructorError {
-                                    error_type: ConstructorErrorType::SymbolNotFound(None),
-                                    position: expr.range,
-                                });
+                                ec.var_not_found(
+                                    expr.range,
+                                    Phase::GraphConstruction,
+                                    &path.to_string(),
+                                );
+                                return;
                             }
                         };
 
-                        graph.add_edge(&from_path, &to_path);
-                        graph.add_node(DependencyGraphNode::new(from_path));
+                        graph.add_edge(func_path, &to_path);
+                        graph.add_node(DependencyGraphNode::new(func_path.clone()));
+                        graph.add_node(DependencyGraphNode::new(to_path));
+                    }
+
+                    ExprTokenKind::FuncCall { path, .. } => {
+                        let to_path = match root_symbol_table.resolve_path(path) {
+                            Some(path) => path,
+                            None => {
+                                ec.func_not_found(
+                                    expr.range,
+                                    Phase::GraphConstruction,
+                                    &path.to_string(),
+                                );
+                                return;
+                            }
+                        };
+
+                        graph.add_edge(func_path, &to_path);
+                        graph.add_node(DependencyGraphNode::new(func_path.clone()));
                         graph.add_node(DependencyGraphNode::new(to_path));
                     }
 
@@ -56,6 +75,4 @@ pub fn build_func_param_graph(
             }
         }
     }
-
-    Ok(())
 }

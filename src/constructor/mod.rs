@@ -14,14 +14,13 @@
 // limitations under the License.
 //
 
-pub mod constructor;
 pub mod error;
-pub mod member_collection;
+pub mod program_builder;
 pub mod resolution;
-pub mod symbol_collection;
-pub mod symbol_table;
+pub mod table_construction;
 pub mod type_collection;
+pub mod validation;
 
-pub use error::{ConstructorError, ConstructorErrorType};
-pub use symbol_table::SymbolTable;
+pub use program_builder::construct_program;
 pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};
+pub use table_construction::SymbolTable;

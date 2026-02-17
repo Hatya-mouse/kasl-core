@@ -14,12 +14,8 @@
 // limitations under the License.
 //
 
-pub mod func_collector;
-pub mod func_param_constructor;
-pub mod nests_collector;
-pub mod var_collector;
-
-pub use func_collector::collect_member_functions;
-pub use func_param_constructor::construct_func_params;
-pub use nests_collector::collect_member_nests;
-pub use var_collector::collect_member_variables;
+pub mod item_getter;
+pub mod literal_bind;
+pub mod member_registration;
+pub mod type_getter;
+pub mod type_utils;

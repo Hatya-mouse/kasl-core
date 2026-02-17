@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{FuncCallArg, Program, SymbolPath};
+use crate::{
+    FuncCallArg, LiteralBind, Program, Range, SymbolPath,
+    error::{ErrorCollector, Phase},
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
@@ -41,21 +44,52 @@ pub enum Expression {
 }
 
 impl Expression {
-    pub fn get_type(&self, program: &Program) -> Option<SymbolPath> {
+    pub fn get_type(
+        &self,
+        ec: &mut ErrorCollector,
+        program: &Program,
+        error_range: Range,
+    ) -> Option<SymbolPath> {
         match self {
-            Expression::IntLiteral(_) => program.int_literal_type.clone(),
-            Expression::FloatLiteral(_) => program.float_literal_type.clone(),
-            Expression::BoolLiteral(_) => program.bool_literal_type.clone(),
+            Expression::IntLiteral(_) => match &program.int_literal_type {
+                Some(type_path) => Some(type_path.clone()),
+                None => {
+                    ec.no_literal_bind(error_range, Phase::TypeResolution, LiteralBind::IntLiteral);
+                    None
+                }
+            },
+            Expression::FloatLiteral(_) => match &program.float_literal_type {
+                Some(type_path) => Some(type_path.clone()),
+                None => {
+                    ec.no_literal_bind(
+                        error_range,
+                        Phase::TypeResolution,
+                        LiteralBind::FloatLiteral,
+                    );
+                    None
+                }
+            },
+            Expression::BoolLiteral(_) => match program.bool_literal_type.clone() {
+                Some(type_path) => Some(type_path),
+                None => {
+                    ec.no_literal_bind(
+                        error_range,
+                        Phase::TypeResolution,
+                        LiteralBind::BoolLiteral,
+                    );
+                    None
+                }
+            },
             Expression::PrefixOperator { return_type, .. } => Some(return_type.clone()),
             Expression::InfixOperator { return_type, .. } => Some(return_type.clone()),
             Expression::Identifier(symbol_path) => Some(symbol_path.clone()),
-            Expression::FuncCall { path, .. } => {
-                if let Some(func) = program.get_func_by_path(path) {
-                    func.return_type.clone()
-                } else {
+            Expression::FuncCall { path, .. } => match program.get_func_by_path(path) {
+                Some(func) => func.return_type.clone(),
+                None => {
+                    ec.func_not_found(error_range, Phase::TypeResolution, &path.to_string());
                     None
                 }
-            }
+            },
         }
     }
 }

@@ -21,6 +21,12 @@ pub struct SymbolPath {
     pub components: Vec<SymbolPathComponent>,
 }
 
+impl Default for SymbolPath {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SymbolPath {
     pub fn new() -> Self {
         SymbolPath {
@@ -61,6 +67,16 @@ impl SymbolPath {
     pub fn push(&mut self, component: SymbolPathComponent) {
         self.components.push(component);
     }
+
+    pub fn parent(&self) -> Option<SymbolPath> {
+        if self.components.is_empty() {
+            None
+        } else {
+            Some(SymbolPath {
+                components: self.components[..self.components.len() - 1].to_vec(),
+            })
+        }
+    }
 }
 
 impl Index<usize> for SymbolPath {
@@ -95,7 +111,9 @@ pub enum SymbolPathComponent {
     InputVar(String),
     OutputVar(String),
     Func(String),
+    InfixDef(String),
     InfixFunc(String),
+    PrefixDef(String),
     PrefixFunc(String),
     TypeDef(String),
 }
@@ -111,7 +129,9 @@ impl Display for SymbolPathComponent {
             | SymbolPathComponent::InputVar(name)
             | SymbolPathComponent::OutputVar(name)
             | SymbolPathComponent::Func(name)
+            | SymbolPathComponent::InfixDef(name)
             | SymbolPathComponent::InfixFunc(name)
+            | SymbolPathComponent::PrefixDef(name)
             | SymbolPathComponent::PrefixFunc(name)
             | SymbolPathComponent::TypeDef(name) => write!(f, "{}", name),
         }

@@ -15,36 +15,35 @@
 //
 
 use crate::{
-    ConstructorError, ParserStatement, Program, SymbolTable,
-    member_collection::collect_all_type_members, resolution::type_resolver::resolve_types,
-    symbol_collection::collect_top_level_symbols, symbol_table::build_symbol_table,
+    ParserStatement, Program, SymbolTable,
+    error::{ErrorCollector, ErrorRecord},
+    resolution::type_resolver::resolve_types,
+    table_construction::build_symbol_table,
     type_collection::collect_all_types,
+    validation::validator::validate,
 };
 
 /// Process order:
 /// 1. `symbol_table`: Build symbol table
 /// 2. `type_collection`: Collect types
-/// 3. `symbol_collection`: Collect top-level symbols
-/// 4. `member_collection`: Collect all type members
-/// 5. `type_resolution`: Resolve types
-pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ConstructorError>> {
+/// 3. `validation`: Validate program
+/// 6. `resolve_types`: Resolve types and construct the AST
+pub fn construct_program(statements: Vec<ParserStatement>) -> Result<(), Vec<ErrorRecord>> {
     let mut program = Program::new();
     let mut symbol_table = SymbolTable::new();
+    let mut error_collector = ErrorCollector::new();
 
     // 1. Build symbol table
-    build_symbol_table(&mut symbol_table, &statements).map_err(|err| vec![err])?;
+    build_symbol_table(&mut error_collector, &mut symbol_table, &statements);
 
     // 2. Collect types
     collect_all_types(&mut program, &symbol_table);
 
-    // 3. Collect top-level symbols
-    collect_top_level_symbols(&mut program, &symbol_table).map_err(|err| vec![err])?;
+    // 3. Validate program
+    validate(&mut error_collector, &symbol_table);
 
-    // 4. Collect all type members
-    collect_all_type_members(&mut program, &symbol_table).map_err(|err| vec![err])?;
+    // 4. Infer the types of symbols
+    resolve_types(&mut error_collector, &mut program, &symbol_table);
 
-    // 5. Infer the types of symbols
-    resolve_types(&mut program, &symbol_table)?;
-
-    Ok(())
+    error_collector.as_result()
 }

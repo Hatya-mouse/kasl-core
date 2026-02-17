@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+use std::fmt::Display;
+
 use crate::{InfixOperatorProperties, LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -191,7 +193,31 @@ pub enum ExprTokenKind {
     RParen,
 }
 
-pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
+// pub type ParserSymbolPath = Vec<ParserSymbolPathComponent>;
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserSymbolPath {
+    pub path: Vec<ParserSymbolPathComponent>,
+}
+
+impl ParserSymbolPath {
+    pub fn new(path: Vec<ParserSymbolPathComponent>) -> Self {
+        Self { path }
+    }
+}
+
+impl Display for ParserSymbolPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.path
+                .iter()
+                .map(|p| p.symbol.clone())
+                .collect::<Vec<_>>()
+                .join(".")
+        )
+    }
+}
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserSymbolPathComponent {

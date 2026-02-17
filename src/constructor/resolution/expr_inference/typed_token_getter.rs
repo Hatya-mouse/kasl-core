@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ExprToken, ExprTokenKind, LiteralBind, Program, Range,
-    SymbolPath, SymbolTable,
+    ExprToken, ExprTokenKind, LiteralBind, Program, Range, SymbolPath, SymbolTable,
+    error::{ErrorCollector, Phase},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -45,14 +45,15 @@ pub enum TypedTokenKind {
 
 /// Infer the type of each token in the expression and convert them to TypedTokens.
 pub fn get_typed_tokens(
+    ec: &mut ErrorCollector,
     program: &Program,
     symbol_table: &SymbolTable,
     expr: &[ExprToken],
-) -> Result<Vec<TypedToken>, ConstructorError> {
-    let mut expr_iter = expr.iter().peekable();
+) -> Option<Vec<TypedToken>> {
+    let expr_iter = expr.iter().peekable();
     let mut result: Vec<TypedToken> = Vec::new();
 
-    while let Some(token) = expr_iter.next() {
+    for token in expr_iter {
         match &token.kind {
             ExprTokenKind::IntLiteral(_) => match &program.int_literal_type {
                 Some(int_literal_type) => result.push(TypedToken::new(
@@ -60,15 +61,11 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: int_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::IntLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(token.range, Phase::TypeResolution, LiteralBind::IntLiteral);
+                    return None;
                 }
             },
 
@@ -78,15 +75,15 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: float_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::FloatLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(
+                        token.range,
+                        Phase::TypeResolution,
+                        LiteralBind::FloatLiteral,
+                    );
+                    return None;
                 }
             },
 
@@ -96,26 +93,36 @@ pub fn get_typed_tokens(
                         expr_token: token.clone(),
                         value_type: bool_literal_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 )),
                 None => {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::MissingLiteralBind(
-                            LiteralBind::BoolLiteral,
-                        ),
-                        position: token.range,
-                    });
+                    ec.no_literal_bind(
+                        token.range,
+                        Phase::TypeResolution,
+                        LiteralBind::FloatLiteral,
+                    );
+                    return None;
                 }
             },
 
             ExprTokenKind::Identifier(parser_path) => {
-                let symbol_type = program.get_symbol_type(&parser_path, symbol_table, token)?;
+                let var_type = match program.get_var_type(parser_path, symbol_table) {
+                    Some(var_type) => var_type,
+                    None => {
+                        ec.var_not_found(
+                            token.range,
+                            Phase::TypeResolution,
+                            &parser_path.to_string(),
+                        );
+                        return None;
+                    }
+                };
                 result.push(TypedToken::new(
                     TypedTokenKind::Value {
                         expr_token: token.clone(),
-                        value_type: symbol_type.clone(),
+                        value_type: var_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 ));
             }
 
@@ -123,74 +130,72 @@ pub fn get_typed_tokens(
                 path: func_parser_path,
                 args: _,
             } => {
-                let func_type = program
-                    // Should refactor this function: ↓
-                    .get_func_type(func_parser_path, symbol_table)
-                    .ok_or_else(|| ConstructorError {
-                        error_type: ConstructorErrorType::NoReturnFunctionInExpr(
-                            func_parser_path
-                                .last()
-                                .map(|component| component.symbol.clone())
-                                .unwrap_or("".to_string()),
-                        ),
-                        position: token.range,
-                    })?;
+                let func_type = match program.get_func_type(func_parser_path, symbol_table) {
+                    Some(func_type) => func_type,
+                    None => {
+                        ec.func_not_found(
+                            token.range,
+                            Phase::TypeResolution,
+                            &func_parser_path.to_string(),
+                        );
+                        return None;
+                    }
+                };
                 result.push(TypedToken::new(
                     TypedTokenKind::Value {
                         expr_token: token.clone(),
                         value_type: func_type.clone(),
                     },
-                    token.range.clone(),
+                    token.range,
                 ));
             }
 
             ExprTokenKind::Operator(operator_symbol) => {
                 let last_token = result.last();
                 let operator_token =
-                    handle_operator_resolution(operator_symbol, token.range.clone(), last_token);
+                    handle_operator_resolution(operator_symbol, token.range, last_token);
                 result.push(operator_token);
             }
 
             ExprTokenKind::LParen => {
-                result.push(TypedToken::new(TypedTokenKind::LParen, token.range.clone()))
+                result.push(TypedToken::new(TypedTokenKind::LParen, token.range))
             }
 
             ExprTokenKind::RParen => {
-                result.push(TypedToken::new(TypedTokenKind::RParen, token.range.clone()))
+                result.push(TypedToken::new(TypedTokenKind::RParen, token.range))
             }
         }
     }
 
-    Ok(result)
+    Some(result)
 }
 
 fn handle_operator_resolution(
-    operator_symbol: &String,
+    operator_symbol: &str,
     operator_range: Range,
     last_token: Option<&TypedToken>,
 ) -> TypedToken {
     // Whether the operator is infix or prefix can be determined by the last token
     let is_infix = match last_token {
-        Some(unwrapped_token) => match unwrapped_token.kind {
+        Some(unwrapped_token) => matches!(
+            unwrapped_token.kind,
             TypedTokenKind::Value {
                 expr_token: _,
                 value_type: _,
-            }
-            | TypedTokenKind::RParen => true,
-            _ => false,
-        },
+            } | TypedTokenKind::RParen
+        ),
         None => false,
     };
 
     if is_infix {
-        return TypedToken::new(
-            TypedTokenKind::InfixOperator(operator_symbol.clone()),
+        TypedToken::new(
+            TypedTokenKind::InfixOperator(operator_symbol.to_string()),
             operator_range,
-        );
+        )
     } else {
-        return TypedToken::new(
-            TypedTokenKind::PrefixOperator(operator_symbol.clone()),
+        TypedToken::new(
+            TypedTokenKind::PrefixOperator(operator_symbol.to_string()),
             operator_range,
-        );
+        )
     }
 }

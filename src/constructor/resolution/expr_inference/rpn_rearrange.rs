@@ -15,14 +15,15 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, OperatorAssociativity, Program, TypedToken,
-    TypedTokenKind,
+    OperatorAssociativity, Program, TypedToken, TypedTokenKind,
+    error::{ErrorCollector, Phase},
 };
 
 pub fn rearrange_tokens_to_rpn(
+    ec: &mut ErrorCollector,
     program: &Program,
     tokens: Vec<TypedToken>,
-) -> Result<Vec<TypedToken>, ConstructorError> {
+) -> Option<Vec<TypedToken>> {
     let mut output_queue: Vec<TypedToken> = Vec::new();
     let mut operator_stack: Vec<TypedToken> = Vec::new();
 
@@ -38,12 +39,12 @@ pub fn rearrange_tokens_to_rpn(
                 let current_props = match program.get_infix_operator(current_op_symbol) {
                     Some(props) => props,
                     None => {
-                        return Err(ConstructorError {
-                            error_type: ConstructorErrorType::OperatorNotFound(
-                                current_op_symbol.clone(),
-                            ),
-                            position: current_token.range,
-                        });
+                        ec.operator_not_found(
+                            current_token.range,
+                            Phase::TypeResolution,
+                            current_op_symbol,
+                        );
+                        return None;
                     }
                 };
 
@@ -58,12 +59,12 @@ pub fn rearrange_tokens_to_rpn(
                             let top_props = match program.get_infix_operator(top_op_symbol) {
                                 Some(props) => props,
                                 None => {
-                                    return Err(ConstructorError {
-                                        error_type: ConstructorErrorType::OperatorNotFound(
-                                            top_op_symbol.clone(),
-                                        ),
-                                        position: top_token.range,
-                                    });
+                                    ec.operator_not_found(
+                                        current_token.range,
+                                        Phase::TypeResolution,
+                                        current_op_symbol,
+                                    );
+                                    return None;
                                 }
                             };
 
@@ -80,33 +81,32 @@ pub fn rearrange_tokens_to_rpn(
                     }
                 }
 
-                if current_props.associativity == OperatorAssociativity::None {
-                    if let Some(top_token) = operator_stack.last() {
-                        if let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind {
-                            // Get the precedence and associativity of the operator from the stack
-                            let top_props = match program.get_infix_operator(top_op_symbol) {
-                                Some(props) => props,
-                                None => {
-                                    return Err(ConstructorError {
-                                        error_type: ConstructorErrorType::OperatorNotFound(
-                                            top_op_symbol.clone(),
-                                        ),
-                                        position: top_token.range,
-                                    });
-                                }
-                            };
-
-                            // If the top operator in the stack has the same precedence as the current operator,
-                            // it means that the current operator is chained which is illegal when the associativity is set to None.
-                            if top_props.precedence == current_props.precedence {
-                                return Err(ConstructorError {
-                                    error_type: ConstructorErrorType::OperatorCannotBeChained(
-                                        top_op_symbol.clone(),
-                                    ),
-                                    position: current_token.range,
-                                });
-                            }
+                if current_props.associativity == OperatorAssociativity::None
+                    && let Some(top_token) = operator_stack.last()
+                    && let TypedTokenKind::InfixOperator(ref top_op_symbol) = top_token.kind
+                {
+                    // Get the precedence and associativity of the operator from the stack
+                    let top_props = match program.get_infix_operator(top_op_symbol) {
+                        Some(props) => props,
+                        None => {
+                            ec.operator_not_found(
+                                current_token.range,
+                                Phase::TypeResolution,
+                                current_op_symbol,
+                            );
+                            return None;
                         }
+                    };
+
+                    // If the top operator in the stack has the same precedence as the current operator,
+                    // it means that the current operator is chained which is illegal when the associativity is set to None.
+                    if top_props.precedence == current_props.precedence {
+                        ec.op_chained(
+                            current_token.range,
+                            Phase::TypeResolution,
+                            current_op_symbol,
+                        );
+                        return None;
                     }
                 }
 
@@ -125,10 +125,8 @@ pub fn rearrange_tokens_to_rpn(
                 }
 
                 if !has_l_paren_found {
-                    return Err(ConstructorError {
-                        error_type: ConstructorErrorType::UnmatchedParentheses,
-                        position: current_token.range,
-                    });
+                    ec.unmatched_parentheses(current_token.range, Phase::TypeResolution);
+                    return None;
                 }
             }
         }
@@ -136,13 +134,11 @@ pub fn rearrange_tokens_to_rpn(
 
     while let Some(top_token) = operator_stack.pop() {
         if top_token.kind == TypedTokenKind::LParen || top_token.kind == TypedTokenKind::RParen {
-            return Err(ConstructorError {
-                error_type: ConstructorErrorType::UnmatchedParentheses,
-                position: top_token.range,
-            });
+            ec.unmatched_parentheses(top_token.range, Phase::TypeResolution);
+            return None;
         }
         output_queue.push(top_token);
     }
 
-    Ok(output_queue)
+    Some(output_queue)
 }

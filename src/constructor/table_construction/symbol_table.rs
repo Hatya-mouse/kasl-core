@@ -15,10 +15,10 @@
 //
 
 use crate::{
-    ConstructorError, ConstructorErrorType, ParserStatement, ParserSymbolPath, SymbolPath,
-    SymbolPathComponent,
+    ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent,
+    error::{ErrorCollector, Ph},
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map::Entry};
 
 /// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
@@ -30,8 +30,10 @@ pub struct SymbolTable<'a> {
     pub funcs: HashMap<String, &'a ParserStatement>,
     pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
     pub infix_defines: HashMap<String, &'a ParserStatement>,
+    /// Infix functions with the same symbol can be defined, so they are stored in a vector.
     pub infix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub prefix_defines: HashMap<String, &'a ParserStatement>,
+    /// Prefix functions with the same symbol can be defined, so they are stored in a vector.
     pub prefix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
     pub inits: Vec<&'a ParserStatement>,
 }
@@ -39,6 +41,12 @@ pub struct SymbolTable<'a> {
 pub enum StatementLookup<'a> {
     Single(&'a ParserStatement),
     Multiple(&'a [&'a ParserStatement]),
+}
+
+impl<'a> Default for SymbolTable<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<'a> SymbolTable<'a> {
@@ -63,22 +71,22 @@ impl<'a> SymbolTable<'a> {
         let mut result_path = SymbolPath::new();
         let mut current_scope = self;
 
-        for component in parser_path {
+        for component in &parser_path.path {
             if &component.symbol == "CompInt" {
                 result_path.push(SymbolPathComponent::CompInt);
             } else if &component.symbol == "CompFloat" {
                 result_path.push(SymbolPathComponent::CompFloat);
             } else if &component.symbol == "CompBool" {
                 result_path.push(SymbolPathComponent::CompBool);
-            } else if let Some(_) = current_scope.get_input(&component.symbol) {
+            } else if current_scope.get_input(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::InputVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_output(&component.symbol) {
+            } else if current_scope.get_output(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::OutputVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_state(&component.symbol) {
+            } else if current_scope.get_state(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::StateVar(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_var(&component.symbol) {
+            } else if current_scope.get_var(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::Var(component.symbol.clone()));
-            } else if let Some(_) = current_scope.get_func(&component.symbol) {
+            } else if current_scope.get_func(&component.symbol).is_some() {
                 result_path.push(SymbolPathComponent::Func(component.symbol.clone()));
             } else if let Some(type_def) = current_scope.get_type_def(&component.symbol) {
                 result_path.push(SymbolPathComponent::TypeDef(component.symbol.clone()));
@@ -91,26 +99,76 @@ impl<'a> SymbolTable<'a> {
         Some(result_path)
     }
 
+    /// Checks if the symbol is already defined in the current scope.
+    pub fn is_symbol_defined(&self, name: &str) -> bool {
+        self.vars.contains_key(name)
+            || self.funcs.contains_key(name)
+            || self.type_defs.contains_key(name)
+            || self.inputs.contains_key(name)
+            || self.outputs.contains_key(name)
+            || self.states.contains_key(name)
+    }
+
     // Insert functions
 
-    pub fn insert_input(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.inputs.insert(name, stmt);
+    pub fn insert_input(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.inputs.insert(name, stmt);
+        }
     }
 
-    pub fn insert_output(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.outputs.insert(name, stmt);
+    pub fn insert_output(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.outputs.insert(name, stmt);
+        }
     }
 
-    pub fn insert_state(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.states.insert(name, stmt);
+    pub fn insert_state(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.states.insert(name, stmt);
+        }
     }
 
-    pub fn insert_var(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.vars.insert(name, stmt);
+    pub fn insert_var(&mut self, ec: &mut ErrorCollector, name: String, stmt: &'a ParserStatement) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.vars.insert(name, stmt);
+        }
     }
 
-    pub fn insert_func(&mut self, name: String, stmt: &'a ParserStatement) {
-        self.funcs.insert(name, stmt);
+    pub fn insert_func(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserStatement,
+    ) {
+        if self.is_symbol_defined(&name) {
+            ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
+        } else {
+            self.funcs.insert(name, stmt);
+        }
     }
 
     pub fn insert_type_def(
@@ -124,43 +182,43 @@ impl<'a> SymbolTable<'a> {
 
     pub fn insert_infix_define(
         &mut self,
+        ec: &mut ErrorCollector,
         symbol: String,
         stmt: &'a ParserStatement,
-    ) -> Result<(), ConstructorError> {
-        if self.infix_defines.contains_key(&symbol) {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
-                position: stmt.range,
-            })
-        } else {
-            self.infix_defines.insert(symbol, stmt);
-            Ok(())
+    ) {
+        match self.infix_defines.entry(symbol) {
+            Entry::Vacant(vacant) => {
+                vacant.insert(stmt);
+            }
+            Entry::Occupied(occupied) => {
+                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
+            }
         }
     }
 
     pub fn insert_prefix_define(
         &mut self,
+        ec: &mut ErrorCollector,
         symbol: String,
         stmt: &'a ParserStatement,
-    ) -> Result<(), ConstructorError> {
-        if self.prefix_defines.contains_key(&symbol) {
-            Err(ConstructorError {
-                error_type: ConstructorErrorType::DuplicateSymbol(symbol),
-                position: stmt.range,
-            })
-        } else {
-            self.prefix_defines.insert(symbol, stmt);
-            Ok(())
+    ) {
+        match self.prefix_defines.entry(symbol) {
+            Entry::Vacant(vacant) => {
+                vacant.insert(stmt);
+            }
+            Entry::Occupied(occupied) => {
+                ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, occupied.key())
+            }
         }
     }
 
     pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        let target_vec = self.infix_funcs.entry(symbol).or_insert_with(Vec::new);
+        let target_vec = self.infix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
     pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
-        let target_vec = self.prefix_funcs.entry(symbol).or_insert_with(Vec::new);
+        let target_vec = self.prefix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
@@ -171,23 +229,23 @@ impl<'a> SymbolTable<'a> {
     // Getter functions
 
     pub fn get_input(&self, name: &str) -> Option<&ParserStatement> {
-        self.inputs.get(name).map(|x| *x)
+        self.inputs.get(name).copied()
     }
 
     pub fn get_output(&self, name: &str) -> Option<&ParserStatement> {
-        self.outputs.get(name).map(|x| *x)
+        self.outputs.get(name).copied()
     }
 
     pub fn get_state(&self, name: &str) -> Option<&ParserStatement> {
-        self.states.get(name).map(|x| *x)
+        self.states.get(name).copied()
     }
 
     pub fn get_var(&self, name: &str) -> Option<&ParserStatement> {
-        self.vars.get(name).map(|x| *x)
+        self.vars.get(name).copied()
     }
 
     pub fn get_func(&self, name: &str) -> Option<&ParserStatement> {
-        self.funcs.get(name).map(|x| *x)
+        self.funcs.get(name).copied()
     }
 
     pub fn get_type_def(&self, name: &str) -> Option<&(&ParserStatement, SymbolTable<'a>)> {
@@ -195,11 +253,11 @@ impl<'a> SymbolTable<'a> {
     }
 
     pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
-        self.infix_defines.get(symbol).map(|x| *x)
+        self.infix_defines.get(symbol).copied()
     }
 
     pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
-        self.prefix_defines.get(symbol).map(|x| *x)
+        self.prefix_defines.get(symbol).copied()
     }
 
     pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {
@@ -252,9 +310,15 @@ impl<'a> SymbolTable<'a> {
             SymbolPathComponent::Func(name) => {
                 current_scope.get_func(name).map(StatementLookup::Single)
             }
+            SymbolPathComponent::InfixDef(symbol) => current_scope
+                .get_infix_define(symbol)
+                .map(StatementLookup::Single),
             SymbolPathComponent::InfixFunc(symbol) => current_scope
                 .get_infix_funcs(symbol)
                 .map(|stmts| StatementLookup::Multiple(stmts)),
+            SymbolPathComponent::PrefixDef(symbol) => current_scope
+                .get_prefix_define(symbol)
+                .map(StatementLookup::Single),
             SymbolPathComponent::PrefixFunc(symbol) => current_scope
                 .get_prefix_funcs(symbol)
                 .map(|stmts| StatementLookup::Multiple(stmts)),
@@ -262,7 +326,9 @@ impl<'a> SymbolTable<'a> {
                 .get_type_def(name)
                 .map(|entry| entry.0)
                 .map(StatementLookup::Single),
-            _ => None,
+            SymbolPathComponent::CompInt
+            | SymbolPathComponent::CompFloat
+            | SymbolPathComponent::CompBool => None,
         }
     }
 }

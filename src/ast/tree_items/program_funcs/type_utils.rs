@@ -43,7 +43,7 @@ impl Program {
     ) -> Option<SymbolPath> {
         Self::resolve_type_def_recursive(
             ScopeItem::Program(self),
-            parser_symbol_path,
+            &parser_symbol_path.path,
             SymbolPath::new(),
         )
     }

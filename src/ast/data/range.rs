@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct Range {
     pub start: usize,
     pub end: usize,
@@ -22,10 +22,7 @@ pub struct Range {
 
 impl Range {
     pub fn n(start: usize, end: usize) -> Self {
-        Range {
-            start: start,
-            end: end,
-        }
+        Range { start, end }
     }
 
     pub fn zero() -> Self {
