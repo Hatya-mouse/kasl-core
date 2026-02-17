@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatementKind, SymbolTable, stmt_building::stmt_builder::build_statements};
+use crate::{
+    ParserTopLevelStmtKind, Program, SymbolTable, error::ErrorCollector,
+    stmt_building::stmt_builder::build_statements,
+};
 
-pub fn build_func_bodies(symbol_table: &SymbolTable) {
+pub fn build_func_bodies(ec: &mut ErrorCollector, program: &Program, symbol_table: &SymbolTable) {
     // Build statements for every function bodies
     for func in symbol_table.funcs.values() {
         match &func.kind {
-            ParserStatementKind::FuncDecl {
+            ParserTopLevelStmtKind::FuncDecl {
                 required_by,
                 name,
                 params,
@@ -28,7 +31,7 @@ pub fn build_func_bodies(symbol_table: &SymbolTable) {
                 body,
             } => {
                 if let Some(body) = body {
-                    let parsed_body = build_statements(body);
+                    let parsed_body = build_statements(ec, program, symbol_table, body);
                 }
             }
             _ => (),

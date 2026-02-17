@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable,
+    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolTable,
     error::{ErrorCollector, Ph},
 };
 
@@ -25,10 +25,10 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
         .infix_funcs
         .values()
         .flatten()
-        .collect::<Vec<&&ParserStatement>>();
+        .collect::<Vec<&&ParserTopLevelStmt>>();
 
     for stmt in infix_funcs {
-        if let ParserStatementKind::OperatorFunc {
+        if let ParserTopLevelStmtKind::OperatorFunc {
             op_type,
             symbol: _,
             params,
@@ -46,10 +46,10 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
         .prefix_funcs
         .values()
         .flatten()
-        .collect::<Vec<&&ParserStatement>>();
+        .collect::<Vec<&&ParserTopLevelStmt>>();
 
     for stmt in prefix_funcs {
-        if let ParserStatementKind::OperatorFunc {
+        if let ParserTopLevelStmtKind::OperatorFunc {
             op_type,
             symbol: _,
             params,

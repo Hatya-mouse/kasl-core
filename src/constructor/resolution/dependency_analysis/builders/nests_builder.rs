@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatementKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    ParserTopLevelStmtKind, SymbolPath, SymbolPathComponent, SymbolTable,
     error::ErrorCollector,
     resolution::dependency_analysis::{DependencyGraph, build_func_param_graph, build_var_graph},
 };
@@ -28,7 +28,7 @@ pub fn build_struct_and_protocol_graph(
     child_symbol_table: &SymbolTable,
 ) {
     for stmt in &child_symbol_table.vars {
-        if let ParserStatementKind::Var {
+        if let ParserTopLevelStmtKind::GlobalVar {
             required_by: _,
             name,
             value_type: _,
@@ -43,7 +43,7 @@ pub fn build_struct_and_protocol_graph(
     }
 
     for stmt in &child_symbol_table.funcs {
-        if let ParserStatementKind::FuncDecl {
+        if let ParserTopLevelStmtKind::FuncDecl {
             required_by: _,
             name,
             params,
@@ -60,12 +60,12 @@ pub fn build_struct_and_protocol_graph(
 
     for stmt in &child_symbol_table.type_defs {
         match &stmt.1.0.kind {
-            ParserStatementKind::StructDecl {
+            ParserTopLevelStmtKind::StructDecl {
                 name,
                 inherits: _,
                 body: _,
             }
-            | ParserStatementKind::ProtocolDecl {
+            | ParserTopLevelStmtKind::ProtocolDecl {
                 name,
                 inherits: _,
                 body: _,

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserStatement, ParserStatementKind, Program, Range, SymbolPath,
+    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, Program, Range, SymbolPath,
     SymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
@@ -50,20 +50,20 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
         // Check if the symbol has already got a type annotation
         // If not, infer the type
         match &current_stmt.kind {
-            ParserStatementKind::Input {
+            ParserTopLevelStmtKind::Input {
                 name,
                 value_type,
                 def_val,
                 attrs: _,
             } => ctx.resolve_input(name, value_type.as_ref(), def_val, current_stmt.range),
 
-            ParserStatementKind::Output {
+            ParserTopLevelStmtKind::Output {
                 name,
                 value_type,
                 def_val,
             } => ctx.resolve_output(name, value_type.as_ref(), def_val, current_stmt.range),
 
-            ParserStatementKind::State { vars } => {
+            ParserTopLevelStmtKind::State { vars } => {
                 for var in vars {
                     ctx.resolve_state(
                         &var.name,
@@ -74,7 +74,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 }
             }
 
-            ParserStatementKind::Var {
+            ParserTopLevelStmtKind::GlobalVar {
                 required_by,
                 name,
                 value_type,
@@ -88,7 +88,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 current_stmt.range,
             ),
 
-            ParserStatementKind::FuncDecl {
+            ParserTopLevelStmtKind::FuncDecl {
                 required_by,
                 name,
                 params,
@@ -103,7 +103,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 current_stmt.range,
             ),
 
-            ParserStatementKind::Init {
+            ParserTopLevelStmtKind::Init {
                 required_by,
                 literal_bind,
                 params,
@@ -116,7 +116,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 current_stmt.range,
             ),
 
-            ParserStatementKind::OperatorFunc {
+            ParserTopLevelStmtKind::OperatorFunc {
                 op_type,
                 symbol,
                 params,
@@ -131,12 +131,12 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 }
             },
 
-            ParserStatementKind::InfixDefine {
+            ParserTopLevelStmtKind::InfixDefine {
                 symbol,
                 infix_properties,
             } => ctx.register_infix_define(symbol, infix_properties.clone()),
 
-            ParserStatementKind::PrefixDefine { symbol } => ctx.register_prefix_define(symbol),
+            ParserTopLevelStmtKind::PrefixDefine { symbol } => ctx.register_prefix_define(symbol),
 
             _ => (),
         }
@@ -147,7 +147,7 @@ fn get_statements<'a>(
     ec: &mut ErrorCollector,
     symbol_table: &'a SymbolTable,
     symbol_paths: Vec<&'a SymbolPath>,
-) -> Vec<(&'a SymbolPath, &'a ParserStatement)> {
+) -> Vec<(&'a SymbolPath, &'a ParserTopLevelStmt)> {
     let mut statements = Vec::new();
 
     for symbol_path in symbol_paths {

@@ -20,32 +20,29 @@ use crate::{InfixOperatorProperties, LiteralBind, Range};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
-    pub statements: Vec<ParserStatement>,
-}
-
-#[derive(Debug, Clone)]
-pub struct ParserStatement {
-    pub range: Range,
-    pub kind: ParserStatementKind,
-}
-
-impl PartialEq for ParserStatement {
-    fn eq(&self, other: &Self) -> bool {
-        self.range == other.range && self.kind == other.kind
-    }
+    pub statements: Vec<ParserTopLevelStmt>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserStatementKind {
+pub struct ParserTopLevelStmt {
+    pub range: Range,
+    pub kind: ParserTopLevelStmtKind,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ParserBodyStmt {
+    pub range: Range,
+    pub kind: ParserBodyStmtKind,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ParserTopLevelStmtKind {
     FuncDecl {
         required_by: Option<ParserSymbolPath>,
         name: String,
         params: Vec<ParserFuncParam>,
         return_type: Option<ParserSymbolPath>,
-        body: Option<Vec<ParserStatement>>,
-    },
-    Return {
-        value: Option<Vec<ExprToken>>,
+        body: Option<Vec<ParserBodyStmt>>,
     },
     Input {
         name: String,
@@ -58,7 +55,7 @@ pub enum ParserStatementKind {
         value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,
     },
-    Var {
+    GlobalVar {
         required_by: Option<ParserSymbolPath>,
         name: String,
         value_type: Option<ParserSymbolPath>,
@@ -67,38 +64,21 @@ pub enum ParserStatementKind {
     State {
         vars: Vec<ParserStateVar>,
     },
-    Assign {
-        target: ParserSymbolPath,
-        value: Vec<ExprToken>,
-    },
-    FuncCall {
-        name: ParserSymbolPath,
-        args: Vec<ParserFuncCallArg>,
-    },
-    If {
-        condition: Vec<ExprToken>,
-        body: Vec<ParserStatement>,
-    },
-    IfElse {
-        condition: Vec<ExprToken>,
-        body: Vec<ParserStatement>,
-        else_body: Vec<ParserStatement>,
-    },
     StructDecl {
         name: String,
         inherits: Vec<ParserSymbolPath>,
-        body: Vec<ParserStatement>,
+        body: Vec<ParserTopLevelStmt>,
     },
     ProtocolDecl {
         name: String,
         inherits: Vec<ParserSymbolPath>,
-        body: Vec<ParserStatement>,
+        body: Vec<ParserTopLevelStmt>,
     },
     Init {
         required_by: Option<ParserSymbolPath>,
         literal_bind: Option<LiteralBind>,
         params: Vec<ParserFuncParam>,
-        body: Option<Vec<ParserStatement>>,
+        body: Option<Vec<ParserBodyStmt>>,
     },
     InfixDefine {
         symbol: String,
@@ -112,10 +92,40 @@ pub enum ParserStatementKind {
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: ParserSymbolPath,
-        body: Vec<ParserStatement>,
+        body: Vec<ParserBodyStmt>,
+    },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ParserBodyStmtKind {
+    Return {
+        value: Option<Vec<ExprToken>>,
+    },
+    LocalVar {
+        required_by: Option<ParserSymbolPath>,
+        name: String,
+        value_type: Option<ParserSymbolPath>,
+        def_val: Vec<ExprToken>,
+    },
+    Assign {
+        target: ParserSymbolPath,
+        value: Vec<ExprToken>,
+    },
+    FuncCall {
+        name: ParserSymbolPath,
+        args: Vec<ParserFuncCallArg>,
+    },
+    If {
+        condition: Vec<ExprToken>,
+        body: Vec<ParserBodyStmt>,
+    },
+    IfElse {
+        condition: Vec<ExprToken>,
+        body: Vec<ParserBodyStmt>,
+        else_body: Vec<ParserBodyStmt>,
     },
     Block {
-        statements: Vec<ParserStatement>,
+        statements: Vec<ParserBodyStmt>,
     },
 }
 

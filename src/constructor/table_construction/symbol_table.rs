@@ -15,32 +15,32 @@
 //
 
 use crate::{
-    ParserStatement, ParserSymbolPath, SymbolPath, SymbolPathComponent,
+    ParserSymbolPath, ParserTopLevelStmt, SymbolPath, SymbolPathComponent,
     error::{ErrorCollector, Ph},
 };
 use std::collections::{HashMap, hash_map::Entry};
 
-/// SymbolTable stores a reference to the declaration statement (ParserStatement) of variables, functions, operators, type definitions, and initializers.
+/// SymbolTable stores a reference to the declaration statement (ParserTopLevelStmt) of variables, functions, operators, type definitions, and initializers.
 #[derive(Debug, Clone)]
 pub struct SymbolTable<'a> {
-    pub inputs: HashMap<String, &'a ParserStatement>,
-    pub outputs: HashMap<String, &'a ParserStatement>,
-    pub states: HashMap<String, &'a ParserStatement>,
-    pub vars: HashMap<String, &'a ParserStatement>,
-    pub funcs: HashMap<String, &'a ParserStatement>,
-    pub type_defs: HashMap<String, (&'a ParserStatement, SymbolTable<'a>)>,
-    pub infix_defines: HashMap<String, &'a ParserStatement>,
+    pub inputs: HashMap<String, &'a ParserTopLevelStmt>,
+    pub outputs: HashMap<String, &'a ParserTopLevelStmt>,
+    pub states: HashMap<String, &'a ParserTopLevelStmt>,
+    pub vars: HashMap<String, &'a ParserTopLevelStmt>,
+    pub funcs: HashMap<String, &'a ParserTopLevelStmt>,
+    pub type_defs: HashMap<String, (&'a ParserTopLevelStmt, SymbolTable<'a>)>,
+    pub infix_defines: HashMap<String, &'a ParserTopLevelStmt>,
     /// Infix functions with the same symbol can be defined, so they are stored in a vector.
-    pub infix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
-    pub prefix_defines: HashMap<String, &'a ParserStatement>,
+    pub infix_funcs: HashMap<String, Vec<&'a ParserTopLevelStmt>>,
+    pub prefix_defines: HashMap<String, &'a ParserTopLevelStmt>,
     /// Prefix functions with the same symbol can be defined, so they are stored in a vector.
-    pub prefix_funcs: HashMap<String, Vec<&'a ParserStatement>>,
-    pub inits: Vec<&'a ParserStatement>,
+    pub prefix_funcs: HashMap<String, Vec<&'a ParserTopLevelStmt>>,
+    pub inits: Vec<&'a ParserTopLevelStmt>,
 }
 
 pub enum StatementLookup<'a> {
-    Single(&'a ParserStatement),
-    Multiple(&'a [&'a ParserStatement]),
+    Single(&'a ParserTopLevelStmt),
+    Multiple(&'a [&'a ParserTopLevelStmt]),
 }
 
 impl<'a> Default for SymbolTable<'a> {
@@ -115,7 +115,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         name: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         if self.is_symbol_defined(&name) {
             ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
@@ -128,7 +128,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         name: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         if self.is_symbol_defined(&name) {
             ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
@@ -141,7 +141,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         name: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         if self.is_symbol_defined(&name) {
             ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
@@ -150,7 +150,12 @@ impl<'a> SymbolTable<'a> {
         }
     }
 
-    pub fn insert_var(&mut self, ec: &mut ErrorCollector, name: String, stmt: &'a ParserStatement) {
+    pub fn insert_var(
+        &mut self,
+        ec: &mut ErrorCollector,
+        name: String,
+        stmt: &'a ParserTopLevelStmt,
+    ) {
         if self.is_symbol_defined(&name) {
             ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
         } else {
@@ -162,7 +167,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         name: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         if self.is_symbol_defined(&name) {
             ec.dup_sym(stmt.range, Ph::SymbolTableConstruction, &name);
@@ -174,7 +179,7 @@ impl<'a> SymbolTable<'a> {
     pub fn insert_type_def(
         &mut self,
         name: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
         sub_table: SymbolTable<'a>,
     ) {
         self.type_defs.insert(name, (stmt, sub_table));
@@ -184,7 +189,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         symbol: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         match self.infix_defines.entry(symbol) {
             Entry::Vacant(vacant) => {
@@ -200,7 +205,7 @@ impl<'a> SymbolTable<'a> {
         &mut self,
         ec: &mut ErrorCollector,
         symbol: String,
-        stmt: &'a ParserStatement,
+        stmt: &'a ParserTopLevelStmt,
     ) {
         match self.prefix_defines.entry(symbol) {
             Entry::Vacant(vacant) => {
@@ -212,63 +217,63 @@ impl<'a> SymbolTable<'a> {
         }
     }
 
-    pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
+    pub fn insert_infix_func(&mut self, symbol: String, stmt: &'a ParserTopLevelStmt) {
         let target_vec = self.infix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
-    pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserStatement) {
+    pub fn insert_prefix_func(&mut self, symbol: String, stmt: &'a ParserTopLevelStmt) {
         let target_vec = self.prefix_funcs.entry(symbol).or_default();
         target_vec.push(stmt);
     }
 
-    pub fn insert_init(&mut self, stmt: &'a ParserStatement) {
+    pub fn insert_init(&mut self, stmt: &'a ParserTopLevelStmt) {
         self.inits.push(stmt);
     }
 
     // Getter functions
 
-    pub fn get_input(&self, name: &str) -> Option<&ParserStatement> {
+    pub fn get_input(&self, name: &str) -> Option<&ParserTopLevelStmt> {
         self.inputs.get(name).copied()
     }
 
-    pub fn get_output(&self, name: &str) -> Option<&ParserStatement> {
+    pub fn get_output(&self, name: &str) -> Option<&ParserTopLevelStmt> {
         self.outputs.get(name).copied()
     }
 
-    pub fn get_state(&self, name: &str) -> Option<&ParserStatement> {
+    pub fn get_state(&self, name: &str) -> Option<&ParserTopLevelStmt> {
         self.states.get(name).copied()
     }
 
-    pub fn get_var(&self, name: &str) -> Option<&ParserStatement> {
+    pub fn get_var(&self, name: &str) -> Option<&ParserTopLevelStmt> {
         self.vars.get(name).copied()
     }
 
-    pub fn get_func(&self, name: &str) -> Option<&ParserStatement> {
+    pub fn get_func(&self, name: &str) -> Option<&ParserTopLevelStmt> {
         self.funcs.get(name).copied()
     }
 
-    pub fn get_type_def(&self, name: &str) -> Option<&(&ParserStatement, SymbolTable<'a>)> {
+    pub fn get_type_def(&self, name: &str) -> Option<&(&ParserTopLevelStmt, SymbolTable<'a>)> {
         self.type_defs.get(name)
     }
 
-    pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
+    pub fn get_infix_define(&self, symbol: &str) -> Option<&'a ParserTopLevelStmt> {
         self.infix_defines.get(symbol).copied()
     }
 
-    pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserStatement> {
+    pub fn get_prefix_define(&self, symbol: &str) -> Option<&'a ParserTopLevelStmt> {
         self.prefix_defines.get(symbol).copied()
     }
 
-    pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {
+    pub fn get_infix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserTopLevelStmt>> {
         self.infix_funcs.get(symbol)
     }
 
-    pub fn get_prefix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserStatement>> {
+    pub fn get_prefix_funcs(&self, symbol: &str) -> Option<&Vec<&'a ParserTopLevelStmt>> {
         self.prefix_funcs.get(symbol)
     }
 
-    pub fn get_inits(&self) -> &Vec<&ParserStatement> {
+    pub fn get_inits(&self) -> &Vec<&ParserTopLevelStmt> {
         &self.inits
     }
 

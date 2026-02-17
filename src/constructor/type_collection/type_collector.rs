@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{ParserStatementKind, Program, SymbolTable, TypeDef};
+use crate::{ParserTopLevelStmtKind, Program, SymbolTable, TypeDef};
 
 pub fn collect_all_types(program: &mut Program, symbol_table: &SymbolTable) {
     let types = collect_nested_types(symbol_table);
@@ -26,12 +26,12 @@ fn collect_nested_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
 
     for stmt in symbol_table.type_defs.values() {
         match &stmt.0.kind {
-            ParserStatementKind::StructDecl {
+            ParserTopLevelStmtKind::StructDecl {
                 name,
                 inherits: _,
                 body: _,
             }
-            | ParserStatementKind::ProtocolDecl {
+            | ParserTopLevelStmtKind::ProtocolDecl {
                 name,
                 inherits: _,
                 body: _,

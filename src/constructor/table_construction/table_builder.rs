@@ -15,17 +15,18 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserStatement, ParserStatementKind, SymbolTable, error::ErrorCollector,
+    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolTable,
+    error::ErrorCollector,
 };
 
 pub fn build_symbol_table<'a>(
     ec: &mut ErrorCollector,
     symbol_table: &mut SymbolTable<'a>,
-    statements: &'a [ParserStatement],
+    statements: &'a [ParserTopLevelStmt],
 ) {
     for stmt in statements {
         match &stmt.kind {
-            ParserStatementKind::FuncDecl {
+            ParserTopLevelStmtKind::FuncDecl {
                 required_by: _,
                 name,
                 params: _,
@@ -35,7 +36,7 @@ pub fn build_symbol_table<'a>(
                 symbol_table.insert_func(ec, name.clone(), stmt);
             }
 
-            ParserStatementKind::Input {
+            ParserTopLevelStmtKind::Input {
                 name,
                 value_type: _,
                 def_val: _,
@@ -44,7 +45,7 @@ pub fn build_symbol_table<'a>(
                 symbol_table.insert_input(ec, name.clone(), stmt);
             }
 
-            ParserStatementKind::Output {
+            ParserTopLevelStmtKind::Output {
                 name,
                 value_type: _,
                 def_val: _,
@@ -52,18 +53,18 @@ pub fn build_symbol_table<'a>(
                 symbol_table.insert_output(ec, name.clone(), stmt);
             }
 
-            ParserStatementKind::State { vars } => {
+            ParserTopLevelStmtKind::State { vars } => {
                 for var in vars {
                     symbol_table.insert_state(ec, var.name.clone(), stmt);
                 }
             }
 
-            ParserStatementKind::StructDecl {
+            ParserTopLevelStmtKind::StructDecl {
                 name,
                 inherits: _,
                 body,
             }
-            | ParserStatementKind::ProtocolDecl {
+            | ParserTopLevelStmtKind::ProtocolDecl {
                 name,
                 inherits: _,
                 body,
@@ -73,15 +74,15 @@ pub fn build_symbol_table<'a>(
                 symbol_table.insert_type_def(name.clone(), stmt, nested_table);
             }
 
-            ParserStatementKind::InfixDefine { symbol, .. } => {
+            ParserTopLevelStmtKind::InfixDefine { symbol, .. } => {
                 symbol_table.insert_infix_define(ec, symbol.clone(), stmt);
             }
 
-            ParserStatementKind::PrefixDefine { symbol } => {
+            ParserTopLevelStmtKind::PrefixDefine { symbol } => {
                 symbol_table.insert_prefix_define(ec, symbol.clone(), stmt);
             }
 
-            ParserStatementKind::OperatorFunc {
+            ParserTopLevelStmtKind::OperatorFunc {
                 op_type, symbol, ..
             } => match op_type {
                 ParserOperatorType::Infix => symbol_table.insert_infix_func(symbol.clone(), stmt),
@@ -96,11 +97,11 @@ pub fn build_symbol_table<'a>(
 pub fn build_nest_symbol_table<'a>(
     ec: &mut ErrorCollector,
     symbol_table: &mut SymbolTable<'a>,
-    statements: &'a [ParserStatement],
+    statements: &'a [ParserTopLevelStmt],
 ) {
     for stmt in statements {
         match &stmt.kind {
-            ParserStatementKind::Var {
+            ParserTopLevelStmtKind::GlobalVar {
                 required_by: _,
                 name,
                 value_type: _,
@@ -109,7 +110,7 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_var(ec, name.clone(), stmt);
             }
 
-            ParserStatementKind::FuncDecl {
+            ParserTopLevelStmtKind::FuncDecl {
                 required_by: _,
                 name,
                 params: _,
@@ -119,7 +120,7 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_func(ec, name.clone(), stmt);
             }
 
-            ParserStatementKind::Init {
+            ParserTopLevelStmtKind::Init {
                 required_by: _,
                 literal_bind: _,
                 params: _,
@@ -128,12 +129,12 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_init(stmt);
             }
 
-            ParserStatementKind::StructDecl {
+            ParserTopLevelStmtKind::StructDecl {
                 name,
                 inherits: _,
                 body,
             }
-            | ParserStatementKind::ProtocolDecl {
+            | ParserTopLevelStmtKind::ProtocolDecl {
                 name,
                 inherits: _,
                 body,
@@ -143,18 +144,18 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_type_def(name.clone(), stmt, nested_table);
             }
 
-            ParserStatementKind::InfixDefine {
+            ParserTopLevelStmtKind::InfixDefine {
                 symbol,
                 infix_properties: _,
             } => {
                 symbol_table.insert_infix_define(ec, symbol.clone(), stmt);
             }
 
-            ParserStatementKind::PrefixDefine { symbol } => {
+            ParserTopLevelStmtKind::PrefixDefine { symbol } => {
                 symbol_table.insert_prefix_define(ec, symbol.clone(), stmt);
             }
 
-            ParserStatementKind::OperatorFunc {
+            ParserTopLevelStmtKind::OperatorFunc {
                 op_type,
                 symbol,
                 params: _,

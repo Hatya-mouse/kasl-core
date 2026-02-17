@@ -66,6 +66,7 @@ pub enum Phase {
     Validation = 30,
     GraphConstruction = 40,
     TypeResolution = 50,
+    StatementBuilding = 60,
 }
 
 #[derive(Clone, Debug)]

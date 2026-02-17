@@ -14,6 +14,56 @@
 // limitations under the License.
 //
 
-use crate::ParserStatement;
+use crate::{
+    ParserBodyStmt, ParserBodyStmtKind, Program, Statement, SymbolTable,
+    error::{ErrorCollector, Phase},
+    resolution::expr_inference::ExprTreeBuilder,
+};
 
-pub fn build_statements(parser_stmts: &[ParserStatement]) {}
+pub fn build_statements(
+    ec: &mut ErrorCollector,
+    program: &Program,
+    symbol_table: &SymbolTable,
+    original_stmts: &[ParserBodyStmt],
+) -> Vec<Statement> {
+    let mut parsed_stmts = Vec::new();
+
+    for stmt in original_stmts {
+        match &stmt.kind {
+            ParserBodyStmtKind::Assign { target, value } => {
+                let parsed_target = match symbol_table.resolve_path(target) {
+                    Some(parsed_target) => parsed_target,
+                    None => {
+                        ec.var_not_found(stmt.range, Phase::StatementBuilding, &target.to_string());
+                        continue;
+                    }
+                };
+
+                let parsed_value =
+                    match program.build_expr_tree_from_raw_tokens(ec, value, symbol_table) {
+                        Some(parsed_value) => parsed_value,
+                        None => {
+                            // Error should have been reported the function so we don't need to report it here
+                            continue;
+                        }
+                    };
+
+                let assign_stmt = Statement::Assign {
+                    target: parsed_target,
+                    value: parsed_value,
+                };
+                parsed_stmts.push(assign_stmt);
+            }
+
+            ParserBodyStmtKind::Block { statements } => {
+                let block_body = build_statements(ec, program, symbol_table, statements);
+                let block_stmt = Statement::Block { body: block_body };
+                parsed_stmts.push(block_stmt);
+            }
+
+            _ => (),
+        }
+    }
+
+    parsed_stmts
+}

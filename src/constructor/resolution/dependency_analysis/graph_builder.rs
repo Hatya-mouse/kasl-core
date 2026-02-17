@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserStatement, ParserStatementKind, SymbolPathComponent, SymbolTable,
+    ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolPathComponent, SymbolTable,
     error::ErrorCollector,
     resolution::{
         DependencyGraphNode,
@@ -32,7 +32,7 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
     for stmt in &symbol_table.inputs {
-        if let ParserStatementKind::Input {
+        if let ParserTopLevelStmtKind::Input {
             name,
             value_type: _,
             def_val,
@@ -47,7 +47,7 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     }
 
     for stmt in &symbol_table.outputs {
-        if let ParserStatementKind::Output {
+        if let ParserTopLevelStmtKind::Output {
             name,
             value_type: _,
             def_val: _,
@@ -60,7 +60,7 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     }
 
     for stmt in &symbol_table.states {
-        if let ParserStatementKind::State { vars } = &stmt.1.kind {
+        if let ParserTopLevelStmtKind::State { vars } = &stmt.1.kind {
             for var in vars {
                 // Combine variable name to create a new path for the child type
                 let var_path = symbol_path![SymbolPathComponent::StateVar(var.name.to_string())];
@@ -71,7 +71,7 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     }
 
     for stmt in &symbol_table.funcs {
-        if let ParserStatementKind::FuncDecl {
+        if let ParserTopLevelStmtKind::FuncDecl {
             required_by: _,
             name,
             params,
@@ -88,12 +88,12 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in &symbol_table.type_defs {
         match &stmt.1.0.kind {
-            ParserStatementKind::StructDecl {
+            ParserTopLevelStmtKind::StructDecl {
                 name,
                 inherits: _,
                 body: _,
             }
-            | ParserStatementKind::ProtocolDecl {
+            | ParserTopLevelStmtKind::ProtocolDecl {
                 name,
                 inherits: _,
                 body: _,
@@ -121,10 +121,10 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
         .infix_funcs
         .values()
         .flatten()
-        .collect::<Vec<&&ParserStatement>>();
+        .collect::<Vec<&&ParserTopLevelStmt>>();
 
     for stmt in infix_funcs {
-        if let ParserStatementKind::OperatorFunc {
+        if let ParserTopLevelStmtKind::OperatorFunc {
             op_type: _,
             symbol,
             params,
@@ -143,10 +143,10 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
         .prefix_funcs
         .values()
         .flatten()
-        .collect::<Vec<&&ParserStatement>>();
+        .collect::<Vec<&&ParserTopLevelStmt>>();
 
     for stmt in prefix_funcs {
-        if let ParserStatementKind::OperatorFunc {
+        if let ParserTopLevelStmtKind::OperatorFunc {
             op_type: _,
             symbol,
             params,
@@ -162,14 +162,14 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     }
 
     for stmt in &symbol_table.infix_defines {
-        if let ParserStatementKind::InfixDefine { symbol, .. } = &stmt.1.kind {
+        if let ParserTopLevelStmtKind::InfixDefine { symbol, .. } = &stmt.1.kind {
             let def_path = symbol_path![SymbolPathComponent::InfixDef(symbol.to_string())];
             graph.add_node(DependencyGraphNode::new(def_path));
         }
     }
 
     for stmt in &symbol_table.prefix_defines {
-        if let ParserStatementKind::PrefixDefine { symbol } = &stmt.1.kind {
+        if let ParserTopLevelStmtKind::PrefixDefine { symbol } = &stmt.1.kind {
             let def_path = symbol_path![SymbolPathComponent::PrefixDef(symbol.to_string())];
             graph.add_node(DependencyGraphNode::new(def_path));
         }

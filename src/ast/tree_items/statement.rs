@@ -43,4 +43,7 @@ pub enum Statement {
         body: Vec<Statement>,
         else_body: Vec<Statement>,
     },
+    Block {
+        body: Vec<Statement>,
+    },
 }
