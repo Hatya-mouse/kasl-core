@@ -31,12 +31,23 @@ impl Function {
     pub fn get_param_name_by_label(&self, label: &str) -> Option<String> {
         self.params
             .iter()
-            .find(|param| param.label.as_ref().map_or(false, |l| l == label) || param.name == label)
+            .find(|param| param.label.as_ref().is_some_and(|l| l == label) || param.name == label)
             .map(|param| param.name.to_string())
     }
 
     pub fn get_param_name_by_index(&self, index: usize) -> Option<String> {
         self.params.get(index).map(|param| param.name.to_string())
+    }
+
+    pub fn min_num_of_params(&self) -> usize {
+        self.params
+            .iter()
+            .filter(|param| param.def_val.is_none())
+            .count()
+    }
+
+    pub fn max_num_of_params(&self) -> usize {
+        self.params.len()
     }
 }
 

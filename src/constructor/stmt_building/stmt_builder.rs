@@ -48,6 +48,7 @@ pub fn build_statements(
                         }
                     };
 
+                // Create an Assign statement
                 let assign_stmt = Statement::Assign {
                     target: parsed_target,
                     value: parsed_value,
@@ -56,7 +57,9 @@ pub fn build_statements(
             }
 
             ParserBodyStmtKind::Block { statements } => {
+                // Build statements within the block
                 let block_body = build_statements(ec, program, symbol_table, statements);
+                // Create a Block statement
                 let block_stmt = Statement::Block { body: block_body };
                 parsed_stmts.push(block_stmt);
             }
@@ -81,7 +84,35 @@ pub fn build_statements(
                     }
                 };
 
-                let parsed_args = Vec::new();
+                // Check if the number of arguments is within the valid range
+                let minimum_num = target_func.min_num_of_params();
+                let maximum_num = target_func.max_num_of_params();
+                let actual_num = args.len();
+
+                if actual_num < minimum_num {
+                    ec.not_enough_params(
+                        stmt.range,
+                        Phase::StatementBuilding,
+                        &func_path.to_string(),
+                        minimum_num,
+                        actual_num,
+                    );
+                    continue;
+                }
+
+                if actual_num > maximum_num {
+                    ec.too_many_params(
+                        stmt.range,
+                        Phase::StatementBuilding,
+                        &func_path.to_string(),
+                        maximum_num,
+                        actual_num,
+                    );
+                    continue;
+                }
+
+                // Get the name of the parameters
+                let mut parsed_args = Vec::new();
                 let i = 0;
                 for arg in args {
                     let parsed_value =
@@ -90,22 +121,38 @@ pub fn build_statements(
                             Some(parsed_value) => parsed_value,
                             None => continue,
                         };
-                    let arg_name = arg.label.map_or_else(
-                        || target_func.get_param_name_by_index(i),
-                        |label| target_func.get_param_name_by_label(&label),
-                    );
+                    let arg_name = match &arg.label {
+                        Some(label) => match target_func.get_param_name_by_label(label) {
+                            Some(name) => name,
+                            None => {
+                                ec.param_not_found(
+                                    stmt.range,
+                                    Phase::StatementBuilding,
+                                    &func_path.to_string(),
+                                    label,
+                                );
+                                continue;
+                            }
+                        },
+                        None => match target_func.get_param_name_by_index(i) {
+                            Some(name) => name,
+                            None => continue,
+                        },
+                    };
 
                     let parsed_arg = FuncCallArg {
                         name: arg_name,
                         value: parsed_value,
                     };
-                    parsed_args.push(parsed_value);
+                    parsed_args.push(parsed_arg);
                 }
 
+                // Create a FuncCall statement
                 let func_call_stmt = Statement::FuncCall {
                     path: func_path,
                     args: parsed_args,
                 };
+                parsed_stmts.push(func_call_stmt);
             }
             _ => (),
         }

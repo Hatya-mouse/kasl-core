@@ -213,6 +213,59 @@ impl ErrorCollector {
         );
     }
 
+    /// Wrapper function for ParamNotFound error.
+    pub fn param_not_found(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_path: &str,
+        param_label: &str,
+    ) {
+        self.emit(
+            EK::ParamNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(func_path.to_string(), param_label.to_string()),
+        );
+    }
+
+    /// Wrapper function for TooManyParams error.
+    pub fn too_many_params(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_path: &str,
+        expected_num: usize,
+        actual_num: usize,
+    ) {
+        self.emit(
+            EK::TooManyParams,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrAndNumPair(func_path.to_string(), expected_num, actual_num),
+        );
+    }
+
+    /// Wrapper function for NotEnoughParams error.
+    pub fn not_enough_params(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        func_path: &str,
+        required_num: usize,
+        actual_num: usize,
+    ) {
+        self.emit(
+            EK::NotEnoughParams,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrAndNumPair(func_path.to_string(), required_num, actual_num),
+        );
+    }
+
     /// Automatically emits a CompilerBug error with the provided range, phase, and dev message,
     /// combined with the location of the caller.
     #[track_caller]

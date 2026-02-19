@@ -102,6 +102,21 @@ pub enum ErrorKind {
     /// Payload: Type from the type annotation and the type of the default value
     TypeMismatch,
 
+    /// Title: ParamNotFound
+    /// Phase: StatementBuilding
+    /// Payload: Function path, parameter label
+    ParamNotFound,
+
+    /// Title: TooManyParams
+    /// Phase: StatementBuilding
+    /// Payload: Function path, maximum number of parameters, actual number of parameters
+    TooManyParams,
+
+    /// Title: NotEnoughParams
+    /// Phase: StatementBuilding
+    /// Payload: Function path, required number of parameters, actual number of parameters
+    NotEnoughParams,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

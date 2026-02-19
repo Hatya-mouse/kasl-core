@@ -15,8 +15,7 @@
 //
 
 use crate::{
-    FuncParam, Function, Program, ScopeItem, ScopeItemMut, ScopeVar, SymbolPath,
-    SymbolPathComponent,
+    Function, Program, ScopeItem, ScopeItemMut, ScopeVar, SymbolPath, SymbolPathComponent,
 };
 
 impl Program {
