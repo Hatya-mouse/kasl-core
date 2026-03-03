@@ -103,6 +103,7 @@ impl<'a> TypeResolveCtx<'a> {
                     return;
                 }
             };
+
             // Register the variable in the parent scope
             self.program
                 .register_var_by_path(self.ec, var, &parent_path, decl_range);

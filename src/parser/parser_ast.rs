@@ -106,8 +106,8 @@ pub enum ParserBodyStmtKind {
         args: Vec<ParserFuncCallArg>,
     },
     If {
-        main: ParserIfCond,
-        else_ifs: Vec<ParserIfCond>,
+        main: ParserIfArm,
+        else_ifs: Vec<ParserIfArm>,
         else_body: Vec<ParserBodyStmt>,
     },
     Block {
@@ -153,7 +153,7 @@ pub struct ParserFuncParam {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ParserIfCond {
+pub struct ParserIfArm {
     pub condition: Vec<ExprToken>,
     pub body: Vec<ParserBodyStmt>,
     pub range: Range,

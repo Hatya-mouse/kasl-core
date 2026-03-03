@@ -35,15 +35,23 @@ pub enum Statement {
         args: Vec<FuncCallArg>,
     },
     If {
-        condition: Expression,
-        body: Vec<Statement>,
-    },
-    IfElse {
-        condition: Expression,
-        body: Vec<Statement>,
+        main: IfArm,
+        else_ifs: Vec<IfArm>,
         else_body: Vec<Statement>,
     },
     Block {
         body: Vec<Statement>,
     },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct IfArm {
+    pub condition: Expression,
+    pub body: Vec<Statement>,
+}
+
+impl IfArm {
+    pub fn new(condition: Expression, body: Vec<Statement>) -> Self {
+        Self { condition, body }
+    }
 }

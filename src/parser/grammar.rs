@@ -16,7 +16,7 @@
 
 use crate::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, LiteralBind, OperatorAssociativity,
-    ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfCond,
+    ParserBodyStmt, ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm,
     ParserInputAttribute, ParserOperatorType, ParserStateVar, ParserSymbolPath,
     ParserSymbolPathComponent, ParserTopLevelStmt, ParserTopLevelStmtKind, Range,
 };
@@ -145,11 +145,11 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    rule if_arm() -> ParserIfCond
+    rule if_arm() -> ParserIfArm
         = start:position!() "if" _ condition:oneline_expression() __? "{"
         __? body:body_stmts() __?
         "}" end:position!() {
-            ParserIfCond { condition, body, range: Range::n(start, end) }
+            ParserIfArm { condition, body, range: Range::n(start, end) }
         }
 
     rule struct_decl_statement() -> ParserTopLevelStmt

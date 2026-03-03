@@ -17,17 +17,18 @@
 use crate::{
     ParserBodyStmt, ParserBodyStmtKind, Program, Statement, SymbolTable,
     error::{ErrorCollector, Phase},
-    resolution::expr_inference::ExprTreeBuilder,
-    stmt_building::func_call_builder::build_func_call_stmt,
+    resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
+    stmt_building::{func_call_builder::build_func_call_stmt, if_builder::build_if_stmt},
 };
 
 pub fn build_func_body_stmt(
     ec: &mut ErrorCollector,
-    program: &Program,
+    program: &mut Program,
     symbol_table: &SymbolTable,
     original_stmts: &[ParserBodyStmt],
 ) -> Vec<Statement> {
     let mut parsed_stmts = Vec::new();
+    let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
 
     for stmt in original_stmts {
         match &stmt.kind {
@@ -44,7 +45,7 @@ pub fn build_func_body_stmt(
                     match program.build_expr_tree_from_raw_tokens(ec, value, symbol_table) {
                         Some(parsed_value) => parsed_value,
                         None => {
-                            // Error should have been reported the function so we don't need to report it here
+                            // Error should have been reported in the build_expr_tree_from_raw_tokens function so we don't need to report it here
                             continue;
                         }
                     };
@@ -75,7 +76,36 @@ pub fn build_func_body_stmt(
                 args,
             ),
 
-            _ => (),
+            ParserBodyStmtKind::LocalVar {
+                name,
+                value_type,
+                def_val,
+            } => {
+                if let Some((val_type, def_val)) =
+                    ctx.resolve_var_type(stmt.range, value_type.as_ref(), def_val)
+                {
+                    let var_decl = Statement::VarDecl {
+                        name: name.clone(),
+                        value_type: val_type,
+                        def_val,
+                    };
+                    parsed_stmts.push(var_decl);
+                }
+            }
+
+            ParserBodyStmtKind::If {
+                main,
+                else_ifs,
+                else_body,
+            } => build_if_stmt(
+                ec,
+                program,
+                symbol_table,
+                &mut parsed_stmts,
+                main,
+                else_ifs,
+                else_body,
+            ),
         }
     }
 
