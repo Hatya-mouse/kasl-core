@@ -26,16 +26,7 @@ fn collect_nested_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
 
     for stmt in symbol_table.type_defs.values() {
         match &stmt.0.kind {
-            ParserTopLevelStmtKind::StructDecl {
-                name,
-                inherits: _,
-                body: _,
-            }
-            | ParserTopLevelStmtKind::ProtocolDecl {
-                name,
-                inherits: _,
-                body: _,
-            } => {
+            ParserTopLevelStmtKind::StructDecl { name, body: _ } => {
                 let mut new_type_def = TypeDef::new(name.clone());
                 let nested_types = collect_nested_types(&stmt.1);
                 new_type_def.types = nested_types;
@@ -44,7 +35,7 @@ fn collect_nested_types(symbol_table: &SymbolTable) -> Vec<TypeDef> {
 
             _ => {
                 panic!(
-                    "SymbolTable::type_defs must only include StructDecl(s) and ProtocolDecl(s)",
+                    "SymbolTable::type_defs must only include StructDecl(s). This might be a SymbolTable bug."
                 );
             }
         }

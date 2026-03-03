@@ -27,7 +27,6 @@ pub fn build_symbol_table<'a>(
     for stmt in statements {
         match &stmt.kind {
             ParserTopLevelStmtKind::FuncDecl {
-                required_by: _,
                 name,
                 params: _,
                 return_type: _,
@@ -59,16 +58,7 @@ pub fn build_symbol_table<'a>(
                 }
             }
 
-            ParserTopLevelStmtKind::StructDecl {
-                name,
-                inherits: _,
-                body,
-            }
-            | ParserTopLevelStmtKind::ProtocolDecl {
-                name,
-                inherits: _,
-                body,
-            } => {
+            ParserTopLevelStmtKind::StructDecl { name, body } => {
                 let mut nested_table = SymbolTable::new();
                 build_nest_symbol_table(ec, &mut nested_table, body);
                 symbol_table.insert_type_def(name.clone(), stmt, nested_table);
@@ -102,7 +92,6 @@ pub fn build_nest_symbol_table<'a>(
     for stmt in statements {
         match &stmt.kind {
             ParserTopLevelStmtKind::GlobalVar {
-                required_by: _,
                 name,
                 value_type: _,
                 def_val: _,
@@ -111,7 +100,6 @@ pub fn build_nest_symbol_table<'a>(
             }
 
             ParserTopLevelStmtKind::FuncDecl {
-                required_by: _,
                 name,
                 params: _,
                 return_type: _,
@@ -121,7 +109,6 @@ pub fn build_nest_symbol_table<'a>(
             }
 
             ParserTopLevelStmtKind::Init {
-                required_by: _,
                 literal_bind: _,
                 params: _,
                 body: _,
@@ -129,16 +116,7 @@ pub fn build_nest_symbol_table<'a>(
                 symbol_table.insert_init(stmt);
             }
 
-            ParserTopLevelStmtKind::StructDecl {
-                name,
-                inherits: _,
-                body,
-            }
-            | ParserTopLevelStmtKind::ProtocolDecl {
-                name,
-                inherits: _,
-                body,
-            } => {
+            ParserTopLevelStmtKind::StructDecl { name, body } => {
                 let mut nested_table = SymbolTable::new();
                 build_nest_symbol_table(ec, &mut nested_table, body);
                 symbol_table.insert_type_def(name.clone(), stmt, nested_table);

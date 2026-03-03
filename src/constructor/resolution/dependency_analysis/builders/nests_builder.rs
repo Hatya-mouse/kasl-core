@@ -20,7 +20,7 @@ use crate::{
     resolution::dependency_analysis::{DependencyGraph, build_func_param_graph, build_var_graph},
 };
 
-pub fn build_struct_and_protocol_graph(
+pub fn build_struct_graph(
     ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
     type_path: &SymbolPath,
@@ -29,7 +29,6 @@ pub fn build_struct_and_protocol_graph(
 ) {
     for stmt in &child_symbol_table.vars {
         if let ParserTopLevelStmtKind::GlobalVar {
-            required_by: _,
             name,
             value_type: _,
             def_val,
@@ -44,7 +43,6 @@ pub fn build_struct_and_protocol_graph(
 
     for stmt in &child_symbol_table.funcs {
         if let ParserTopLevelStmtKind::FuncDecl {
-            required_by: _,
             name,
             params,
             return_type: _,
@@ -59,35 +57,22 @@ pub fn build_struct_and_protocol_graph(
     }
 
     for stmt in &child_symbol_table.type_defs {
-        match &stmt.1.0.kind {
-            ParserTopLevelStmtKind::StructDecl {
-                name,
-                inherits: _,
-                body: _,
-            }
-            | ParserTopLevelStmtKind::ProtocolDecl {
-                name,
-                inherits: _,
-                body: _,
-            } => {
-                if let Some(decl_expr) = child_symbol_table.get_type_def(name) {
-                    let child_symbol_table = &decl_expr.1;
+        if let ParserTopLevelStmtKind::StructDecl { name, body: _ } = &stmt.1.0.kind
+            && let Some(decl_expr) = child_symbol_table.get_type_def(name)
+        {
+            let child_symbol_table = &decl_expr.1;
 
-                    // Combine the child type name to create a new type path for the child type
-                    let mut child_type_path = type_path.clone();
-                    child_type_path.push(SymbolPathComponent::TypeDef(name.to_string()));
+            // Combine the child type name to create a new type path for the child type
+            let mut child_type_path = type_path.clone();
+            child_type_path.push(SymbolPathComponent::TypeDef(name.to_string()));
 
-                    build_struct_and_protocol_graph(
-                        ec,
-                        graph,
-                        &child_type_path,
-                        root_symbol_table,
-                        child_symbol_table,
-                    );
-                }
-            }
-
-            _ => (),
+            build_struct_graph(
+                ec,
+                graph,
+                &child_type_path,
+                root_symbol_table,
+                child_symbol_table,
+            );
         }
     }
 }

@@ -38,7 +38,6 @@ pub struct ParserBodyStmt {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserTopLevelStmtKind {
     FuncDecl {
-        required_by: Option<ParserSymbolPath>,
         name: String,
         params: Vec<ParserFuncParam>,
         return_type: Option<ParserSymbolPath>,
@@ -56,7 +55,6 @@ pub enum ParserTopLevelStmtKind {
         def_val: Vec<ExprToken>,
     },
     GlobalVar {
-        required_by: Option<ParserSymbolPath>,
         name: String,
         value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,
@@ -66,16 +64,9 @@ pub enum ParserTopLevelStmtKind {
     },
     StructDecl {
         name: String,
-        inherits: Vec<ParserSymbolPath>,
-        body: Vec<ParserTopLevelStmt>,
-    },
-    ProtocolDecl {
-        name: String,
-        inherits: Vec<ParserSymbolPath>,
         body: Vec<ParserTopLevelStmt>,
     },
     Init {
-        required_by: Option<ParserSymbolPath>,
         literal_bind: Option<LiteralBind>,
         params: Vec<ParserFuncParam>,
         body: Option<Vec<ParserBodyStmt>>,
@@ -102,7 +93,6 @@ pub enum ParserBodyStmtKind {
         value: Option<Vec<ExprToken>>,
     },
     LocalVar {
-        required_by: Option<ParserSymbolPath>,
         name: String,
         value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,

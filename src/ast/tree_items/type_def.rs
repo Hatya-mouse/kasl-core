@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Function, InfixOperator, Initializer, PrefixOperator, ScopeVar, SymbolPath};
+use crate::{Function, InfixOperator, Initializer, PrefixOperator, ScopeVar};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeDef {
     pub name: String,
-    pub inherits: Vec<SymbolPath>,
     pub vars: Vec<ScopeVar>,
     pub inits: Vec<Initializer>,
     pub funcs: Vec<Function>,
@@ -32,7 +31,6 @@ impl TypeDef {
     pub fn new(name: String) -> Self {
         TypeDef {
             name,
-            inherits: Vec::new(),
             vars: Vec::new(),
             inits: Vec::new(),
             funcs: Vec::new(),

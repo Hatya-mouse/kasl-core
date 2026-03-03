@@ -20,8 +20,7 @@ use crate::{
     resolution::{
         DependencyGraphNode,
         dependency_analysis::{
-            DependencyGraph, build_func_param_graph, build_struct_and_protocol_graph,
-            build_var_graph,
+            DependencyGraph, build_func_param_graph, build_struct_graph, build_var_graph,
         },
     },
     symbol_path,
@@ -72,7 +71,6 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
 
     for stmt in &symbol_table.funcs {
         if let ParserTopLevelStmtKind::FuncDecl {
-            required_by: _,
             name,
             params,
             return_type: _,
@@ -87,33 +85,19 @@ pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Optio
     }
 
     for stmt in &symbol_table.type_defs {
-        match &stmt.1.0.kind {
-            ParserTopLevelStmtKind::StructDecl {
-                name,
-                inherits: _,
-                body: _,
-            }
-            | ParserTopLevelStmtKind::ProtocolDecl {
-                name,
-                inherits: _,
-                body: _,
-            } => {
-                if let Some(decl_stmt) = symbol_table.get_type_def(name) {
-                    let child_symbol_table = &decl_stmt.1;
-                    let child_type_path =
-                        symbol_path![SymbolPathComponent::TypeDef(name.to_string())];
+        if let ParserTopLevelStmtKind::StructDecl { name, body: _ } = &stmt.1.0.kind
+            && let Some(decl_stmt) = symbol_table.get_type_def(name)
+        {
+            let child_symbol_table = &decl_stmt.1;
+            let child_type_path = symbol_path![SymbolPathComponent::TypeDef(name.to_string())];
 
-                    build_struct_and_protocol_graph(
-                        ec,
-                        &mut graph,
-                        &child_type_path,
-                        symbol_table,
-                        child_symbol_table,
-                    );
-                }
-            }
-
-            _ => (),
+            build_struct_graph(
+                ec,
+                &mut graph,
+                &child_type_path,
+                symbol_table,
+                child_symbol_table,
+            );
         }
     }
 

@@ -25,7 +25,7 @@ fn table_generation() {
         output out_value: Int = 0
 
         struct Multiplier {
-        var value = 1
+            var value = 1
 
             init(_ value: Int) {
                 self.value = value

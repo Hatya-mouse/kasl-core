@@ -30,20 +30,16 @@ fn complex_program_parses() {
                 index: Int = 0
             }
 
-            // Protocol for effects
-            protocol Effect {
-                func process(_ in_value: Float) -> Float
-            }
 
-            // Delay struct implementing Effect
-            struct Delay: Effect {
+            // Delay struct
+            struct Delay {
                 var feedback: Float = 0.5
 
                 init(feedback: Float) {
                     self.feedback = feedback
                 }
 
-                Effect func process(_ in_value: Float) -> Float {
+                func process(_ in_value: Float) -> Float {
                     return in_value * self.feedback
                 }
             }
@@ -119,15 +115,14 @@ fn complex_program_parses() {
                 var prod = multiply_ints(a, b)
             }
 
-            // A separate struct implementing the protocol
-            struct Multiplier: Effect {
+            struct Multiplier {
                 var value: Int = 1
 
                 init(_ value: Int) {
                     self.value = value
                 }
 
-                Effect func process(_ in_value: Float) -> Float {
+                func process(_ in_value: Float) -> Float {
                     return in_value * Float(self.value)
                 }
             }

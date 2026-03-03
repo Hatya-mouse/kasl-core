@@ -25,26 +25,9 @@ impl<'a> TypeResolveCtx<'a> {
         name: &str,
         symbol_path: &SymbolPath,
         params: &[ParserFuncParam],
-        required_by: Option<&ParserSymbolPath>,
         return_type: Option<&ParserSymbolPath>,
         decl_range: Range,
     ) {
-        // If the function has required-by type, resolve the type
-        let resolved_required_by = match required_by {
-            Some(required_by) => match self.program.resolve_type_def_parser_path(required_by) {
-                Some(resolved_path) => Some(resolved_path),
-                None => {
-                    self.ec.type_not_found(
-                        decl_range,
-                        Phase::TypeResolution,
-                        &required_by.to_string(),
-                    );
-                    None
-                }
-            },
-            None => None,
-        };
-
         // If the function has a return type, resolve the type
         let resolved_return_type = match return_type {
             Some(return_type) => match self.program.resolve_type_def_parser_path(return_type) {
@@ -75,7 +58,6 @@ impl<'a> TypeResolveCtx<'a> {
             name: name.to_string(),
             params: resolved_params,
             return_type: resolved_return_type,
-            required_by: resolved_required_by,
             body: Vec::new(),
         };
 
@@ -102,26 +84,8 @@ impl<'a> TypeResolveCtx<'a> {
         symbol_path: &SymbolPath,
         literal_bind: Option<&LiteralBind>,
         params: &[ParserFuncParam],
-        required_by: Option<&ParserSymbolPath>,
         decl_range: Range,
     ) {
-        // If the function has required-by type, resolve the type
-        let resolved_required_by = match required_by {
-            Some(required_by) => match self.program.resolve_type_def_parser_path(required_by) {
-                Some(resolved_path) => Some(resolved_path),
-                None => {
-                    self.ec.type_not_found(
-                        decl_range,
-                        Phase::TypeResolution,
-                        &required_by.to_string(),
-                    );
-                    None
-                }
-            },
-            None => None,
-        };
-
-        // Resolve the variables
         let mut resolved_params = Vec::new();
         for param in params {
             match self.resolve_param(param) {
@@ -134,7 +98,6 @@ impl<'a> TypeResolveCtx<'a> {
         let init = Initializer {
             literal_bind: literal_bind.cloned(),
             params: resolved_params,
-            required_by: resolved_required_by,
             body: Vec::new(),
         };
 

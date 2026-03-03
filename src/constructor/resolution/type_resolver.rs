@@ -75,21 +75,18 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
             }
 
             ParserTopLevelStmtKind::GlobalVar {
-                required_by,
                 name,
                 value_type,
                 def_val,
             } => ctx.resolve_var(
                 name,
                 symbol_path,
-                required_by.as_ref(),
                 value_type.as_ref(),
                 def_val,
                 current_stmt.range,
             ),
 
             ParserTopLevelStmtKind::FuncDecl {
-                required_by,
                 name,
                 params,
                 return_type,
@@ -98,13 +95,11 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 name,
                 symbol_path,
                 params,
-                required_by.as_ref(),
                 return_type.as_ref(),
                 current_stmt.range,
             ),
 
             ParserTopLevelStmtKind::Init {
-                required_by,
                 literal_bind,
                 params,
                 body: _,
@@ -112,7 +107,6 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 symbol_path,
                 literal_bind.as_ref(),
                 params,
-                required_by.as_ref(),
                 current_stmt.range,
             ),
 

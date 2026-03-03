@@ -40,7 +40,6 @@ peg::parser!(pub grammar kasl_parser() for str {
         / global_var_statement()
         / state_statement()
         / struct_decl_statement()
-        / protocol_decl_statement()
         / init_statement()
         / operator_definition_statement()
         / operator_func_statement()
@@ -56,14 +55,14 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expected!("statement")
 
     rule func_decl_statement() -> ParserTopLevelStmt
-        = start:position!() required_by:(r:id_chain() _ { r })?
+        = start:position!()
         "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:id_chain() { t })? body:(__? "{"
         __? body:body_stmts() __?
         "}" { body })? end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::FuncDecl { required_by, name, params, return_type, body }
+                kind: ParserTopLevelStmtKind::FuncDecl { name, params, return_type, body }
             }
         }
 
@@ -92,18 +91,18 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule global_var_statement() -> ParserTopLevelStmt
-        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::GlobalVar { required_by, name, value_type, def_val }
+                kind: ParserTopLevelStmtKind::GlobalVar { name, value_type, def_val }
             }
         }
 
     rule local_var_statement() -> ParserBodyStmt
-        = start:position!() required_by:(r:id_chain() _ { r })? "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
+        = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserBodyStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::LocalVar { required_by, name, value_type, def_val }
+                kind: ParserBodyStmtKind::LocalVar { name, value_type, def_val }
             }
         }
 
@@ -154,36 +153,25 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule struct_decl_statement() -> ParserTopLevelStmt
-        = start:position!() "struct" _ name:identifier() inherits:(_? ":" _? i:(id_chain() ** comma()) comma()? { i })? _? "{"
+        = start:position!() "struct" _ name:identifier() __? "{"
         __? body:top_level_stmts() __?
         "}" end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
                 kind: ParserTopLevelStmtKind::StructDecl {
                     name,
-                    inherits: inherits.unwrap_or_default(),
                     body
                 }
             }
         }
 
-    rule protocol_decl_statement() -> ParserTopLevelStmt
-        = start:position!() "protocol" _ name:identifier() inherits:(_? ":" _? i:(id_chain() ** comma()) comma()? { i })? _? "{"
-        __? body:top_level_stmts() __?
-        "}" end:position!() {
-            ParserTopLevelStmt {
-                range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::ProtocolDecl { name, inherits: inherits.unwrap_or_default(), body }
-            }
-        }
-
     rule init_statement() -> ParserTopLevelStmt
-        = start:position!() required_by:id_chain()? literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" body:(__? "{"
+        = start:position!() literal_bind:(l:literal_bind() _ { l })? "init" _? "(" _? params:(func_param() ** comma()) comma()? ")" body:(__? "{"
         __? body:body_stmts() __?
         "}" { body })? end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::Init { required_by, literal_bind, params, body }
+                kind: ParserTopLevelStmtKind::Init { literal_bind, params, body }
             }
         }
 
@@ -369,7 +357,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule reserved()
         = ("input" / "output" / "var" / "state" / "func" / "return"
-        / "if" / "else" / "struct" / "init" / "protocol" / "intliteral"
+        / "if" / "else" / "struct" / "init" / "intliteral"
         / "floatliteral" / "boolliteral" / "define" / "impl" / "infix" / "prefix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
     rule comment() = "//" (!['\n'] [_])* &['\n']

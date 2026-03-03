@@ -79,30 +79,13 @@ impl<'a> TypeResolveCtx<'a> {
         &mut self,
         name: &str,
         symbol_path: &SymbolPath,
-        required_by: Option<&ParserSymbolPath>,
         value_type: Option<&ParserSymbolPath>,
         def_val: &[ExprToken],
         decl_range: Range,
     ) {
         if let Some((value_type, def_val)) = self.resolve_var_type(decl_range, value_type, def_val)
         {
-            let required_by = match required_by {
-                Some(required_by) => match self.program.resolve_type_def_parser_path(required_by) {
-                    Some(resolved_path) => Some(resolved_path),
-                    None => {
-                        self.ec.type_not_found(
-                            decl_range,
-                            Phase::TypeResolution,
-                            &required_by.to_string(),
-                        );
-                        None
-                    }
-                },
-                None => None,
-            };
-
             let var = ScopeVar {
-                required_by,
                 name: name.to_string(),
                 value_type,
                 def_val,
