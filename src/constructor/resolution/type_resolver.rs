@@ -80,7 +80,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 }
             }
 
-            ParserTopLevelStmtKind::GlobalVar {
+            ParserTopLevelStmtKind::ScopeVar {
                 name,
                 value_type,
                 def_val,

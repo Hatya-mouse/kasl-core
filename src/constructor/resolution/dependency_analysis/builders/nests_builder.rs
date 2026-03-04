@@ -28,7 +28,7 @@ pub fn build_struct_graph(
     child_symbol_table: &SymbolTable,
 ) {
     for stmt in &child_symbol_table.vars {
-        if let ParserTopLevelStmtKind::GlobalVar {
+        if let ParserTopLevelStmtKind::ScopeVar {
             name,
             value_type: _,
             def_val,

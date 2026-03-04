@@ -1,0 +1,44 @@
+//
+// © 2025-2026 Shuntaro Kasatani
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+use crate::{
+    Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
+};
+
+impl ErrorCollector {
+    /// Wrapper function for DuplicateSymbol error.
+    pub fn dup_sym(&mut self, range: Range, phase: Phase, sym: &str) {
+        self.emit(
+            EK::DuplicateSymbol,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(sym.to_string()),
+        );
+    }
+
+    /// Wrapper function for InvalidTopExpr
+    pub fn invalid_top_expr(&mut self, range: Range, phase: Phase, expr: &str) {
+        self.emit(
+            EK::InvalidTopExpr,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(expr.to_string()),
+        );
+    }
+}

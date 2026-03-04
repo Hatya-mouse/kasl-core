@@ -54,7 +54,7 @@ pub enum ParserTopLevelStmtKind {
         value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,
     },
-    GlobalVar {
+    ScopeVar {
         name: String,
         value_type: Option<ParserSymbolPath>,
         def_val: Vec<ExprToken>,

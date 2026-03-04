@@ -94,7 +94,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserTopLevelStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::GlobalVar { name, value_type, def_val }
+                kind: ParserTopLevelStmtKind::ScopeVar { name, value_type, def_val }
             }
         }
 

@@ -21,6 +21,11 @@ pub enum ErrorKind {
     /// Payload: Name of the duplicate symbol
     DuplicateSymbol,
 
+    /// Title: InvalidTopExpr
+    /// Phase: SymbolTableConstruction
+    /// Payload: Type of the expression
+    InvalidTopExpr,
+
     /// Title: InvalidParamNumbersForInfix
     /// Phase: Validation
     /// Payload: None

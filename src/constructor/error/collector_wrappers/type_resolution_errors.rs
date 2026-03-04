@@ -14,57 +14,12 @@
 // limitations under the License.
 //
 
-use std::panic::Location;
-
 use crate::{
     LiteralBind, Range,
     error::{EK, ErrorCollector, Phase, Pl, Sv},
 };
 
 impl ErrorCollector {
-    /// Wrapper function for DuplicateSymbol error.
-    pub fn dup_sym(&mut self, range: Range, phase: Phase, sym: &str) {
-        self.emit(
-            EK::DuplicateSymbol,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(sym.to_string()),
-        );
-    }
-
-    /// Wrapper function for InvalidParamNumbersForInfix error.
-    pub fn invalid_param_numbers_for_infix(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        got_params: usize,
-    ) {
-        self.emit(
-            EK::InvalidParamNumbersForInfix,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Num(got_params),
-        );
-    }
-
-    /// Wrapper function for InvalidParamNumbersForPrefix error.
-    pub fn invalid_param_numbers_for_prefix(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        got_params: usize,
-    ) {
-        self.emit(
-            EK::InvalidParamNumbersForPrefix,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Num(got_params),
-        );
-    }
-
     /// Wrapper function for DuplicateLiteralBind error.
     pub fn dup_literal_bind(&mut self, range: Range, phase: Phase, bind: LiteralBind) {
         self.emit(
@@ -210,78 +165,6 @@ impl ErrorCollector {
             phase,
             Sv::Error,
             Pl::StrPair(expected_type.to_string(), actual_type.to_string()),
-        );
-    }
-
-    /// Wrapper function for ParamNotFound error.
-    pub fn param_not_found(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_path: &str,
-        param_label: &str,
-    ) {
-        self.emit(
-            EK::ParamNotFound,
-            range,
-            phase,
-            Sv::Error,
-            Pl::StrPair(func_path.to_string(), param_label.to_string()),
-        );
-    }
-
-    /// Wrapper function for TooManyParams error.
-    pub fn too_many_params(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_path: &str,
-        expected_num: usize,
-        actual_num: usize,
-    ) {
-        self.emit(
-            EK::TooManyParams,
-            range,
-            phase,
-            Sv::Error,
-            Pl::StrAndNumPair(func_path.to_string(), expected_num, actual_num),
-        );
-    }
-
-    /// Wrapper function for NotEnoughParams error.
-    pub fn not_enough_params(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_path: &str,
-        required_num: usize,
-        actual_num: usize,
-    ) {
-        self.emit(
-            EK::NotEnoughParams,
-            range,
-            phase,
-            Sv::Error,
-            Pl::StrAndNumPair(func_path.to_string(), required_num, actual_num),
-        );
-    }
-
-    /// Automatically emits a CompilerBug error with the provided range, phase, and dev message,
-    /// combined with the location of the caller.
-    #[track_caller]
-    pub fn comp_bug(&mut self, range: Range, phase: Phase, dev_msg: &str) {
-        // Get the location of the caller
-        let loc = Location::caller();
-        // Format the location string
-        let loc_str = format!("{}:{}:{}", loc.file(), loc.line(), loc.column());
-        // Combine the location and the dev message into one string and emit
-        let full = format!("{} -- {}", loc_str, dev_msg);
-        self.emit(
-            EK::CompilerBug,
-            range,
-            phase,
-            Sv::CompilerBug,
-            Pl::Str(full),
         );
     }
 }

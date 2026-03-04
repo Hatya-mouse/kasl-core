@@ -79,7 +79,7 @@ pub fn build_symbol_table<'a>(
                 ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
             },
 
-            _ => {}
+            _ => (),
         }
     }
 }
@@ -91,7 +91,7 @@ pub fn build_nest_symbol_table<'a>(
 ) {
     for stmt in statements {
         match &stmt.kind {
-            ParserTopLevelStmtKind::GlobalVar {
+            ParserTopLevelStmtKind::ScopeVar {
                 name,
                 value_type: _,
                 def_val: _,
@@ -144,7 +144,7 @@ pub fn build_nest_symbol_table<'a>(
                 ParserOperatorType::Prefix => symbol_table.insert_prefix_func(symbol.clone(), stmt),
             },
 
-            _ => (),
+            _ => {}
         }
     }
 }
