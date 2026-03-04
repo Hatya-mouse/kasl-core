@@ -61,7 +61,8 @@ fn chaining() {
 #[test]
 fn easy_program() {
     let program = "input integer: Int = 14
-            input fac = 5 #range(0, 100)
+            #range(0, 100)
+            input fac = 5
             output out_value: Int = 0
 
             struct Multiplier {
