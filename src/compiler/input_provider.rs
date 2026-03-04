@@ -14,6 +14,13 @@
 // limitations under the License.
 //
 
-mod input_provider;
+use crate::InputVar;
+use cranelift_codegen::ir::Value;
 
-pub use input_provider::InputProvider;
+pub trait InputProvider {
+    /// Define a new input variable with the given name, type, value and attributes.
+    fn define_input(&mut self, input: &InputVar);
+
+    /// Get a value for the given input variable.
+    fn get_input(&self, name: &str) -> Option<Value>;
+}
