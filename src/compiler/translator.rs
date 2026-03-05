@@ -14,7 +14,22 @@
 // limitations under the License.
 //
 
-mod input_provider;
-mod translator;
+use cranelift::prelude::*;
 
-pub use input_provider::InputProvider;
+/// A class that translates AST into Cranelift IR.
+pub struct Translator {
+    builder_context: FunctionBuilderContext,
+}
+
+impl Default for Translator {
+    fn default() -> Self {
+        Self {
+            builder_context: FunctionBuilderContext::new(),
+        }
+    }
+}
+
+impl Translator {
+    /// Translates the given AST into Cranelift IR.
+    pub fn translate(&mut self) {}
+}
