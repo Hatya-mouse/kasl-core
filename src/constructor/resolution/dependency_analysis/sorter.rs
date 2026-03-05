@@ -60,11 +60,6 @@ pub fn sort_graph(
         }
     }
 
-    // Drain the remaining nodes that have no incoming edges
-    while let Some(node) = queue.pop_front() {
-        sorted_nodes.insert(0, node);
-    }
-
     // Check if the graph is acyclic
     if sorted_nodes.len() != graph.node_paths().len() {
         let cyclic_nodes = in_degrees.keys().cloned().collect();
