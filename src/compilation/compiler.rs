@@ -15,21 +15,38 @@
 //
 
 use cranelift::prelude::*;
+use cranelift_jit::{JITBuilder, JITModule};
 
 /// A class that translates AST into Cranelift IR.
-pub struct Translator {
+pub struct Compiler {
     builder_context: FunctionBuilderContext,
+
+    module: JITModule,
 }
 
-impl Default for Translator {
+impl Default for Compiler {
     fn default() -> Self {
+        let mut flag_builder = settings::builder();
+        flag_builder.set("use_colocated_libcalls", "false").unwrap();
+        flag_builder.set("is_pic", "false").unwrap();
+
+        let isa_builder = cranelift_native::builder().unwrap_or_else(|msg| {
+            panic!("Host machine is not supported: {}", msg);
+        });
+        let isa = isa_builder
+            .finish(settings::Flags::new(flag_builder))
+            .unwrap();
+        let builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
+
+        let module = JITModule::new(builder);
+
         Self {
             builder_context: FunctionBuilderContext::new(),
+            module,
         }
     }
 }
 
-impl Translator {
-    /// Translates the given AST into Cranelift IR.
-    pub fn translate(&mut self) {}
+impl Compiler {
+    pub fn compiler(&mut self) {}
 }

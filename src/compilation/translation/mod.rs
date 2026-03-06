@@ -14,7 +14,4 @@
 // limitations under the License.
 //
 
-mod input_provider;
 mod translator;
-
-pub use input_provider::InputProvider;

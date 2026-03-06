@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod ast_construction;
-pub mod compilation;
-pub mod parser;
+use crate::Program;
 
-pub use ast::*;
-pub use ast_construction::*;
-pub use parser::*;
+struct Translator {}
+
+impl Translator {
+    /// Translates the given AST into Cranelift IR.
+    pub fn translate(&self, program: &Program) {}
+}

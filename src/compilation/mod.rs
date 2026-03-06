@@ -14,11 +14,8 @@
 // limitations under the License.
 //
 
-pub mod ast;
-pub mod ast_construction;
-pub mod compilation;
-pub mod parser;
+mod compiler;
+mod input_provider;
+mod translation;
 
-pub use ast::*;
-pub use ast_construction::*;
-pub use parser::*;
+pub use input_provider::InputProvider;
