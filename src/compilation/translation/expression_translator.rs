@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-mod block_translator;
-mod expression_translator;
-mod translator;
-mod variable_decl;
+use crate::{Expression, compilation::Translator};
+use cranelift::prelude::*;
 
-pub use translator::Translator;
+impl Translator<'_> {
+    pub fn translate_expression(&self, expr: Expression) -> Value {}
+}

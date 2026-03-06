@@ -18,4 +18,6 @@ mod compiler;
 mod input_provider;
 mod translation;
 
+pub use compiler::Compiler;
 pub use input_provider::InputProvider;
+pub use translation::Translator;

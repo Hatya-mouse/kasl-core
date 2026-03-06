@@ -38,7 +38,7 @@ pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<
     build_statements(&mut error_collector, &mut program, &symbol_table);
 
     // 4. Validate program
-    validate(&mut error_collector, &program);
+    validate(&mut error_collector, &symbol_table);
 
     error_collector.as_result()
 }

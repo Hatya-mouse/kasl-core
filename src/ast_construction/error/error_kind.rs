@@ -118,6 +118,16 @@ pub enum ErrorKind {
     /// Payload: Function path to the recursive function
     RecursiveFunc,
 
+    /// Title: NoMainFunc
+    /// Phase: Validation
+    /// Payload: None
+    NoMainFunc,
+
+    /// Title: MainStmtNotFunc
+    /// Phase: Validation
+    /// Payload: None
+    MainStmtNotFunc,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

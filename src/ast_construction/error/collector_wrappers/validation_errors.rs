@@ -14,9 +14,17 @@
 // limitations under the License.
 //
 
-mod block_translator;
-mod expression_translator;
-mod translator;
-mod variable_decl;
+use crate::{
+    Range,
+    error::{EK, ErrorCollector, Phase, Pl, Sv},
+};
 
-pub use translator::Translator;
+impl ErrorCollector {
+    pub fn no_main_func(&mut self, phase: Phase) {
+        self.emit(EK::NoMainFunc, Range::zero(), phase, Sv::Error, Pl::None);
+    }
+
+    pub fn main_stmt_not_func(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::MainStmtNotFunc, range, phase, Sv::Error, Pl::None);
+    }
+}

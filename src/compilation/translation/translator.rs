@@ -14,11 +14,34 @@
 // limitations under the License.
 //
 
-use crate::Program;
+use crate::{
+    Function, MAIN_FUNCTION_NAME, Program, Statement, compilation::InputProvider, symbol_path,
+};
+use cranelift::prelude::*;
 
-struct Translator {}
+pub struct Translator<'a> {
+    pub builder: FunctionBuilder<'a>,
+    pub program: &'a Program,
+    pub input_provider: dyn InputProvider,
+}
 
-impl Translator {
+impl<'a> Translator<'a> {
     /// Translates the given AST into Cranelift IR.
-    pub fn translate(&self, program: &Program) {}
+    pub fn translate(&mut self) {
+        let main_func = self.get_main_func();
+        self.translate_block(&main_func.body);
+    }
+
+    /// Returns a reference to the main function of the given program.
+    /// Assumes that it is safe to unwrap the ID and function from the program.
+    fn get_main_func(&self) -> &'a Function {
+        let main_func_path = symbol_path![MAIN_FUNCTION_NAME.to_string()];
+        let main_func_id = self
+            .program
+            .get_id_by_path(&main_func_path)
+            .unwrap()
+            .first()
+            .unwrap();
+        self.program.get_func(main_func_id).unwrap()
+    }
 }

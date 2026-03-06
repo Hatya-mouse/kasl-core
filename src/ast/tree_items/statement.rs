@@ -18,8 +18,8 @@ use crate::{Expression, FuncCallArg, data::SymbolID};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    Return {
-        value: Option<Expression>,
+    Block {
+        body: Vec<Statement>,
     },
     VarDecl {
         name: String,
@@ -39,8 +39,8 @@ pub enum Statement {
         else_ifs: Vec<IfArm>,
         else_body: Vec<Statement>,
     },
-    Block {
-        body: Vec<Statement>,
+    Return {
+        value: Option<Expression>,
     },
 }
 
