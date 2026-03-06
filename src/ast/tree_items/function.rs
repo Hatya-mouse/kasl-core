@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncParam, Statement, data::SymbolID};
+use crate::{Expression, FuncParam, Range, Statement, data::SymbolID};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
@@ -23,6 +23,7 @@ pub struct Function {
     pub params: Vec<FuncParam>,
     pub return_type: Option<SymbolID>,
     pub body: Vec<Statement>,
+    pub range: Range,
 }
 
 impl Function {

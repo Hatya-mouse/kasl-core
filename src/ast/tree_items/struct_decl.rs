@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
+use crate::Range;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct StructDecl {
     pub name: String,
+    pub range: Range,
 }
 
 impl StructDecl {
-    pub fn new(name: String) -> Self {
-        StructDecl { name }
+    pub fn new(name: String, range: Range) -> Self {
+        StructDecl { name, range }
     }
 }

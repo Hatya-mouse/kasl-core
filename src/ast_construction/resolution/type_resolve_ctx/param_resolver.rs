@@ -65,6 +65,7 @@ impl<'a> TypeResolveCtx<'a> {
                 name: param.name.clone(),
                 value_type: annotation_type,
                 def_val: None,
+                range: param.range,
             })
         } else if let Some(def_val) = &param.def_val {
             // If the parameter does not have a type annotation, infer it from the expression
@@ -81,6 +82,7 @@ impl<'a> TypeResolveCtx<'a> {
                 name: param.name.clone(),
                 value_type: resolved_type,
                 def_val: Some(expr),
+                range: param.range,
             })
         } else {
             // If the parameter does not have a type annotation or default value, throw an error

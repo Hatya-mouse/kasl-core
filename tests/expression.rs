@@ -125,6 +125,7 @@ fn simple_subtraction() {
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
 
@@ -152,6 +153,7 @@ fn sub_and_mul() {
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
     program.register_infix_operator(
@@ -159,6 +161,7 @@ fn sub_and_mul() {
         InfixOperatorProperties {
             precedence: 20,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
 
@@ -186,6 +189,7 @@ fn prefix_and_infix() {
         InfixOperatorProperties {
             precedence: 20,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
     program.register_infix_operator(
@@ -193,6 +197,7 @@ fn prefix_and_infix() {
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
 
@@ -220,6 +225,7 @@ fn non_associative_chain_error() {
         InfixOperatorProperties {
             precedence: 5,
             associativity: OperatorAssociativity::None,
+            range: Range::zero(),
         },
     );
 
@@ -241,6 +247,7 @@ fn unmatched_parentheses_detected_on_drain() {
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
 
@@ -262,6 +269,7 @@ fn unmatched_parentheses_right_paren_error() {
         InfixOperatorProperties {
             precedence: 10,
             associativity: OperatorAssociativity::Left,
+            range: Range::zero(),
         },
     );
 

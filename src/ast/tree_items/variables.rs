@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, data::SymbolID};
+use crate::{Expression, Range, data::SymbolID};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputVar {
@@ -22,12 +22,14 @@ pub struct InputVar {
     pub value_type: SymbolID,
     pub def_val: Expression,
     pub attrs: Vec<InputAttribute>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputAttribute {
     pub name: String,
     pub args: Vec<Expression>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -35,6 +37,7 @@ pub struct OutputVar {
     pub name: String,
     pub value_type: SymbolID,
     pub def_val: Expression,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -42,6 +45,7 @@ pub struct StateVar {
     pub name: String,
     pub value_type: SymbolID,
     pub def_val: Expression,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -49,6 +53,7 @@ pub struct ScopeVar {
     pub name: String,
     pub value_type: SymbolID,
     pub def_val: Expression,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -57,4 +62,5 @@ pub struct FuncParam {
     pub name: String,
     pub value_type: SymbolID,
     pub def_val: Option<Expression>,
+    pub range: Range,
 }

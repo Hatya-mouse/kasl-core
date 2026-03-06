@@ -141,7 +141,9 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 infix_properties,
             } => ctx.register_infix_define(symbol, infix_properties.clone()),
 
-            ParserTopLevelStmtKind::StructDecl { name, .. } => ctx.register_struct(symbol_id, name),
+            ParserTopLevelStmtKind::StructDecl { name, .. } => {
+                ctx.register_struct(symbol_id, name, current_stmt.range)
+            }
         }
     }
 }

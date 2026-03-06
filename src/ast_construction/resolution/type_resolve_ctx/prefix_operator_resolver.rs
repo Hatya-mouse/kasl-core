@@ -60,6 +60,7 @@ impl<'a> TypeResolveCtx<'a> {
             operand,
             return_type: resolved_return_type,
             body: Vec::new(),
+            range: decl_range,
         };
         self.program.register_prefix_func(prefix);
     }

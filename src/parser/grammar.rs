@@ -165,11 +165,11 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Infix Operator Properties
     rule infix_properties() -> InfixOperatorProperties
-        = precedence:precedence_prop() __? comma() __? associativity:associativity_prop() {
-            InfixOperatorProperties { precedence, associativity }
+        = start:position!() precedence:precedence_prop() __? comma() __? associativity:associativity_prop() end:position!() {
+            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
         }
-        / associativity:associativity_prop() __? comma() __? precedence:precedence_prop() {
-            InfixOperatorProperties { precedence, associativity }
+        / start:position!() associativity:associativity_prop() __? comma() __? precedence:precedence_prop() end:position!() {
+            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
         }
 
     rule precedence_prop() -> u32

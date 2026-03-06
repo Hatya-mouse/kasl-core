@@ -38,17 +38,9 @@ pub fn build_statements(
     if !cyclic_nodes.is_empty() {
         for func_id in cyclic_nodes {
             if let Some(func_path) = program.get_path_by_id(&func_id)
-                && let Some(func_stmt) = symbol_table.get_id_by_path(func_path).and_then(|ids| {
-                    ids.first()
-                        .copied()
-                        .and_then(|id| symbol_table.get_statement_by_id(&id))
-                })
+                && let Some(func) = program.get_func(&func_id)
             {
-                ec.recursive_func(
-                    func_stmt.range,
-                    Ph::StatementBuilding,
-                    &func_path.to_string(),
-                );
+                ec.recursive_func(func.range, Ph::StatementBuilding, &func_path.to_string());
             }
         }
     }

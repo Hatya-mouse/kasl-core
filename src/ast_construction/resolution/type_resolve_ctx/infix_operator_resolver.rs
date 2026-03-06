@@ -75,6 +75,7 @@ impl<'a> TypeResolveCtx<'a> {
             rhs,
             return_type: resolved_return_type,
             body: Vec::new(),
+            range: decl_range,
         };
         self.program.register_infix_func(infix);
     }

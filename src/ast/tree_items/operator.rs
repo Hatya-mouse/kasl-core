@@ -16,7 +16,7 @@
 
 use std::fmt::Debug;
 
-use crate::{FuncParam, Statement, data::SymbolID};
+use crate::{FuncParam, Range, Statement, data::SymbolID};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InfixOperator {
@@ -25,12 +25,14 @@ pub struct InfixOperator {
     pub rhs: FuncParam,
     pub return_type: SymbolID,
     pub body: Vec<Statement>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone, Eq)]
 pub struct InfixOperatorProperties {
     pub precedence: u32,
     pub associativity: OperatorAssociativity,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -39,6 +41,7 @@ pub struct PrefixOperator {
     pub operand: FuncParam,
     pub return_type: SymbolID,
     pub body: Vec<Statement>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone, Eq)]

@@ -66,6 +66,7 @@ impl<'a> TypeResolveCtx<'a> {
                 params: resolved_params,
                 return_type: resolved_return_type,
                 body: Vec::new(),
+                range: decl_range,
             };
 
             // Register the function to the Program

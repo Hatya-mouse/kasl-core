@@ -49,6 +49,7 @@ impl<'a> TypeResolveCtx<'a> {
                 let attr = InputAttribute {
                     name: parser_attr.name.clone(),
                     args,
+                    range: parser_attr.range,
                 };
                 attrs.push(attr);
             }
@@ -59,6 +60,7 @@ impl<'a> TypeResolveCtx<'a> {
                 value_type,
                 def_val,
                 attrs,
+                range: decl_range,
             };
             self.program.register_input(input);
         }
@@ -78,6 +80,7 @@ impl<'a> TypeResolveCtx<'a> {
                 name: name.to_string(),
                 value_type,
                 def_val,
+                range: decl_range,
             };
             self.program.register_output(output);
         }
@@ -97,6 +100,7 @@ impl<'a> TypeResolveCtx<'a> {
                 name: name.to_string(),
                 value_type,
                 def_val,
+                range: decl_range,
             };
             self.program.register_state(state);
         }
@@ -120,6 +124,7 @@ impl<'a> TypeResolveCtx<'a> {
                 name: name.to_string(),
                 value_type,
                 def_val,
+                range: decl_range,
             };
 
             // Register the variable in the parent scope
