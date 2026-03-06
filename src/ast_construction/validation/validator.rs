@@ -15,13 +15,13 @@
 //
 
 use crate::{
-    MAIN_FUNCTION_NAME, ParserTopLevelStmtKind, SymbolTable,
+    MAIN_FUNCTION_NAME, ParserTopLevelStmtKind, RawSymbolTable,
     error::{ErrorCollector, Ph},
     symbol_path,
 };
 
-/// Check for errors in the given Program and SymbolTable.
-pub fn validate(ec: &mut ErrorCollector, symbol_table: &SymbolTable) {
+/// Check for errors in the given Program and RawSymbolTable.
+pub fn validate(ec: &mut ErrorCollector, symbol_table: &RawSymbolTable) {
     // Check if the main function exists
     let main_func_path = symbol_path![MAIN_FUNCTION_NAME.to_string()];
     let main_func_id = symbol_table.get_id_by_path(&main_func_path);

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Program, SymbolTable,
+    Program, RawSymbolTable,
     data::SymbolID,
     error::{ErrorCollector, Ph},
     stmt_building::{StmtBuildingCtx, function_graph::FunctionGraph},
@@ -25,7 +25,7 @@ use std::collections::{HashMap, VecDeque};
 pub fn build_statements(
     ec: &mut ErrorCollector,
     program: &mut Program,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
 ) {
     // Create a building context'
     let mut ctx = StmtBuildingCtx::new(ec, program, symbol_table);

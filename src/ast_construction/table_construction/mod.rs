@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-pub mod symbol_table;
+pub mod raw_symbol_table;
 pub mod table_builder;
 
-pub use symbol_table::SymbolTable;
+pub use raw_symbol_table::RawSymbolTable;
 pub use table_builder::build_symbol_table;

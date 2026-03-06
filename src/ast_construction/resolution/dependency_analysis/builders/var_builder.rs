@@ -15,16 +15,16 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, SymbolTable,
-    data::ParserStmtID,
+    ExprToken, ExprTokenKind, RawSymbolTable,
     error::{ErrorCollector, Phase},
+    name_space::ParserStmtID,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_var_graph(
     ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
     var_id: ParserStmtID,
     def_val: &Vec<ExprToken>,
 ) {

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ExprTokenKind, Expression, FuncCallArg, Program, Range, SymbolTable, TypedToken,
+    ExprTokenKind, Expression, FuncCallArg, Program, Range, RawSymbolTable, TypedToken,
     TypedTokenKind,
     error::{ErrorCollector, Phase},
     resolution::expr_inference::ExprTreeBuilder,
@@ -27,7 +27,7 @@ use crate::{
 pub fn build_expr_tree_from_rpn(
     ec: &mut ErrorCollector,
     program: &Program,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
     rpn_tokens: Vec<TypedToken>,
 ) -> Option<Expression> {
     let mut stack = Vec::new();

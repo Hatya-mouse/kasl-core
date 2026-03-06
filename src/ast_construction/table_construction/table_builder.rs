@@ -15,14 +15,14 @@
 //
 
 use crate::{
-    ParserTopLevelStmt, ParserTopLevelStmtKind, SymbolPath, SymbolPathComponent, SymbolTable,
+    ParserTopLevelStmt, ParserTopLevelStmtKind, RawSymbolTable, SymbolPath, SymbolPathComponent,
     error::{ErrorCollector, Ph},
     symbol_path,
 };
 
 pub fn build_symbol_table<'a>(
     ec: &mut ErrorCollector,
-    symbol_table: &mut SymbolTable<'a>,
+    symbol_table: &mut RawSymbolTable<'a>,
     statements: &'a [ParserTopLevelStmt],
 ) {
     for stmt in statements {
@@ -54,7 +54,7 @@ pub fn build_symbol_table<'a>(
 
 pub fn build_nest_symbol_table<'a>(
     ec: &mut ErrorCollector,
-    symbol_table: &mut SymbolTable<'a>,
+    symbol_table: &mut RawSymbolTable<'a>,
     type_path: &SymbolPath,
     statements: &'a [ParserTopLevelStmt],
 ) {

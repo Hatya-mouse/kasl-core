@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserTopLevelStmtKind, SymbolTable,
+    ParserTopLevelStmtKind, RawSymbolTable,
     error::ErrorCollector,
     resolution::{
         DependencyGraphNode,
@@ -23,7 +23,10 @@ use crate::{
     },
 };
 
-pub fn build_graph(ec: &mut ErrorCollector, symbol_table: &SymbolTable) -> Option<DependencyGraph> {
+pub fn build_graph(
+    ec: &mut ErrorCollector,
+    symbol_table: &RawSymbolTable,
+) -> Option<DependencyGraph> {
     let mut graph = DependencyGraph::new();
 
     // Output variables MUST have type annotations therefore we don't need to resolve their types.

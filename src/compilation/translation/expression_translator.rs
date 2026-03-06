@@ -14,9 +14,25 @@
 // limitations under the License.
 //
 
-use crate::{Expression, compilation::Translator};
+use crate::{Expression, PrimitiveType, compilation::Translator};
 use cranelift::prelude::*;
 
 impl Translator<'_> {
-    pub fn translate_expression(&self, expr: Expression) -> Value {}
+    pub fn translate_expression(&self, expr: Expression) -> Value {
+        match expr {
+            Expression::IntLiteral(value) => self
+                .builder
+                .ins()
+                .iconst(PrimitiveType::Int.size(), value as i64),
+            Expression::FloatLiteral(value) => self
+                .builder
+                .ins()
+                .fconst(PrimitiveType::Float.size(), value as f64),
+            Expression::BoolLiteral(value) => self
+                .builder
+                .ins()
+                .iconst(PrimitiveType::Bool.size(), value as i64),
+            _ => unimplemented!(),
+        }
+    }
 }

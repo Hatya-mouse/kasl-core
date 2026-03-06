@@ -17,15 +17,15 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
-    Range, SymbolTable,
-    data::ParserStmtID,
+    Range, RawSymbolTable,
     error::{ErrorCollector, Phase},
+    name_space::ParserStmtID,
     resolution::dependency_analysis::DependencyGraph,
 };
 
 pub fn sort_graph(
     ec: &mut ErrorCollector,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
     graph: &DependencyGraph,
 ) -> Option<Vec<ParserStmtID>> {
     // Calculate the in degree of each node
@@ -72,7 +72,7 @@ pub fn sort_graph(
 
 pub fn generate_cyclic_errors(
     ec: &mut ErrorCollector,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
     cyclic_nodes: Vec<ParserStmtID>,
 ) {
     for symbol_id in cyclic_nodes {
@@ -84,7 +84,7 @@ pub fn generate_cyclic_errors(
                     ec.comp_bug(
                         stmt.range,
                         Phase::GraphConstruction,
-                        "generate_cyclic_errors received a SymbolID that doesn't exist in the SymbolTable",
+                        "generate_cyclic_errors received a SymbolID that doesn't exist in the RawSymbolTable",
                     );
                     return;
                 }
@@ -98,7 +98,7 @@ pub fn generate_cyclic_errors(
                     ec.comp_bug(
                         Range::zero(),
                         Phase::GraphConstruction,
-                        "generate_cyclic_errors received a SymbolID that doesn't exist in the SymbolTable",
+                        "generate_cyclic_errors received a SymbolID that doesn't exist in the RawSymbolTable",
                     );
                     return;
                 }

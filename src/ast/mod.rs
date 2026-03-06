@@ -15,11 +15,14 @@
 //
 
 pub mod data;
-pub mod tree_items;
+pub mod name_space;
+pub mod symbol_table;
+pub mod type_registry;
 
-pub use data::{Range, SymbolPath, SymbolPathComponent};
-pub use tree_items::{
+pub use data::Range;
+pub use name_space::{NameSpace, SymbolID, SymbolPath, SymbolPathComponent};
+pub use symbol_table::{
     Expression, FuncCallArg, FuncParam, Function, IfArm, InfixOperator, InfixOperatorProperties,
-    InputAttribute, InputVar, OperatorAssociativity, OutputVar, PrefixOperator, PrimitiveType,
-    Program, ScopeVar, StateVar, Statement, StructDecl,
+    InputAttribute, InputVar, OperatorAssociativity, OutputVar, PrefixOperator, StateVar,
+    Statement,
 };

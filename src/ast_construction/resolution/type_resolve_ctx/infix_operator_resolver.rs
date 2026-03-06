@@ -16,22 +16,26 @@
 
 use crate::{
     InfixOperator, InfixOperatorProperties, ParserFuncParam, Range, SymbolPath, error::Ph,
-    resolution::TypeResolveCtx,
+    name_space::ParserStmtID, resolution::TypeResolveCtx,
 };
 
 impl<'a> TypeResolveCtx<'a> {
     pub fn resolve_infix_func(
         &mut self,
         symbol: &str,
+        symbol_id: &ParserStmtID,
         params: &[ParserFuncParam],
         return_type: &SymbolPath,
         decl_range: Range,
     ) {
+        let Some(path) = self.symbol_table.get_path_by_id(symbol_id) else {
+            return;
+        };
+
         // Get the return type id
         let resolved_return_type = match self
-            .program
-            .get_id_by_path(return_type)
-            .and_then(|ids| ids.first().cloned())
+            .type_registry
+            .resolve_type_path(self.name_space, return_type)
         {
             Some(resolved_path) => resolved_path,
             None => {
@@ -77,10 +81,14 @@ impl<'a> TypeResolveCtx<'a> {
             body: Vec::new(),
             range: decl_range,
         };
-        self.program.register_infix_func(infix);
+
+        // Register the infix operator
+        let id = self.name_space.register_path(path.clone());
+        self.op_ctx.register_infix_func(infix, id);
     }
 
     pub fn register_infix_define(&mut self, symbol: &str, properties: InfixOperatorProperties) {
-        self.program.register_infix_operator(symbol, properties);
+        self.op_ctx
+            .register_infix_properties(symbol.to_string(), properties);
     }
 }

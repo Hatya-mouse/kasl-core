@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::data::ParserStmtID;
+use crate::name_space::ParserStmtID;
 use std::collections::HashMap;
 
 #[derive(Debug)]

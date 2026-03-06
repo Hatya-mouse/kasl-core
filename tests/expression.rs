@@ -16,7 +16,7 @@
 
 use kasl::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, PrimitiveType,
-    Program, Range, SymbolTable, TypedToken, TypedTokenKind,
+    Program, Range, RawSymbolTable, TypedToken, TypedTokenKind,
     data::SymbolID,
     error::{EK, ErrorCollector, Pl},
     get_typed_tokens,
@@ -301,7 +301,7 @@ fn complex_expression_test() {
 
     // 1. --- Setup ---
     let mut program = Program::new();
-    let mut symbol_table = SymbolTable::new();
+    let mut symbol_table = RawSymbolTable::new();
     let mut ec = ErrorCollector::new();
 
     // Build a symbol table by parsing a small program that declares the needed symbols.

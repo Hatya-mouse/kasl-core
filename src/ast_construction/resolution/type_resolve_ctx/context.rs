@@ -14,23 +14,40 @@
 // limitations under the License.
 //
 
-use crate::{Program, SymbolTable, error::ErrorCollector};
+use crate::{
+    NameSpace, RawSymbolTable,
+    error::ErrorCollector,
+    symbol_table::{FunctionContext, OperatorContext, VariableContext},
+    type_registry::TypeRegistry,
+};
 
 pub struct TypeResolveCtx<'a> {
     pub ec: &'a mut ErrorCollector,
-    pub program: &'a mut Program,
-    pub symbol_table: &'a SymbolTable<'a>,
+    pub name_space: &'a mut NameSpace,
+    pub func_ctx: &'a mut FunctionContext,
+    pub op_ctx: &'a mut OperatorContext,
+    pub var_ctx: &'a mut VariableContext,
+    pub type_registry: &'a TypeRegistry,
+    pub symbol_table: &'a RawSymbolTable<'a>,
 }
 
 impl<'a> TypeResolveCtx<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        program: &'a mut Program,
-        symbol_table: &'a SymbolTable<'a>,
+        name_space: &'a mut NameSpace,
+        func_ctx: &'a mut FunctionContext,
+        op_ctx: &'a mut OperatorContext,
+        var_ctx: &'a mut VariableContext,
+        type_registry: &'a TypeRegistry,
+        symbol_table: &'a RawSymbolTable<'a>,
     ) -> Self {
         TypeResolveCtx {
             ec,
-            program,
+            name_space,
+            func_ctx,
+            op_ctx,
+            var_ctx,
+            type_registry,
             symbol_table,
         }
     }

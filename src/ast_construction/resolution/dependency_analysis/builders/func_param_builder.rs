@@ -15,16 +15,16 @@
 //
 
 use crate::{
-    ExprTokenKind, ParserFuncParam, SymbolTable,
-    data::ParserStmtID,
+    ExprTokenKind, ParserFuncParam, RawSymbolTable,
     error::{ErrorCollector, Phase},
+    name_space::ParserStmtID,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
 
 pub fn build_func_param_graph(
     ec: &mut ErrorCollector,
     graph: &mut DependencyGraph,
-    symbol_table: &SymbolTable,
+    symbol_table: &RawSymbolTable,
     func_id: ParserStmtID,
     params: &[ParserFuncParam],
 ) {

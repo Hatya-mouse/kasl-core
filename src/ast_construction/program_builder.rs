@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserTopLevelStmt, Program, SymbolTable,
+    ParserTopLevelStmt, Program, RawSymbolTable,
     error::{ErrorCollector, ErrorRecord},
     resolution::type_resolver::resolve_types,
     stmt_building::build_statements,
@@ -25,7 +25,7 @@ use crate::{
 
 pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<ErrorRecord>> {
     let mut program = Program::new();
-    let mut symbol_table = SymbolTable::new();
+    let mut symbol_table = RawSymbolTable::new();
     let mut error_collector = ErrorCollector::new();
 
     // 1. Build symbol table

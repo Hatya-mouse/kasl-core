@@ -15,13 +15,13 @@
 //
 
 use crate::{
-    Program, SymbolTable, error::ErrorCollector, stmt_building::function_graph::FunctionGraph,
+    Program, RawSymbolTable, error::ErrorCollector, stmt_building::function_graph::FunctionGraph,
 };
 
 pub struct StmtBuildingCtx<'a> {
     pub ec: &'a mut ErrorCollector,
     pub program: &'a mut Program,
-    pub symbol_table: &'a SymbolTable<'a>,
+    pub symbol_table: &'a RawSymbolTable<'a>,
     pub function_graph: FunctionGraph,
 }
 
@@ -29,7 +29,7 @@ impl<'a> StmtBuildingCtx<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         program: &'a mut Program,
-        symbol_table: &'a SymbolTable<'a>,
+        symbol_table: &'a RawSymbolTable<'a>,
     ) -> Self {
         Self {
             ec,

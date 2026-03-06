@@ -25,9 +25,8 @@ impl<'a> TypeResolveCtx<'a> {
         if let Some(value_type) = &param.value_type {
             // If the parameter has a type annotation, use it
             let annotation_type = match self
-                .program
-                .get_id_by_path(value_type)
-                .and_then(|ids| ids.first().cloned())
+                .type_registry
+                .resolve_type_path(self.name_space, value_type)
             {
                 Some(id) => id,
                 None => {

@@ -15,7 +15,7 @@
 //
 
 use kasl::{
-    SymbolTable, error::ErrorCollector, kasl_parser, symbol_path,
+    RawSymbolTable, error::ErrorCollector, kasl_parser, symbol_path,
     table_construction::build_symbol_table,
 };
 
@@ -49,7 +49,7 @@ fn table_generation() {
 
     let parsed_program = kasl_parser::parse(program).unwrap();
 
-    let mut symbol_table = SymbolTable::new();
+    let mut symbol_table = RawSymbolTable::new();
     let mut ec = ErrorCollector::new();
     build_symbol_table(&mut ec, &mut symbol_table, &parsed_program);
 

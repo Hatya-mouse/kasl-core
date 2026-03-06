@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Function, ParserFuncParam, Range, SymbolPath, data::ParserStmtID, error::Phase,
+    Function, ParserFuncParam, Range, SymbolPath, error::Phase, name_space::ParserStmtID,
     resolution::TypeResolveCtx,
 };
 
@@ -33,9 +33,8 @@ impl<'a> TypeResolveCtx<'a> {
             // If the function has a return type, resolve the type
             let resolved_return_type = match return_type {
                 Some(return_type) => match self
-                    .program
-                    .get_id_by_path(return_type)
-                    .and_then(|ids| ids.first().cloned())
+                    .type_registry
+                    .resolve_type_path(self.name_space, return_type)
                 {
                     Some(resolved_path) => Some(resolved_path),
                     None => {
@@ -70,7 +69,8 @@ impl<'a> TypeResolveCtx<'a> {
             };
 
             // Register the function to the Program
-            self.program.register_func(func, path.clone());
+            let id = self.name_space.register_path(path.clone());
+            self.func_ctx.register_func(func, id);
         }
     }
 }

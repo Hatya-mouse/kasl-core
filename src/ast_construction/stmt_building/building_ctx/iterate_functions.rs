@@ -23,14 +23,14 @@ impl<'a> StmtBuildingCtx<'a> {
 
         // Iterate over each function in the program
         for func_id in func_ids {
-            // Get the TableStmtID used in the SymbolTable from the SymbolID used in the Program
+            // Get the TableStmtID used in the RawSymbolTable from the SymbolID used in the Program
             if let Some(func_path) = self.program.get_path_by_id(&func_id).cloned()
                 && let Some(table_stmt_id) = self
                     .symbol_table
                     .get_id_by_path(&func_path)
                     .and_then(|ids| ids.first())
             {
-                // Get the function body statements from the SymbolTable
+                // Get the function body statements from the RawSymbolTable
                 if let Some(func_body_stmts) =
                     match self.symbol_table.get_statement_by_id(table_stmt_id) {
                         Some(stmt) => match stmt.kind {
@@ -64,7 +64,7 @@ impl<'a> StmtBuildingCtx<'a> {
                         Range::zero(),
                         Ph::StatementBuilding,
                         &format!(
-                            "Could not get function body from the SymbolTable for function ID {} and path {:?}",
+                            "Could not get function body from the RawSymbolTable for function ID {} and path {:?}",
                             func_id,
                             func_path
                         ),

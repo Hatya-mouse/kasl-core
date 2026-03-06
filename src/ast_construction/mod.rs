@@ -23,4 +23,4 @@ pub mod validation;
 
 pub use program_builder::construct_program;
 pub use resolution::{TypedToken, TypedTokenKind, get_typed_tokens};
-pub use table_construction::SymbolTable;
+pub use table_construction::RawSymbolTable;

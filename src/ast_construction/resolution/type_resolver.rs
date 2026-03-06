@@ -15,21 +15,23 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserTopLevelStmtKind, PrimitiveType, Program, Range, SymbolTable,
+    ParserOperatorType, ParserTopLevelStmtKind, Range, RawSymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
         TypeResolveCtx,
         dependency_analysis::{build_graph, sort_graph},
     },
+    symbol_table::{FunctionContext, OperatorContext, VariableContext},
 };
 
 /// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
-pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_table: &SymbolTable) {
-    // Register primitive types
-    program.add_primitive_type(PrimitiveType::Int);
-    program.add_primitive_type(PrimitiveType::Float);
-    program.add_primitive_type(PrimitiveType::Bool);
-
+pub fn resolve_types(
+    ec: &mut ErrorCollector,
+    func_ctx: &mut FunctionContext,
+    op_ctx: &mut OperatorContext,
+    var_ctx: &mut VariableContext,
+    symbol_table: &RawSymbolTable,
+) {
     // Build the type dependency graph
     let graph = match build_graph(ec, symbol_table) {
         Some(graph) => graph,
@@ -62,7 +64,7 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
     }
 
     // Create a TypeResolveCtx instance
-    let mut ctx = TypeResolveCtx::new(ec, program, symbol_table);
+    let mut ctx = TypeResolveCtx::new(ec, func_ctx, op_ctx, var_ctx, symbol_table);
 
     // Infer the type of each symbol in the sorted order
     for (symbol_id, current_stmt) in sorted_list.iter().zip(statements) {
@@ -75,10 +77,10 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 def_val,
                 attrs,
             } => ctx.resolve_input(
-                name,
+                &name,
                 value_type.as_ref(),
-                def_val,
-                attrs,
+                &def_val,
+                &attrs,
                 current_stmt.range,
             ),
 
@@ -86,23 +88,23 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 name,
                 value_type,
                 def_val,
-            } => ctx.resolve_output(name, value_type.as_ref(), def_val, current_stmt.range),
+            } => ctx.resolve_output(&name, value_type.as_ref(), &def_val, current_stmt.range),
 
             ParserTopLevelStmtKind::StateVar {
                 name,
                 value_type,
                 def_val,
-            } => ctx.resolve_state(name, value_type.as_ref(), def_val, current_stmt.range),
+            } => ctx.resolve_state(&name, value_type.as_ref(), &def_val, current_stmt.range),
 
             ParserTopLevelStmtKind::ScopeVar {
                 name,
                 value_type,
                 def_val,
             } => ctx.resolve_var(
-                name,
+                &name,
                 symbol_id,
                 value_type.as_ref(),
-                def_val,
+                &def_val,
                 current_stmt.range,
             ),
 
@@ -113,10 +115,10 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 return_type,
                 body: _,
             } => ctx.resolve_func(
-                *is_static,
-                name,
+                is_static.clone(),
+                &name,
                 symbol_id,
-                params,
+                &params,
                 return_type.as_ref(),
                 current_stmt.range,
             ),
@@ -129,20 +131,20 @@ pub fn resolve_types(ec: &mut ErrorCollector, program: &mut Program, symbol_tabl
                 body: _,
             } => match op_type {
                 ParserOperatorType::Infix => {
-                    ctx.resolve_infix_func(symbol, params, return_type, current_stmt.range)
+                    ctx.resolve_infix_func(&symbol, &params, &return_type, current_stmt.range)
                 }
                 ParserOperatorType::Prefix => {
-                    ctx.resolve_prefix_operator(symbol, params, return_type, current_stmt.range)
+                    ctx.resolve_prefix_operator(&symbol, &params, &return_type, current_stmt.range)
                 }
             },
 
             ParserTopLevelStmtKind::InfixDefine {
                 symbol,
                 infix_properties,
-            } => ctx.register_infix_define(symbol, infix_properties.clone()),
+            } => ctx.register_infix_define(&symbol, infix_properties.clone()),
 
             ParserTopLevelStmtKind::StructDecl { name, .. } => {
-                ctx.register_struct(symbol_id, name, current_stmt.range)
+                ctx.register_struct(symbol_id, &name, current_stmt.range)
             }
         }
     }
