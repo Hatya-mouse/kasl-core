@@ -14,8 +14,4 @@
 // limitations under the License.
 //
 
-pub mod raw_symbol_table;
-pub mod table_builder;
-
-pub use raw_symbol_table::RawSymbolTable;
-pub use table_builder::build_symbol_table;
+struct GlobalDeclCollector {}

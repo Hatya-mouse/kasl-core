@@ -34,6 +34,13 @@ pub struct TypeRegistry {
 }
 
 impl TypeRegistry {
+    pub fn new() -> Self {
+        Self {
+            structs: HashMap::new(),
+            path_to_id: HashMap::new(),
+        }
+    }
+
     pub fn resolve_type_path(&self, type_path: &SymbolPath) -> Option<ResolvedType> {
         if type_path.len() == 1 {
             if let Some(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)
@@ -63,9 +70,9 @@ impl TypeRegistry {
         }
     }
 
-    pub fn register_struct(&mut self, name: String, range: Range, id: StructID) {
-        let layout = StructDecl::new(name, range);
-        self.structs.insert(id, layout);
+    pub fn register_struct(&mut self, struct_decl: StructDecl, path: SymbolPath, id: StructID) {
+        self.structs.insert(id, struct_decl);
+        self.path_to_id.insert(path, id);
     }
 
     pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {

@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    IfArm, ParserBodyStmt, ParserIfArm, Statement, data::VariableID,
+    IfArm, ParserIfArm, ParserScopeStmt, Statement, data::VariableID,
     resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
 };
 
@@ -25,7 +25,7 @@ impl<'a> StmtBuildingCtx<'a> {
         function_id: VariableID,
         parser_main: &ParserIfArm,
         parser_else_ifs: &Vec<ParserIfArm>,
-        parser_else_body: &[ParserBodyStmt],
+        parser_else_body: &[ParserScopeStmt],
     ) -> Option<Statement> {
         // Parse the main (if) arm
         let main = self.build_if_arm(function_id, parser_main)?;

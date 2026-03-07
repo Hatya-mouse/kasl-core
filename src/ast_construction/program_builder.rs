@@ -15,30 +15,31 @@
 //
 
 use crate::{
-    ParserTopLevelStmt, Program, RawSymbolTable,
+    NameSpace, ParserDeclStmt,
     error::{ErrorCollector, ErrorRecord},
-    resolution::type_resolver::resolve_types,
-    stmt_building::build_statements,
-    table_construction::build_symbol_table,
-    validation::validator::validate,
+    type_collection::TypeCollector,
+    type_registry::TypeRegistry,
 };
 
-pub fn construct_program(statements: Vec<ParserTopLevelStmt>) -> Result<(), Vec<ErrorRecord>> {
-    let mut program = Program::new();
-    let mut symbol_table = RawSymbolTable::new();
+pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
+    let mut name_space = NameSpace::new();
+    let mut type_registry = TypeRegistry::new();
     let mut error_collector = ErrorCollector::new();
 
-    // 1. Build symbol table
-    build_symbol_table(&mut error_collector, &mut symbol_table, &statements);
+    // 1. Collect types
+    let mut type_collector = TypeCollector {
+        decl_stmts: &statements,
+        name_space: &mut name_space,
+        type_registry: &mut type_registry,
+    };
+    type_collector.process();
 
-    // 2. Resolve types and construct the AST
-    resolve_types(&mut error_collector, &mut program, &symbol_table);
-
-    // 3. Build the function bodies
-    build_statements(&mut error_collector, &mut program, &symbol_table);
-
-    // 4. Validate program
-    validate(&mut error_collector, &symbol_table);
+    // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
+    let mut global_decl_collector = GlobalDeclCollector {
+        decl_stmts: &statements,
+        name_space: &mut name_space,
+    };
+    global_decl_collector.process();
 
     error_collector.as_result()
 }

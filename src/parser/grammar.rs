@@ -15,25 +15,25 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserBodyStmt,
-    ParserBodyStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
-    ParserOperatorType, ParserTopLevelStmt, ParserTopLevelStmtKind, Range, SymbolPath,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
+    ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
+    ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, Range, SymbolPath,
     SymbolPathComponent,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
-    pub rule parse() -> Vec<ParserTopLevelStmt>
+    pub rule parse() -> Vec<ParserDeclStmt>
         = top_level_stmts()
 
     // --- STATEMENTS ---
 
-    rule top_level_stmts() -> Vec<ParserTopLevelStmt>
+    rule top_level_stmts() -> Vec<ParserDeclStmt>
         = __? statements:(top_level_stmt() ** ((_? "\n" _?)+)) __? { statements }
 
-    rule body_stmts() -> Vec<ParserBodyStmt>
+    rule body_stmts() -> Vec<ParserScopeStmt>
         = __? statements:(body_stmt() ** ((_? "\n" _?)+)) __? { statements }
 
-    rule top_level_stmt() -> ParserTopLevelStmt
+    rule top_level_stmt() -> ParserDeclStmt
         = func_decl_statement()
         / input_statement()
         / output_statement()
@@ -44,7 +44,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / operator_func_statement()
         / expected!("statement")
 
-    rule body_stmt() -> ParserBodyStmt
+    rule body_stmt() -> ParserScopeStmt
         = return_statement()
         / local_var_statement()
         / assign_statement()
@@ -53,89 +53,89 @@ peg::parser!(pub grammar kasl_parser() for str {
         / block_statement()
         / expected!("statement")
 
-    rule func_decl_statement() -> ParserTopLevelStmt
+    rule func_decl_statement() -> ParserDeclStmt
         = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
         return_type:("->" _? t:id_chain() { t })? __? "{"
         __? body:body_stmts() __?
         "}" end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::FuncDecl { is_static: is_static.is_some(), name, params, return_type, body }
+                kind: ParserDeclStmtKind::FuncDecl { is_static: is_static.is_some(), name, params, return_type, body }
             }
         }
 
-    rule return_statement() -> ParserBodyStmt
+    rule return_statement() -> ParserScopeStmt
         = start:position!() "return" value:(_ v:oneline_expression() { v })? end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::Return { value }
+                kind: ParserScopeStmtKind::Return { value }
             }
         }
 
-    rule input_statement() -> ParserTopLevelStmt
+    rule input_statement() -> ParserDeclStmt
         = start:position!() attrs:(__? a:input_attr() { a })* __? "input" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::Input { name, value_type, def_val, attrs }
+                kind: ParserDeclStmtKind::Input { name, value_type, def_val, attrs }
             }
         }
 
-    rule output_statement() -> ParserTopLevelStmt
+    rule output_statement() -> ParserDeclStmt
         = start:position!() "output" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::Output { name, value_type, def_val }
+                kind: ParserDeclStmtKind::Output { name, value_type, def_val }
             }
         }
 
-    rule state_var_statement() -> ParserTopLevelStmt
+    rule state_var_statement() -> ParserDeclStmt
         = start:position!() "state" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::StateVar { name, value_type, def_val }
+                kind: ParserDeclStmtKind::StateVar { name, value_type, def_val }
             }
         }
 
-    rule global_var_statement() -> ParserTopLevelStmt
+    rule global_var_statement() -> ParserDeclStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::ScopeVar { name, value_type, def_val }
+                kind: ParserDeclStmtKind::ScopeVar { name, value_type, def_val }
             }
         }
 
-    rule local_var_statement() -> ParserBodyStmt
+    rule local_var_statement() -> ParserScopeStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:id_chain() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::LocalVar { name, value_type, def_val }
+                kind: ParserScopeStmtKind::LocalVar { name, value_type, def_val }
             }
         }
 
-    rule assign_statement() -> ParserBodyStmt
+    rule assign_statement() -> ParserScopeStmt
         = start:position!() target:id_chain() _ "=" _ value:oneline_expression() end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::Assign { target, value }
+                kind: ParserScopeStmtKind::Assign { target, value }
             }
         }
 
-    rule func_call_statement() -> ParserBodyStmt
+    rule func_call_statement() -> ParserScopeStmt
         = start:position!() path:id_chain() _? "(" __? args:func_call_args() ")" end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::FuncCall { path, args }
+                kind: ParserScopeStmtKind::FuncCall { path, args }
             }
         }
 
-    rule if_statement() -> ParserBodyStmt
+    rule if_statement() -> ParserScopeStmt
         = start:position!() main:if_arm()
         else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
         else_body:body_stmts()?
         end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::If {
+                kind: ParserScopeStmtKind::If {
                     main,
                     else_ifs,
                     else_body: else_body.unwrap_or(Vec::new()),
@@ -150,13 +150,13 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserIfArm { condition, body, range: Range::n(start, end) }
         }
 
-    rule struct_decl_statement() -> ParserTopLevelStmt
+    rule struct_decl_statement() -> ParserDeclStmt
         = start:position!() "struct" _ name:identifier() __? "{"
         __? body:top_level_stmts() __?
         "}" end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::StructDecl {
+                kind: ParserDeclStmtKind::StructDecl {
                     name,
                     body
                 }
@@ -183,34 +183,34 @@ peg::parser!(pub grammar kasl_parser() for str {
         ) { value }
 
     // Operator Definition
-    rule operator_definition_statement() -> ParserTopLevelStmt
+    rule operator_definition_statement() -> ParserDeclStmt
         = start:position!() "operator" _ kind:(
             "infix" _ symbol:operator() __? "{" __? props:infix_properties() __? "}" {
-                ParserTopLevelStmtKind::InfixDefine { symbol, infix_properties: props }
+                ParserDeclStmtKind::InfixDefine { symbol, infix_properties: props }
             }
         ) end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
                 kind,
             }
         }
 
     // Operator Function
-    rule operator_func_statement() -> ParserTopLevelStmt
+    rule operator_func_statement() -> ParserDeclStmt
         = start:position!() "func" _ op_type:("infix" { ParserOperatorType::Infix } / "prefix" { ParserOperatorType::Prefix }) _ symbol:operator() _? "(" _? params:(func_param() ** comma()) comma()? ")" _? "->" _? return_type:id_chain() __? body:("{"
         __? body:body_stmts() __?
         "}" { body }) end:position!() {
-            ParserTopLevelStmt {
+            ParserDeclStmt {
                 range: Range::n(start, end),
-                kind: ParserTopLevelStmtKind::OperatorFunc { op_type, symbol, params, return_type, body },
+                kind: ParserDeclStmtKind::OperatorFunc { op_type, symbol, params, return_type, body },
             }
         }
 
-    rule block_statement() -> ParserBodyStmt
+    rule block_statement() -> ParserScopeStmt
         = start:position!() "{" _? statements:body_stmts() _? "}" end:position!() {
-            ParserBodyStmt {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserBodyStmtKind::Block { statements }
+                kind: ParserScopeStmtKind::Block { statements }
             }
         }
 

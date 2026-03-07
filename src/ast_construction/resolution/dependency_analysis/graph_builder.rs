@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserTopLevelStmtKind, RawSymbolTable,
+    ParserDeclStmtKind, RawSymbolTable,
     error::ErrorCollector,
     resolution::{
         DependencyGraphNode,
@@ -32,25 +32,25 @@ pub fn build_graph(
     // Output variables MUST have type annotations therefore we don't need to resolve their types.
     for (symbol_id, stmt) in &symbol_table.get_tuples() {
         match &stmt.kind {
-            ParserTopLevelStmtKind::ScopeVar { def_val, .. }
-            | ParserTopLevelStmtKind::Input { def_val, .. }
-            | ParserTopLevelStmtKind::Output { def_val, .. }
-            | ParserTopLevelStmtKind::StateVar { def_val, .. } => {
+            ParserDeclStmtKind::ScopeVar { def_val, .. }
+            | ParserDeclStmtKind::Input { def_val, .. }
+            | ParserDeclStmtKind::Output { def_val, .. }
+            | ParserDeclStmtKind::StateVar { def_val, .. } => {
                 build_var_graph(ec, &mut graph, symbol_table, *symbol_id, def_val);
                 graph.add_node(DependencyGraphNode::new(*symbol_id));
             }
 
-            ParserTopLevelStmtKind::StructDecl { .. } => {
+            ParserDeclStmtKind::StructDecl { .. } => {
                 graph.add_node(DependencyGraphNode::new(*symbol_id));
             }
 
-            ParserTopLevelStmtKind::OperatorFunc { params, .. }
-            | ParserTopLevelStmtKind::FuncDecl { params, .. } => {
+            ParserDeclStmtKind::OperatorFunc { params, .. }
+            | ParserDeclStmtKind::FuncDecl { params, .. } => {
                 build_func_param_graph(ec, &mut graph, symbol_table, *symbol_id, params);
                 graph.add_node(DependencyGraphNode::new(*symbol_id));
             }
 
-            ParserTopLevelStmtKind::InfixDefine { .. } => {
+            ParserDeclStmtKind::InfixDefine { .. } => {
                 graph.add_node(DependencyGraphNode::new(*symbol_id));
             }
         }

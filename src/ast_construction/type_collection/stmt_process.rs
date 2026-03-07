@@ -14,20 +14,21 @@
 // limitations under the License.
 //
 
-mod stmt_process;
-
-use crate::{NameSpace, ParserDeclStmt, type_registry::TypeRegistry};
-
-pub struct TypeCollector<'a> {
-    pub decl_stmts: &'a Vec<ParserDeclStmt>,
-    pub name_space: &'a mut NameSpace,
-    pub type_registry: &'a mut TypeRegistry,
-}
+use crate::{
+    ParserDeclStmt, ParserDeclStmtKind, symbol_path, type_collection::TypeCollector,
+    type_registry::StructDecl,
+};
 
 impl TypeCollector<'_> {
-    pub fn process(&mut self) {
-        for stmt in self.decl_stmts.iter() {
-            self.process_stmt(stmt);
+    pub fn process_stmt(&mut self, stmt: &ParserDeclStmt) {
+        match &stmt.kind {
+            ParserDeclStmtKind::StructDecl { name, .. } => {
+                let struct_decl = StructDecl::new(name.clone(), stmt.range);
+                let path = symbol_path![name.clone()];
+                let id = self.name_space.generate_struct_id();
+                self.type_registry.register_struct(struct_decl, path, id);
+            }
+            _ => {}
         }
     }
 }

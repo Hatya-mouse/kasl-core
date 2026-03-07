@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    NameSpace, ParserOperatorType, ParserTopLevelStmtKind, Range, RawSymbolTable,
+    NameSpace, ParserDeclStmtKind, ParserOperatorType, Range, RawSymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
         TypeResolveCtx,
@@ -82,7 +82,7 @@ pub fn resolve_types(
         // Check if the symbol has already got a type annotation
         // If not, infer the type
         match &current_stmt.kind {
-            ParserTopLevelStmtKind::Input {
+            ParserDeclStmtKind::Input {
                 name,
                 value_type,
                 def_val,
@@ -95,19 +95,19 @@ pub fn resolve_types(
                 current_stmt.range,
             ),
 
-            ParserTopLevelStmtKind::Output {
+            ParserDeclStmtKind::Output {
                 name,
                 value_type,
                 def_val,
             } => ctx.resolve_output(&name, value_type.as_ref(), &def_val, current_stmt.range),
 
-            ParserTopLevelStmtKind::StateVar {
+            ParserDeclStmtKind::StateVar {
                 name,
                 value_type,
                 def_val,
             } => ctx.resolve_state(&name, value_type.as_ref(), &def_val, current_stmt.range),
 
-            ParserTopLevelStmtKind::ScopeVar {
+            ParserDeclStmtKind::ScopeVar {
                 name,
                 value_type,
                 def_val,
@@ -119,7 +119,7 @@ pub fn resolve_types(
                 current_stmt.range,
             ),
 
-            ParserTopLevelStmtKind::FuncDecl {
+            ParserDeclStmtKind::FuncDecl {
                 is_static,
                 name,
                 params,
@@ -134,7 +134,7 @@ pub fn resolve_types(
                 current_stmt.range,
             ),
 
-            ParserTopLevelStmtKind::OperatorFunc {
+            ParserDeclStmtKind::OperatorFunc {
                 op_type,
                 symbol,
                 params,
@@ -149,12 +149,12 @@ pub fn resolve_types(
                 }
             },
 
-            ParserTopLevelStmtKind::InfixDefine {
+            ParserDeclStmtKind::InfixDefine {
                 symbol,
                 infix_properties,
             } => ctx.register_infix_define(&symbol, infix_properties.clone()),
 
-            ParserTopLevelStmtKind::StructDecl { name, .. } => {
+            ParserDeclStmtKind::StructDecl { name, .. } => {
                 ctx.register_struct(symbol_id, &name, current_stmt.range)
             }
         }

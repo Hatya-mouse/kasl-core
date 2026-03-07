@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    MAIN_FUNCTION_NAME, ParserTopLevelStmtKind, RawSymbolTable,
+    MAIN_FUNCTION_NAME, ParserDeclStmtKind, RawSymbolTable,
     error::{ErrorCollector, Ph},
     symbol_path,
 };
@@ -31,7 +31,7 @@ pub fn validate(ec: &mut ErrorCollector, symbol_table: &RawSymbolTable) {
         symbol_table.get_statement_by_id(main_func_id.unwrap().first().unwrap())
     {
         // If the `main` statement exists, check if it is a function
-        if !matches!(main_stmt.kind, ParserTopLevelStmtKind::FuncDecl { .. }) {
+        if !matches!(main_stmt.kind, ParserDeclStmtKind::FuncDecl { .. }) {
             ec.main_stmt_not_func(main_stmt.range, Ph::Validation);
         }
     }

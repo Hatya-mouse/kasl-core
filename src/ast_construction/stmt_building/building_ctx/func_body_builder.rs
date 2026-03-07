@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserBodyStmt, ParserBodyStmtKind, Statement,
+    ParserScopeStmt, ParserScopeStmtKind, Statement,
     data::VariableID,
     error::Ph,
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
@@ -26,13 +26,13 @@ impl<'a> StmtBuildingCtx<'a> {
     pub fn build_func_body_stmt(
         &mut self,
         function_id: VariableID,
-        original_stmts: &[ParserBodyStmt],
+        original_stmts: &[ParserScopeStmt],
     ) -> Vec<Statement> {
         let mut parsed_stmts = Vec::new();
 
         for stmt in original_stmts {
             match &stmt.kind {
-                ParserBodyStmtKind::Assign { target, value } => {
+                ParserScopeStmtKind::Assign { target, value } => {
                     let parsed_target = match self
                         .program
                         .get_id_by_path(target)
@@ -69,7 +69,7 @@ impl<'a> StmtBuildingCtx<'a> {
                     parsed_stmts.push(assign_stmt);
                 }
 
-                ParserBodyStmtKind::Block { statements } => {
+                ParserScopeStmtKind::Block { statements } => {
                     // Collect statements within the block
                     let block_body = self.build_func_body_stmt(function_id, statements);
                     // Create a Block statement
@@ -77,11 +77,11 @@ impl<'a> StmtBuildingCtx<'a> {
                     parsed_stmts.push(block_stmt);
                 }
 
-                ParserBodyStmtKind::FuncCall { path, args } => {
+                ParserScopeStmtKind::FuncCall { path, args } => {
                     self.build_func_call_stmt(function_id, &mut parsed_stmts, stmt, path, args)
                 }
 
-                ParserBodyStmtKind::LocalVar {
+                ParserScopeStmtKind::LocalVar {
                     name,
                     value_type,
                     def_val,
@@ -99,7 +99,7 @@ impl<'a> StmtBuildingCtx<'a> {
                     }
                 }
 
-                ParserBodyStmtKind::If {
+                ParserScopeStmtKind::If {
                     main,
                     else_ifs,
                     else_body,
@@ -112,7 +112,7 @@ impl<'a> StmtBuildingCtx<'a> {
                     }
                 }
 
-                ParserBodyStmtKind::Return { value } => {
+                ParserScopeStmtKind::Return { value } => {
                     let return_value = value.as_ref().and_then(|value| {
                         self.program.build_expr_tree_from_raw_tokens(
                             self.ec,

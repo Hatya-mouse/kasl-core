@@ -19,29 +19,29 @@ use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserProgram {
-    pub statements: Vec<ParserTopLevelStmt>,
+    pub statements: Vec<ParserDeclStmt>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ParserTopLevelStmt {
+pub struct ParserDeclStmt {
     pub range: Range,
-    pub kind: ParserTopLevelStmtKind,
+    pub kind: ParserDeclStmtKind,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ParserBodyStmt {
+pub struct ParserScopeStmt {
     pub range: Range,
-    pub kind: ParserBodyStmtKind,
+    pub kind: ParserScopeStmtKind,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserTopLevelStmtKind {
+pub enum ParserDeclStmtKind {
     FuncDecl {
         is_static: bool,
         name: String,
         params: Vec<ParserFuncParam>,
         return_type: Option<SymbolPath>,
-        body: Vec<ParserBodyStmt>,
+        body: Vec<ParserScopeStmt>,
     },
     Input {
         name: String,
@@ -66,7 +66,7 @@ pub enum ParserTopLevelStmtKind {
     },
     StructDecl {
         name: String,
-        body: Vec<ParserTopLevelStmt>,
+        body: Vec<ParserDeclStmt>,
     },
     InfixDefine {
         symbol: String,
@@ -77,27 +77,27 @@ pub enum ParserTopLevelStmtKind {
         symbol: String,
         params: Vec<ParserFuncParam>,
         return_type: SymbolPath,
-        body: Vec<ParserBodyStmt>,
+        body: Vec<ParserScopeStmt>,
     },
 }
 
-impl Display for ParserTopLevelStmtKind {
+impl Display for ParserDeclStmtKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParserTopLevelStmtKind::FuncDecl { .. } => write!(f, "func"),
-            ParserTopLevelStmtKind::Input { .. } => write!(f, "input"),
-            ParserTopLevelStmtKind::Output { .. } => write!(f, "output"),
-            ParserTopLevelStmtKind::StateVar { .. } => write!(f, "state"),
-            ParserTopLevelStmtKind::ScopeVar { .. } => write!(f, "var"),
-            ParserTopLevelStmtKind::StructDecl { .. } => write!(f, "struct"),
-            ParserTopLevelStmtKind::InfixDefine { .. } => write!(f, "infix"),
-            ParserTopLevelStmtKind::OperatorFunc { .. } => write!(f, "func"),
+            ParserDeclStmtKind::FuncDecl { .. } => write!(f, "func"),
+            ParserDeclStmtKind::Input { .. } => write!(f, "input"),
+            ParserDeclStmtKind::Output { .. } => write!(f, "output"),
+            ParserDeclStmtKind::StateVar { .. } => write!(f, "state"),
+            ParserDeclStmtKind::ScopeVar { .. } => write!(f, "var"),
+            ParserDeclStmtKind::StructDecl { .. } => write!(f, "struct"),
+            ParserDeclStmtKind::InfixDefine { .. } => write!(f, "infix"),
+            ParserDeclStmtKind::OperatorFunc { .. } => write!(f, "func"),
         }
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ParserBodyStmtKind {
+pub enum ParserScopeStmtKind {
     Return {
         value: Option<Vec<ExprToken>>,
     },
@@ -117,10 +117,10 @@ pub enum ParserBodyStmtKind {
     If {
         main: ParserIfArm,
         else_ifs: Vec<ParserIfArm>,
-        else_body: Vec<ParserBodyStmt>,
+        else_body: Vec<ParserScopeStmt>,
     },
     Block {
-        statements: Vec<ParserBodyStmt>,
+        statements: Vec<ParserScopeStmt>,
     },
 }
 
@@ -156,7 +156,7 @@ pub struct ParserFuncParam {
 #[derive(Debug, PartialEq, Clone)]
 pub struct ParserIfArm {
     pub condition: Vec<ExprToken>,
-    pub body: Vec<ParserBodyStmt>,
+    pub body: Vec<ParserScopeStmt>,
     pub range: Range,
 }
 

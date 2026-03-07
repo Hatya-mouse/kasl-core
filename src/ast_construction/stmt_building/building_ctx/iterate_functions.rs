@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{ParserTopLevelStmtKind, Range, error::Ph, stmt_building::StmtBuildingCtx};
+use crate::{ParserDeclStmtKind, Range, error::Ph, stmt_building::StmtBuildingCtx};
 
 impl<'a> StmtBuildingCtx<'a> {
     /// Iterates over each function in the program and builds its body.
@@ -34,7 +34,7 @@ impl<'a> StmtBuildingCtx<'a> {
                 if let Some(func_body_stmts) =
                     match self.symbol_table.get_statement_by_id(table_stmt_id) {
                         Some(stmt) => match stmt.kind {
-                            ParserTopLevelStmtKind::FuncDecl { ref body, .. } => Some(body),
+                            ParserDeclStmtKind::FuncDecl { ref body, .. } => Some(body),
                             _ => None,
                         },
                         None => None,

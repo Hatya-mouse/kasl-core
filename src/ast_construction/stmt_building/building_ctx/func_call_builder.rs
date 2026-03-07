@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncCallArg, ParserBodyStmt, ParserFuncCallArg, Statement, SymbolPath, data::VariableID,
+    FuncCallArg, ParserFuncCallArg, ParserScopeStmt, Statement, SymbolPath, data::VariableID,
     error::Phase, resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
 };
 
@@ -24,7 +24,7 @@ impl<'a> StmtBuildingCtx<'a> {
         &mut self,
         caller_id: VariableID,
         parsed_stmts: &mut Vec<Statement>,
-        stmt: &ParserBodyStmt,
+        stmt: &ParserScopeStmt,
         path: &SymbolPath,
         args: &[ParserFuncCallArg],
     ) {
