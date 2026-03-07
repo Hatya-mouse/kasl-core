@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, NameSpace, Range, SymbolID,
+    ExprToken, ExprTokenKind, NameSpace, Range, VariableID,
     error::{ErrorCollector, Ph, Phase},
     resolution::expr_inference::SymbolTypeGetter,
     symbol_table::{FunctionContext, VariableContext},

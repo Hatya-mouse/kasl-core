@@ -14,16 +14,15 @@
 // limitations under the License.
 //
 
-use crate::{Range, StructDecl, data::ParserStmtID, resolution::type_resolve_ctx::TypeResolveCtx};
+use crate::{Range, name_space::ParserStmtID, resolution::type_resolve_ctx::TypeResolveCtx};
 
 impl<'a> TypeResolveCtx<'a> {
     pub fn register_struct(&mut self, symbol_id: &ParserStmtID, name: &str, decl_range: Range) {
         if let Some(path) = self.symbol_table.get_path_by_id(symbol_id) {
-            let struct_decl = StructDecl {
-                name: name.to_string(),
-                range: decl_range,
-            };
-            self.program.register_struct_decl(struct_decl, path.clone());
+            // Register the struct
+            let id = self.name_space.register_path(path.clone());
+            self.type_registry
+                .register_struct(name.to_string(), decl_range, id);
         }
     }
 }

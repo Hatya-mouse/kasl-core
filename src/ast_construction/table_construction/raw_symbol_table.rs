@@ -66,7 +66,7 @@ impl<'a> RawSymbolTable<'a> {
         self.path_to_id.contains_key(path)
     }
 
-    /// Returns the next available SymbolID.
+    /// Returns the next available VariableID.
     pub fn next_id(&mut self) -> ParserStmtID {
         let id = self.next_id;
         self.next_id += 1;
@@ -81,12 +81,12 @@ impl<'a> RawSymbolTable<'a> {
         self.statements.insert(id, stmt);
     }
 
-    /// Gets the statement by SymbolID.
+    /// Gets the statement by VariableID.
     pub fn get_statement_by_id(&self, id: &ParserStmtID) -> Option<&&ParserTopLevelStmt> {
         self.statements.get(id)
     }
 
-    /// Iterates over all statements and their corresponding SymbolIDs.
+    /// Iterates over all statements and their corresponding VariableIDs.
     pub fn get_tuples(&self) -> Vec<(ParserStmtID, &&ParserTopLevelStmt)> {
         self.statements
             .iter()

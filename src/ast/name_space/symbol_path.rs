@@ -53,6 +53,10 @@ impl SymbolPath {
         self.components.len()
     }
 
+    pub fn first(&self) -> Option<&SymbolPathComponent> {
+        self.components.first()
+    }
+
     pub fn last(&self) -> Option<&SymbolPathComponent> {
         self.components.last()
     }

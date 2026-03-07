@@ -15,14 +15,14 @@
 //
 
 use crate::{
-    IfArm, ParserBodyStmt, ParserIfArm, Statement, data::SymbolID,
+    IfArm, ParserBodyStmt, ParserIfArm, Statement, data::VariableID,
     resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
 };
 
 impl<'a> StmtBuildingCtx<'a> {
     pub fn build_if_stmt(
         &mut self,
-        function_id: SymbolID,
+        function_id: VariableID,
         parser_main: &ParserIfArm,
         parser_else_ifs: &Vec<ParserIfArm>,
         parser_else_body: &[ParserBodyStmt],
@@ -51,7 +51,7 @@ impl<'a> StmtBuildingCtx<'a> {
 
     pub fn build_if_arm(
         &mut self,
-        function_id: SymbolID,
+        function_id: VariableID,
         parser_arm: &ParserIfArm,
     ) -> Option<IfArm> {
         // Parse the main (if) condition

@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Expression, compilation::Translator, data::SymbolID};
+use crate::{Expression, compilation::Translator, data::VariableID};
 use cranelift::prelude::*;
 
 impl Translator<'_> {
-    pub fn declare_variable(&self, name: &str, value_type: SymbolID, def_val: Value) -> Variable {
+    pub fn declare_variable(&self, name: &str, value_type: VariableID, def_val: Value) -> Variable {
         let ir_type = todo!();
         let var = self.builder.declare_var(ir_type);
         self.builder.def_var(var, def_val);

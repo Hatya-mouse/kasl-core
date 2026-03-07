@@ -16,14 +16,14 @@
 
 use std::collections::HashMap;
 
-use crate::data::SymbolID;
+use crate::data::VariableID;
 
 /// A function dependency graph to detect recursive function call.
 pub struct FunctionGraph {
-    pub nodes: Vec<SymbolID>,
+    pub nodes: Vec<VariableID>,
     /// A map from a function ID to its outgoing edges.
     /// The key is an ID of the function that calls the function with an ID in the value.
-    pub edges: HashMap<SymbolID, Vec<SymbolID>>,
+    pub edges: HashMap<VariableID, Vec<VariableID>>,
 }
 
 impl FunctionGraph {
@@ -34,11 +34,11 @@ impl FunctionGraph {
         }
     }
 
-    pub fn add_edge(&mut self, from: SymbolID, to: SymbolID) {
+    pub fn add_edge(&mut self, from: VariableID, to: VariableID) {
         self.edges.entry(from).or_default().push(to);
     }
 
-    pub fn add_node(&mut self, id: SymbolID) {
+    pub fn add_node(&mut self, id: VariableID) {
         self.nodes.push(id);
     }
 }

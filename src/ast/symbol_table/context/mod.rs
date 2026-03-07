@@ -16,8 +16,6 @@
 
 mod function_context;
 mod operator_context;
-mod variable_context;
 
 pub use function_context::FunctionContext;
 pub use operator_context::OperatorContext;
-pub use variable_context::VariableContext;

@@ -14,25 +14,22 @@
 // limitations under the License.
 //
 
-use crate::{
-    Expression, Range, SymbolID,
-    type_registry::{ResolvedType, TypeRegistry},
-};
+use crate::{Range, VariableID, type_registry::StructField, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct StructLayout {
+pub struct StructDecl {
     /// The name of the struct.
     pub name: String,
 
     /// The fields of the struct.
     pub fields: Vec<StructField>,
-    /// The IDs of the instance methods belonging to the struct.
-    pub instance_methods: Vec<SymbolID>,
-    /// The IDs of the static methods belonging to the struct.
-    pub static_methods: Vec<SymbolID>,
     /// The map of field names to their indices in the `fields` vector.
     pub indices: HashMap<String, usize>,
+    /// The IDs of the instance methods belonging to the struct.
+    pub instance_methods: Vec<VariableID>,
+    /// The IDs of the static methods belonging to the struct.
+    pub static_methods: Vec<VariableID>,
 
     /// The map of field names to their offsets in bytes.
     pub field_offsets: Vec<u32>,
@@ -45,7 +42,28 @@ pub struct StructLayout {
     pub range: Range,
 }
 
-impl StructLayout {
+impl StructDecl {
+    pub fn new(name: String, range: Range) -> Self {
+        Self {
+            name,
+            fields: Vec::new(),
+            indices: HashMap::new(),
+            instance_methods: Vec::new(),
+            static_methods: Vec::new(),
+            field_offsets: Vec::new(),
+            total_size: 0,
+            alignment: 1,
+            range,
+        }
+    }
+
+    pub fn get_field(&self, field_name: &str) -> Option<&StructField> {
+        match self.indices.get(field_name) {
+            Some(field_index) => self.fields.get(*field_index),
+            None => None,
+        }
+    }
+
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {
         let mut offset = 0;
         let mut max_alignment = 1;
@@ -68,12 +86,4 @@ impl StructLayout {
         self.total_size = offset;
         self.alignment = max_alignment;
     }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct StructField {
-    pub name: String,
-    pub value_type: ResolvedType,
-    pub def_val: Expression,
-    pub range: Range,
 }

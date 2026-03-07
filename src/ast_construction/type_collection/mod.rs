@@ -14,16 +14,8 @@
 // limitations under the License.
 //
 
-mod input_var;
-mod output_var;
-mod state_var;
+use crate::ParserTopLevelStmt;
 
-pub use input_var::{InputAttribute, InputVar};
-pub use output_var::OutputVar;
-pub use state_var::StateVar;
-
-use crate::type_registry::ResolvedType;
-
-pub trait VariableKind {
-    fn value_type(&self) -> ResolvedType;
+pub struct TypeCollector {
+    pub top_stmts: Vec<ParserTopLevelStmt>,
 }

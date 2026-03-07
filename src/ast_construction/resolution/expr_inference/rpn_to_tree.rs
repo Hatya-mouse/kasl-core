@@ -15,20 +15,24 @@
 //
 
 use crate::{
-    ExprTokenKind, Expression, FuncCallArg, Program, Range, RawSymbolTable, TypedToken,
-    TypedTokenKind,
+    ExprTokenKind, Expression, FuncCallArg, NameSpace, Range, RawSymbolTable, SymbolPath,
+    TypedToken, TypedTokenKind,
     error::{ErrorCollector, Phase},
     resolution::expr_inference::ExprTreeBuilder,
     symbol_path,
+    symbol_table::{FunctionContext, OperatorContext},
 };
 
 /// Convert an RPN sequence of TypedToken into an Expression tree.
 /// Returns Err on arity errors, unknown symbols, or missing operator implementations.
 pub fn build_expr_tree_from_rpn(
     ec: &mut ErrorCollector,
-    program: &Program,
+    name_space: &NameSpace,
+    func_ctx: &FunctionContext,
+    op_ctx: &OperatorContext,
     symbol_table: &RawSymbolTable,
     rpn_tokens: Vec<TypedToken>,
+    var_resolver: impl Fn(&SymbolPath) -> Option<Expression>,
 ) -> Option<Expression> {
     let mut stack = Vec::new();
     let expr_range = rpn_tokens
@@ -51,21 +55,13 @@ pub fn build_expr_tree_from_rpn(
                     stack.push((Expression::BoolLiteral(value), value_type))
                 }
                 ExprTokenKind::Identifier(ref path) => {
-                    let var_id = match program.get_id_by_path(path).and_then(|ids| ids.first()) {
-                        Some(path) => path,
-                        None => {
-                            ec.var_not_found(
-                                current_token.range,
-                                Phase::TypeResolution,
-                                &path.to_string(),
-                            );
-                            return None;
-                        }
-                    };
-                    stack.push((Expression::Identifier(*var_id), value_type))
+                    if let Some(expr) = var_resolver(path) {
+                        stack.push((expr, value_type))
+                    }
                 }
                 ExprTokenKind::FuncCall { ref path, args } => {
-                    let func_id = match program.get_id_by_path(path).and_then(|ids| ids.first()) {
+                    let func_id = match name_space.get_id_by_path(path).and_then(|ids| ids.first())
+                    {
                         Some(id) => id,
                         None => {
                             ec.func_not_found(
@@ -77,7 +73,7 @@ pub fn build_expr_tree_from_rpn(
                         }
                     };
 
-                    let function = match program.get_func(func_id) {
+                    let function = match func_ctx.get_func(func_id) {
                         Some(func) => func,
                         None => {
                             ec.func_not_found(
@@ -143,7 +139,7 @@ pub fn build_expr_tree_from_rpn(
                 };
 
                 // Get the operator in order to determine the return type
-                let operator = match program
+                let operator = match op_ctx
                     .get_prefix_func_by_path(&symbol_path![symbol], &operand_type)
                 {
                     Some(operator) => operator,

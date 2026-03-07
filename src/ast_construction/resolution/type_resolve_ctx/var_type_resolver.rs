@@ -16,7 +16,7 @@
 
 use crate::{
     ExprToken, Expression, Range, SymbolPath,
-    data::SymbolID,
+    data::VariableID,
     error::Phase,
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
 };
@@ -36,7 +36,7 @@ impl<'a> TypeResolveCtx<'a> {
         decl_range: Range,
         value_type: Option<&SymbolPath>,
         def_val: &[ExprToken],
-    ) -> Option<(SymbolID, Expression)> {
+    ) -> Option<(VariableID, Expression)> {
         let parsed_expr =
             self.program
                 .build_expr_tree_from_raw_tokens(self.ec, def_val, self.symbol_table)?;

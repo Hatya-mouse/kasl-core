@@ -14,22 +14,26 @@
 // limitations under the License.
 //
 
-use crate::{Function, SymbolID, type_registry::ResolvedType};
+use crate::{Function, FunctionID, type_registry::ResolvedType};
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct FunctionContext {
-    pub funcs: HashMap<SymbolID, Function>,
+    pub funcs: HashMap<FunctionID, Function>,
 }
 
 impl FunctionContext {
-    pub fn get_type(&self, symbol_id: &SymbolID) -> Option<ResolvedType> {
+    pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
         self.funcs
             .get(symbol_id)
             .and_then(|func| func.return_type.clone())
     }
 
-    pub fn register_func(&mut self, func: Function, id: SymbolID) {
+    pub fn register_func(&mut self, func: Function, id: FunctionID) {
         self.funcs.insert(id, func);
+    }
+
+    pub fn get_func(&self, symbol_id: &FunctionID) -> Option<&Function> {
+        self.funcs.get(symbol_id)
     }
 }

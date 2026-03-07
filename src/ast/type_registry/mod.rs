@@ -16,34 +16,37 @@
 
 mod primitive_type;
 mod resolved_type;
-mod struct_layout;
+mod struct_decl;
+mod struct_field;
 
 pub use primitive_type::PrimitiveType;
 pub use resolved_type::ResolvedType;
-pub use struct_layout::{StructField, StructLayout};
+pub use struct_decl::StructDecl;
+pub use struct_field::StructField;
 
-use crate::{NameSpace, SymbolID, SymbolPath};
+use crate::{Range, StructID, SymbolPath};
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct TypeRegistry {
-    pub structs: HashMap<SymbolID, StructLayout>,
+    pub structs: HashMap<StructID, StructDecl>,
+    pub path_to_id: HashMap<SymbolPath, StructID>,
 }
 
 impl TypeRegistry {
-    pub fn resolve_type_path(
-        &self,
-        name_space: &NameSpace,
-        type_path: &SymbolPath,
-    ) -> Option<ResolvedType> {
+    pub fn resolve_type_path(&self, type_path: &SymbolPath) -> Option<ResolvedType> {
         if type_path.len() == 1 {
             if let Some(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)
             {
                 return Some(ResolvedType::Primitive(primitive_type));
             }
         }
-        let id = name_space.get_id_by_path(type_path)?.first().unwrap();
-        Some(ResolvedType::Struct(*id))
+        let id = self.get_struct_id_by_path(type_path)?;
+        Some(ResolvedType::Struct(id))
+    }
+
+    pub fn get_struct_id_by_path(&self, type_path: &SymbolPath) -> Option<StructID> {
+        self.path_to_id.get(type_path).copied()
     }
 
     pub fn get_type_size(&self, type_id: &ResolvedType) -> u32 {
@@ -58,5 +61,14 @@ impl TypeRegistry {
             ResolvedType::Primitive(ty) => ty.alignment(),
             ResolvedType::Struct(id) => self.structs[id].alignment,
         }
+    }
+
+    pub fn register_struct(&mut self, name: String, range: Range, id: StructID) {
+        let layout = StructDecl::new(name, range);
+        self.structs.insert(id, layout);
+    }
+
+    pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
+        self.structs.get(id)
     }
 }

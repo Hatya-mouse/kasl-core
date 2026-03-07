@@ -16,13 +16,16 @@
 
 pub mod data;
 pub mod name_space;
+pub mod scope_manager;
 pub mod symbol_table;
 pub mod type_registry;
 
 pub use data::Range;
-pub use name_space::{NameSpace, SymbolID, SymbolPath, SymbolPathComponent};
+pub use name_space::{
+    FunctionID, NameSpace, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,
+    VariableID,
+};
 pub use symbol_table::{
     Expression, FuncCallArg, FuncParam, Function, IfArm, InfixOperator, InfixOperatorProperties,
-    InputAttribute, InputVar, OperatorAssociativity, OutputVar, PrefixOperator, StateVar,
-    Statement,
+    OperatorAssociativity, PrefixOperator, Statement,
 };

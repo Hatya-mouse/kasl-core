@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{SymbolID, type_registry::PrimitiveType};
+use crate::{StructID, type_registry::PrimitiveType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResolvedType {
     Primitive(PrimitiveType),
-    Struct(SymbolID),
+    Struct(StructID),
 }

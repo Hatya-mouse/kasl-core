@@ -19,6 +19,7 @@ pub mod program_builder;
 pub mod resolution;
 pub mod stmt_building;
 pub mod table_construction;
+pub mod type_collection;
 pub mod validation;
 
 pub use program_builder::construct_program;

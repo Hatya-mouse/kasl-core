@@ -14,20 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{
-    Expression, Range, symbol_table::variables::VariableKind, type_registry::ResolvedType,
-};
+use crate::{Expression, Range, type_registry::ResolvedType};
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct OutputVar {
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructField {
     pub name: String,
     pub value_type: ResolvedType,
     pub def_val: Expression,
     pub range: Range,
-}
-
-impl VariableKind for OutputVar {
-    fn value_type(&self) -> ResolvedType {
-        self.value_type.clone()
-    }
 }

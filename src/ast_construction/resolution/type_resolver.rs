@@ -15,21 +15,24 @@
 //
 
 use crate::{
-    ParserOperatorType, ParserTopLevelStmtKind, Range, RawSymbolTable,
+    NameSpace, ParserOperatorType, ParserTopLevelStmtKind, Range, RawSymbolTable,
     error::{ErrorCollector, Phase},
     resolution::{
         TypeResolveCtx,
         dependency_analysis::{build_graph, sort_graph},
     },
     symbol_table::{FunctionContext, OperatorContext, VariableContext},
+    type_registry::TypeRegistry,
 };
 
 /// Infer the types of symbols (input, output, state, var, and function parameters) in the program.
 pub fn resolve_types(
     ec: &mut ErrorCollector,
+    name_space: &mut NameSpace,
     func_ctx: &mut FunctionContext,
     op_ctx: &mut OperatorContext,
     var_ctx: &mut VariableContext,
+    type_registry: &TypeRegistry,
     symbol_table: &RawSymbolTable,
 ) {
     // Build the type dependency graph
@@ -64,7 +67,15 @@ pub fn resolve_types(
     }
 
     // Create a TypeResolveCtx instance
-    let mut ctx = TypeResolveCtx::new(ec, func_ctx, op_ctx, var_ctx, symbol_table);
+    let mut ctx = TypeResolveCtx::new(
+        ec,
+        name_space,
+        func_ctx,
+        op_ctx,
+        var_ctx,
+        type_registry,
+        symbol_table,
+    );
 
     // Infer the type of each symbol in the sorted order
     for (symbol_id, current_stmt) in sorted_list.iter().zip(statements) {

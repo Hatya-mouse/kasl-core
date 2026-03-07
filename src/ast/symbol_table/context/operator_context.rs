@@ -14,22 +14,22 @@
 // limitations under the License.
 //
 
-use crate::{InfixOperator, InfixOperatorProperties, PrefixOperator, SymbolID};
+use crate::{InfixOperator, InfixOperatorProperties, PrefixOperator, VariableID};
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct OperatorContext {
-    pub infix_operators: HashMap<SymbolID, InfixOperator>,
-    pub prefix_operators: HashMap<SymbolID, PrefixOperator>,
+    pub infix_operators: HashMap<VariableID, InfixOperator>,
+    pub prefix_operators: HashMap<VariableID, PrefixOperator>,
     pub infix_operator_properties: HashMap<String, InfixOperatorProperties>,
 }
 
 impl OperatorContext {
-    pub fn register_infix_func(&mut self, infix: InfixOperator, id: SymbolID) {
+    pub fn register_infix_func(&mut self, infix: InfixOperator, id: VariableID) {
         self.infix_operators.insert(id, infix);
     }
 
-    pub fn register_prefix_func(&mut self, prefix: PrefixOperator, id: SymbolID) {
+    pub fn register_prefix_func(&mut self, prefix: PrefixOperator, id: VariableID) {
         self.prefix_operators.insert(id, prefix);
     }
 

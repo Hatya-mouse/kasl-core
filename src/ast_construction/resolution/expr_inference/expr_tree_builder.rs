@@ -15,19 +15,23 @@
 //
 
 use crate::{
-    ExprToken, Expression, RawSymbolTable,
+    ExprToken, Expression, NameSpace, RawSymbolTable,
     error::ErrorCollector,
     get_typed_tokens,
     resolution::expr_inference::{build_expr_tree_from_rpn, rearrange_tokens_to_rpn},
+    symbol_table::{FunctionContext, VariableContext},
 };
 
 fn build_expr_tree_from_raw_tokens(
     ec: &mut ErrorCollector,
+    name_space: &mut NameSpace,
+    func_ctx: &mut FunctionContext,
+    var_ctx: &mut VariableContext,
     expr: &[ExprToken],
     symbol_table: &RawSymbolTable,
 ) -> Option<Expression> {
     // 1. Convert tokens to TypedToken so we can easily look up their types
-    let typed_tokens = get_typed_tokens(ec, self, expr)?;
+    let typed_tokens = get_typed_tokens(ec, name_space, func_ctx, var_ctx, expr)?;
     // 2. Rearrange tokens to get reverse polish notation
     let rpn_tokens = rearrange_tokens_to_rpn(ec, self, typed_tokens)?;
     // 3. Evaluate the reverse polish notation to get the type of the expression

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-mod context;
 mod func_resolver;
 mod infix_operator_resolver;
 mod param_resolver;
@@ -23,4 +22,41 @@ mod struct_resolver;
 mod var_resolver;
 mod var_type_resolver;
 
-pub use context::TypeResolveCtx;
+use crate::{
+    NameSpace, RawSymbolTable,
+    error::ErrorCollector,
+    symbol_table::{FunctionContext, OperatorContext, VariableContext},
+    type_registry::TypeRegistry,
+};
+
+pub struct TypeResolveCtx<'a> {
+    pub ec: &'a mut ErrorCollector,
+    pub name_space: &'a mut NameSpace,
+    pub func_ctx: &'a mut FunctionContext,
+    pub op_ctx: &'a mut OperatorContext,
+    pub var_ctx: &'a mut VariableContext,
+    pub type_registry: &'a mut TypeRegistry,
+    pub symbol_table: &'a RawSymbolTable<'a>,
+}
+
+impl<'a> TypeResolveCtx<'a> {
+    pub fn new(
+        ec: &'a mut ErrorCollector,
+        name_space: &'a mut NameSpace,
+        func_ctx: &'a mut FunctionContext,
+        op_ctx: &'a mut OperatorContext,
+        var_ctx: &'a mut VariableContext,
+        type_registry: &'a mut TypeRegistry,
+        symbol_table: &'a RawSymbolTable<'a>,
+    ) -> Self {
+        TypeResolveCtx {
+            ec,
+            name_space,
+            func_ctx,
+            op_ctx,
+            var_ctx,
+            type_registry,
+            symbol_table,
+        }
+    }
+}

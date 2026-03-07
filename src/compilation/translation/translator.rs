@@ -16,7 +16,7 @@
 
 use crate::{
     Function, MAIN_FUNCTION_NAME, PrimitiveType, Program, compilation::InputProvider,
-    data::SymbolID, symbol_path,
+    data::VariableID, symbol_path,
 };
 use cranelift::prelude::*;
 use std::collections::HashMap;
@@ -24,7 +24,7 @@ use std::collections::HashMap;
 pub struct Translator<'a> {
     pub builder: FunctionBuilder<'a>,
     pub program: &'a Program,
-    pub primitive_types: HashMap<SymbolID, PrimitiveType>,
+    pub primitive_types: HashMap<VariableID, PrimitiveType>,
     pub input_provider: dyn InputProvider,
 }
 

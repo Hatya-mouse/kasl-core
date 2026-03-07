@@ -19,11 +19,9 @@ mod expression;
 mod function;
 mod operator;
 mod statement;
-mod variables;
 
-pub use context::{FunctionContext, OperatorContext, VariableContext};
+pub use context::{FunctionContext, OperatorContext};
 pub use expression::Expression;
 pub use function::{FuncCallArg, FuncParam, Function};
 pub use operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity, PrefixOperator};
 pub use statement::{IfArm, Statement};
-pub use variables::{InputAttribute, InputVar, OutputVar, StateVar};

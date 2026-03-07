@@ -14,16 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{
-    FuncCallArg, Range, SymbolID,
-    error::{ErrorCollector, Phase},
-    symbol_table::{FunctionContext, VariableContext},
-    type_registry::{PrimitiveType, ResolvedType},
-};
+use crate::{FuncCallArg, VariableID, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
-    IntLiteral(u32),
+    IntLiteral(i32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     PrefixOperator {
@@ -38,55 +33,18 @@ pub enum Expression {
         rhs_type: ResolvedType,
         return_type: ResolvedType,
     },
-    Identifier(SymbolID),
-    FuncCall {
-        id: SymbolID,
-        args: Vec<FuncCallArg>,
+    Identifier {
+        id: VariableID,
+        value_type: ResolvedType,
     },
-}
-
-impl Expression {
-    pub fn get_type(
-        &self,
-        ec: &mut ErrorCollector,
-        var_ctx: &VariableContext,
-        func_ctx: &FunctionContext,
-        error_range: Range,
-    ) -> Option<ResolvedType> {
-        match self {
-            Expression::IntLiteral(_) => Some(ResolvedType::Primitive(PrimitiveType::Int)),
-            Expression::FloatLiteral(_) => Some(ResolvedType::Primitive(PrimitiveType::Float)),
-            Expression::BoolLiteral(_) => Some(ResolvedType::Primitive(PrimitiveType::Bool)),
-            Expression::PrefixOperator { return_type, .. } => Some(return_type.clone()),
-            Expression::InfixOperator { return_type, .. } => Some(return_type.clone()),
-            Expression::Identifier(symbol_id) => match var_ctx.get_type(symbol_id) {
-                Some(value_type) => Some(value_type),
-                None => {
-                    ec.comp_bug(
-                        error_range,
-                        Phase::TypeResolution,
-                        &format!(
-                            "Identifier with ID {} which should have been resolved",
-                            symbol_id
-                        ),
-                    );
-                    None
-                }
-            },
-            Expression::FuncCall { id: func_id, .. } => match func_ctx.get_type(func_id) {
-                Some(return_type) => Some(return_type),
-                None => {
-                    ec.comp_bug(
-                        error_range,
-                        Phase::TypeResolution,
-                        &format!(
-                            "Call to function with ID {} which should have been resolved",
-                            func_id
-                        ),
-                    );
-                    None
-                }
-            },
-        }
-    }
+    MemberAccess {
+        lhs: Box<Expression>,
+        offset: usize,
+        value_type: ResolvedType,
+    },
+    FuncCall {
+        id: VariableID,
+        args: Vec<FuncCallArg>,
+        return_type: ResolvedType,
+    },
 }

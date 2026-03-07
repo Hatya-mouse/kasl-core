@@ -16,7 +16,7 @@
 
 use crate::{
     ParserBodyStmt, ParserBodyStmtKind, Statement,
-    data::SymbolID,
+    data::VariableID,
     error::Ph,
     resolution::{TypeResolveCtx, expr_inference::ExprTreeBuilder},
     stmt_building::StmtBuildingCtx,
@@ -25,7 +25,7 @@ use crate::{
 impl<'a> StmtBuildingCtx<'a> {
     pub fn build_func_body_stmt(
         &mut self,
-        function_id: SymbolID,
+        function_id: VariableID,
         original_stmts: &[ParserBodyStmt],
     ) -> Vec<Statement> {
         let mut parsed_stmts = Vec::new();

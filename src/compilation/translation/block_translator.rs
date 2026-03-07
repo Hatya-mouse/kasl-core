@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{Statement, compilation::Translator, data::SymbolID};
+use crate::{Statement, compilation::Translator, data::VariableID};
 use cranelift::prelude::*;
 use std::collections::HashMap;
 
 impl Translator<'_> {
     pub fn translate_block(&mut self, statements: &[Statement]) {
-        let mut local_vars: HashMap<SymbolID, Variable> = HashMap::new();
+        let mut local_vars: HashMap<VariableID, Variable> = HashMap::new();
 
         for statement in statements {
             match statement {

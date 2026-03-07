@@ -15,22 +15,45 @@
 //
 
 use crate::{
-    Expression, Range, symbol_table::variables::VariableKind, type_registry::ResolvedType,
+    Expression, Range,
+    type_registry::{ResolvedType, StructField, TypeRegistry},
 };
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct InputVar {
+pub struct ScopeVar {
     pub name: String,
     pub value_type: ResolvedType,
     pub def_val: Expression,
-    pub attrs: Vec<InputAttribute>,
     pub range: Range,
+    pub var_kind: VariableKind,
 }
 
-impl VariableKind for InputVar {
+impl ScopeVar {
     fn value_type(&self) -> ResolvedType {
         self.value_type.clone()
     }
+
+    fn get_field<'a>(
+        &self,
+        type_registry: &'a TypeRegistry,
+        field_name: &str,
+    ) -> Option<&'a StructField> {
+        match self.value_type {
+            ResolvedType::Struct(ref struct_id) => match type_registry.get_struct(struct_id) {
+                Some(struct_layout) => struct_layout.get_field(field_name),
+                None => None,
+            },
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum VariableKind {
+    Input { attrs: Vec<InputAttribute> },
+    Output,
+    State,
+    Local,
 }
 
 #[derive(Debug, PartialEq, Clone)]

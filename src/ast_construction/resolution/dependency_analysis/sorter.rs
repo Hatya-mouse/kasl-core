@@ -84,7 +84,7 @@ pub fn generate_cyclic_errors(
                     ec.comp_bug(
                         stmt.range,
                         Phase::GraphConstruction,
-                        "generate_cyclic_errors received a SymbolID that doesn't exist in the RawSymbolTable",
+                        "generate_cyclic_errors received a VariableID that doesn't exist in the RawSymbolTable",
                     );
                     return;
                 }
@@ -98,7 +98,7 @@ pub fn generate_cyclic_errors(
                     ec.comp_bug(
                         Range::zero(),
                         Phase::GraphConstruction,
-                        "generate_cyclic_errors received a SymbolID that doesn't exist in the RawSymbolTable",
+                        "generate_cyclic_errors received a VariableID that doesn't exist in the RawSymbolTable",
                     );
                     return;
                 }

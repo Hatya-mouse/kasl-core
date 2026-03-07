@@ -23,7 +23,7 @@ impl<'a> StmtBuildingCtx<'a> {
 
         // Iterate over each function in the program
         for func_id in func_ids {
-            // Get the TableStmtID used in the RawSymbolTable from the SymbolID used in the Program
+            // Get the TableStmtID used in the RawSymbolTable from the VariableID used in the Program
             if let Some(func_path) = self.program.get_path_by_id(&func_id).cloned()
                 && let Some(table_stmt_id) = self
                     .symbol_table

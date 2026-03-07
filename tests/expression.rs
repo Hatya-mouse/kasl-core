@@ -17,7 +17,7 @@
 use kasl::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, PrimitiveType,
     Program, Range, RawSymbolTable, TypedToken, TypedTokenKind,
-    data::SymbolID,
+    data::VariableID,
     error::{EK, ErrorCollector, Pl},
     get_typed_tokens,
     resolution::{
@@ -35,7 +35,7 @@ fn v() -> TypedToken {
                 kind: ExprTokenKind::IntLiteral(0),
                 range: Range::zero(),
             },
-            value_type: SymbolID::new(0),
+            value_type: VariableID::new(0),
         },
         Range::zero(),
     )

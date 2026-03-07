@@ -16,7 +16,7 @@
 
 use crate::{
     Program, Range, SymbolPath,
-    data::SymbolID,
+    data::VariableID,
     error::{ErrorCollector, Ph},
 };
 
@@ -27,7 +27,7 @@ pub trait SymbolTypeGetter {
         symbol_path: &SymbolPath,
         range: Range,
         error_fn: F,
-    ) -> Option<SymbolID>
+    ) -> Option<VariableID>
     where
         F: Fn(&mut ErrorCollector, &SymbolPath);
 }
@@ -39,7 +39,7 @@ impl SymbolTypeGetter for Program {
         symbol_path: &SymbolPath,
         range: Range,
         error_fn: F,
-    ) -> Option<SymbolID>
+    ) -> Option<VariableID>
     where
         F: Fn(&mut ErrorCollector, &SymbolPath),
     {

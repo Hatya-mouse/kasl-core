@@ -17,54 +17,48 @@
 mod symbol_id;
 mod symbol_path;
 
-pub use symbol_id::{ParserStmtID, SymbolID};
+pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
-
-use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct NameSpace {
-    id_to_path: HashMap<SymbolID, SymbolPath>,
-    path_to_id: HashMap<SymbolPath, Vec<SymbolID>>,
-    next_id: usize,
+    next_variable_id: usize,
+    next_struct_id: usize,
+    next_function_id: usize,
+    next_operator_id: usize,
 }
 
 impl NameSpace {
     pub fn new() -> Self {
         Self {
-            id_to_path: HashMap::new(),
-            path_to_id: HashMap::new(),
-            next_id: 0,
+            next_variable_id: 0,
+            next_struct_id: 0,
+            next_function_id: 0,
+            next_operator_id: 0,
         }
     }
 
-    /// Returns a SymbolID for the given SymbolPath.
-    pub fn get_id_by_path(&self, path: &SymbolPath) -> Option<&Vec<SymbolID>> {
-        self.path_to_id.get(path)
-    }
-
-    /// Returns a SymbolPath for the given SymbolID.
-    pub fn get_path_by_id(&self, id: &SymbolID) -> Option<&SymbolPath> {
-        self.id_to_path.get(id)
-    }
-
-    /// Registers a new SymbolID for the given SymbolPath.
-    pub fn register_path_with_id(&mut self, path: SymbolPath, id: SymbolID) {
-        self.path_to_id.entry(path.clone()).or_default().push(id);
-        self.id_to_path.insert(id, path);
-    }
-
-    /// Returns a next available SymbolID.
-    pub fn generate_id(&mut self) -> SymbolID {
-        let id = SymbolID::new(self.next_id);
-        self.next_id += 1;
+    pub fn generate_variable_id(&mut self) -> VariableID {
+        let id = VariableID::new(self.next_variable_id);
+        self.next_variable_id += 1;
         id
     }
 
-    /// Registers a next available SymbolID for the given SymbolPath, and returns the new ID.
-    pub fn register_path(&mut self, path: SymbolPath) -> SymbolID {
-        let id = self.generate_id();
-        self.register_path_with_id(path, id);
+    pub fn generate_struct_id(&mut self) -> StructID {
+        let id = StructID::new(self.next_struct_id);
+        self.next_struct_id += 1;
+        id
+    }
+
+    pub fn generate_function_id(&mut self) -> FunctionID {
+        let id = FunctionID::new(self.next_function_id);
+        self.next_function_id += 1;
+        id
+    }
+
+    pub fn generate_operator_id(&mut self) -> OperatorID {
+        let id = OperatorID::new(self.next_operator_id);
+        self.next_operator_id += 1;
         id
     }
 }

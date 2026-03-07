@@ -16,7 +16,7 @@
 
 use crate::{
     Program, RawSymbolTable,
-    data::SymbolID,
+    data::VariableID,
     error::{ErrorCollector, Ph},
     stmt_building::{StmtBuildingCtx, function_graph::FunctionGraph},
 };
@@ -47,8 +47,8 @@ pub fn build_statements(
 }
 
 // Gets the cyclic nodes using Kahn's algorithm.
-fn detect_cycles(graph: &FunctionGraph) -> Vec<SymbolID> {
-    let mut in_degrees: HashMap<SymbolID, u32> = HashMap::new();
+fn detect_cycles(graph: &FunctionGraph) -> Vec<VariableID> {
+    let mut in_degrees: HashMap<VariableID, u32> = HashMap::new();
 
     // Initialize in-degrees for all nodes
     for node in &graph.nodes {
@@ -63,7 +63,7 @@ fn detect_cycles(graph: &FunctionGraph) -> Vec<SymbolID> {
     }
 
     // Push the nodes with in-degree 0 into the queue
-    let mut queue: VecDeque<SymbolID> = VecDeque::new();
+    let mut queue: VecDeque<VariableID> = VecDeque::new();
     for (node, degree) in in_degrees.iter() {
         if *degree == 0 {
             queue.push_back(*node);
@@ -84,7 +84,7 @@ fn detect_cycles(graph: &FunctionGraph) -> Vec<SymbolID> {
     }
 
     // Get the cyclic nodes
-    let cyclic_nodes: Vec<SymbolID> = in_degrees
+    let cyclic_nodes: Vec<VariableID> = in_degrees
         .iter()
         .filter(|(_, degree)| **degree > 0)
         .map(|(node, _)| *node)
