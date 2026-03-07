@@ -64,6 +64,12 @@ pub enum ErrorKind {
     /// Member access expression on a primitive type.
     MemberAccessOnPrimitive,
 
+    /// Title: MemberNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the struct and the name of the member that is not found
+    /// Member is not found.
+    MemberNotFound,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

@@ -80,6 +80,7 @@ pub enum MemberAccess {
     },
     FuncCall {
         name: String,
+        id: Option<FunctionID>,
         no_type_args: Vec<NoTypeFuncCallArg>,
         args: Option<Vec<FuncCallArg>>,
     },

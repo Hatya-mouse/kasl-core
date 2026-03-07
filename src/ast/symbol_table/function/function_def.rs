@@ -19,6 +19,7 @@ use crate::{Expr, Range, Statement, type_registry::ResolvedType};
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
     pub name: String,
+    pub is_member: bool,
     pub is_static: bool,
     pub params: Vec<FuncParam>,
     pub return_type: Option<ResolvedType>,

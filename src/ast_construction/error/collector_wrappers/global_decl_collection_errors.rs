@@ -99,4 +99,14 @@ impl ErrorCollector {
             Pl::None,
         );
     }
+
+    pub fn member_not_found(&mut self, range: Range, struct_name: String, member_name: String) {
+        self.emit(
+            EK::MemberNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Strs(struct_name, member_name),
+        );
+    }
 }
