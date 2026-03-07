@@ -18,26 +18,30 @@ mod infix_operator;
 mod postfix_operator;
 mod prefix_operator;
 
-pub use infix_operator::{InfixOperator, InfixOperatorProperties, OperatorAssociativity};
-pub use postfix_operator::{PostfixOperator, PostfixOperatorProperties};
-pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties};
+pub use infix_operator::{
+    InfixOperator, InfixOperatorProperties, InfixQuery, InfixQueryRef, OperatorAssociativity,
+};
+pub use postfix_operator::{
+    PostfixOperator, PostfixOperatorProperties, PostfixQuery, PostfixQueryRef,
+};
+pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery, PrefixQueryRef};
 
 use crate::OperatorID;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 #[derive(Debug)]
 pub struct OperatorContext {
     infix_operator_properties: HashMap<String, InfixOperatorProperties>,
     infix_operators: HashMap<OperatorID, InfixOperator>,
-    infix_ids: HashMap<String, OperatorID>,
+    infix_ids: HashMap<InfixQuery, OperatorID>,
 
     prefix_operator_properties: HashMap<String, PrefixOperatorProperties>,
     prefix_operators: HashMap<OperatorID, PrefixOperator>,
-    prefix_ids: HashMap<String, OperatorID>,
+    prefix_ids: HashMap<PrefixQuery, OperatorID>,
 
     postfix_operator_properties: HashMap<String, PostfixOperatorProperties>,
     postfix_operators: HashMap<OperatorID, PostfixOperator>,
-    postfix_ids: HashMap<String, OperatorID>,
+    postfix_ids: HashMap<PostfixQuery, OperatorID>,
 }
 
 impl OperatorContext {
@@ -79,7 +83,7 @@ impl OperatorContext {
         self.postfix_operator_properties.insert(symbol, properties);
     }
 
-    // -- GETTER FUNCTIONS --
+    // -- PROPERTIES GETTER FUNCTIONS --
 
     pub fn get_infix_props(&self, symbol: &str) -> Option<&InfixOperatorProperties> {
         self.infix_operator_properties.get(symbol)
@@ -91,5 +95,33 @@ impl OperatorContext {
 
     pub fn get_postfix_props(&self, symbol: &str) -> Option<&PostfixOperatorProperties> {
         self.postfix_operator_properties.get(symbol)
+    }
+
+    // -- ID GETTER FUNCTIONS --
+
+    pub fn get_infix_id(&self, query: InfixQueryRef) -> Option<OperatorID> {
+        self.infix_ids.get(&query).copied()
+    }
+
+    pub fn get_prefix_id(&self, query: PrefixQueryRef) -> Option<OperatorID> {
+        self.prefix_ids.get(&query).copied()
+    }
+
+    pub fn get_postfix_id(&self, query: PostfixQueryRef) -> Option<OperatorID> {
+        self.postfix_ids.get(&query).copied()
+    }
+
+    // -- OPERATOR FUNC GETTER FUNCTIONS --
+
+    pub fn get_infix_op(&self, id: &OperatorID) -> Option<&InfixOperator> {
+        self.infix_operators.get(id)
+    }
+
+    pub fn get_prefix_op(&self, id: &OperatorID) -> Option<&PrefixOperator> {
+        self.prefix_operators.get(id)
+    }
+
+    pub fn get_postfix_op(&self, id: &OperatorID) -> Option<&PostfixOperator> {
+        self.postfix_operators.get(id)
     }
 }

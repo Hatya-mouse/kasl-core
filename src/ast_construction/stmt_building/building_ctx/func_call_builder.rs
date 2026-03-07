@@ -15,8 +15,11 @@
 //
 
 use crate::{
-    FuncCallArg, ParserFuncCallArg, ParserScopeStmt, Statement, SymbolPath, data::VariableID,
-    error::Phase, resolution::expr_inference::ExprTreeBuilder, stmt_building::StmtBuildingCtx,
+    FuncCallArg, ParserFuncCallArg, ParserScopeStmt, Statement, SymbolPath,
+    data::VariableID,
+    error::{Ph, Phase},
+    resolution::expr_inference::ExprTreeBuilder,
+    stmt_building::StmtBuildingCtx,
 };
 
 impl<'a> StmtBuildingCtx<'a> {
@@ -36,7 +39,7 @@ impl<'a> StmtBuildingCtx<'a> {
             Some(parsed_target) => parsed_target,
             None => {
                 self.ec
-                    .func_not_found(stmt.range, Phase::StatementBuilding, &path.to_string());
+                    .func_not_found(stmt.range, Ph::StatementBuilding, &path.to_string());
                 return;
             }
         };
@@ -44,7 +47,7 @@ impl<'a> StmtBuildingCtx<'a> {
             Some(func) => func,
             None => {
                 self.ec
-                    .func_not_found(stmt.range, Phase::StatementBuilding, &path.to_string());
+                    .func_not_found(stmt.range, Ph::StatementBuilding, &path.to_string());
                 return;
             }
         };

@@ -15,8 +15,11 @@
 //
 
 use crate::{
-    Expr, ExprKind, ExprToken, ExprTokenKind, OperatorAssociativity, ParserMemberAccess, error::Ph,
-    global_decl_collection::expr_builder::ExpressionBuilder, symbol_table::MemberAccess,
+    Expr, ExprKind, ExprToken, ExprTokenKind, OperatorAssociativity, ParserFuncCallArg,
+    ParserMemberAccess,
+    error::Ph,
+    global_decl_collection::expr_builder::ExpressionBuilder,
+    symbol_table::{MemberAccess, NoTypeFuncCallArg},
 };
 use std::{iter::Peekable, slice::Iter};
 
@@ -30,6 +33,9 @@ impl ExpressionBuilder<'_> {
         let mut lhs = self.parse_lhs(tokens)?;
 
         while let Some(op_token) = tokens.peek() {
+            // Get the range of the operator token
+            let op_range = op_token.range;
+
             let op_symbol = match &op_token.kind {
                 ExprTokenKind::Operator(symbol) => symbol.clone(),
                 _ => break,
@@ -48,13 +54,19 @@ impl ExpressionBuilder<'_> {
                         operand: Box::new(lhs),
                     },
                     (),
+                    op_range,
                 );
                 tokens.next();
             } else {
                 // If the operator is not a postfix operator, assume it's infix
                 let op_props = match self.op_ctx.get_infix_props(&op_symbol) {
                     Some(op_props) => op_props,
-                    None => break,
+                    None => {
+                        // If the both infix and postfix operators are not found, emit an error
+                        self.ec
+                            .infix_or_postfix_op_not_found(op_token.range, &op_symbol);
+                        break;
+                    }
                 };
 
                 if op_props.precedence < min_prec {
@@ -89,6 +101,7 @@ impl ExpressionBuilder<'_> {
                         rhs: Box::new(rhs),
                     },
                     (),
+                    op_range,
                 );
             }
         }
@@ -123,14 +136,19 @@ impl ExpressionBuilder<'_> {
                         operand: Box::new(operand),
                     },
                     (),
+                    token.range,
                 ))
             }
 
-            ExprTokenKind::IntLiteral(value) => Some(Expr::new(ExprKind::IntLiteral(*value), ())),
-            ExprTokenKind::FloatLiteral(value) => {
-                Some(Expr::new(ExprKind::FloatLiteral(*value), ()))
+            ExprTokenKind::IntLiteral(value) => {
+                Some(Expr::new(ExprKind::IntLiteral(*value), (), token.range))
             }
-            ExprTokenKind::BoolLiteral(value) => Some(Expr::new(ExprKind::BoolLiteral(*value), ())),
+            ExprTokenKind::FloatLiteral(value) => {
+                Some(Expr::new(ExprKind::FloatLiteral(*value), (), token.range))
+            }
+            ExprTokenKind::BoolLiteral(value) => {
+                Some(Expr::new(ExprKind::BoolLiteral(*value), (), token.range))
+            }
 
             ExprTokenKind::Identifier(name) => Some(Expr::new(
                 ExprKind::Identifier {
@@ -138,15 +156,18 @@ impl ExpressionBuilder<'_> {
                     id: None,
                 },
                 (),
+                token.range,
             )),
 
-            ExprTokenKind::FuncCall { name, .. } => Some(Expr::new(
+            ExprTokenKind::FuncCall { name, args } => Some(Expr::new(
                 ExprKind::FuncCall {
                     name: name.clone(),
                     id: None,
+                    no_type_args: self.parse_func_args(args.clone())?,
                     args: None,
                 },
                 (),
+                token.range,
             )),
 
             ExprTokenKind::Chain { lhs, member } => {
@@ -156,8 +177,9 @@ impl ExpressionBuilder<'_> {
                         name: name.clone(),
                         offset: None,
                     },
-                    ParserMemberAccess::FuncCall { name, .. } => MemberAccess::FuncCall {
+                    ParserMemberAccess::FuncCall { name, args } => MemberAccess::FuncCall {
                         name: name.clone(),
+                        no_type_args: self.parse_func_args(args.clone())?,
                         args: None,
                     },
                 };
@@ -167,6 +189,7 @@ impl ExpressionBuilder<'_> {
                         access: member_access,
                     },
                     (),
+                    token.range,
                 ))
             }
 
@@ -181,5 +204,17 @@ impl ExpressionBuilder<'_> {
                 None
             }
         }
+    }
+
+    fn parse_func_args(&mut self, args: Vec<ParserFuncCallArg>) -> Option<Vec<NoTypeFuncCallArg>> {
+        let mut parsed_args = Vec::new();
+        for arg in args {
+            let arg_expr = self.build(arg.value)?;
+            parsed_args.push(NoTypeFuncCallArg {
+                label: arg.label,
+                value: arg_expr,
+            });
+        }
+        Some(parsed_args)
     }
 }

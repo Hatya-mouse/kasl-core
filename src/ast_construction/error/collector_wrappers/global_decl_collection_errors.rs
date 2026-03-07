@@ -60,6 +60,16 @@ impl ErrorCollector {
         );
     }
 
+    pub fn infix_or_postfix_op_not_found(&mut self, range: Range, symbol: &str) {
+        self.emit(
+            EK::InfixOrPostfixOpNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(symbol.to_string()),
+        );
+    }
+
     pub fn op_not_associative(&mut self, range: Range, symbol: &str) {
         self.emit(
             EK::OpNotAssociative,
@@ -67,6 +77,26 @@ impl ErrorCollector {
             Ph::GlobalDeclCollection,
             Sv::Error,
             Pl::Str(symbol.to_string()),
+        );
+    }
+
+    pub fn no_return_func_in_expr(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::NoReturnFuncInExpr,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
+
+    pub fn member_access_on_primitive(&mut self, range: Range) {
+        self.emit(
+            EK::MemberAccessOnPrimitive,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::None,
         );
     }
 }

@@ -16,7 +16,7 @@
 
 use crate::{
     ExprTokenKind, ParserFuncParam, RawSymbolTable,
-    error::{ErrorCollector, Phase},
+    error::{ErrorCollector, Ph, Phase},
     name_space::ParserStmtID,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
@@ -61,7 +61,7 @@ pub fn build_func_param_graph(
                             None => {
                                 ec.func_not_found(
                                     expr.range,
-                                    Phase::GraphConstruction,
+                                    Ph::GraphConstruction,
                                     &path.to_string(),
                                 );
                                 return;

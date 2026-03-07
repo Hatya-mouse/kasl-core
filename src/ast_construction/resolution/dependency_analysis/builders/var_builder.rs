@@ -16,7 +16,7 @@
 
 use crate::{
     ExprToken, ExprTokenKind, RawSymbolTable,
-    error::{ErrorCollector, Phase},
+    error::{ErrorCollector, Ph, Phase},
     name_space::ParserStmtID,
     resolution::{DependencyGraphNode, dependency_analysis::DependencyGraph},
 };
@@ -51,7 +51,7 @@ pub fn build_var_graph(
                 let to_ids = match symbol_table.get_id_by_path(path) {
                     Some(ids) => ids,
                     None => {
-                        ec.func_not_found(expr.range, Phase::GraphConstruction, &path.to_string());
+                        ec.func_not_found(expr.range, Ph::GraphConstruction, &path.to_string());
                         return;
                     }
                 };

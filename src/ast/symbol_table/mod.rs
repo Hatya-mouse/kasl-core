@@ -20,9 +20,10 @@ mod operator;
 mod statement;
 
 pub use expression::{Expr, ExprKind, MemberAccess};
-pub use function::{FuncCallArg, FuncParam, Function, FunctionContext};
+pub use function::{FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg};
 pub use operator::{
-    InfixOperator, InfixOperatorProperties, OperatorAssociativity, OperatorContext,
-    PostfixOperator, PostfixOperatorProperties, PrefixOperator, PrefixOperatorProperties,
+    InfixOperator, InfixOperatorProperties, InfixQueryRef, OperatorAssociativity, OperatorContext,
+    PostfixOperator, PostfixOperatorProperties, PostfixQueryRef, PrefixOperator,
+    PrefixOperatorProperties, PrefixQueryRef,
 };
 pub use statement::{IfArm, Statement};

@@ -16,7 +16,7 @@
 
 mod function_def;
 
-pub use function_def::{FuncCallArg, FuncParam, Function};
+pub use function_def::{FuncCallArg, FuncParam, Function, NoTypeFuncCallArg};
 
 use crate::{FunctionID, StructID, type_registry::ResolvedType};
 use std::collections::HashMap;
@@ -43,13 +43,14 @@ impl FunctionContext {
         self.funcs.get(symbol_id)
     }
 
-    pub fn get_global_func_by_name(&self, name: &str) -> Option<&FunctionID> {
-        self.global_functions.get(name)
+    pub fn get_global_func_by_name(&self, name: &str) -> Option<FunctionID> {
+        self.global_functions.get(name).copied()
     }
 
-    pub fn get_member_func_by_name(&self, struct_id: &StructID, name: &str) -> Option<&FunctionID> {
+    pub fn get_member_func_by_name(&self, struct_id: &StructID, name: &str) -> Option<FunctionID> {
         self.member_functions
             .get(struct_id)
             .and_then(|funcs| funcs.get(name))
+            .copied()
     }
 }

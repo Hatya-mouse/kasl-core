@@ -51,8 +51,14 @@ impl Function {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct NoTypeFuncCallArg {
+    pub label: Option<String>,
+    pub value: Expr<()>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct FuncCallArg {
-    pub name: String,
+    pub arg_name: Option<String>,
     pub value: Expr<ResolvedType>,
 }
 

@@ -57,11 +57,16 @@ impl StructDecl {
         }
     }
 
-    pub fn get_field(&self, field_name: &str) -> Option<&StructField> {
-        match self.indices.get(field_name) {
-            Some(field_index) => self.fields.get(*field_index),
-            None => None,
-        }
+    pub fn get_field_by_index(&self, field_index: usize) -> Option<&StructField> {
+        self.fields.get(field_index)
+    }
+
+    pub fn get_field_index(&self, field_name: &str) -> Option<usize> {
+        self.indices.get(field_name).copied()
+    }
+
+    pub fn get_offset_by_index(&self, field_index: usize) -> Option<u32> {
+        self.field_offsets.get(field_index).copied()
     }
 
     pub fn compute_layout(&mut self, type_registry: &TypeRegistry) {

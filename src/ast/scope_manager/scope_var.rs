@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    Expr, Range,
-    type_registry::{ResolvedType, StructField, TypeRegistry},
-};
+use crate::{Expr, Range, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ScopeVar {
@@ -26,26 +23,6 @@ pub struct ScopeVar {
     pub def_val: Expr<ResolvedType>,
     pub range: Range,
     pub var_kind: VariableKind,
-}
-
-impl ScopeVar {
-    fn value_type(&self) -> ResolvedType {
-        self.value_type.clone()
-    }
-
-    fn get_field<'a>(
-        &self,
-        type_registry: &'a TypeRegistry,
-        field_name: &str,
-    ) -> Option<&'a StructField> {
-        match self.value_type {
-            ResolvedType::Struct(ref struct_id) => match type_registry.get_struct(struct_id) {
-                Some(struct_layout) => struct_layout.get_field(field_name),
-                None => None,
-            },
-            _ => None,
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

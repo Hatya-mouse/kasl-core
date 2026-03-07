@@ -15,6 +15,7 @@
 //
 
 use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
+use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct InfixOperator {
@@ -38,4 +39,24 @@ pub enum OperatorAssociativity {
     Left,
     Right,
     None,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+pub struct InfixQuery {
+    pub symbol: String,
+    pub lhs_type: ResolvedType,
+    pub rhs_type: ResolvedType,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+pub struct InfixQueryRef<'a> {
+    pub symbol: &'a str,
+    pub lhs_type: &'a ResolvedType,
+    pub rhs_type: &'a ResolvedType,
+}
+
+impl Equivalent<InfixQuery> for InfixQueryRef<'_> {
+    fn equivalent(&self, key: &InfixQuery) -> bool {
+        self.symbol == key.symbol && self.lhs_type == key.lhs_type && self.rhs_type == key.rhs_type
+    }
 }

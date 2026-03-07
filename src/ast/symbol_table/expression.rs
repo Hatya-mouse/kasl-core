@@ -14,17 +14,24 @@
 // limitations under the License.
 //
 
-use crate::{FuncCallArg, FunctionID, OperatorID, VariableID};
+use crate::{
+    FuncCallArg, FunctionID, OperatorID, Range, VariableID, symbol_table::NoTypeFuncCallArg,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Expr<T> {
     pub kind: ExprKind<T>,
     pub value_type: T,
+    pub range: Range,
 }
 
 impl<T> Expr<T> {
-    pub fn new(kind: ExprKind<T>, value_type: T) -> Self {
-        Self { kind, value_type }
+    pub fn new(kind: ExprKind<T>, value_type: T, range: Range) -> Self {
+        Self {
+            kind,
+            value_type,
+            range,
+        }
     }
 }
 
@@ -56,6 +63,7 @@ pub enum ExprKind<T> {
     FuncCall {
         name: String,
         id: Option<FunctionID>,
+        no_type_args: Vec<NoTypeFuncCallArg>,
         args: Option<Vec<FuncCallArg>>,
     },
     Chain {
@@ -68,10 +76,11 @@ pub enum ExprKind<T> {
 pub enum MemberAccess {
     Access {
         name: String,
-        offset: Option<usize>,
+        offset: Option<u32>,
     },
     FuncCall {
         name: String,
+        no_type_args: Vec<NoTypeFuncCallArg>,
         args: Option<Vec<FuncCallArg>>,
     },
 }

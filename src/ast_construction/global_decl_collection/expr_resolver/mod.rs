@@ -13,3 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+mod recursive_resolver;
+
+use crate::{
+    Expr, OperatorContext, ScopeID, ScopeRegistry,
+    error::ErrorCollector,
+    symbol_table::FunctionContext,
+    type_registry::{ResolvedType, TypeRegistry},
+};
+
+pub struct ExpressionResolver<'a> {
+    pub ec: &'a mut ErrorCollector,
+    pub op_ctx: &'a OperatorContext,
+    pub func_ctx: &'a FunctionContext,
+    pub scope_registry: &'a ScopeRegistry,
+    pub type_registry: &'a TypeRegistry,
+    pub current_scope: ScopeID,
+}
+
+impl ExpressionResolver<'_> {
+    pub fn resolve(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {
+        self.resolve_recursively(expr)
+    }
+}

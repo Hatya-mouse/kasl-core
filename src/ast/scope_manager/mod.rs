@@ -23,6 +23,9 @@ pub use scope_var::{ScopeVar, VariableKind};
 use crate::VariableID;
 use std::collections::HashMap;
 
+/// ScopeRegistry manages scopes and variables belonging to them.
+/// It only manages the top-level variables and local variables,
+/// and doesn't manage the struct fields.
 pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,

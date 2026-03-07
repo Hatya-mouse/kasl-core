@@ -17,17 +17,12 @@
 mod climb_precedence;
 
 use crate::{
-    Expr, ExprToken, ExprTokenKind, NameSpace, ScopeID, ScopeRegistry,
-    error::ErrorCollector,
-    symbol_table::{FunctionContext, OperatorContext},
+    Expr, ExprToken, ExprTokenKind, ScopeID, error::ErrorCollector, symbol_table::OperatorContext,
 };
 
 pub struct ExpressionBuilder<'a> {
     pub ec: &'a mut ErrorCollector,
-    pub name_space: &'a NameSpace,
-    pub func_ctx: &'a FunctionContext,
     pub op_ctx: &'a OperatorContext,
-    pub scope_registry: &'a ScopeRegistry,
     pub current_scope: ScopeID,
 }
 

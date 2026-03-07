@@ -40,11 +40,29 @@ pub enum ErrorKind {
     /// Prefix operator is not found.
     PrefixOpNotFound,
 
+    /// Title: InfixOrPostfixOpNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the infix or postfix operator that is not found
+    /// Infix or postfix operator is not found.
+    InfixOrPostfixOpNotFound,
+
     /// Title: OpNotAssociative
     /// Phase: GlobalDeclCollection
     /// Payload: The symbol of the operator that is not associative
     /// Non-associative operator is used consecutively.
     OpNotAssociative,
+
+    /// Title: NoReturnFuncInExpr
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the function that has no return type
+    /// Function without return type is used in an expression.
+    NoReturnFuncInExpr,
+
+    /// Title: MemberAccessOnPrimitive
+    /// Phase: GlobalDeclCollection
+    /// Payload: None
+    /// Member access expression on a primitive type.
+    MemberAccessOnPrimitive,
 
     /// Title: CompilerBug
     /// Payload: Error message

@@ -15,6 +15,7 @@
 //
 
 use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
+use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct PrefixOperator {
@@ -29,4 +30,22 @@ pub struct PrefixOperator {
 pub struct PrefixOperatorProperties {
     pub precedence: u32,
     pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+pub struct PrefixQuery {
+    pub symbol: String,
+    pub operand_type: ResolvedType,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
+pub struct PrefixQueryRef<'a> {
+    pub symbol: &'a str,
+    pub operand_type: &'a ResolvedType,
+}
+
+impl Equivalent<PrefixQuery> for PrefixQueryRef<'_> {
+    fn equivalent(&self, key: &PrefixQuery) -> bool {
+        self.symbol == key.symbol && self.operand_type == key.operand_type
+    }
 }
