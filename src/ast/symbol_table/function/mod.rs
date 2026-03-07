@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Function, FunctionID, StructID, type_registry::ResolvedType};
+mod function_def;
+
+pub use function_def::{FuncCallArg, FuncParam, Function};
+
+use crate::{FunctionID, StructID, type_registry::ResolvedType};
 use std::collections::HashMap;
 
 #[derive(Debug)]

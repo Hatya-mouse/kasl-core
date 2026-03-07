@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Range, type_registry::ResolvedType};
+use crate::{Expr, Range, type_registry::ResolvedType};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructField {
     pub name: String,
     pub value_type: ResolvedType,
-    pub def_val: Expression,
+    pub def_val: Expr<ResolvedType>,
     pub range: Range,
 }

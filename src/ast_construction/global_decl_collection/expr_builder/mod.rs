@@ -14,18 +14,43 @@
 // limitations under the License.
 //
 
-pub mod rpn_rearrange;
-pub mod rpn_to_tree;
-pub mod typed_token_getter;
+mod climb_precedence;
 
 use crate::{
-    NameSpace, ScopeID, ScopeRegistry, error::ErrorCollector, symbol_table::FunctionContext,
+    Expr, ExprToken, ExprTokenKind, NameSpace, ScopeID, ScopeRegistry,
+    error::ErrorCollector,
+    symbol_table::{FunctionContext, OperatorContext},
 };
 
 pub struct ExpressionBuilder<'a> {
     pub ec: &'a mut ErrorCollector,
     pub name_space: &'a NameSpace,
     pub func_ctx: &'a FunctionContext,
+    pub op_ctx: &'a OperatorContext,
     pub scope_registry: &'a ScopeRegistry,
     pub current_scope: ScopeID,
+}
+
+impl ExpressionBuilder<'_> {
+    pub fn build(&mut self, tokens: Vec<ExprToken>) -> Option<Expr<()>> {
+        // First, build the parenthesized tokens by calling `build` recursively
+        let mut processed_tokens: Vec<ExprToken> = Vec::new();
+        for token in tokens {
+            match token.kind {
+                ExprTokenKind::Parenthesized(inner) => {
+                    processed_tokens.push(ExprToken {
+                        kind: ExprTokenKind::ResolvedExpr(self.build(inner)?),
+                        range: token.range,
+                    });
+                }
+                _ => {
+                    processed_tokens.push(token);
+                }
+            }
+        }
+
+        // Then, convert the processed tokens into an `Expression`
+        let mut token_iter = processed_tokens.iter().peekable();
+        self.climb_precedence(&mut token_iter, 0)
+    }
 }

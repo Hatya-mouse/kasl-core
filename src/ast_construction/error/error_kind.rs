@@ -22,6 +22,30 @@ pub enum ErrorKind {
     /// Struct field is defined in the top level though it should be defined in a struct.
     TopLevelStructField,
 
+    /// Title: VarNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the variable that is not found
+    /// Variable is not found.
+    VarNotFound,
+
+    /// Title: FuncNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the function that is not found
+    /// Function is not found.
+    FuncNotFound,
+
+    /// Title: PrefixOpNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the prefix operator that is not found
+    /// Prefix operator is not found.
+    PrefixOpNotFound,
+
+    /// Title: OpNotAssociative
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the operator that is not associative
+    /// Non-associative operator is used consecutively.
+    OpNotAssociative,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

@@ -27,6 +27,7 @@ pub use name_space::{
 };
 pub use scope_manager::{Scope, ScopeID, ScopeRegistry, ScopeVar};
 pub use symbol_table::{
-    Expression, FuncCallArg, FuncParam, Function, IfArm, InfixOperator, InfixOperatorProperties,
-    OperatorAssociativity, PrefixOperator, Statement,
+    Expr, ExprKind, FuncCallArg, FuncParam, Function, IfArm, InfixOperator,
+    InfixOperatorProperties, OperatorAssociativity, OperatorContext, PostfixOperator,
+    PostfixOperatorProperties, PrefixOperator, PrefixOperatorProperties, Statement,
 };

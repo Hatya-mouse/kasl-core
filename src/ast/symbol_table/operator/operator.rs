@@ -14,8 +14,4 @@
 // limitations under the License.
 //
 
-mod function_context;
-mod operator_context;
-
-pub use function_context::FunctionContext;
-pub use operator_context::OperatorContext;
+use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};

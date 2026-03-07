@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, FuncCallArg, VariableID};
+use crate::{Expr, FuncCallArg, VariableID, type_registry::ResolvedType};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
@@ -24,11 +24,11 @@ pub enum Statement {
     VarDecl {
         name: String,
         value_type: VariableID,
-        def_val: Expression,
+        def_val: Expr<ResolvedType>,
     },
     Assign {
         target: VariableID,
-        value: Expression,
+        value: Expr<ResolvedType>,
     },
     FuncCall {
         path: VariableID,
@@ -40,18 +40,18 @@ pub enum Statement {
         else_body: Vec<Statement>,
     },
     Return {
-        value: Option<Expression>,
+        value: Option<Expr<ResolvedType>>,
     },
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfArm {
-    pub condition: Expression,
+    pub condition: Expr<ResolvedType>,
     pub body: Vec<Statement>,
 }
 
 impl IfArm {
-    pub fn new(condition: Expression, body: Vec<Statement>) -> Self {
+    pub fn new(condition: Expr<ResolvedType>, body: Vec<Statement>) -> Self {
         Self { condition, body }
     }
 }

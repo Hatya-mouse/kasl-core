@@ -15,6 +15,7 @@
 //
 
 mod expr_builder;
+mod expr_resolver;
 mod resolvers;
 mod stmt_process;
 mod struct_process;

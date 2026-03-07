@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{Expression, Range, Statement, type_registry::ResolvedType};
+use crate::{Expr, Range, Statement, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
@@ -53,7 +53,7 @@ impl Function {
 #[derive(Debug, Clone, PartialEq)]
 pub struct FuncCallArg {
     pub name: String,
-    pub value: Expression,
+    pub value: Expr<ResolvedType>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -61,6 +61,6 @@ pub struct FuncParam {
     pub label: Option<String>,
     pub name: String,
     pub value_type: ResolvedType,
-    pub def_val: Option<Expression>,
+    pub def_val: Option<Expr<ResolvedType>>,
     pub range: Range,
 }

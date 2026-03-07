@@ -14,15 +14,28 @@
 // limitations under the License.
 //
 
-mod expression;
-mod function;
-mod operator;
-mod statement;
+use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
 
-pub use expression::{Expr, ExprKind, MemberAccess};
-pub use function::{FuncCallArg, FuncParam, Function, FunctionContext};
-pub use operator::{
-    InfixOperator, InfixOperatorProperties, OperatorAssociativity, OperatorContext,
-    PostfixOperator, PostfixOperatorProperties, PrefixOperator, PrefixOperatorProperties,
-};
-pub use statement::{IfArm, Statement};
+#[derive(Debug, PartialEq, Clone)]
+pub struct InfixOperator {
+    pub symbol: String,
+    pub lhs: FuncParam,
+    pub rhs: FuncParam,
+    pub return_type: ResolvedType,
+    pub body: Vec<Statement>,
+    pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
+pub struct InfixOperatorProperties {
+    pub precedence: u32,
+    pub associativity: OperatorAssociativity,
+    pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone, Eq)]
+pub enum OperatorAssociativity {
+    Left,
+    Right,
+    None,
+}

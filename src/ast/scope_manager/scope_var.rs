@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expression, Range,
+    Expr, Range,
     type_registry::{ResolvedType, StructField, TypeRegistry},
 };
 
@@ -23,7 +23,7 @@ use crate::{
 pub struct ScopeVar {
     pub name: String,
     pub value_type: ResolvedType,
-    pub def_val: Expression,
+    pub def_val: Expr<ResolvedType>,
     pub range: Range,
     pub var_kind: VariableKind,
 }
@@ -59,6 +59,6 @@ pub enum VariableKind {
 #[derive(Debug, PartialEq, Clone)]
 pub struct InputAttribute {
     pub name: String,
-    pub args: Vec<Expression>,
+    pub args: Vec<Expr<ResolvedType>>,
     pub range: Range,
 }

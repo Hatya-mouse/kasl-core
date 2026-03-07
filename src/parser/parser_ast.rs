@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{InfixOperatorProperties, Range, SymbolPath};
+use crate::{
+    Expr, InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
+    SymbolPath,
+};
 use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -70,7 +73,15 @@ pub enum ParserDeclStmtKind {
     },
     InfixDefine {
         symbol: String,
-        infix_properties: InfixOperatorProperties,
+        props: InfixOperatorProperties,
+    },
+    PrefixDefine {
+        symbol: String,
+        props: PrefixOperatorProperties,
+    },
+    PostfixDefine {
+        symbol: String,
+        props: PostfixOperatorProperties,
     },
     OperatorFunc {
         op_type: ParserOperatorType,
@@ -91,6 +102,8 @@ impl Display for ParserDeclStmtKind {
             ParserDeclStmtKind::StructField { .. } => write!(f, "var"),
             ParserDeclStmtKind::StructDecl { .. } => write!(f, "struct"),
             ParserDeclStmtKind::InfixDefine { .. } => write!(f, "infix"),
+            ParserDeclStmtKind::PrefixDefine { .. } => write!(f, "prefix"),
+            ParserDeclStmtKind::PostfixDefine { .. } => write!(f, "postfix"),
             ParserDeclStmtKind::OperatorFunc { .. } => write!(f, "func"),
         }
     }
@@ -128,6 +141,7 @@ pub enum ParserScopeStmtKind {
 pub enum ParserOperatorType {
     Infix,
     Prefix,
+    Postfix,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -168,24 +182,25 @@ pub struct ExprToken {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ExprTokenKind {
-    IntLiteral(u32),
+    IntLiteral(i32),
     FloatLiteral(f32),
     BoolLiteral(bool),
     Operator(String),
-    Access(String),
+    Identifier(String),
     FuncCall {
         name: String,
         args: Vec<ParserFuncCallArg>,
     },
     Chain {
         lhs: Box<ExprToken>,
-        op: ChainOp,
+        member: ParserMemberAccess,
     },
     Parenthesized(Vec<ExprToken>),
+    ResolvedExpr(Expr<()>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum ChainOp {
+pub enum ParserMemberAccess {
     Access(String),
     FuncCall {
         name: String,

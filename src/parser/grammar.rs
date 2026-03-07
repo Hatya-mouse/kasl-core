@@ -15,10 +15,10 @@
 //
 
 use crate::{
-    ChainOp, ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity,
-    ParserDeclStmt, ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm,
-    ParserInputAttribute, ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, Range,
-    SymbolPath, SymbolPathComponent,
+    ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
+    ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
+    ParserMemberAccess, ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind,
+    PostfixOperatorProperties, PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -163,17 +163,9 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    // Infix Operator Properties
-    rule infix_properties() -> InfixOperatorProperties
-        = start:position!() precedence:precedence_prop() __? comma() __? associativity:associativity_prop() end:position!() {
-            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
-        }
-        / start:position!() associativity:associativity_prop() __? comma() __? precedence:precedence_prop() end:position!() {
-            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
-        }
-
+    // Operator Properties
     rule precedence_prop() -> u32
-        = "precedence" _? ":" _? value:integer() { value }
+        = "precedence" _? ":" _? value:number() { value }
 
     rule associativity_prop() -> OperatorAssociativity
         = "associativity" _? ":" _? value:(
@@ -182,11 +174,35 @@ peg::parser!(pub grammar kasl_parser() for str {
             / "none" { OperatorAssociativity::None }
         ) { value }
 
+    rule infix_properties() -> InfixOperatorProperties
+        = start:position!() precedence:precedence_prop() __? comma() __? associativity:associativity_prop() end:position!() {
+            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
+        }
+        / start:position!() associativity:associativity_prop() __? comma() __? precedence:precedence_prop() end:position!() {
+            InfixOperatorProperties { precedence, associativity, range: Range::n(start, end) }
+        }
+
+    rule prefix_properties() -> PrefixOperatorProperties
+        = start:position!() precedence:precedence_prop() end:position!() {
+            PrefixOperatorProperties { precedence, range: Range::n(start, end) }
+        }
+
+    rule postfix_properties() -> PostfixOperatorProperties
+        = start:position!() precedence:precedence_prop() end:position!() {
+            PostfixOperatorProperties { precedence, range: Range::n(start, end) }
+        }
+
     // Operator Definition
     rule operator_definition_statement() -> ParserDeclStmt
         = start:position!() "operator" _ kind:(
             "infix" _ symbol:operator() __? "{" __? props:infix_properties() __? "}" {
-                ParserDeclStmtKind::InfixDefine { symbol, infix_properties: props }
+                ParserDeclStmtKind::InfixDefine { symbol, props }
+            }
+            / "prefix" _ symbol:operator() __? "{" __? props:prefix_properties() __? "}" {
+                ParserDeclStmtKind::PrefixDefine { symbol, props }
+            }
+            / "postfix" _ symbol:operator() __? "{" __? props:postfix_properties() __? "}" {
+                ParserDeclStmtKind::PostfixDefine { symbol, props }
             }
         ) end:position!() {
             ParserDeclStmt {
@@ -282,25 +298,25 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule identifier_token() -> ExprTokenKind
-        = id:identifier() { ExprTokenKind::Access(id) }
+        = id:identifier() { ExprTokenKind::Identifier(id) }
 
     rule operator_token() -> ExprTokenKind
         = op:operator() { ExprTokenKind::Operator(op) }
 
     rule parenthesized_token() -> ExprTokenKind
-        = "(" __? expr:multiline_expression() ")" { ExprTokenKind::Pharenthesized(expr) }
+        = "(" __? expr:multiline_expression() ")" { ExprTokenKind::Parenthesized(expr) }
 
     rule chain_token() -> ExprToken
-    = lhs:primary() extensions:(start:position!() __? "." __? op:chain_op() end:position!() { (op, Range::n(start, end)) })+ {
-            extensions.into_iter().fold(lhs, |lhs, op| {
-                ExprToken { range: op.1, kind: ExprTokenKind::Chain { lhs: Box::new(lhs), op: op.0 } }
+        = lhs:primary() extensions:(start:position!() __? "." __? member_access:member_access() end:position!() { (member_access, Range::n(start, end)) })+ {
+            extensions.into_iter().fold(lhs, |lhs, member_access| {
+                ExprToken { range: member_access.1, kind: ExprTokenKind::Chain { lhs: Box::new(lhs), member: member_access.0 } }
             })
         }
 
-    rule chain_op() -> ChainOp
-        = id:identifier() { ChainOp::Access(id) }
+    rule member_access() -> ParserMemberAccess
+        = id:identifier() { ParserMemberAccess::Access(id) }
         / id:identifier() __? "(" __? args:func_call_args() __? ")" {
-            ChainOp::FuncCall { name: id, args }
+            ParserMemberAccess::FuncCall { name: id, args }
         }
 
     rule identifier() -> String
@@ -321,8 +337,11 @@ peg::parser!(pub grammar kasl_parser() for str {
         = quiet!{ op:$(['+' | '-' | '*' | '/' | '%' | '^' | '<' | '>' | '=' | '!' | '?' | '%' | '|' | '&']+) { op.to_owned() } }
         / expected!("operator")
 
-    rule integer() -> u32
+    rule number() -> u32
         = n:$(['0'..='9']+) { n.parse().unwrap() }
+
+    rule integer() -> i32
+        = is_neg:("-" _?)? n:number() { n as i32 * if is_neg.is_some() { -1 } else { 1 } }
 
     rule decimal() -> f32
         = n:$(['0'..='9']+) "." d:$(['0'..='9']+) {

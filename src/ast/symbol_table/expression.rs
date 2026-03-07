@@ -14,37 +14,64 @@
 // limitations under the License.
 //
 
-use crate::{FuncCallArg, VariableID, type_registry::ResolvedType};
+use crate::{FuncCallArg, FunctionID, OperatorID, VariableID};
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Expression {
+pub struct Expr<T> {
+    pub kind: ExprKind<T>,
+    pub value_type: T,
+}
+
+impl<T> Expr<T> {
+    pub fn new(kind: ExprKind<T>, value_type: T) -> Self {
+        Self { kind, value_type }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ExprKind<T> {
     IntLiteral(i32),
     FloatLiteral(f32),
     BoolLiteral(bool),
-    PrefixOperator {
-        operand: Box<Expression>,
-        operand_type: ResolvedType,
-        return_type: ResolvedType,
+    InfixOp {
+        symbol: String,
+        operator: Option<OperatorID>,
+        lhs: Box<Expr<T>>,
+        rhs: Box<Expr<T>>,
     },
-    InfixOperator {
-        lhs: Box<Expression>,
-        lhs_type: ResolvedType,
-        rhs: Box<Expression>,
-        rhs_type: ResolvedType,
-        return_type: ResolvedType,
+    PrefixOp {
+        symbol: String,
+        operator: Option<OperatorID>,
+        operand: Box<Expr<T>>,
+    },
+    PostfixOp {
+        symbol: String,
+        operator: Option<OperatorID>,
+        operand: Box<Expr<T>>,
     },
     Identifier {
-        id: VariableID,
-        value_type: ResolvedType,
-    },
-    MemberAccess {
-        lhs: Box<Expression>,
-        offset: usize,
-        value_type: ResolvedType,
+        name: String,
+        id: Option<VariableID>,
     },
     FuncCall {
-        id: VariableID,
-        args: Vec<FuncCallArg>,
-        return_type: ResolvedType,
+        name: String,
+        id: Option<FunctionID>,
+        args: Option<Vec<FuncCallArg>>,
+    },
+    Chain {
+        lhs: Box<Expr<T>>,
+        access: MemberAccess,
+    },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum MemberAccess {
+    Access {
+        name: String,
+        offset: Option<usize>,
+    },
+    FuncCall {
+        name: String,
+        args: Option<Vec<FuncCallArg>>,
     },
 }

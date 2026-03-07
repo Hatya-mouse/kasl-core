@@ -29,4 +29,44 @@ impl ErrorCollector {
             Pl::Str(field_name.to_string()),
         );
     }
+
+    pub fn var_not_found(&mut self, range: Range, var_name: &str) {
+        self.emit(
+            EK::VarNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(var_name.to_string()),
+        );
+    }
+
+    pub fn func_not_found(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::FuncNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
+
+    pub fn prefix_op_not_found(&mut self, range: Range, symbol: &str) {
+        self.emit(
+            EK::PrefixOpNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(symbol.to_string()),
+        );
+    }
+
+    pub fn op_not_associative(&mut self, range: Range, symbol: &str) {
+        self.emit(
+            EK::OpNotAssociative,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(symbol.to_string()),
+        );
+    }
 }

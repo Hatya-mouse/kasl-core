@@ -17,23 +17,6 @@
 use crate::{FuncParam, Range, Statement, type_registry::ResolvedType};
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct InfixOperator {
-    pub symbol: String,
-    pub lhs: FuncParam,
-    pub rhs: FuncParam,
-    pub return_type: ResolvedType,
-    pub body: Vec<Statement>,
-    pub range: Range,
-}
-
-#[derive(Debug, PartialEq, Clone, Eq)]
-pub struct InfixOperatorProperties {
-    pub precedence: u32,
-    pub associativity: OperatorAssociativity,
-    pub range: Range,
-}
-
-#[derive(Debug, PartialEq, Clone)]
 pub struct PrefixOperator {
     pub symbol: String,
     pub operand: FuncParam,
@@ -43,8 +26,7 @@ pub struct PrefixOperator {
 }
 
 #[derive(Debug, PartialEq, Clone, Eq)]
-pub enum OperatorAssociativity {
-    Left,
-    Right,
-    None,
+pub struct PrefixOperatorProperties {
+    pub precedence: u32,
+    pub range: Range,
 }

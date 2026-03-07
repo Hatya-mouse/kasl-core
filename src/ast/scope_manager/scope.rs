@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    VariableID,
-    scope_manager::{ScopeID, scope_var::ScopeVar},
-};
+use crate::{VariableID, scope_manager::ScopeID};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
