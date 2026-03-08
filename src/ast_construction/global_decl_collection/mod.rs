@@ -28,7 +28,7 @@ use crate::{
     type_registry::TypeRegistry,
 };
 
-struct GlobalDeclCollector<'a> {
+pub struct GlobalDeclCollector<'a> {
     pub ec: &'a mut ErrorCollector,
     pub decl_stmts: &'a [ParserDeclStmt],
     pub name_space: &'a mut NameSpace,

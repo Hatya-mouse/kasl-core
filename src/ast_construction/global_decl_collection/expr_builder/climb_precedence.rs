@@ -179,6 +179,7 @@ impl ExpressionBuilder<'_> {
                     },
                     ParserMemberAccess::FuncCall { name, args } => MemberAccess::FuncCall {
                         name: name.clone(),
+                        id: None,
                         no_type_args: self.parse_func_args(args.clone())?,
                         args: None,
                     },
@@ -213,6 +214,7 @@ impl ExpressionBuilder<'_> {
             parsed_args.push(NoTypeFuncCallArg {
                 label: arg.label,
                 value: arg_expr,
+                range: arg.range,
             });
         }
         Some(parsed_args)

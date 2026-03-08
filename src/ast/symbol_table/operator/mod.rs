@@ -45,6 +45,22 @@ pub struct OperatorContext {
 }
 
 impl OperatorContext {
+    pub fn new() -> Self {
+        Self {
+            infix_operator_properties: HashMap::new(),
+            infix_operators: HashMap::new(),
+            infix_ids: HashMap::new(),
+
+            prefix_operator_properties: HashMap::new(),
+            prefix_operators: HashMap::new(),
+            prefix_ids: HashMap::new(),
+
+            postfix_operator_properties: HashMap::new(),
+            postfix_operators: HashMap::new(),
+            postfix_ids: HashMap::new(),
+        }
+    }
+
     // -- REGISTER FUNCTIONS --
 
     pub fn register_infix_func(&mut self, infix: InfixOperator, id: OperatorID) {

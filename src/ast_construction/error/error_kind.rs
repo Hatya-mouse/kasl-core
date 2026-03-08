@@ -70,6 +70,30 @@ pub enum ErrorKind {
     /// Member is not found.
     MemberNotFound,
 
+    /// Title: ArgOrderIncorrect
+    /// Phase: GlobalDeclCollection
+    /// Payload: The range of the call expression and the name of the function
+    /// Argument order is incorrect.
+    ArgOrderIncorrect,
+
+    /// Title: DuplicateArg
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the function and the name of the duplicate argument
+    /// The same argument is given more than once.
+    DuplicateArg,
+
+    /// Title: ExtraArg
+    /// Phase: GlobalDeclCollection
+    /// Payload: The range of the call expression and the name of the function
+    /// Too many arguments are given.
+    ExtraArg,
+
+    /// Title: MissingArg
+    /// Phase: GlobalDeclCollection
+    /// Payload: The range of the call expression and the name of the function
+    /// Not enough arguments are given.
+    MissingArg,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

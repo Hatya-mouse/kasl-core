@@ -58,7 +58,7 @@ impl ExpressionResolver<'_> {
                 id: _,
                 no_type_args,
                 args: _,
-            } => self.resolve_func(name, no_type_args, expr.range),
+            } => self.resolve_func_call(name, no_type_args, expr.range),
 
             ExprKind::Chain { lhs, access } => self.resolve_chain(lhs, access, expr.range),
         }

@@ -15,16 +15,21 @@
 //
 
 use crate::{
-    NameSpace, ParserDeclStmt,
+    NameSpace, OperatorContext, ParserDeclStmt, ScopeRegistry,
     error::{ErrorCollector, ErrorRecord},
+    global_decl_collection::GlobalDeclCollector,
+    symbol_table::FunctionContext,
     type_collection::TypeCollector,
     type_registry::TypeRegistry,
 };
 
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
+    let mut ec = ErrorCollector::new();
     let mut name_space = NameSpace::new();
+    let mut function_ctx = FunctionContext::new();
+    let mut operator_ctx = OperatorContext::new();
+    let mut scope_registry = ScopeRegistry::new();
     let mut type_registry = TypeRegistry::new();
-    let mut error_collector = ErrorCollector::new();
 
     // 1. Collect types
     let mut type_collector = TypeCollector {
@@ -36,10 +41,15 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
 
     // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
     let mut global_decl_collector = GlobalDeclCollector {
+        ec: &mut ec,
         decl_stmts: &statements,
         name_space: &mut name_space,
+        type_registry: &mut type_registry,
+        function_ctx: &mut function_ctx,
+        operator_ctx: &mut operator_ctx,
+        scope_registry: &mut scope_registry,
     };
     global_decl_collector.process();
 
-    error_collector.as_result()
+    ec.as_result()
 }

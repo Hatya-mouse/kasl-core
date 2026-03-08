@@ -106,7 +106,47 @@ impl ErrorCollector {
             range,
             Ph::GlobalDeclCollection,
             Sv::Error,
-            Pl::Strs(struct_name, member_name),
+            Pl::StrPair(struct_name, member_name),
+        );
+    }
+
+    pub fn arg_order_incorrect(&mut self, range: Range, func_name: &str, param_label: &str) {
+        self.emit(
+            EK::ArgOrderIncorrect,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrPair(func_name.to_string(), param_label.to_string()),
+        );
+    }
+
+    pub fn duplicate_arg(&mut self, range: Range, func_name: &str, param_label: &str) {
+        self.emit(
+            EK::DuplicateArg,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrPair(func_name.to_string(), param_label.to_string()),
+        );
+    }
+
+    pub fn extra_arg(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::ExtraArg,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
+
+    pub fn missing_arg(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::MissingArg,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
         );
     }
 }

@@ -29,6 +29,14 @@ pub struct FunctionContext {
 }
 
 impl FunctionContext {
+    pub fn new() -> Self {
+        Self {
+            funcs: HashMap::new(),
+            member_functions: HashMap::new(),
+            global_functions: HashMap::new(),
+        }
+    }
+
     pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
         self.funcs
             .get(symbol_id)
