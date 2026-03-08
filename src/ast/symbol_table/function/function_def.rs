@@ -23,7 +23,7 @@ pub struct Function {
     pub is_static: bool,
     pub params: Vec<FuncParam>,
     pub return_type: Option<ResolvedType>,
-    pub body: Vec<Statement>,
+    pub body: Option<Vec<Statement>>,
     pub range: Range,
 }
 

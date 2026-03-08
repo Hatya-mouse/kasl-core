@@ -64,11 +64,17 @@ pub enum ErrorKind {
     /// Member access expression on a primitive type.
     MemberAccessOnPrimitive,
 
-    /// Title: MemberNotFound
+    /// Title: MemberFieldNotFound
     /// Phase: GlobalDeclCollection
     /// Payload: The name of the struct and the name of the member that is not found
-    /// Member is not found.
-    MemberNotFound,
+    /// Member field of the struct is not found.
+    MemberFieldNotFound,
+
+    /// Title: MemberFuncNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the struct and the name of the member that is not found
+    /// Member function of the struct is not found.
+    MemberFuncNotFound,
 
     /// Title: ArgOrderIncorrect
     /// Phase: GlobalDeclCollection
@@ -111,6 +117,24 @@ pub enum ErrorKind {
     /// Payload: The kind of the statement that is invalid
     /// An unexpected statement was found in the struct body.
     InvalidStructStmt,
+
+    /// Title: TypeNotFound
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the type that is not found
+    /// The type is not found in the type registry.
+    TypeNotFound,
+
+    /// Title: NoTypeAnnotationOrDefVal
+    /// Phase: GlobalDeclCollection
+    /// Payload: None
+    /// Both type annotation and default value are missing for the parameter.
+    NoTypeAnnotationOrDefVal,
+
+    /// Title: GlobalFuncCannotBeStatic
+    /// Phase: GlobalDeclCollection
+    /// Payload: The name of the function
+    /// `static` keyword is applied to a global function.
+    GlobalFuncCannotBeStatic,
 
     /// Title: CompilerBug
     /// Payload: Error message

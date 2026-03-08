@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+mod func_builder;
+mod func_decl_resolver;
 mod global_var_registrar;
 mod struct_resolver;
 mod var_resolver;

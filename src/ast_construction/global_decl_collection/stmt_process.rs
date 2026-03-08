@@ -36,12 +36,21 @@ impl GlobalDeclCollector<'_> {
                 def_val,
             } => self.resolve_state_var(name, value_type, def_val, stmt.range),
 
-            ParserDeclStmtKind::StructDecl { name, body } => self.resolve_struct_decl(stmt),
+            ParserDeclStmtKind::StructDecl { name, body } => {
+                self.resolve_struct_decl(name, body, stmt.range)
+            }
 
-            ParserDeclStmtKind::FuncDecl { .. } => self.resolve_func_decl(stmt),
+            ParserDeclStmtKind::FuncDecl {
+                is_static,
+                name,
+                params,
+                return_type,
+                body: _,
+            } => self.resolve_global_func_decl(*is_static, name, params, return_type, stmt.range),
 
             ParserDeclStmtKind::InfixDefine { .. } => self.resolve_infix_define(stmt),
             ParserDeclStmtKind::OperatorFunc { .. } => self.resolve_operator_func(stmt, op_type),
+
             ParserDeclStmtKind::StructField { name, .. } => {
                 self.ec.top_level_struct_field(stmt.range, name)
             }

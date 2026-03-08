@@ -48,8 +48,8 @@ impl GlobalDeclCollector<'_> {
         if resolved_def_val.value_type != resolved_type_annotation {
             self.ec.type_annotation_mismatch(
                 decl_range,
-                &resolved_type_annotation.to_string(),
-                &resolved_def_val.value_type.to_string(),
+                resolved_type_annotation.to_string(),
+                resolved_def_val.value_type.to_string(),
             );
             return None;
         }

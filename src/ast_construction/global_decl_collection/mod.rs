@@ -16,7 +16,6 @@
 
 mod resolvers;
 mod stmt_process;
-mod struct_process;
 
 use crate::{
     NameSpace, ParserDeclStmt,

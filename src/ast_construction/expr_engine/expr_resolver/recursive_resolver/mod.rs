@@ -15,7 +15,7 @@
 //
 
 mod chain_resolver;
-mod func_resolver;
+mod func_call_resolver;
 mod identifier_resolver;
 mod literal_resolver;
 mod operator_resolver;

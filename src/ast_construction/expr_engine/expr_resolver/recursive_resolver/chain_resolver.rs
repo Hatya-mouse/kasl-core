@@ -64,8 +64,11 @@ impl ExpressionResolver<'_> {
 
                     // Get the index of the field by its name
                     let Some(field_index) = struct_decl.get_field_index(&name) else {
-                        self.ec
-                            .member_not_found(range, struct_decl.name.clone(), name.clone());
+                        self.ec.member_field_not_found(
+                            range,
+                            struct_decl.name.clone(),
+                            name.clone(),
+                        );
                         return None;
                     };
 
@@ -89,7 +92,7 @@ impl ExpressionResolver<'_> {
                     else {
                         let struct_decl = self.type_registry.get_struct(&struct_id)?;
                         self.ec
-                            .member_not_found(range, struct_decl.name.clone(), name);
+                            .member_func_not_found(range, struct_decl.name.clone(), name);
                         return None;
                     };
 

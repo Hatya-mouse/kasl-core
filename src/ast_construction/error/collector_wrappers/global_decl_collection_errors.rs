@@ -100,13 +100,28 @@ impl ErrorCollector {
         );
     }
 
-    pub fn member_not_found(&mut self, range: Range, struct_name: String, member_name: String) {
+    pub fn member_field_not_found(
+        &mut self,
+        range: Range,
+        struct_name: String,
+        field_name: String,
+    ) {
         self.emit(
-            EK::MemberNotFound,
+            EK::MemberFieldNotFound,
             range,
             Ph::GlobalDeclCollection,
             Sv::Error,
-            Pl::StrPair(struct_name, member_name),
+            Pl::StrPair(struct_name, field_name),
+        );
+    }
+
+    pub fn member_func_not_found(&mut self, range: Range, struct_name: String, func_name: String) {
+        self.emit(
+            EK::MemberFuncNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrPair(struct_name, func_name),
         );
     }
 
@@ -163,8 +178,8 @@ impl ErrorCollector {
     pub fn type_annotation_mismatch(
         &mut self,
         range: Range,
-        annotation_type: &str,
-        expr_type: &str,
+        annotation_type: String,
+        expr_type: String,
     ) {
         self.emit(
             EK::TypeAnnotationMismatch,
@@ -182,6 +197,36 @@ impl ErrorCollector {
             Ph::GlobalDeclCollection,
             Sv::Error,
             Pl::Str(stmt_kind),
+        );
+    }
+
+    pub fn type_not_found(&mut self, range: Range, type_name: String) {
+        self.emit(
+            EK::TypeNotFound,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
+    pub fn no_type_annotation_or_def_val(&mut self, range: Range) {
+        self.emit(
+            EK::NoTypeAnnotationOrDefVal,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub fn global_func_cannot_be_static(&mut self, range: Range, func_name: &str) {
+        self.emit(
+            EK::GlobalFuncCannotBeStatic,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
         );
     }
 }

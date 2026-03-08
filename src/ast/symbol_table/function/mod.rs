@@ -43,8 +43,22 @@ impl FunctionContext {
             .and_then(|func| func.return_type.clone())
     }
 
-    pub fn register_func(&mut self, func: Function, id: FunctionID) {
-        self.funcs.insert(id, func);
+    pub fn register_member_func(
+        &mut self,
+        func: Function,
+        struct_id: StructID,
+        func_id: FunctionID,
+    ) {
+        self.member_functions
+            .entry(struct_id)
+            .or_insert_with(HashMap::new)
+            .insert(func.name.clone(), func_id);
+        self.funcs.insert(func_id, func);
+    }
+
+    pub fn register_global_func(&mut self, func: Function, func_id: FunctionID) {
+        self.global_functions.insert(func.name.clone(), func_id);
+        self.funcs.insert(func_id, func);
     }
 
     pub fn get_func(&self, symbol_id: &FunctionID) -> Option<&Function> {

@@ -27,7 +27,10 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Get a reference to the function
-        let func_id = self.func_ctx.get_global_func_by_name(&name)?;
+        let Some(func_id) = self.func_ctx.get_global_func_by_name(&name) else {
+            self.ec.func_not_found(range, &name);
+            return None;
+        };
         let func = self.func_ctx.get_func(&func_id)?;
 
         let args = self.resolve_func_call_args(&func, &no_type_args, range)?;
