@@ -63,7 +63,7 @@ impl ExpressionResolver<'_> {
 
         for no_type_arg in no_type_args {
             // Resolve the type of the argument expression
-            let Some(value) = self.resolve(no_type_arg.value.clone()) else {
+            let Some(value) = self.resolve_recursively(no_type_arg.value.clone()) else {
                 continue;
             };
 

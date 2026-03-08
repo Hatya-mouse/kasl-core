@@ -27,7 +27,7 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the LHS expression
-        let resolved_lhs = self.resolve(*lhs)?;
+        let resolved_lhs = self.resolve_recursively(*lhs)?;
 
         // Resolve the access expression
         let (resolved_access, value_type) =

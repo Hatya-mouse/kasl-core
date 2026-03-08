@@ -17,10 +17,8 @@
 mod recursive_resolver;
 
 use crate::{
-    Expr, OperatorContext, ScopeID, ScopeRegistry,
-    error::ErrorCollector,
-    symbol_table::FunctionContext,
-    type_registry::{ResolvedType, TypeRegistry},
+    OperatorContext, ScopeID, ScopeRegistry, error::ErrorCollector, symbol_table::FunctionContext,
+    type_registry::TypeRegistry,
 };
 
 pub struct ExpressionResolver<'a> {
@@ -49,9 +47,5 @@ impl<'a> ExpressionResolver<'a> {
             type_registry,
             current_scope,
         }
-    }
-
-    pub fn resolve(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {
-        self.resolve_recursively(expr)
     }
 }
