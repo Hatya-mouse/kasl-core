@@ -22,7 +22,7 @@ pub struct PostfixOperator {
     pub symbol: String,
     pub operand: FuncParam,
     pub return_type: ResolvedType,
-    pub body: Vec<Statement>,
+    pub body: Option<Vec<Statement>>,
     pub range: Range,
 }
 

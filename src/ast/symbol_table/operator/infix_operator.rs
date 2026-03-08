@@ -23,7 +23,7 @@ pub struct InfixOperator {
     pub lhs: FuncParam,
     pub rhs: FuncParam,
     pub return_type: ResolvedType,
-    pub body: Vec<Statement>,
+    pub body: Option<Vec<Statement>>,
     pub range: Range,
 }
 

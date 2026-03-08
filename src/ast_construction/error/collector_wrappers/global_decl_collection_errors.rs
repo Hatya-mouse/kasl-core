@@ -229,4 +229,49 @@ impl ErrorCollector {
             Pl::Str(func_name.to_string()),
         );
     }
+
+    pub fn wrong_param_count_for_infix(
+        &mut self,
+        range: Range,
+        op_symbol: &str,
+        param_count: usize,
+    ) {
+        self.emit(
+            EK::WrongParamCountForInfix,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrAndNum(op_symbol.to_string(), param_count),
+        );
+    }
+
+    pub fn wrong_param_count_for_prefix(
+        &mut self,
+        range: Range,
+        op_symbol: &str,
+        param_count: usize,
+    ) {
+        self.emit(
+            EK::WrongParamCountForPrefix,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrAndNum(op_symbol.to_string(), param_count),
+        );
+    }
+
+    pub fn wrong_param_count_for_postfix(
+        &mut self,
+        range: Range,
+        op_symbol: &str,
+        param_count: usize,
+    ) {
+        self.emit(
+            EK::WrongParamCountForPostfix,
+            range,
+            Ph::GlobalDeclCollection,
+            Sv::Error,
+            Pl::StrAndNum(op_symbol.to_string(), param_count),
+        );
+    }
 }

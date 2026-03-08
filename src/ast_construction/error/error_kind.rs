@@ -136,6 +136,24 @@ pub enum ErrorKind {
     /// `static` keyword is applied to a global function.
     GlobalFuncCannotBeStatic,
 
+    /// Title: WrongParamCountForInfix
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the operator and the number of parameters
+    /// An infix operator definition has a wrong number of parameters.
+    WrongParamCountForInfix,
+
+    /// Title: WrongParamCountForPrefix
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the operator and the number of parameters
+    /// A prefix operator definition has a wrong number of parameters.
+    WrongParamCountForPrefix,
+
+    /// Title: WrongParamCountForPostfix
+    /// Phase: GlobalDeclCollection
+    /// Payload: The symbol of the operator and the number of parameters
+    /// A postfix operator definition has a wrong number of parameters.
+    WrongParamCountForPostfix,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

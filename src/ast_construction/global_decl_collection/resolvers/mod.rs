@@ -17,5 +17,6 @@
 mod func_builder;
 mod func_decl_resolver;
 mod global_var_registrar;
+mod op_resolver;
 mod struct_resolver;
 mod var_resolver;
