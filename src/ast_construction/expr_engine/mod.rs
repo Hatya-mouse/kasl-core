@@ -16,9 +16,11 @@
 
 mod expr_builder;
 mod expr_resolver;
+mod l_value_resolver;
 
 pub use expr_builder::ExpressionBuilder;
 pub use expr_resolver::ExpressionResolver;
+pub use l_value_resolver::LValueResolver;
 
 use crate::{
     Expr, ExprToken, OperatorContext, ScopeID, ScopeRegistry,

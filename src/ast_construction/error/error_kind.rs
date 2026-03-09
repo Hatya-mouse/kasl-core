@@ -146,6 +146,11 @@ pub enum ErrorKind {
     /// A function with the same name already exists in the current scope, or its parent scopes.
     DuplicateFuncName,
 
+    /// Title: FuncCallInLValue
+    /// Payload: None
+    /// A function call is part of an LValue expression.
+    FuncCallInLValue,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

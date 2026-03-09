@@ -96,16 +96,16 @@ pub enum LValue {
     },
     Chain {
         lhs: Box<LValue>,
-        offset: Option<usize>,
+        offset: usize,
         value_type: ResolvedType,
     },
 }
 
 impl LValue {
-    pub fn value_type(&self) -> &ResolvedType {
+    pub fn value_type(&self) -> ResolvedType {
         match self {
-            LValue::Identifier { value_type, .. } => value_type,
-            LValue::Chain { value_type, .. } => value_type,
+            LValue::Identifier { value_type, .. } => *value_type,
+            LValue::Chain { value_type, .. } => *value_type,
         }
     }
 }

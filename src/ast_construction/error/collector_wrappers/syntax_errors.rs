@@ -39,4 +39,8 @@ impl ErrorCollector {
             Pl::Str(field_name.to_string()),
         );
     }
+
+    pub fn func_call_in_l_value(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::FuncCallInLValue, range, phase, Sv::Error, Pl::None);
+    }
 }

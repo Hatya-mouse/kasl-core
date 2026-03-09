@@ -19,7 +19,7 @@ mod function;
 mod operator;
 mod statement;
 
-pub use expression::{Expr, ExprKind, MemberAccess};
+pub use expression::{Expr, ExprKind, LValue, MemberAccess};
 pub use function::{
     FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
 };
