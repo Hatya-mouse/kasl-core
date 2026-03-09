@@ -94,8 +94,8 @@ impl GlobalDeclCollector<'_> {
                     self.ec.type_annotation_mismatch(
                         param.range,
                         Ph::GlobalDeclCollection,
-                        resolved_annotation_type.to_string(),
-                        resolved_def_val.value_type.to_string(),
+                        self.type_registry.format_type(&resolved_annotation_type),
+                        self.type_registry.format_type(&resolved_def_val.value_type),
                     );
                     return None;
                 }

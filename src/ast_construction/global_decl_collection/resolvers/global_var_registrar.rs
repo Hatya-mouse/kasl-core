@@ -49,8 +49,8 @@ impl GlobalDeclCollector<'_> {
             self.ec.type_annotation_mismatch(
                 decl_range,
                 Ph::GlobalDeclCollection,
-                resolved_type_annotation.to_string(),
-                resolved_def_val.value_type.to_string(),
+                self.type_registry.format_type(&resolved_type_annotation),
+                self.type_registry.format_type(&resolved_def_val.value_type),
             );
             return None;
         }

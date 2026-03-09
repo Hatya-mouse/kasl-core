@@ -55,8 +55,8 @@ impl StatementBuilder<'_> {
             self.ec.assign_type_mismatch(
                 stmt_range,
                 Ph::StatementCollection,
-                target_l_value.value_type.to_string(),
-                resolved_value.value_type.to_string(),
+                self.type_registry.format_type(&target_l_value.value_type),
+                self.type_registry.format_type(&resolved_value.value_type),
             );
             return None;
         }

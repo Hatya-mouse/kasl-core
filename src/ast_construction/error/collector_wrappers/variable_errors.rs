@@ -52,7 +52,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(annotation_type.to_string(), expr_type.to_string()),
+            Pl::StrPair(annotation_type, expr_type),
         );
     }
 
