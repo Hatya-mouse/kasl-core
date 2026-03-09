@@ -50,7 +50,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / local_var_statement()
         / assign_statement()
         / local_let_statement()
-        / func_call_statement()
+        / expr_statement()
         / if_statement()
         / block_statement()
         / expected!("statement")
@@ -114,6 +114,20 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
+
+    rule struct_decl_statement() -> ParserDeclStmt
+        = start:position!() "struct" _ name:identifier() __? "{"
+        __? body:decl_stmts() __?
+        "}" end:position!() {
+            ParserDeclStmt {
+                range: Range::n(start, end),
+                kind: ParserDeclStmtKind::StructDecl {
+                    name,
+                    body
+                }
+            }
+        }
+
     rule local_var_statement() -> ParserScopeStmt
         = start:position!() "var" _ name:identifier() value_type:(_? ":" _? t:type_name() { t })? _? "=" _? def_val:oneline_expression() end:position!() {
             ParserScopeStmt {
@@ -138,14 +152,6 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    rule func_call_statement() -> ParserScopeStmt
-        = start:position!() target:expr_token() _? "(" __? args:func_call_args() ")" end:position!() {
-            ParserScopeStmt {
-                range: Range::n(start, end),
-                kind: ParserScopeStmtKind::FuncCall { target, args }
-            }
-        }
-
     rule if_statement() -> ParserScopeStmt
         = start:position!() main:if_arm()
         else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
@@ -156,7 +162,7 @@ peg::parser!(pub grammar kasl_parser() for str {
                 kind: ParserScopeStmtKind::If {
                     main,
                     else_ifs,
-                    else_body: else_body.unwrap_or(Vec::new()),
+                    else_body,
                 }
             }
         }
@@ -168,16 +174,11 @@ peg::parser!(pub grammar kasl_parser() for str {
             ParserIfArm { condition, body, range: Range::n(start, end) }
         }
 
-    rule struct_decl_statement() -> ParserDeclStmt
-        = start:position!() "struct" _ name:identifier() __? "{"
-        __? body:decl_stmts() __?
-        "}" end:position!() {
-            ParserDeclStmt {
+    rule expr_statement() -> ParserScopeStmt
+        = start:position!() expr:oneline_expression() end:position!() {
+            ParserScopeStmt {
                 range: Range::n(start, end),
-                kind: ParserDeclStmtKind::StructDecl {
-                    name,
-                    body
-                }
+                kind: ParserScopeStmtKind::Expression { expr }
             }
         }
 

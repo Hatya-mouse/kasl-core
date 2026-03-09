@@ -18,10 +18,10 @@ use crate::{
     ExprToken, Range, ScopeID, Statement,
     error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
-    statement_building::StatementBuilder,
+    statement_building::FuncStmtBuilder,
 };
 
-impl StatementBuilder<'_> {
+impl FuncStmtBuilder<'_> {
     pub fn build_assign(
         &mut self,
         target: &ExprToken,

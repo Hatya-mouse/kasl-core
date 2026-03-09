@@ -14,18 +14,19 @@
 // limitations under the License.
 //
 
-mod func_stmt_building;
-
-pub use func_stmt_building::FuncStmtBuilder;
+mod builders;
+/// Builds a Block which contains ScopeID from a list of statements.
+mod scope_block_builder;
+mod stmt_builder;
 
 use crate::{
-    NameSpace, OperatorContext, ScopeRegistry,
+    FunctionID, NameSpace, OperatorContext, ScopeRegistry,
     error::ErrorCollector,
     symbol_table::{FuncBodyMap, FunctionContext},
-    type_registry::TypeRegistry,
+    type_registry::{ResolvedType, TypeRegistry},
 };
 
-pub struct StatementBuilder<'a> {
+pub struct FuncStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
     type_registry: &'a TypeRegistry,
@@ -33,9 +34,12 @@ pub struct StatementBuilder<'a> {
     func_body_map: &'a FuncBodyMap,
     op_ctx: &'a OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
+
+    func_id: FunctionID,
+    expected_return_type: Option<ResolvedType>,
 }
 
-impl<'a> StatementBuilder<'a> {
+impl<'a> FuncStmtBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
@@ -44,7 +48,11 @@ impl<'a> StatementBuilder<'a> {
         func_body_map: &'a FuncBodyMap,
         op_ctx: &'a OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
+        func_id: FunctionID,
     ) -> Self {
+        let func = func_ctx.get_func(&func_id);
+        let expected_return_type = func.and_then(|f| f.return_type.clone());
+
         Self {
             ec,
             name_space,
@@ -53,22 +61,8 @@ impl<'a> StatementBuilder<'a> {
             func_body_map,
             op_ctx,
             scope_registry,
-        }
-    }
-
-    pub fn build_all(&mut self) {
-        for func_id in self.func_ctx.func_ids() {
-            let mut func_stmt_builder = FuncStmtBuilder::new(
-                self.ec,
-                self.name_space,
-                self.type_registry,
-                self.func_ctx,
-                self.func_body_map,
-                self.op_ctx,
-                self.scope_registry,
-                func_id,
-            );
-            func_stmt_builder.build_func_body();
+            func_id,
+            expected_return_type,
         }
     }
 }

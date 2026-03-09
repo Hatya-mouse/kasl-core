@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{ParserScopeStmt, ScopeID, statement_building::StatementBuilder, symbol_table::Block};
+use crate::{ParserScopeStmt, ScopeID, statement_building::FuncStmtBuilder, symbol_table::Block};
 
-impl StatementBuilder<'_> {
+impl FuncStmtBuilder<'_> {
     pub fn build_scope_block(
         &mut self,
-        statements: &Vec<ParserScopeStmt>,
+        statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
     ) -> Block {
         let mut body = Vec::new();

@@ -16,11 +16,11 @@
 
 use crate::{
     Expr, ExprToken, Range, ScopeID, ScopeVar, SymbolPath, VariableID, error::Ph,
-    expr_engine::resolve_expr, scope_manager::VariableKind, statement_building::StatementBuilder,
+    expr_engine::resolve_expr, scope_manager::VariableKind, statement_building::FuncStmtBuilder,
     type_registry::ResolvedType,
 };
 
-impl StatementBuilder<'_> {
+impl FuncStmtBuilder<'_> {
     fn resolve_def_val(
         &mut self,
         def_val: &[ExprToken],

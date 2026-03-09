@@ -14,16 +14,25 @@
 // limitations under the License.
 //
 
-use crate::{ParserScopeStmt, ScopeID, Statement, statement_building::StatementBuilder};
+use crate::{
+    ExprToken, ScopeID, Statement, expr_engine::resolve_expr, statement_building::FuncStmtBuilder,
+};
 
-impl StatementBuilder<'_> {
-    /// Builds a block statement from a list of statements.
-    pub fn build_block_stmt(
+impl FuncStmtBuilder<'_> {
+    pub fn build_expr_stmt(
         &mut self,
-        statements: &Vec<ParserScopeStmt>,
-        parent_scope_id: ScopeID,
+        expr: &[ExprToken],
+        current_scope_id: ScopeID,
     ) -> Option<Statement> {
-        let block = self.build_scope_block(statements, parent_scope_id);
-        Some(Statement::Block { block })
+        let expr = resolve_expr(
+            self.ec,
+            self.op_ctx,
+            self.func_ctx,
+            self.scope_registry,
+            self.type_registry,
+            current_scope_id,
+            expr,
+        )?;
+        Some(Statement::Expression { expr })
     }
 }

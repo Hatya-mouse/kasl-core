@@ -134,14 +134,13 @@ pub enum ParserScopeStmtKind {
         target: ExprToken,
         value: Vec<ExprToken>,
     },
-    FuncCall {
-        target: ExprToken,
-        args: Vec<ParserFuncCallArg>,
+    Expression {
+        expr: Vec<ExprToken>,
     },
     If {
         main: ParserIfArm,
         else_ifs: Vec<ParserIfArm>,
-        else_body: Vec<ParserScopeStmt>,
+        else_body: Option<Vec<ParserScopeStmt>>,
     },
     Return {
         value: Option<Vec<ExprToken>>,

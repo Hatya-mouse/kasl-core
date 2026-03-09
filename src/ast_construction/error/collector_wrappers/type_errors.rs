@@ -29,4 +29,55 @@ impl ErrorCollector {
             Pl::Str(type_name),
         );
     }
+
+    pub fn non_bool_type_for_condition(&mut self, range: Range, phase: Phase, got_type: String) {
+        self.emit(
+            EK::NonBoolTypeForCondition,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(got_type),
+        );
+    }
+
+    pub fn return_type_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        expected_type: String,
+        value_type: String,
+    ) {
+        self.emit(
+            EK::ReturnTypeMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(expected_type, value_type),
+        );
+    }
+
+    pub fn return_value_for_no_return_func(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::ReturnValueForNoReturnFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub fn return_without_value_for_return_func(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        return_type: String,
+    ) {
+        self.emit(
+            EK::ReturnWithoutValueForReturnFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(return_type),
+        );
+    }
 }

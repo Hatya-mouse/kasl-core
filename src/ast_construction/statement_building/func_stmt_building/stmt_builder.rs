@@ -15,17 +15,16 @@
 //
 
 use crate::{
-    FunctionID, ParserScopeStmt, ParserScopeStmtKind, ScopeID, Statement,
-    statement_building::StatementBuilder,
+    ParserScopeStmt, ParserScopeStmtKind, ScopeID, Statement, statement_building::FuncStmtBuilder,
 };
 
-impl StatementBuilder<'_> {
-    pub fn build_func_body(&mut self, func_id: FunctionID) {
-        if let Some(body) = self.func_body_map.get_body(&func_id) {
+impl FuncStmtBuilder<'_> {
+    pub fn build_func_body(&mut self) {
+        if let Some(body) = self.func_body_map.get_body(&self.func_id) {
             // Get the scope ID of the function
             let Some(scope_id) = self
                 .func_ctx
-                .get_func_mut(&func_id)
+                .get_func_mut(&self.func_id)
                 .map(|func| func.block.get_scope_id())
             else {
                 return;
@@ -43,7 +42,7 @@ impl StatementBuilder<'_> {
             }
 
             // Store the resolved body in the function
-            let Some(func) = self.func_ctx.get_func_mut(&func_id) else {
+            let Some(func) = self.func_ctx.get_func_mut(&self.func_id) else {
                 return;
             };
             func.block.set_stmt(resolved_body);
@@ -68,13 +67,15 @@ impl StatementBuilder<'_> {
             ParserScopeStmtKind::Assign { target, value } => {
                 self.build_assign(target, value, scope_id, stmt.range)
             }
-            ParserScopeStmtKind::FuncCall { path, args } => {}
+            ParserScopeStmtKind::Expression { expr } => self.build_expr_stmt(expr, scope_id),
             ParserScopeStmtKind::If {
                 main,
                 else_ifs,
                 else_body,
-            } => {}
-            ParserScopeStmtKind::Return { value } => {}
+            } => self.build_if_stmt(main, else_ifs, else_body.as_ref(), scope_id),
+            ParserScopeStmtKind::Return { value } => {
+                self.build_return_stmt(value.as_ref(), scope_id, stmt.range)
+            }
         }
     }
 }

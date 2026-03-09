@@ -152,9 +152,29 @@ pub enum ErrorKind {
     FuncCallInLValue,
 
     /// Title: AssignTypeMismatch
-    /// Payload: The range of the assignment, the range of the value, the type of the target, and the type of the value
+    /// Payload: The type of the target and the type of the assigned value
     /// The type of the value does not match the type of the target variable.
     AssignTypeMismatch,
+
+    /// Title: NonBoolTypeForCondition
+    /// Payload: The type of the condition expression
+    /// The condition expression does not have a bool type.
+    NonBoolTypeForCondition,
+
+    /// Title: ReturnTypeMismatch
+    /// Payload: The type of the return value and the expected return type
+    /// The type of the return value does not match the expected return type.
+    ReturnTypeMismatch,
+
+    /// Title: ReturnValueForNoReturnFunc
+    /// Payload: None
+    /// A value is given to a return statement in a function that does not return a value.
+    ReturnValueForNoReturnFunc,
+
+    /// Title: ReturnWithoutValueForReturnFunc
+    /// Payload: The return type of the function
+    /// A return statement without a value is used in a function that returns a value.
+    ReturnWithoutValueForReturnFunc,
 
     /// Title: CompilerBug
     /// Payload: Error message
