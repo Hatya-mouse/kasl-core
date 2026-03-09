@@ -43,4 +43,20 @@ impl ErrorCollector {
     pub fn func_call_in_l_value(&mut self, range: Range, phase: Phase) {
         self.emit(EK::FuncCallInLValue, range, phase, Sv::Error, Pl::None);
     }
+
+    pub fn assign_type_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        target_type: String,
+        value_type: String,
+    ) {
+        self.emit(
+            EK::AssignTypeMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(target_type, value_type),
+        );
+    }
 }

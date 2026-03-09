@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    ExprToken, ScopeID, Statement,
+    ExprToken, Range, ScopeID, Statement,
+    error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
     statement_building::StatementBuilder,
 };
@@ -26,6 +27,7 @@ impl StatementBuilder<'_> {
         target: &ExprToken,
         value: &[ExprToken],
         current_scope_id: ScopeID,
+        stmt_range: Range,
     ) -> Option<Statement> {
         // Resolve the target variable
         let mut l_value_resolver = LValueResolver::new(
@@ -47,6 +49,17 @@ impl StatementBuilder<'_> {
             current_scope_id,
             value,
         )?;
+
+        // Check if the target and value types match
+        if target_l_value.value_type != resolved_value.value_type {
+            self.ec.assign_type_mismatch(
+                stmt_range,
+                Ph::StatementCollection,
+                target_l_value.value_type.to_string(),
+                resolved_value.value_type.to_string(),
+            );
+            return None;
+        }
 
         Some(Statement::Assign {
             target: target_l_value,

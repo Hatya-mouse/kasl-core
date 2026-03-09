@@ -151,6 +151,11 @@ pub enum ErrorKind {
     /// A function call is part of an LValue expression.
     FuncCallInLValue,
 
+    /// Title: AssignTypeMismatch
+    /// Payload: The range of the assignment, the range of the value, the type of the target, and the type of the value
+    /// The type of the value does not match the type of the target variable.
+    AssignTypeMismatch,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,
