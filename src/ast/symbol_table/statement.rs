@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-use crate::{Expr, FuncCallArg, ScopeID, VariableID, type_registry::ResolvedType};
+use crate::{
+    Expr, FuncCallArg, FunctionID, ScopeID, VariableID, symbol_table::LValue,
+    type_registry::ResolvedType,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Block {
@@ -51,11 +54,11 @@ pub enum Statement {
         var_id: VariableID,
     },
     Assign {
-        target: VariableID,
+        target: LValue,
         value: Expr<ResolvedType>,
     },
     FuncCall {
-        path: VariableID,
+        id: FunctionID,
         args: Vec<FuncCallArg>,
     },
     If {

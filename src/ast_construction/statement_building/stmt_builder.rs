@@ -63,7 +63,9 @@ impl StatementBuilder<'_> {
                 value_type,
                 def_val,
             } => self.build_local_const(name, value_type, def_val, scope_id, stmt.range),
-            ParserScopeStmtKind::Assign { target, value } => {}
+            ParserScopeStmtKind::Assign { target, value } => {
+                self.build_assign(target, value, scope_id)
+            }
             ParserScopeStmtKind::FuncCall { path, args } => {}
             ParserScopeStmtKind::If {
                 main,

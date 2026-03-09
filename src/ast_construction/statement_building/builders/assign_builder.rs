@@ -15,19 +15,27 @@
 //
 
 use crate::{
-    ExprToken, Range, ScopeID, Statement, SymbolPath, expr_engine::resolve_expr,
+    ExprToken, ScopeID, Statement,
+    expr_engine::{LValueResolver, resolve_expr},
     statement_building::StatementBuilder,
 };
 
 impl StatementBuilder<'_> {
     pub fn build_assign(
         &mut self,
-        target: SymbolPath,
+        target: &ExprToken,
         value: &[ExprToken],
         current_scope_id: ScopeID,
-        stmt_range: Range,
     ) -> Option<Statement> {
         // Resolve the target variable
+        let mut l_value_resolver = LValueResolver::new(
+            self.ec,
+            self.scope_registry,
+            self.type_registry,
+            current_scope_id,
+        );
+        // Error will be thrown by the LValueResolver so no need to check for None
+        let target_l_value = l_value_resolver.resolve_recursively(target)?;
 
         // Resolve the expression
         let resolved_value = resolve_expr(
@@ -39,5 +47,10 @@ impl StatementBuilder<'_> {
             current_scope_id,
             value,
         )?;
+
+        Some(Statement::Assign {
+            target: target_l_value,
+            value: resolved_value,
+        })
     }
 }
