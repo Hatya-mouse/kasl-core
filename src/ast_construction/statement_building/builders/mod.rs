@@ -14,4 +14,9 @@
 // limitations under the License.
 //
 
+/// Builds a block statement.
 mod block_builder;
+/// Builds a LocalVar and LocalConst statements which declare local variables and constants.
+mod local_decl_builder;
+/// Builds a ScopeVar from the given information and registers it in the scope registry.
+mod local_var_registrar;

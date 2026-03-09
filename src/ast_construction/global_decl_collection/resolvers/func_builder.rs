@@ -83,7 +83,7 @@ impl GlobalDeclCollector<'_> {
                 self.scope_registry,
                 self.type_registry,
                 global_scope_id,
-                def_val.clone(),
+                def_val,
             )?;
 
             // If a type annotation is provided, check if it matches the resolved default value type

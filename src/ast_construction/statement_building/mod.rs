@@ -18,29 +18,39 @@ mod builders;
 mod stmt_builder;
 
 use crate::{
-    ScopeRegistry,
+    NameSpace, OperatorContext, ScopeRegistry,
     error::ErrorCollector,
     symbol_table::{FuncBodyMap, FunctionContext},
+    type_registry::TypeRegistry,
 };
 
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
+    name_space: &'a mut NameSpace,
+    type_registry: &'a TypeRegistry,
     func_ctx: &'a mut FunctionContext,
     func_body_map: &'a FuncBodyMap,
+    op_ctx: &'a OperatorContext,
     scope_registry: &'a mut ScopeRegistry,
 }
 
 impl<'a> StatementBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
+        name_space: &'a mut NameSpace,
+        type_registry: &'a TypeRegistry,
         func_ctx: &'a mut FunctionContext,
         func_body_map: &'a FuncBodyMap,
+        op_ctx: &'a OperatorContext,
         scope_registry: &'a mut ScopeRegistry,
     ) -> Self {
         Self {
             ec,
+            name_space,
+            type_registry,
             func_ctx,
             func_body_map,
+            op_ctx,
             scope_registry,
         }
     }

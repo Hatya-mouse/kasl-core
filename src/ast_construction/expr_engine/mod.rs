@@ -33,8 +33,8 @@ pub fn resolve_expr(
     func_ctx: &FunctionContext,
     scope_registry: &ScopeRegistry,
     type_registry: &TypeRegistry,
-    current_scope: ScopeID,
-    raw_tokens: Vec<ExprToken>,
+    current_scope_id: ScopeID,
+    raw_tokens: &[ExprToken],
 ) -> Option<Expr<ResolvedType>> {
     // Build the expression tree
     let mut expr_builder = ExpressionBuilder::new(ec, op_ctx);
@@ -47,7 +47,7 @@ pub fn resolve_expr(
         func_ctx,
         scope_registry,
         type_registry,
-        current_scope,
+        current_scope_id,
     );
     resolver.resolve_recursively(expr)
 }

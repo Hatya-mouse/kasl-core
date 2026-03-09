@@ -168,7 +168,7 @@ impl ExpressionBuilder<'_> {
                 ExprKind::FuncCall {
                     name: name.clone(),
                     id: None,
-                    no_type_args: self.parse_func_args(args.clone())?,
+                    no_type_args: self.parse_func_args(args)?,
                     args: None,
                 },
                 (),
@@ -185,7 +185,7 @@ impl ExpressionBuilder<'_> {
                     ParserMemberAccess::FuncCall { name, args } => MemberAccess::FuncCall {
                         name: name.clone(),
                         id: None,
-                        no_type_args: self.parse_func_args(args.clone())?,
+                        no_type_args: self.parse_func_args(args)?,
                         args: None,
                     },
                 };
@@ -212,12 +212,12 @@ impl ExpressionBuilder<'_> {
         }
     }
 
-    fn parse_func_args(&mut self, args: Vec<ParserFuncCallArg>) -> Option<Vec<NoTypeFuncCallArg>> {
+    fn parse_func_args(&mut self, args: &[ParserFuncCallArg]) -> Option<Vec<NoTypeFuncCallArg>> {
         let mut parsed_args = Vec::new();
         for arg in args {
-            let arg_expr = self.build(arg.value)?;
+            let arg_expr = self.build(&arg.value)?;
             parsed_args.push(NoTypeFuncCallArg {
-                label: arg.label,
+                label: arg.label.clone(),
                 value: arg_expr,
                 range: arg.range,
             });

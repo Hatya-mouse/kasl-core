@@ -29,7 +29,7 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) {
         // Resolve the attributes
-        let Some(resolved_attrs) = self.resolve_attrs(attrs.clone()) else {
+        let Some(resolved_attrs) = self.resolve_attrs(attrs) else {
             return;
         };
 
@@ -81,14 +81,14 @@ impl GlobalDeclCollector<'_> {
         );
     }
 
-    fn resolve_attrs(&mut self, attrs: Vec<ParserInputAttribute>) -> Option<Vec<InputAttribute>> {
+    fn resolve_attrs(&mut self, attrs: &[ParserInputAttribute]) -> Option<Vec<InputAttribute>> {
         let mut resolved_attrs = Vec::new();
         let global_scope_id = self.scope_registry.get_global_scope_id();
 
         // Resolve each attribute's arguments and construct InputAttribute
         for attr in attrs {
             let mut resolved_args = Vec::new();
-            for arg in attr.args {
+            for arg in &attr.args {
                 // Resolve the expression of the argument
                 let resolved_arg = resolve_expr(
                     self.ec,
@@ -103,7 +103,7 @@ impl GlobalDeclCollector<'_> {
             }
 
             resolved_attrs.push(InputAttribute {
-                name: attr.name,
+                name: attr.name.clone(),
                 args: resolved_args,
                 range: attr.range,
             });

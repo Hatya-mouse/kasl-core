@@ -45,14 +45,10 @@ pub enum Statement {
         block: Block,
     },
     LocalVar {
-        name: String,
-        value_type: VariableID,
-        def_val: Expr<ResolvedType>,
+        var_id: VariableID,
     },
     LocalConst {
-        name: String,
-        value_type: VariableID,
-        def_val: Expr<ResolvedType>,
+        var_id: VariableID,
     },
     Assign {
         target: VariableID,

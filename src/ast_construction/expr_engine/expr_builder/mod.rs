@@ -28,11 +28,11 @@ impl<'a> ExpressionBuilder<'a> {
         Self { ec, op_ctx }
     }
 
-    pub fn build(&mut self, tokens: Vec<ExprToken>) -> Option<Expr<()>> {
+    pub fn build(&mut self, tokens: &[ExprToken]) -> Option<Expr<()>> {
         // First, build the parenthesized tokens by calling `build` recursively
         let mut processed_tokens: Vec<ExprToken> = Vec::new();
         for token in tokens {
-            match token.kind {
+            match &token.kind {
                 ExprTokenKind::Parenthesized(inner) => {
                     processed_tokens.push(ExprToken {
                         kind: ExprTokenKind::ResolvedExpr(self.build(inner)?),
@@ -40,7 +40,7 @@ impl<'a> ExpressionBuilder<'a> {
                     });
                 }
                 _ => {
-                    processed_tokens.push(token);
+                    processed_tokens.push(token.clone());
                 }
             }
         }

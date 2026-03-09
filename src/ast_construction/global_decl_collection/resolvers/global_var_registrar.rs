@@ -36,7 +36,7 @@ impl GlobalDeclCollector<'_> {
             self.scope_registry,
             self.type_registry,
             global_scope_id,
-            def_val.clone(),
+            def_val,
         )?;
 
         // Resolve the type annotation if provided

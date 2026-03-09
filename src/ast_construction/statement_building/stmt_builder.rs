@@ -35,6 +35,8 @@ impl StatementBuilder<'_> {
             for stmt in body {
                 // Build the body one by one
                 let Some(resolved_stmt) = self.build_stmt(stmt, scope_id) else {
+                    // Errors should have been emitted inside the build_stmt function
+                    // thus it is okay to continue without emitting any additional errors here
                     continue;
                 };
                 resolved_body.push(resolved_stmt);
@@ -55,12 +57,12 @@ impl StatementBuilder<'_> {
                 name,
                 value_type,
                 def_val,
-            } => {}
+            } => self.build_local_var(name, value_type, def_val, scope_id, stmt.range),
             ParserScopeStmtKind::LocalConst {
                 name,
                 value_type,
                 def_val,
-            } => {}
+            } => self.build_local_const(name, value_type, def_val, scope_id, stmt.range),
             ParserScopeStmtKind::Assign { target, value } => {}
             ParserScopeStmtKind::FuncCall { path, args } => {}
             ParserScopeStmtKind::If {
