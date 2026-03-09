@@ -20,7 +20,7 @@ use crate::{
 };
 
 impl StatementBuilder<'_> {
-    pub fn build_stmt_for_func(&mut self, func_id: FunctionID) {
+    pub fn build_func_body(&mut self, func_id: FunctionID) {
         if let Some(body) = self.func_body_map.get_body(&func_id) {
             // Get the scope ID of the function
             let Some(scope_id) = self

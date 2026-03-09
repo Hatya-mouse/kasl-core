@@ -55,9 +55,9 @@ impl<'a> StatementBuilder<'a> {
         }
     }
 
-    pub fn build_stmts(&mut self) {
+    pub fn build_all(&mut self) {
         for func_id in self.func_ctx.func_ids() {
-            self.build_stmt_for_func(func_id);
+            self.build_func_body(func_id);
         }
     }
 }
