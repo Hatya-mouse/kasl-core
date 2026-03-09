@@ -52,7 +52,9 @@ impl StatementBuilder<'_> {
 
     pub fn build_stmt(&mut self, stmt: &ParserScopeStmt, scope_id: ScopeID) -> Option<Statement> {
         match &stmt.kind {
-            ParserScopeStmtKind::Block { statements } => self.build_block(statements, scope_id),
+            ParserScopeStmtKind::Block { statements } => {
+                self.build_block_stmt(statements, scope_id)
+            }
             ParserScopeStmtKind::LocalVar {
                 name,
                 value_type,
@@ -64,7 +66,7 @@ impl StatementBuilder<'_> {
                 def_val,
             } => self.build_local_const(name, value_type, def_val, scope_id, stmt.range),
             ParserScopeStmtKind::Assign { target, value } => {
-                self.build_assign(target, value, scope_id)
+                self.build_assign(target, value, scope_id, stmt.range)
             }
             ParserScopeStmtKind::FuncCall { path, args } => {}
             ParserScopeStmtKind::If {

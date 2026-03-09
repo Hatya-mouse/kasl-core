@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
-/// Builds an Assign statement.
-mod assign_builder;
-/// Builds a block statement.
-mod block_stmt_builder;
-/// Builds a LocalVar and LocalConst statements which declare local variables and constants.
-mod local_decl_builder;
-/// Builds a ScopeVar from the given information and registers it in the scope registry.
-mod local_var_registrar;
-/// Builds a Block which contains ScopeID from a list of statements.
-mod scope_block_builder;
+use crate::{ParserScopeStmt, ScopeID, Statement, statement_building::StatementBuilder};
+
+impl StatementBuilder<'_> {
+    /// Builds a block statement from a list of statements.
+    pub fn build_block_stmt(
+        &mut self,
+        statements: &Vec<ParserScopeStmt>,
+        parent_scope_id: ScopeID,
+    ) -> Option<Statement> {
+        let block = self.build_scope_block(statements, parent_scope_id);
+        Some(Statement::Block { block })
+    }
+}
