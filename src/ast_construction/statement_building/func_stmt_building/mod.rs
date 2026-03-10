@@ -28,7 +28,7 @@ pub struct FuncStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
     func_body_map: &'a FuncBodyMap,
-    compilation_state: &'a mut CompilationState,
+    comp_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
     func_id: FunctionID,
@@ -41,18 +41,18 @@ impl<'a> FuncStmtBuilder<'a> {
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
         func_body_map: &'a FuncBodyMap,
-        compilation_state: &'a mut CompilationState,
+        comp_state: &'a mut CompilationState,
         scope_graph: &'a mut ScopeGraph,
         func_id: FunctionID,
     ) -> Self {
-        let func = compilation_state.func_ctx.get_func(&func_id);
+        let func = comp_state.func_ctx.get_func(&func_id);
         let expected_return_type = func.and_then(|f| f.return_type);
 
         Self {
             ec,
             name_space,
             func_body_map,
-            compilation_state,
+            comp_state,
             scope_graph,
             func_id,
             expected_return_type,

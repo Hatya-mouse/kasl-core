@@ -35,7 +35,7 @@ impl<'a> GlobalDeclCollector<'a> {
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
         // Register the struct in the type registry with a generated ID
-        self.compilation_state
+        self.comp_state
             .type_registry
             .register_struct(struct_decl, struct_path, struct_id);
     }
@@ -128,11 +128,11 @@ impl<'a> GlobalDeclCollector<'a> {
         let func_id = self.name_space.generate_function_id();
 
         if info.is_static {
-            self.compilation_state
+            self.comp_state
                 .func_ctx
                 .register_static_func(func, struct_id, func_id);
         } else {
-            self.compilation_state
+            self.comp_state
                 .func_ctx
                 .register_member_func(func, struct_id, func_id);
         }

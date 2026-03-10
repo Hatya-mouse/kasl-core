@@ -42,7 +42,7 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Check if a function with the same name already exists
-        if self.compilation_state.func_ctx.has_global_func(info.name) {
+        if self.comp_state.func_ctx.has_global_func(info.name) {
             self.ec
                 .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, info.name);
             return;
@@ -50,9 +50,7 @@ impl GlobalDeclCollector<'_> {
 
         // Register the function
         let func_id = self.name_space.generate_function_id();
-        self.compilation_state
-            .func_ctx
-            .register_global_func(func, func_id);
+        self.comp_state.func_ctx.register_global_func(func, func_id);
 
         // Register the function body to the function body map
         self.func_body_map.register(func_id, info.body.to_vec());

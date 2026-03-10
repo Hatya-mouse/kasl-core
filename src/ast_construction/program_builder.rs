@@ -26,15 +26,11 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     let mut ec = ErrorCollector::new();
     let mut name_space = NameSpace::default();
     let mut func_body_map = FuncBodyMap::default();
-    let mut compilation_state = CompilationState::default();
+    let mut comp_state = CompilationState::default();
 
     // 1. Collect types
-    let mut type_collector = TypeCollector::new(
-        &mut ec,
-        &statements,
-        &mut name_space,
-        &mut compilation_state,
-    );
+    let mut type_collector =
+        TypeCollector::new(&mut ec, &statements, &mut name_space, &mut comp_state);
     type_collector.process();
 
     // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
@@ -43,7 +39,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
         &statements,
         &mut name_space,
         &mut func_body_map,
-        &mut compilation_state,
+        &mut comp_state,
     );
     global_decl_collector.process();
 

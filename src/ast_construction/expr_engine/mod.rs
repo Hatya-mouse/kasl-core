@@ -28,15 +28,15 @@ use crate::{
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
-    compilation_state: &CompilationState,
+    comp_state: &CompilationState,
     current_scope_id: ScopeID,
     raw_tokens: &[ExprToken],
 ) -> Option<Expr<ResolvedType>> {
     // Build the expression tree
-    let mut expr_builder = ExpressionBuilder::new(ec, &compilation_state.op_ctx);
+    let mut expr_builder = ExpressionBuilder::new(ec, &comp_state.op_ctx);
     let expr = expr_builder.build(raw_tokens)?;
 
     // Resolve the type of the expression
-    let mut resolver = ExpressionResolver::new(ec, compilation_state, current_scope_id);
+    let mut resolver = ExpressionResolver::new(ec, comp_state, current_scope_id);
     resolver.resolve_recursively(expr)
 }

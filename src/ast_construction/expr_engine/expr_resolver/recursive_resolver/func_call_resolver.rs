@@ -27,15 +27,11 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Get a reference to the function
-        let Some(func_id) = self
-            .compilation_state
-            .func_ctx
-            .get_global_func_by_name(&name)
-        else {
+        let Some(func_id) = self.comp_state.func_ctx.get_global_func_by_name(&name) else {
             self.ec.func_not_found(range, Ph::ExprEngine, &name);
             return None;
         };
-        let func = self.compilation_state.func_ctx.get_func(&func_id)?;
+        let func = self.comp_state.func_ctx.get_func(&func_id)?;
 
         let args = self.resolve_func_call_args(func, &no_type_args, range)?;
 

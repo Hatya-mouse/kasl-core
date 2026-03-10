@@ -28,13 +28,12 @@ impl FuncStmtBuilder<'_> {
         current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Expr<ResolvedType>> {
-        let resolved_def_val =
-            resolve_expr(self.ec, self.compilation_state, current_scope_id, def_val)?;
+        let resolved_def_val = resolve_expr(self.ec, self.comp_state, current_scope_id, def_val)?;
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
             let Some(resolved_type_annotation) = self
-                .compilation_state
+                .comp_state
                 .type_registry
                 .resolve_type_path(type_annotation)
             else {
@@ -51,10 +50,10 @@ impl FuncStmtBuilder<'_> {
                 self.ec.type_annotation_mismatch(
                     stmt_range,
                     Ph::StatementCollection,
-                    self.compilation_state
+                    self.comp_state
                         .type_registry
                         .format_type(&resolved_type_annotation),
-                    self.compilation_state
+                    self.comp_state
                         .type_registry
                         .format_type(&resolved_def_val.value_type),
                 );
@@ -88,7 +87,7 @@ impl FuncStmtBuilder<'_> {
 
         // Check if the name is already in use in this scope
         if self
-            .compilation_state
+            .comp_state
             .scope_registry
             .has_var(current_scope_id, name)
         {
@@ -99,7 +98,7 @@ impl FuncStmtBuilder<'_> {
 
         // Register the variable in the scope
         let var_id = self.name_space.generate_variable_id();
-        self.compilation_state.scope_registry.register_var(
+        self.comp_state.scope_registry.register_var(
             scope_var,
             name.to_string(),
             var_id,

@@ -20,19 +20,19 @@ use crate::{CompilationState, ScopeID, error::ErrorCollector};
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
-    compilation_state: &'a CompilationState,
+    comp_state: &'a CompilationState,
     current_scope: ScopeID,
 }
 
 impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        compilation_state: &'a CompilationState,
+        comp_state: &'a CompilationState,
         current_scope: ScopeID,
     ) -> Self {
         Self {
             ec,
-            compilation_state,
+            comp_state,
             current_scope,
         }
     }

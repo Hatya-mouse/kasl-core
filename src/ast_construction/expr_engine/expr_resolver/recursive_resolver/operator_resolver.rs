@@ -33,12 +33,12 @@ impl ExpressionResolver<'_> {
         let lhs = self.resolve_recursively(lhs)?;
         let rhs = self.resolve_recursively(rhs)?;
         // Get a reference to the actual operator
-        let op_id = self.compilation_state.op_ctx.get_infix_id(InfixQueryRef {
+        let op_id = self.comp_state.op_ctx.get_infix_id(InfixQueryRef {
             symbol: &symbol,
             lhs_type: &lhs.value_type,
             rhs_type: &rhs.value_type,
         })?;
-        let op = self.compilation_state.op_ctx.get_infix_op(&op_id)?;
+        let op = self.comp_state.op_ctx.get_infix_op(&op_id)?;
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(
@@ -62,14 +62,11 @@ impl ExpressionResolver<'_> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
         // Get a reference to the actual operator
-        let op_id = self
-            .compilation_state
-            .op_ctx
-            .get_prefix_id(PrefixQueryRef {
-                symbol: &symbol,
-                operand_type: &operand.value_type,
-            })?;
-        let op = self.compilation_state.op_ctx.get_prefix_op(&op_id)?;
+        let op_id = self.comp_state.op_ctx.get_prefix_id(PrefixQueryRef {
+            symbol: &symbol,
+            operand_type: &operand.value_type,
+        })?;
+        let op = self.comp_state.op_ctx.get_prefix_op(&op_id)?;
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(
@@ -92,14 +89,11 @@ impl ExpressionResolver<'_> {
         // Resolve the type of the operand
         let operand = self.resolve_recursively(operand)?;
         // Get a reference to the actual operator
-        let op_id = self
-            .compilation_state
-            .op_ctx
-            .get_postfix_id(PostfixQueryRef {
-                symbol: &symbol,
-                operand_type: &operand.value_type,
-            })?;
-        let op = self.compilation_state.op_ctx.get_postfix_op(&op_id)?;
+        let op_id = self.comp_state.op_ctx.get_postfix_id(PostfixQueryRef {
+            symbol: &symbol,
+            operand_type: &operand.value_type,
+        })?;
+        let op = self.comp_state.op_ctx.get_postfix_op(&op_id)?;
         // Get the return type of the operator
         let return_type = op.return_type;
         Some(Expr::new(

@@ -28,7 +28,7 @@ pub struct GlobalDeclCollector<'a> {
     decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
     func_body_map: &'a mut FuncBodyMap,
-    compilation_state: &'a mut CompilationState,
+    comp_state: &'a mut CompilationState,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -37,14 +37,14 @@ impl<'a> GlobalDeclCollector<'a> {
         decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
         func_body_map: &'a mut FuncBodyMap,
-        compilation_state: &'a mut CompilationState,
+        comp_state: &'a mut CompilationState,
     ) -> Self {
         Self {
             ec,
             decl_stmts,
             name_space,
             func_body_map,
-            compilation_state,
+            comp_state,
         }
     }
 

@@ -22,7 +22,7 @@ pub struct TypeCollector<'a> {
     ec: &'a mut ErrorCollector,
     decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
-    compilation_state: &'a mut CompilationState,
+    comp_state: &'a mut CompilationState,
 }
 
 impl<'a> TypeCollector<'a> {
@@ -30,13 +30,13 @@ impl<'a> TypeCollector<'a> {
         ec: &'a mut ErrorCollector,
         decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
-        compilation_state: &'a mut CompilationState,
+        comp_state: &'a mut CompilationState,
     ) -> Self {
         Self {
             ec,
             decl_stmts,
             name_space,
-            compilation_state,
+            comp_state,
         }
     }
 

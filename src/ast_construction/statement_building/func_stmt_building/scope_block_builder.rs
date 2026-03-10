@@ -26,7 +26,7 @@ impl FuncStmtBuilder<'_> {
 
         // Create a new scope for the block
         let block_scope_id = self
-            .compilation_state
+            .comp_state
             .scope_registry
             .create_scope(Some(parent_scope_id));
         // Build each statement in the block scope

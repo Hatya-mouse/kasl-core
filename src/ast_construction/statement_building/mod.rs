@@ -27,7 +27,7 @@ pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
     name_space: &'a mut NameSpace,
     func_body_map: &'a FuncBodyMap,
-    compilation_state: &'a mut CompilationState,
+    comp_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
 }
@@ -37,25 +37,25 @@ impl<'a> StatementBuilder<'a> {
         ec: &'a mut ErrorCollector,
         name_space: &'a mut NameSpace,
         func_body_map: &'a FuncBodyMap,
-        compilation_state: &'a mut CompilationState,
+        comp_state: &'a mut CompilationState,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
             name_space,
             func_body_map,
-            compilation_state,
+            comp_state,
             scope_graph,
         }
     }
 
     pub fn build_all(&mut self) {
-        for func_id in self.compilation_state.func_ctx.func_ids() {
+        for func_id in self.comp_state.func_ctx.func_ids() {
             let mut func_stmt_builder = FuncStmtBuilder::new(
                 self.ec,
                 self.name_space,
                 self.func_body_map,
-                self.compilation_state,
+                self.comp_state,
                 self.scope_graph,
                 func_id,
             );

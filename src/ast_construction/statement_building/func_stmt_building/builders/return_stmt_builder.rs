@@ -30,7 +30,7 @@ impl FuncStmtBuilder<'_> {
             if let Some(value) = value {
                 // Resolve the expression
                 let resolved_value =
-                    resolve_expr(self.ec, self.compilation_state, current_scope_id, value)?;
+                    resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;
 
                 // Check if the return type matches the expected return type
                 // If the self.expected_return_type is None, resolved_value should be None as well
@@ -38,10 +38,10 @@ impl FuncStmtBuilder<'_> {
                     self.ec.return_type_mismatch(
                         decl_range,
                         Ph::StatementCollection,
-                        self.compilation_state
+                        self.comp_state
                             .type_registry
                             .format_type(&expected_return_type),
-                        self.compilation_state
+                        self.comp_state
                             .type_registry
                             .format_type(&resolved_value.value_type),
                     );
@@ -55,7 +55,7 @@ impl FuncStmtBuilder<'_> {
                 self.ec.return_without_value_for_return_func(
                     decl_range,
                     Ph::StatementCollection,
-                    self.compilation_state
+                    self.comp_state
                         .type_registry
                         .format_type(&expected_return_type),
                 );

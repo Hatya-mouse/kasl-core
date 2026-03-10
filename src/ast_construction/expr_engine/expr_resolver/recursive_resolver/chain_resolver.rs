@@ -60,7 +60,7 @@ impl ExpressionResolver<'_> {
             ResolvedType::Struct(struct_id) => match access {
                 MemberAccess::Access { name, .. } => {
                     // Get the struct declaration
-                    let struct_decl = self.compilation_state.type_registry.get_struct(struct_id)?;
+                    let struct_decl = self.comp_state.type_registry.get_struct(struct_id)?;
 
                     // Get the index of the field by its name
                     let Some(field_index) = struct_decl.get_field_index(&name) else {
@@ -90,12 +90,11 @@ impl ExpressionResolver<'_> {
                 } => {
                     // Get the function ID by name
                     let Some(func_id) = self
-                        .compilation_state
+                        .comp_state
                         .func_ctx
                         .get_member_func_by_name(struct_id, &name)
                     else {
-                        let struct_decl =
-                            self.compilation_state.type_registry.get_struct(struct_id)?;
+                        let struct_decl = self.comp_state.type_registry.get_struct(struct_id)?;
                         self.ec.member_func_not_found(
                             range,
                             Ph::ExprEngine,
@@ -106,7 +105,7 @@ impl ExpressionResolver<'_> {
                     };
 
                     // Get the function by ID
-                    let func = self.compilation_state.func_ctx.get_func(&func_id)?;
+                    let func = self.comp_state.func_ctx.get_func(&func_id)?;
                     let Some(return_type) = &func.return_type else {
                         self.ec
                             .no_return_func_in_expr(range, Ph::ExprEngine, &func.name);

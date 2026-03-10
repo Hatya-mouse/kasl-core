@@ -25,7 +25,7 @@ impl TypeCollector<'_> {
             let path = symbol_path![name.clone()];
 
             // Check if the struct with the same name already exists
-            if self.compilation_state.type_registry.has_struct(&path) {
+            if self.comp_state.type_registry.has_struct(&path) {
                 self.ec
                     .duplicate_struct_name(stmt.range, Ph::StructCollection, name);
             }
@@ -33,7 +33,7 @@ impl TypeCollector<'_> {
             // Create a new struct declaration
             let struct_decl = StructDecl::new(name.clone(), stmt.range);
             let id = self.name_space.generate_struct_id();
-            self.compilation_state
+            self.comp_state
                 .type_registry
                 .register_struct(struct_decl, path, id);
         }

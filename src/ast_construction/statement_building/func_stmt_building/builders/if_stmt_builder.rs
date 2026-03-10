@@ -50,17 +50,12 @@ impl FuncStmtBuilder<'_> {
 
     pub fn build_if_arm(&mut self, arm: &ParserIfArm, current_scope_id: ScopeID) -> Option<IfArm> {
         // Resolve the condition expression and verify it has a bool type
-        let condition = resolve_expr(
-            self.ec,
-            self.compilation_state,
-            current_scope_id,
-            &arm.condition,
-        )?;
+        let condition = resolve_expr(self.ec, self.comp_state, current_scope_id, &arm.condition)?;
         if condition.value_type != ResolvedType::Primitive(PrimitiveType::Bool) {
             self.ec.non_bool_type_for_condition(
                 arm.range,
                 Ph::StatementCollection,
-                self.compilation_state
+                self.comp_state
                     .type_registry
                     .format_type(&condition.value_type),
             );
