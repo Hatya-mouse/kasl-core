@@ -22,7 +22,7 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::VariableID;
+use crate::{VariableID, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
 /// ScopeRegistry manages scopes and variables belonging to them.
@@ -110,11 +110,23 @@ impl ScopeRegistry {
         self.variables.get(id)
     }
 
-    // Registers a variable in the scope registry.
+    /// Registers a variable in the scope registry.
     pub fn register_var(&mut self, var: ScopeVar, name: String, id: VariableID, scope: ScopeID) {
         let target_scope = self.scopes.get_mut(&scope).unwrap();
         target_scope.register_var(name, id);
         self.variables.insert(id, var);
+    }
+
+    /// Calculates the size of the scope, ignoring the child scopes.
+    pub fn scope_size(&self, type_registry: &TypeRegistry, scope_id: ScopeID) -> usize {
+        let scope = &self.scopes[&scope_id];
+        let mut size = 0;
+        for var_id in &scope.variables {
+            let var = self.variables.get(var_id).unwrap();
+            let var_type = var.def_val.value_type;
+            size += type_registry.get_type_size(&var_type);
+        }
+        size
     }
 }
 

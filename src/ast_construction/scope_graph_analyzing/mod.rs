@@ -14,8 +14,9 @@
 // limitations under the License.
 //
 
-use crate::scope_manager::ScopeGraph;
+use crate::{ScopeRegistry, scope_manager::ScopeGraph};
 
 pub struct ScopeGraphAnalyzer<'a> {
     scope_graph: &'a ScopeGraph,
+    scope_registry: &'a ScopeRegistry,
 }

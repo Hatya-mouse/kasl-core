@@ -20,14 +20,16 @@ use crate::ScopeID;
 
 pub struct ScopeGraph {
     pub scope_sizes: HashMap<ScopeID, usize>,
-    pub edges: Vec<ScopeGraphEdge>,
+    pub caller_to_callee: HashMap<ScopeID, Vec<ScopeID>>,
+    pub callee_to_caller: HashMap<ScopeID, Vec<ScopeID>>,
 }
 
 impl ScopeGraph {
     pub fn new() -> Self {
         Self {
             scope_sizes: HashMap::new(),
-            edges: Vec::new(),
+            caller_to_callee: HashMap::new(),
+            callee_to_caller: HashMap::new(),
         }
     }
 
@@ -36,17 +38,13 @@ impl ScopeGraph {
     }
 
     pub fn add_edge(&mut self, caller: ScopeID, callee: ScopeID) {
-        self.edges.push(ScopeGraphEdge::new(caller, callee));
-    }
-}
-
-pub struct ScopeGraphEdge {
-    pub caller: ScopeID,
-    pub callee: ScopeID,
-}
-
-impl ScopeGraphEdge {
-    pub fn new(caller: ScopeID, callee: ScopeID) -> Self {
-        Self { caller, callee }
+        self.caller_to_callee
+            .entry(caller)
+            .or_default()
+            .push(callee);
+        self.callee_to_caller
+            .entry(callee)
+            .or_default()
+            .push(caller);
     }
 }

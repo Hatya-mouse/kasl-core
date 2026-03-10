@@ -21,6 +21,7 @@ use std::collections::HashMap;
 pub struct Scope {
     pub parent: Option<ScopeID>,
     name_to_id: HashMap<String, VariableID>,
+    pub variables: Vec<VariableID>,
 }
 
 impl Scope {
@@ -28,6 +29,7 @@ impl Scope {
         Self {
             parent,
             name_to_id: HashMap::new(),
+            variables: Vec::new(),
         }
     }
 
@@ -41,5 +43,6 @@ impl Scope {
 
     pub fn register_var(&mut self, name: String, id: VariableID) {
         self.name_to_id.insert(name, id);
+        self.variables.push(id);
     }
 }
