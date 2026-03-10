@@ -38,7 +38,7 @@ impl FuncTranslator<'_> {
                 main,
                 else_ifs,
                 else_block,
-            } => {}
+            } => self.translate_if(main, else_ifs, else_block.as_ref()),
             Statement::Return { value } => self.translate_return(value),
         }
     }

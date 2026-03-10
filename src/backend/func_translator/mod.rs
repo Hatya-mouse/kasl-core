@@ -26,6 +26,9 @@ use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
 use std::collections::HashMap;
 
+pub const TRUE: i8 = 1;
+pub const FALSE: i8 = 0;
+
 pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
     type_converter: TypeConverter,
