@@ -181,6 +181,11 @@ pub enum ErrorKind {
     /// A recursive function call is found.
     RecursiveCall,
 
+    /// Title: ImmutableAssignment
+    /// Payload: None
+    /// An assignment to an immutable variable (const or input).
+    ImmutableAssignment,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

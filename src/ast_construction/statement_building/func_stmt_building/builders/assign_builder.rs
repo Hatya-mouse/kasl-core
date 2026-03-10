@@ -18,6 +18,7 @@ use crate::{
     ExprToken, Range, ScopeID, Statement,
     error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
+    scope_manager::VariableKind,
     statement_building::FuncStmtBuilder,
 };
 
@@ -36,8 +37,24 @@ impl FuncStmtBuilder<'_> {
             &self.comp_state.type_registry,
             current_scope_id,
         );
+
         // Error will be thrown by the LValueResolver so no need to check for None
         let target_l_value = l_value_resolver.resolve_recursively(target)?;
+
+        // Check if the LValue is a writable variable
+        if let Some(target_var) = self
+            .comp_state
+            .scope_registry
+            .get_var_by_id(&target_l_value.var_id)
+            && matches!(
+                target_var.var_kind,
+                VariableKind::Input { .. } | VariableKind::State
+            )
+        {
+            self.ec
+                .immutable_assignment(target.range, Ph::StatementCollection, &target_var.name);
+            return None;
+        }
 
         // Resolve the expression
         let resolved_value = resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;

@@ -65,4 +65,14 @@ impl ErrorCollector {
             Pl::Str(var_name.to_string()),
         );
     }
+
+    pub fn immutable_assignment(&mut self, range: Range, phase: Phase, var_name: &str) {
+        self.emit(
+            EK::ImmutableAssignment,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(var_name.to_string()),
+        );
+    }
 }
