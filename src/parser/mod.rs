@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-pub mod parser;
+pub mod grammar;
 pub mod parser_ast;
 
-pub use parser::kasl_parser;
+pub use grammar::kasl_parser;
 pub use parser_ast::{
-    ExprToken, ExprTokenKind, ParserFuncCallArg, ParserFuncParam, ParserInputAttribute,
-    ParserOperatorType, ParserProgram, ParserStateVar, ParserStatement, ParserStatementKind,
-    ParserSymbolPath, ParserSymbolPathComponent,
+    ExprToken, ExprTokenKind, ParserDeclStmt, ParserDeclStmtKind, ParserFuncCallArg,
+    ParserFuncParam, ParserIfArm, ParserInputAttribute, ParserMemberAccess, ParserOperatorType,
+    ParserProgram, ParserScopeStmt, ParserScopeStmtKind,
 };

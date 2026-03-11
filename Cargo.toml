@@ -1,6 +1,6 @@
 [package]
 name = "kasl"
-version = "0.3.9"
+version = "0.0.0"
 edition = "2024"
 license = "Apache-2.0"
 
@@ -9,15 +9,12 @@ name = "kasl"
 path = "src/lib.rs"
 
 [dependencies]
-rand = "0.9.1"
-target-lexicon = "0.13.2"
-knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine.git" }
-cranelift-jit = "0.121.1"
-cranelift-codegen = "0.121.1"
-cranelift-module = "0.121.1"
-pest = "2.8.1"
-cranelift-frontend = "0.121.1"
-lazy_static = "1.5.0"
+cranelift = "0.129.1"
+cranelift-codegen = "0.129.1"
+cranelift-jit = "0.129.1"
+cranelift-module = "0.129.1"
+cranelift-native = "0.129.1"
+hashbrown = "0.16.1"
 peg = "0.8.5"
 
 [dev-dependencies]

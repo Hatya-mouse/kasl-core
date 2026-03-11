@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -120,10 +120,7 @@ impl Node for AudioShaderNode {
 
         let output = match exec.run(
             input_vec,
-            self.output
-                .iter()
-                .map(|info| info.value_type.clone())
-                .collect(),
+            self.output.iter().map(|info| info.value_type).collect(),
         ) {
             Ok(r) => r,
             Err(_) => return Ok(()),

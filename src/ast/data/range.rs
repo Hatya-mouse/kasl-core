@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct Range {
     pub start: usize,
     pub end: usize,
@@ -22,10 +22,7 @@ pub struct Range {
 
 impl Range {
     pub fn n(start: usize, end: usize) -> Self {
-        Range {
-            start: start,
-            end: end,
-        }
+        Range { start, end }
     }
 
     pub fn zero() -> Self {

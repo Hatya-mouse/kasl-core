@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,22 @@
 // limitations under the License.
 //
 
+pub mod compilation_state;
 pub mod data;
-pub mod tree_items;
+pub mod name_space;
+pub mod scope_manager;
+pub mod symbol_table;
+pub mod type_registry;
 
-pub use data::{Range, SymbolPath, SymbolPathComponent};
-pub use tree_items::{
-    Expression, FuncCallArg, FuncParam, Function, InfixOperator, InfixOperatorProperties,
-    Initializer, InputAttribute, InputVar, LiteralBind, OperatorAssociativity, OutputVar,
-    PrefixOperator, Program, ScopeItem, ScopeItemMut, ScopeVar, StateVar, Statement, TypeDef,
+pub use compilation_state::CompilationState;
+pub use data::Range;
+pub use name_space::{
+    FunctionID, NameSpace, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,
+    VariableID,
+};
+pub use scope_manager::{InputAttribute, Scope, ScopeID, ScopeRegistry, ScopeVar};
+pub use symbol_table::{
+    Expr, ExprKind, FuncCallArg, FuncParam, Function, IfArm, InfixOperator,
+    InfixOperatorProperties, OperatorAssociativity, OperatorContext, PostfixOperator,
+    PostfixOperatorProperties, PrefixOperator, PrefixOperatorProperties, Statement,
 };

@@ -1,5 +1,5 @@
 //
-// Copyright 2025-2026 Shuntaro Kasatani
+// © 2025-2026 Shuntaro Kasatani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
 // limitations under the License.
 //
 
+pub const MAIN_FUNCTION_NAME: &str = "main";
+
 pub mod ast;
-pub mod constructor;
+pub mod ast_construction;
+pub mod backend;
 pub mod parser;
 
 pub use ast::*;
-pub use constructor::*;
+pub use ast_construction::*;
 pub use parser::*;
