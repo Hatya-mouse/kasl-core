@@ -24,9 +24,8 @@ impl FuncTranslator<'_> {
             .scope_registry
             .get_var_by_id(var_id)
             .unwrap();
-
-        // Declare the variable
-        let var = self.declare_var(*var_id, &local_var.value_type);
+        // Get the Variable
+        let var = self.variables[var_id];
 
         // Translate the expression and store the value
         // The variable is a local variable so it should be safe to unwrap the value
@@ -35,15 +34,14 @@ impl FuncTranslator<'_> {
     }
 
     pub fn translate_local_const(&mut self, var_id: &VariableID) {
-        // Get the variable
+        // Get the ScopeVar
         let local_const = self
             .comp_state
             .scope_registry
             .get_var_by_id(var_id)
             .unwrap();
-
-        // Declare the variable
-        let var = self.declare_var(*var_id, &local_const.value_type);
+        // Get the Variable
+        let var = self.variables[var_id];
 
         // Translate the expression and store the value
         // The variable is a local constant so it should be safe to unwrap the value
