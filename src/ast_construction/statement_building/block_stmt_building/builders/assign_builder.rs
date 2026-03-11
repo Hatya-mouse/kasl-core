@@ -48,7 +48,10 @@ impl BlockStmtBuilder<'_> {
             .get_var_by_id(&target_l_value.var_id)
             && matches!(
                 target_var.var_kind,
-                VariableKind::Input { .. } | VariableKind::State
+                VariableKind::Input { .. }
+                    | VariableKind::State
+                    | VariableKind::LocalConst
+                    | VariableKind::FuncParam
             )
         {
             self.ec
