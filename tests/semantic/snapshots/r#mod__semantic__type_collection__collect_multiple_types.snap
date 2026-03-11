@@ -1,0 +1,36 @@
+---
+source: tests/semantic/type_collection.rs
+expression: result
+---
+structs:
+  0:
+    name: Animal
+    fields: []
+    indices: {}
+    instance_methods: []
+    static_methods: []
+    field_offsets: []
+    total_size: 0
+    alignment: 1
+    range:
+      start: 0
+      end: 16
+  1:
+    name: Fish
+    fields: []
+    indices: {}
+    instance_methods: []
+    static_methods: []
+    field_offsets: []
+    total_size: 0
+    alignment: 1
+    range:
+      start: 25
+      end: 39
+path_to_id:
+  ? components:
+      - symbol: Animal
+  : 0
+  ? components:
+      - symbol: Fish
+  : 1

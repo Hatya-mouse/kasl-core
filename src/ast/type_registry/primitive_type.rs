@@ -17,7 +17,7 @@
 use cranelift::prelude::{Type, types};
 use std::{fmt::Display, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum PrimitiveType {
     Int,
     Float,

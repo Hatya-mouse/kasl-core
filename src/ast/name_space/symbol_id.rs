@@ -17,7 +17,7 @@
 use std::fmt::Display;
 
 /// An ID used to identify a variable.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct VariableID(usize);
 
 impl VariableID {
@@ -43,7 +43,7 @@ impl ParserStmtID {
 }
 
 /// An ID used to identify a struct.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct StructID(usize);
 
 impl StructID {
@@ -59,7 +59,7 @@ impl Display for StructID {
 }
 
 /// An ID used to identify a function.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct FunctionID(usize);
 
 impl FunctionID {
@@ -75,7 +75,7 @@ impl Display for FunctionID {
 }
 
 /// An ID used to identify an operator.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct OperatorID(usize);
 
 impl OperatorID {

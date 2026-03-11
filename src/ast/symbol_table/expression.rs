@@ -19,7 +19,7 @@ use crate::{
     type_registry::ResolvedType,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct Expr<T> {
     pub kind: ExprKind<T>,
     pub value_type: T,
@@ -36,7 +36,7 @@ impl<T> Expr<T> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum ExprKind<T> {
     IntLiteral(i32),
     FloatLiteral(f32),
@@ -77,7 +77,7 @@ pub enum ExprKind<T> {
     },
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum MemberAccess {
     Access {
         name: String,

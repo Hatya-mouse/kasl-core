@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::common::parser::parse_expr;
+use crate::common::parse_expr;
 use insta::assert_debug_snapshot;
 
 #[test]

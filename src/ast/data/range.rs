@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, serde::Serialize)]
 pub struct Range {
     pub start: usize,
     pub end: usize,

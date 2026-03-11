@@ -17,7 +17,7 @@
 use std::{fmt::Display, ops::Index};
 
 /// A absolute path to a symbol in the symbol table.
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize)]
 pub struct SymbolPath {
     components: Vec<SymbolPathComponent>,
 }
@@ -88,7 +88,7 @@ impl Display for SymbolPath {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize)]
 pub struct SymbolPathComponent {
     pub symbol: String,
 }

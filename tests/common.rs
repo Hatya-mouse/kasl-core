@@ -14,8 +14,25 @@
 // limitations under the License.
 //
 
-use kasl::{ParserDeclStmt, kasl_parser};
+use kasl::{
+    CompilationState, NameSpace, ParserDeclStmt,
+    error::{ErrorCollector, ErrorRecord},
+    kasl_parser,
+    type_collection::TypeCollector,
+    type_registry::TypeRegistry,
+};
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
     kasl_parser::parse(input).unwrap()
+}
+
+pub fn collect_types(statements: &[ParserDeclStmt]) -> Result<TypeRegistry, Vec<ErrorRecord>> {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut comp_state = CompilationState::default();
+
+    let mut type_collector =
+        TypeCollector::new(&mut ec, statements, &mut name_space, &mut comp_state);
+    type_collector.process();
+    ec.as_result().map(|_| comp_state.type_registry)
 }

@@ -27,7 +27,7 @@ pub use struct_field::StructField;
 use crate::{StructID, SymbolPath};
 use std::{collections::HashMap, str::FromStr};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
     pub structs: HashMap<StructID, StructDecl>,
     pub path_to_id: HashMap<SymbolPath, StructID>,

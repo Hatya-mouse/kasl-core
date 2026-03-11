@@ -51,14 +51,14 @@ impl Function {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct NoTypeFuncCallArg {
     pub label: Option<String>,
     pub value: Expr<()>,
     pub range: Range,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct FuncCallArg {
     pub var_id: VariableID,
     pub value: Expr<ResolvedType>,

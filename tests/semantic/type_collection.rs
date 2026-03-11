@@ -14,33 +14,28 @@
 // limitations under the License.
 //
 
-use crate::common::parse_expr;
-use insta::assert_debug_snapshot;
+use crate::common::{collect_types, parse_expr};
+use insta::{assert_yaml_snapshot, sorted_redaction};
 
 #[test]
-fn parse_basic_op() {
-    let code = "let value = 3 * 2";
+fn collect_single_type() {
+    let code = "struct Type {}";
     let parsed = parse_expr(code);
-    assert_debug_snapshot!(parsed)
+    let result = collect_types(&parsed).unwrap();
+    assert_yaml_snapshot!(result, {
+        ".structs" => sorted_redaction(),
+        ".path_to_id" => sorted_redaction()
+    });
 }
 
 #[test]
-fn parse_many_ops() {
-    let code = "let value = 3 * 2 + 5 * 2";
+fn collect_multiple_types() {
+    let code = "struct Animal {}
+        struct Fish {}";
     let parsed = parse_expr(code);
-    assert_debug_snapshot!(parsed)
-}
-
-#[test]
-fn parse_parenthesis() {
-    let code = "let value = 3 * (2 + 5)";
-    let parsed = parse_expr(code);
-    assert_debug_snapshot!(parsed)
-}
-
-#[test]
-fn parse_many_parentheses() {
-    let code = "let value = (3 + 7) * (2 + 5)";
-    let parsed = parse_expr(code);
-    assert_debug_snapshot!(parsed)
+    let result = collect_types(&parsed).unwrap();
+    assert_yaml_snapshot!(result, {
+        ".structs" => sorted_redaction(),
+        ".path_to_id" => sorted_redaction()
+    });
 }

@@ -17,7 +17,7 @@
 use crate::{Range, VariableID, type_registry::StructField, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct StructDecl {
     /// The name of the struct.
     pub name: String,

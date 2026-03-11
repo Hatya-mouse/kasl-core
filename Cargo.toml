@@ -16,7 +16,8 @@ cranelift-module = "0.129.1"
 cranelift-native = "0.129.1"
 hashbrown = "0.16.1"
 peg = "0.8.5"
+serde = { version = "1.0.228", features = ["derive"] }
 
 [dev-dependencies]
-insta = "1.46.3"
+insta = { version = "1.46.3", features = ["yaml", "redactions"] }
 kasl = { path = "./" }
