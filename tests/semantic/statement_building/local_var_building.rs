@@ -15,7 +15,7 @@
 //
 
 use crate::common::{
-    TestContext, build_stmts,
+    TestContext, assert_error, build_stmts,
     builders::{
         expression, func_call, func_call_arg, func_decl, func_param, identifier, int_literal,
         local_var,
@@ -23,7 +23,7 @@ use crate::common::{
     collect_global_decls,
 };
 use insta::{assert_yaml_snapshot, sorted_redaction};
-use kasl::symbol_path;
+use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -136,7 +136,5 @@ fn test_access_to_var_before_definition() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_yaml_snapshot!(error, {
-        "." => sorted_redaction()
-    });
+    assert_error(&error, EK::VarNotFound);
 }

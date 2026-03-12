@@ -18,7 +18,7 @@ pub mod builders;
 
 use kasl::{
     CompilationState, NameSpace, ParserDeclStmt,
-    error::{ErrorCollector, ErrorRecord},
+    error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     scope_manager::ScopeGraph,
@@ -67,4 +67,8 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     );
     stmt_builder.build_all();
     test_ctx.ec.as_result()
+}
+
+pub fn assert_error(error: &[ErrorRecord], expected: ErrorKind) {
+    assert!(error.iter().any(|r| r.key.kind == expected))
 }

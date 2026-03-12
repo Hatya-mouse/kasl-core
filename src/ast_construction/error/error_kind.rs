@@ -196,6 +196,11 @@ pub enum ErrorKind {
     /// A return statement without a value is used in a function that returns a value.
     ReturnWithoutValueForReturnFunc,
 
+    /// Title: MissingReturn
+    /// Payload: The return type of the function
+    /// A function requires a return value but return statement is missing
+    MissingReturn,
+
     /// Title: RecursiveCall
     /// Payload: None
     /// A recursive function call is found.

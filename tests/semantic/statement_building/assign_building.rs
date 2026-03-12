@@ -15,15 +15,15 @@
 //
 
 use crate::common::{
-    TestContext, build_stmts,
+    TestContext, assert_error, build_stmts,
     builders::{
         assign, func_decl, func_param, global_const, identifier, input, int_literal, local_const,
         local_var, output, state_var,
     },
     collect_global_decls,
 };
-use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::symbol_path;
+use insta::{assert_yaml_snapshot, sorted_redaction};
+use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -127,7 +127,7 @@ fn test_assign_to_different_type() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::AssignTypeMismatch);
 }
 
 #[test]
@@ -159,7 +159,7 @@ fn test_assign_to_input() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::ImmutableAssignment);
 }
 
 #[test]
@@ -180,7 +180,7 @@ fn test_assign_to_func_param() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::ImmutableAssignment);
 }
 
 #[test]
@@ -204,7 +204,7 @@ fn test_assign_to_global_const() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::ImmutableAssignment);
 }
 
 #[test]
@@ -228,5 +228,5 @@ fn test_assign_to_local_const() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::ImmutableAssignment);
 }

@@ -1,0 +1,31 @@
+---
+source: tests/semantic/statement_building/return_building.rs
+expression: test_ctx.comp_state.func_ctx
+---
+funcs:
+  0:
+    name: do_something
+    is_member: false
+    is_static: false
+    params: []
+    return_type:
+      Primitive: Int
+    block:
+      body:
+        - Return:
+            value:
+              kind:
+                IntLiteral: 0
+              value_type:
+                Primitive: Int
+              range:
+                start: 0
+                end: 0
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions: {}
+static_functions: {}
+global_functions:
+  do_something: 0
