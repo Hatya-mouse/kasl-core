@@ -62,6 +62,39 @@ fn test_return_int() {
     });
 }
 
+#[test]
+fn test_return_after_if_else() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[func_param(
+            None,
+            "param",
+            Some(symbol_path!["Bool".to_string()]),
+            None,
+        )],
+        Some(symbol_path!["Float".to_string()]),
+        &[if_stmt(
+            if_arm(
+                &[identifier("param")],
+                &[return_stmt(Some(&[float_literal(5.0)]))],
+            ),
+            &[],
+            Some(&[return_stmt(Some(&[float_literal(3.0)]))]),
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    assert_yaml_snapshot!(test_ctx.comp_state.func_ctx, {
+        ".funcs" => sorted_redaction(),
+        ".member_functions" => sorted_redaction(),
+        ".static_functions" => sorted_redaction(),
+        ".global_functions" => sorted_redaction()
+    });
+}
+
 // --- ERROR CASES ---
 
 #[test]
@@ -129,7 +162,7 @@ fn test_missing_return() {
 }
 
 #[test]
-fn test_missing_return_on_if() {
+fn test_return_only_in_if() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![func_decl(
@@ -148,6 +181,81 @@ fn test_missing_return_on_if() {
                 &[return_stmt(Some(&[float_literal(5.0)]))],
             ),
             &[],
+            Some(&[]),
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).unwrap_err();
+    assert_error(&error, EK::MissingReturn);
+}
+
+#[test]
+fn test_return_only_in_else_if() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[
+            func_param(
+                None,
+                "if_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+            func_param(
+                None,
+                "else_if_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+        ],
+        Some(symbol_path!["Float".to_string()]),
+        &[if_stmt(
+            if_arm(&[identifier("if_param")], &[]),
+            &[if_arm(
+                &[identifier("else_if_param")],
+                &[return_stmt(Some(&[float_literal(3.0)]))],
+            )],
+            Some(&[]),
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    let error = build_stmts(&mut test_ctx).unwrap_err();
+    assert_error(&error, EK::MissingReturn);
+}
+
+#[test]
+fn test_return_only_in_if_and_else_if() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[
+            func_param(
+                None,
+                "if_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+            func_param(
+                None,
+                "else_if_param",
+                Some(symbol_path!["Bool".to_string()]),
+                None,
+            ),
+        ],
+        Some(symbol_path!["Float".to_string()]),
+        &[if_stmt(
+            if_arm(
+                &[identifier("if_param")],
+                &[return_stmt(Some(&[float_literal(5.0)]))],
+            ),
+            &[if_arm(
+                &[identifier("else_if_param")],
+                &[return_stmt(Some(&[float_literal(3.0)]))],
+            )],
             Some(&[]),
         )],
     )];

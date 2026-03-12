@@ -18,7 +18,7 @@ use crate::common::{
     TestContext, assert_error, build_stmts,
     builders::{
         expression, func_call, func_call_arg, func_decl, func_param, identifier, int_literal,
-        local_var,
+        local_var, return_stmt,
     },
     collect_global_decls,
 };
@@ -82,7 +82,7 @@ fn test_local_var_definition_with_func_call() {
             "do_something",
             &[],
             Some(symbol_path!["Int".to_string()]),
-            &[],
+            &[return_stmt(Some(&[int_literal(0)]))],
         ),
         func_decl(
             false,

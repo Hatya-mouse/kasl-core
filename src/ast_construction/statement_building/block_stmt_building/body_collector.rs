@@ -143,7 +143,7 @@ impl BlockStmtBuilder<'_> {
     fn verify_return_for_func(&mut self, func_scope_id: ScopeID, func_range: Range) {
         let has_return = *self.scope_has_return.entry(func_scope_id).or_insert(false);
         if !has_return {
-            self.ec.missing_arg(func_range, Ph::StatementCollection);
+            self.ec.missing_return(func_range, Ph::StatementCollection);
         }
     }
 }
