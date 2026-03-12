@@ -17,7 +17,7 @@
 use crate::common::collect_global_decls;
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
 use kasl::{
-    CompilationState, NameSpace, ParserDeclStmt, ParserDeclStmtKind, Range,
+    CompilationState, NameSpace, ParserDeclStmt, ParserDeclStmtKind, ParserFuncParam, Range,
     error::ErrorCollector,
     symbol_path,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -123,6 +123,132 @@ pub fn test_invalid_func() {
         },
         range: Range::zero(),
     }];
+    let error = collect_global_decls(
+        &mut ec,
+        &mut name_space,
+        &mut func_body_map,
+        &mut op_body_map,
+        &mut comp_state,
+        &parsed,
+    )
+    .expect_err("The function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+pub fn test_duplicate_func() {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut func_body_map = FuncBodyMap::default();
+    let mut op_body_map = OpBodyMap::default();
+    let mut comp_state = CompilationState::default();
+
+    let parsed = vec![
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::FuncDecl {
+                is_static: false,
+                name: "greet".to_string(),
+                params: vec![],
+                return_type: None,
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::FuncDecl {
+                is_static: false,
+                name: "greet".to_string(),
+                params: vec![],
+                return_type: None,
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+    ];
+    let error = collect_global_decls(
+        &mut ec,
+        &mut name_space,
+        &mut func_body_map,
+        &mut op_body_map,
+        &mut comp_state,
+        &parsed,
+    )
+    .expect_err("The function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+pub fn test_global_static_func() {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut func_body_map = FuncBodyMap::default();
+    let mut op_body_map = OpBodyMap::default();
+    let mut comp_state = CompilationState::default();
+
+    let parsed = vec![ParserDeclStmt {
+        kind: ParserDeclStmtKind::FuncDecl {
+            is_static: true,
+            name: "greet".to_string(),
+            params: vec![],
+            return_type: None,
+            body: vec![],
+        },
+        range: Range::zero(),
+    }];
+    let error = collect_global_decls(
+        &mut ec,
+        &mut name_space,
+        &mut func_body_map,
+        &mut op_body_map,
+        &mut comp_state,
+        &parsed,
+    )
+    .expect_err("The function should generate an error");
+    assert_debug_snapshot!(error);
+}
+
+#[test]
+pub fn test_duplicate_param_func() {
+    let mut ec = ErrorCollector::new();
+    let mut name_space = NameSpace::default();
+    let mut func_body_map = FuncBodyMap::default();
+    let mut op_body_map = OpBodyMap::default();
+    let mut comp_state = CompilationState::default();
+
+    let parsed = vec![
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::StructDecl {
+                name: "Type".to_string(),
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+        ParserDeclStmt {
+            kind: ParserDeclStmtKind::FuncDecl {
+                is_static: false,
+                name: "greet".to_string(),
+                params: vec![
+                    ParserFuncParam {
+                        label: None,
+                        name: "message".to_string(),
+                        value_type: Some(symbol_path!["Type".to_string()]),
+                        def_val: None,
+                        range: Range::zero(),
+                    },
+                    ParserFuncParam {
+                        label: None,
+                        name: "message".to_string(),
+                        value_type: Some(symbol_path!["Type".to_string()]),
+                        def_val: None,
+                        range: Range::zero(),
+                    },
+                ],
+                return_type: None,
+                body: vec![],
+            },
+            range: Range::zero(),
+        },
+    ];
     let error = collect_global_decls(
         &mut ec,
         &mut name_space,
