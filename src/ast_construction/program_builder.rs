@@ -22,7 +22,6 @@ use crate::{
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
     symbol_table::{FuncBodyMap, OpBodyMap},
-    type_collection::TypeCollector,
 };
 
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
@@ -33,12 +32,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     let mut comp_state = CompilationState::default();
     let mut scope_graph = ScopeGraph::default();
 
-    // 1. Collect types
-    let mut type_collector =
-        TypeCollector::new(&mut ec, &statements, &mut name_space, &mut comp_state);
-    type_collector.process();
-
-    // 2. Collect global declarations, such as inputs, outputs, states, struct fields and functions
+    // 1. Collect global declarations, such as inputs, outputs, states, structs, struct fields and functions
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut ec,
         &statements,
@@ -49,7 +43,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     );
     global_decl_collector.process();
 
-    // 3. Build the function bodies
+    // 2. Build the function bodies
     let mut stmt_builder = StatementBuilder::new(
         &mut ec,
         &mut name_space,
@@ -60,7 +54,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     );
     stmt_builder.build_all();
 
-    // Analyze the scope graph
+    // 3. Analyze the scope graph
     let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &comp_state, &scope_graph);
     scope_graph_analyzer.analyze_all();
 

@@ -20,22 +20,10 @@ use kasl::{
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     symbol_table::{FuncBodyMap, OpBodyMap},
-    type_collection::TypeCollector,
 };
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
     kasl_parser::parse(input).unwrap()
-}
-
-pub fn collect_types(
-    ec: &mut ErrorCollector,
-    name_space: &mut NameSpace,
-    comp_state: &mut CompilationState,
-    statements: &[ParserDeclStmt],
-) -> Result<(), Vec<ErrorRecord>> {
-    let mut type_collector = TypeCollector::new(ec, statements, name_space, comp_state);
-    type_collector.process();
-    ec.as_result()
 }
 
 pub fn collect_global_decls(

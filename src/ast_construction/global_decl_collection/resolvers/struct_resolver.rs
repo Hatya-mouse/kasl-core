@@ -30,6 +30,12 @@ impl<'a> GlobalDeclCollector<'a> {
         decl_range: Range,
     ) {
         let struct_path = symbol_path![name.to_string()];
+        // Check if the struct with the same name already exists
+        if self.comp_state.type_registry.has_struct(&struct_path) {
+            self.ec
+                .duplicate_struct_name(decl_range, Ph::StructCollection, name);
+        }
+
         let struct_id = self.name_space.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);

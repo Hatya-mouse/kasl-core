@@ -1,0 +1,22 @@
+---
+source: tests/semantic/global_decl_collection/struct_collection.rs
+expression: comp_state.func_ctx
+---
+funcs:
+  0:
+    name: new
+    is_member: true
+    is_static: false
+    params: []
+    return_type: ~
+    block:
+      body: []
+      scope_id: 1
+    range:
+      start: 0
+      end: 0
+member_functions:
+  0:
+    new: 0
+static_functions: {}
+global_functions: {}

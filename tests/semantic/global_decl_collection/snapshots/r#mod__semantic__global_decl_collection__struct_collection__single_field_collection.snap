@@ -1,0 +1,37 @@
+---
+source: tests/semantic/global_decl_collection/struct_collection.rs
+expression: comp_state.type_registry
+---
+structs:
+  0:
+    name: Type
+    fields:
+      - name: field
+        value_type:
+          Primitive: Float
+        def_val:
+          kind:
+            FloatLiteral: 5.3
+          value_type:
+            Primitive: Float
+          range:
+            start: 0
+            end: 0
+        range:
+          start: 0
+          end: 0
+    indices:
+      field: 0
+    instance_methods: []
+    static_methods: []
+    field_offsets:
+      - 0
+    total_size: 4
+    alignment: 4
+    range:
+      start: 0
+      end: 0
+path_to_id:
+  ? components:
+      - symbol: Type
+  : 0

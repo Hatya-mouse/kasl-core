@@ -20,6 +20,5 @@ pub mod global_decl_collection;
 pub mod program_builder;
 pub mod scope_graph_analyzing;
 pub mod statement_building;
-pub mod type_collection;
 
 pub use program_builder::construct_program;

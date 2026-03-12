@@ -15,4 +15,3 @@
 //
 
 mod global_decl_collection;
-mod type_collection;
