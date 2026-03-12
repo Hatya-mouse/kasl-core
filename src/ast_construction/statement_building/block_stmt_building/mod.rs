@@ -20,8 +20,10 @@ mod builders;
 mod scope_block_builder;
 mod stmt_builder;
 
+use std::collections::HashMap;
+
 use crate::{
-    CompilationState, NameSpace,
+    CompilationState, NameSpace, ScopeID,
     error::ErrorCollector,
     scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -35,6 +37,7 @@ pub struct BlockStmtBuilder<'a> {
     comp_state: &'a mut CompilationState,
 
     scope_graph: &'a mut ScopeGraph,
+    scope_has_return: HashMap<ScopeID, bool>,
 }
 
 impl<'a> BlockStmtBuilder<'a> {
@@ -53,6 +56,11 @@ impl<'a> BlockStmtBuilder<'a> {
             op_body_map,
             comp_state,
             scope_graph,
+            scope_has_return: HashMap::new(),
         }
+    }
+
+    pub fn scope_guarantees_return(&self, id: ScopeID) -> bool {
+        *self.scope_has_return.get(&id).unwrap_or(&false)
     }
 }

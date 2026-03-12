@@ -19,6 +19,7 @@ use crate::{
     error::Ph,
     expr_engine::resolve_expr,
     statement_building::BlockStmtBuilder,
+    symbol_table::Block,
     type_registry::{PrimitiveType, ResolvedType},
 };
 
@@ -35,12 +36,18 @@ impl BlockStmtBuilder<'_> {
         let main_arm = self.build_if_arm(main, current_scope_id, expected_return_type)?;
         let else_ifs = else_ifs
             .iter()
-            .filter_map(|arm| self.build_if_arm(arm, current_scope_id, expected_return_type))
-            .collect();
+            .map(|arm| self.build_if_arm(arm, current_scope_id, expected_return_type))
+            .collect::<Option<Vec<_>>>()?;
         // Build the else block
         // None is allowed because the else block is optional
         let else_block = else_body
             .map(|arm| self.build_scope_block(arm, current_scope_id, expected_return_type));
+
+        // Check if the all scopes have a return statement
+        self.scope_has_return.insert(
+            current_scope_id,
+            self.verify_if_return(&main_arm, &else_ifs, else_block.as_ref()),
+        );
 
         // Return the constructed if statement
         Some(Statement::If {
@@ -50,7 +57,7 @@ impl BlockStmtBuilder<'_> {
         })
     }
 
-    pub fn build_if_arm(
+    fn build_if_arm(
         &mut self,
         arm: &ParserIfArm,
         current_scope_id: ScopeID,
@@ -72,5 +79,21 @@ impl BlockStmtBuilder<'_> {
         // Create a block for the arm's body
         let block = self.build_scope_block(&arm.body, current_scope_id, expected_return_type);
         Some(IfArm { condition, block })
+    }
+
+    fn verify_if_return(
+        &self,
+        main_arm: &IfArm,
+        else_ifs: &[IfArm],
+        else_block: Option<&Block>,
+    ) -> bool {
+        self.scope_guarantees_return(main_arm.block.scope_id)
+            && else_ifs
+                .iter()
+                .all(|arm| self.scope_guarantees_return(arm.block.scope_id))
+            && else_block
+                .map(|block| self.scope_guarantees_return(block.scope_id))
+                // If the "if" statement doesn't have an else block, treat it as false
+                .unwrap_or(false)
     }
 }

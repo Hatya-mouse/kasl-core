@@ -42,6 +42,9 @@ impl BlockStmtBuilder<'_> {
             body.push(resolved_stmt);
         }
 
+        // If the block scope doesn't have any return statement, insert false
+        self.scope_has_return.entry(block_scope_id).or_insert(false);
+
         // Add an edge from the parent scope to the block scope
         self.scope_graph.add_edge(parent_scope_id, block_scope_id);
 

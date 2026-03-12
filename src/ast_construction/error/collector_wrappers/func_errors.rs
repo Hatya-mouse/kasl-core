@@ -95,4 +95,8 @@ impl ErrorCollector {
     pub fn recursive_call(&mut self, range: Range, phase: Phase) {
         self.emit(EK::RecursiveCall, range, phase, Sv::Error, Pl::None);
     }
+
+    pub fn missing_return(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::MissingReturn, range, phase, Sv::Error, Pl::None);
+    }
 }

@@ -27,8 +27,12 @@ impl BlockStmtBuilder<'_> {
         decl_range: Range,
         expected_return_type: ResolvedType,
     ) -> Option<Statement> {
+        // The current scope has a return statement
+        self.scope_has_return.insert(current_scope_id, true);
+
         if expected_return_type.is_void() {
             if value.is_some() {
+                // If the function doesn't require a return value but it's provided, throw and error
                 self.ec
                     .return_value_for_no_return_func(decl_range, Ph::StatementCollection);
                 None

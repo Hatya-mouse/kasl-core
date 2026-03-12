@@ -28,6 +28,12 @@ impl BlockStmtBuilder<'_> {
         expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         let block = self.build_scope_block(statements, parent_scope_id, expected_return_type);
+
+        // Check if the child block has a return statement
+        let does_child_have_return = *self.scope_has_return.get(&block.scope_id).unwrap_or(&false);
+        self.scope_has_return
+            .insert(parent_scope_id, does_child_have_return);
+
         Some(Statement::Block { block })
     }
 }
