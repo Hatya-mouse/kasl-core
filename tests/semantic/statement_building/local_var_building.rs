@@ -25,6 +25,8 @@ use crate::common::{
 use insta::{assert_yaml_snapshot, sorted_redaction};
 use kasl::symbol_path;
 
+// --- SUCCESS CASES ---
+
 #[test]
 fn test_local_var_definition() {
     let mut test_ctx = TestContext::default();
@@ -98,6 +100,8 @@ fn test_local_var_definition_with_func_call() {
         ".**.name_to_id" => sorted_redaction()
     });
 }
+
+// --- ERROR CASES ---
 
 #[test]
 fn test_access_to_var_before_definition() {

@@ -25,6 +25,8 @@ use crate::common::{
 use insta::{assert_yaml_snapshot, sorted_redaction};
 use kasl::symbol_path;
 
+// -- SUCCESS CASES ---
+
 #[test]
 fn test_empty_block_building() {
     let mut test_ctx = TestContext::default();
@@ -104,6 +106,8 @@ fn test_block_with_access_to_outside_var() {
         ".global_functions" => sorted_redaction()
     });
 }
+
+// --- ERROR CASES ---
 
 #[test]
 fn test_block_with_access_to_child_scope_var() {

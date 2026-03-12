@@ -24,6 +24,8 @@ use crate::common::{
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
 use kasl::symbol_path;
 
+// --- SUCCESS CASES ---
+
 #[test]
 fn test_single_field_collection() {
     let mut test_ctx = TestContext::default();
@@ -58,19 +60,6 @@ fn test_single_member_func_collection() {
 }
 
 #[test]
-fn invalid_struct_decl_error() {
-    let mut test_ctx = TestContext::default();
-
-    let parsed = vec![struct_decl(
-        "Type",
-        &[state_var("this_is_state", None, &[float_literal(0.5)])],
-    )];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("This function should generate an error");
-    assert_debug_snapshot!(error);
-}
-
-#[test]
 fn test_complex_struct_collection() {
     let mut test_ctx = TestContext::default();
 
@@ -101,4 +90,19 @@ fn test_complex_struct_collection() {
         ".path_to_id" => sorted_redaction(),
         ".**.indices" => sorted_redaction()
     });
+}
+
+// --- ERROR CASES ---
+
+#[test]
+fn invalid_struct_decl_error() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![struct_decl(
+        "Type",
+        &[state_var("this_is_state", None, &[float_literal(0.5)])],
+    )];
+    let error = collect_global_decls(&mut test_ctx, &parsed)
+        .expect_err("This function should generate an error");
+    assert_debug_snapshot!(error);
 }

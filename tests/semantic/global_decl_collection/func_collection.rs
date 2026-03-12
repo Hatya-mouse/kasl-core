@@ -22,6 +22,8 @@ use crate::common::{
 use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
 use kasl::symbol_path;
 
+// --- SUCCESS CASES ---
+
 #[test]
 fn test_simple_func_resolution() {
     let mut test_ctx = TestContext::default();
@@ -72,6 +74,8 @@ fn test_func_with_param() {
         ".global_functions" => sorted_redaction()
     });
 }
+
+// --- ERROR CASES ---
 
 #[test]
 fn test_type_not_found_func() {

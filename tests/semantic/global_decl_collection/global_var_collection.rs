@@ -21,6 +21,8 @@ use crate::common::{
 };
 use insta::{assert_yaml_snapshot, sorted_redaction};
 
+// --- SUCCESS CASES ---
+
 #[test]
 fn test_simple_input_resolution() {
     let mut test_ctx = TestContext::default();
