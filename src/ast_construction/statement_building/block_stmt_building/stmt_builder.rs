@@ -24,7 +24,7 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         stmt: &ParserScopeStmt,
         scope_id: ScopeID,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         match &stmt.kind {
             ParserScopeStmtKind::Block { statements } => {

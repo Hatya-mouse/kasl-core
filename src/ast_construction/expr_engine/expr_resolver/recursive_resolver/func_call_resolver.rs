@@ -35,11 +35,6 @@ impl ExpressionResolver<'_> {
 
         let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
 
-        let Some(return_type) = &func.return_type else {
-            self.ec.no_return_func_in_expr(range, Ph::ExprEngine, &name);
-            return None;
-        };
-
         Some(Expr::new(
             ExprKind::FuncCall {
                 name,
@@ -47,7 +42,7 @@ impl ExpressionResolver<'_> {
                 no_type_args,
                 args: Some(args),
             },
-            *return_type,
+            func.return_type,
             range,
         ))
     }

@@ -35,7 +35,7 @@ impl FuncTranslator<'_> {
         &mut self,
         block: &symbol_table::Block,
         args: &[FuncCallArg],
-        expected_return_type: &Option<ResolvedType>,
+        expected_return_type: &ResolvedType,
     ) -> Option<ir::Value> {
         // Define the argument as variables
         for arg in args {
@@ -48,10 +48,8 @@ impl FuncTranslator<'_> {
         let func_return_block = self.builder.create_block();
 
         // Get the return type
-        if let Some(return_type) = expected_return_type
-            .as_ref()
-            .map(|ty| self.type_converter.convert(ty))
-        {
+        if !expected_return_type.is_void() {
+            let return_type = self.type_converter.convert(expected_return_type);
             self.builder
                 .append_block_param(func_return_block, return_type);
         }
@@ -64,7 +62,7 @@ impl FuncTranslator<'_> {
         self.builder.seal_block(func_return_block);
 
         // Retrieve the return value
-        if expected_return_type.is_some() {
+        if !expected_return_type.is_void() {
             Some(self.builder.block_params(func_return_block)[0])
         } else {
             None

@@ -106,11 +106,6 @@ impl ExpressionResolver<'_> {
 
                     // Get the function by ID
                     let func = self.comp_state.func_ctx.get_func(&func_id)?;
-                    let Some(return_type) = &func.return_type else {
-                        self.ec
-                            .no_return_func_in_expr(range, Ph::ExprEngine, &func.name);
-                        return None;
-                    };
 
                     // Resolve the arguments
                     let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
@@ -121,10 +116,12 @@ impl ExpressionResolver<'_> {
                             args: Some(args),
                             id: Some(func_id),
                         },
-                        *return_type,
+                        func.return_type,
                     ))
                 }
             },
+
+            ResolvedType::Void => None,
         }
     }
 }

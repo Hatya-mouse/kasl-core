@@ -37,6 +37,7 @@ impl TypeConverter {
             ResolvedType::Primitive(PrimitiveType::Float) => types::F32,
             ResolvedType::Primitive(PrimitiveType::Bool) => types::I8,
             ResolvedType::Struct(_) => self.pointer_type,
+            ResolvedType::Void => types::INVALID,
         }
     }
 }

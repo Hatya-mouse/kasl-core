@@ -17,6 +17,7 @@
 use crate::{
     FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar, SymbolPath, error::Ph,
     global_decl_collection::GlobalDeclCollector, scope_manager::VariableKind, symbol_table::Block,
+    type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
@@ -43,14 +44,14 @@ impl GlobalDeclCollector<'_> {
         // Resolve the return type
         let return_type = match return_type {
             Some(path) => match self.comp_state.type_registry.resolve_type_path(path) {
-                Some(resolved) => Some(resolved),
+                Some(resolved) => resolved,
                 None => {
                     self.ec
                         .type_not_found(decl_range, Ph::GlobalDeclCollection, path.to_string());
                     return None;
                 }
             },
-            None => None,
+            None => ResolvedType::Void,
         };
 
         Some(Function {

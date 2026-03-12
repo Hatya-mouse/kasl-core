@@ -25,7 +25,7 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         let block = self.build_scope_block(statements, parent_scope_id, expected_return_type);
         Some(Statement::Block { block })

@@ -50,8 +50,7 @@ impl BlockStmtBuilder<'_> {
                     continue;
                 };
 
-                let Some(resolved_stmt) =
-                    self.build_stmt(stmt, op.block.scope_id, Some(op.return_type))
+                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
                 else {
                     continue;
                 };
@@ -74,8 +73,7 @@ impl BlockStmtBuilder<'_> {
                     continue;
                 };
 
-                let Some(resolved_stmt) =
-                    self.build_stmt(stmt, op.block.scope_id, Some(op.return_type))
+                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
                 else {
                     continue;
                 };
@@ -98,8 +96,7 @@ impl BlockStmtBuilder<'_> {
                     continue;
                 };
 
-                let Some(resolved_stmt) =
-                    self.build_stmt(stmt, op.block.scope_id, Some(op.return_type))
+                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
                 else {
                     continue;
                 };

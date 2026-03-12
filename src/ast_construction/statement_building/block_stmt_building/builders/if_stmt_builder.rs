@@ -29,7 +29,7 @@ impl BlockStmtBuilder<'_> {
         else_ifs: &[ParserIfArm],
         else_body: Option<&Vec<ParserScopeStmt>>,
         current_scope_id: ScopeID,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         // Build the arms
         let main_arm = self.build_if_arm(main, current_scope_id, expected_return_type)?;
@@ -54,7 +54,7 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         arm: &ParserIfArm,
         current_scope_id: ScopeID,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Option<IfArm> {
         // Resolve the condition expression and verify it has a bool type
         let condition = resolve_expr(self.ec, self.comp_state, current_scope_id, &arm.condition)?;

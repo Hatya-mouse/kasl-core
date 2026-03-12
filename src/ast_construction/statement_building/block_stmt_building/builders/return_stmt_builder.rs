@@ -25,49 +25,48 @@ impl BlockStmtBuilder<'_> {
         value: Option<&Vec<ExprToken>>,
         current_scope_id: ScopeID,
         decl_range: Range,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Option<Statement> {
-        if let Some(expected_return_type) = expected_return_type {
-            if let Some(value) = value {
-                // Resolve the expression
-                let resolved_value =
-                    resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;
-
-                // Check if the return type matches the expected return type
-                // If the self.expected_return_type is None, resolved_value should be None as well
-                if resolved_value.value_type != expected_return_type {
-                    self.ec.return_type_mismatch(
-                        decl_range,
-                        Ph::StatementCollection,
-                        self.comp_state
-                            .type_registry
-                            .format_type(&expected_return_type),
-                        self.comp_state
-                            .type_registry
-                            .format_type(&resolved_value.value_type),
-                    );
-                    return None;
-                }
-
-                Some(Statement::Return {
-                    value: Some(resolved_value),
-                })
+        if expected_return_type.is_void() {
+            if value.is_some() {
+                self.ec
+                    .return_value_for_no_return_func(decl_range, Ph::StatementCollection);
+                None
             } else {
-                self.ec.return_without_value_for_return_func(
+                Some(Statement::Return { value: None })
+            }
+        } else if let Some(value) = value {
+            // Resolve the expression
+            let resolved_value = resolve_expr(self.ec, self.comp_state, current_scope_id, value)?;
+
+            // Check if the return type matches the expected return type
+            // If the self.expected_return_type is None, resolved_value should be None as well
+            if resolved_value.value_type != expected_return_type {
+                self.ec.return_type_mismatch(
                     decl_range,
                     Ph::StatementCollection,
                     self.comp_state
                         .type_registry
                         .format_type(&expected_return_type),
+                    self.comp_state
+                        .type_registry
+                        .format_type(&resolved_value.value_type),
                 );
-                None
+                return None;
             }
-        } else if value.is_some() {
-            self.ec
-                .return_value_for_no_return_func(decl_range, Ph::StatementCollection);
-            None
+
+            Some(Statement::Return {
+                value: Some(resolved_value),
+            })
         } else {
-            Some(Statement::Return { value: None })
+            self.ec.return_without_value_for_return_func(
+                decl_range,
+                Ph::StatementCollection,
+                self.comp_state
+                    .type_registry
+                    .format_type(&expected_return_type),
+            );
+            None
         }
     }
 }

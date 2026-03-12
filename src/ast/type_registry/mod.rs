@@ -52,6 +52,7 @@ impl TypeRegistry {
         match type_id {
             ResolvedType::Primitive(ty) => ty.size(),
             ResolvedType::Struct(id) => self.structs[id].total_size,
+            ResolvedType::Void => 0,
         }
     }
 
@@ -59,6 +60,7 @@ impl TypeRegistry {
         match type_id {
             ResolvedType::Primitive(ty) => ty.alignment(),
             ResolvedType::Struct(id) => self.structs[id].alignment,
+            ResolvedType::Void => 0,
         }
     }
 
@@ -82,6 +84,7 @@ impl TypeRegistry {
                 .get_struct(id)
                 .map(|s| s.name.clone())
                 .unwrap_or(format!("struct(ID: {})", id)),
+            ResolvedType::Void => "Void".to_string(),
         }
     }
 }

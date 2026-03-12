@@ -24,7 +24,7 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
-        expected_return_type: Option<ResolvedType>,
+        expected_return_type: ResolvedType,
     ) -> Block {
         let mut body = Vec::new();
 
