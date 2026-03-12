@@ -126,7 +126,7 @@ fn test_assign_to_different_type() {
         ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::AssignTypeMismatch);
 }
 
@@ -158,7 +158,7 @@ fn test_assign_to_input() {
         ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ImmutableAssignment);
 }
 
@@ -179,7 +179,7 @@ fn test_assign_to_func_param() {
         &[assign(&[identifier("param")], &[int_literal(5)])],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ImmutableAssignment);
 }
 
@@ -203,7 +203,7 @@ fn test_assign_to_global_const() {
         ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ImmutableAssignment);
 }
 
@@ -227,6 +227,6 @@ fn test_assign_to_local_const() {
         ],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ImmutableAssignment);
 }

@@ -102,7 +102,6 @@ fn invalid_struct_decl_error() {
         "Type",
         &[state_var("this_is_state", None, &[float_literal(0.5)])],
     )];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("This function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_debug_snapshot!(error);
 }

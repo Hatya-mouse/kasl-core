@@ -135,6 +135,6 @@ fn test_access_to_var_before_definition() {
         ),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::VarNotFound);
 }

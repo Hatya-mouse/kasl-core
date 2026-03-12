@@ -88,8 +88,7 @@ fn test_type_not_found_func() {
         Some(symbol_path!["Type".to_string()]),
         &[],
     )];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_debug_snapshot!(error);
 }
 
@@ -101,8 +100,7 @@ fn test_duplicate_func() {
         func_decl(false, "greet", &[], None, &[]),
         func_decl(false, "greet", &[], None, &[]),
     ];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_debug_snapshot!(error);
 }
 
@@ -111,8 +109,7 @@ fn test_global_static_func() {
     let mut test_ctx = TestContext::default();
 
     let parsed = vec![func_decl(true, "greet", &[], None, &[])];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_debug_snapshot!(error);
 }
 
@@ -143,7 +140,6 @@ fn test_duplicate_param_func() {
             &[],
         ),
     ];
-    let error = collect_global_decls(&mut test_ctx, &parsed)
-        .expect_err("The function should generate an error");
+    let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
     assert_debug_snapshot!(error);
 }

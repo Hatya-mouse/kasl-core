@@ -76,7 +76,7 @@ fn test_return_int_on_no_return_func() {
         &[return_stmt(Some(&[int_literal(0)]))],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ReturnValueForNoReturnFunc);
 }
 
@@ -92,7 +92,7 @@ fn test_return_nothing_on_int_return_func() {
         &[return_stmt(None)],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ReturnWithoutValueForReturnFunc);
 }
 
@@ -108,7 +108,7 @@ fn test_return_int_on_float_return_func() {
         &[return_stmt(Some(&[int_literal(0)]))],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::ReturnTypeMismatch);
 }
 
@@ -124,7 +124,7 @@ fn test_missing_return() {
         &[],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -152,6 +152,6 @@ fn test_missing_return_on_if() {
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).expect_err("This function should generate an error");
+    let error = build_stmts(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
