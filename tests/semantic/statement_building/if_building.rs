@@ -16,7 +16,7 @@
 
 use crate::common::{
     TestContext, build_stmts,
-    builders::{assign, func_decl, func_param, identifier, if_arm, if_stmt, int_literal, output},
+    builders::{func_decl, func_param, identifier, if_arm, if_stmt},
     collect_global_decls,
 };
 use insta::{assert_yaml_snapshot, sorted_redaction};

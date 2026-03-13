@@ -23,7 +23,7 @@ pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
 use crate::VariableID;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
@@ -120,7 +120,7 @@ impl ScopeRegistry {
     }
 
     /// Returns the vector of all scope IDs.
-    pub fn all_scope_ids(&self) -> Vec<ScopeID> {
+    pub fn all_scope_ids(&self) -> HashSet<ScopeID> {
         self.scopes.keys().copied().collect()
     }
 }

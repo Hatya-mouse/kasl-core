@@ -71,4 +71,14 @@ impl ErrorCollector {
             Pl::Str(struct_name.to_string()),
         );
     }
+
+    pub fn struct_cycle(&mut self, range: Range, phase: Phase, struct_name: &str) {
+        self.emit(
+            EK::StructCycle,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(struct_name.to_string()),
+        )
+    }
 }

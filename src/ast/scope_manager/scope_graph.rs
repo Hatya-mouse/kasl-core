@@ -14,14 +14,12 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-
 use crate::ScopeID;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Default)]
 pub struct ScopeGraph {
-    pub caller_to_callee: HashMap<ScopeID, Vec<ScopeID>>,
-    pub callee_to_caller: HashMap<ScopeID, Vec<ScopeID>>,
+    pub caller_to_callee: HashMap<ScopeID, HashSet<ScopeID>>,
 }
 
 impl ScopeGraph {
@@ -29,14 +27,10 @@ impl ScopeGraph {
         self.caller_to_callee
             .entry(caller)
             .or_default()
-            .push(callee);
-        self.callee_to_caller
-            .entry(callee)
-            .or_default()
-            .push(caller);
+            .insert(callee);
     }
 
-    pub fn get_callees(&self, caller: &ScopeID) -> Option<&Vec<ScopeID>> {
+    pub fn get_callees(&self, caller: &ScopeID) -> Option<&HashSet<ScopeID>> {
         self.caller_to_callee.get(caller)
     }
 }

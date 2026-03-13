@@ -211,6 +211,11 @@ pub enum ErrorKind {
     /// An assignment to an immutable variable (const or input).
     ImmutableAssignment,
 
+    /// Title: StructCycle
+    /// Payload: Name of the struct which has a cyclic field
+    /// A struct has a cyclic field, so the compiler cannot determine the size.
+    StructCycle,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

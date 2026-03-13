@@ -63,9 +63,10 @@ pub enum Phase {
     Parse = 0,
     StructCollection = 1,
     GlobalDeclCollection = 2,
-    StatementCollection = 3,
-    ExprEngine = 4,
-    ScopeGraphAnalyzing = 5,
+    StructGraphAnalyzing = 3,
+    StatementCollection = 4,
+    ExprEngine = 5,
+    ScopeGraphAnalyzing = 6,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]

@@ -23,38 +23,40 @@ use crate::{
     CompilationState, NameSpace, ParserDeclStmt,
     error::ErrorCollector,
     symbol_table::{FuncBodyMap, OpBodyMap},
+    type_registry::StructGraph,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
-    decl_stmts: &'a [ParserDeclStmt],
     name_space: &'a mut NameSpace,
     func_body_map: &'a mut FuncBodyMap,
     op_body_map: &'a mut OpBodyMap,
     comp_state: &'a mut CompilationState,
+
+    struct_graph: &'a mut StructGraph,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        decl_stmts: &'a [ParserDeclStmt],
         name_space: &'a mut NameSpace,
         func_body_map: &'a mut FuncBodyMap,
         op_body_map: &'a mut OpBodyMap,
         comp_state: &'a mut CompilationState,
+        struct_graph: &'a mut StructGraph,
     ) -> Self {
         Self {
             ec,
-            decl_stmts,
             name_space,
             func_body_map,
             op_body_map,
             comp_state,
+            struct_graph,
         }
     }
 
-    pub fn process(&mut self) {
-        for stmt in self.decl_stmts.iter() {
+    pub fn process(&mut self, decl_stmts: &'a [ParserDeclStmt]) {
+        for stmt in decl_stmts.iter() {
             self.process_stmt(stmt);
         }
     }

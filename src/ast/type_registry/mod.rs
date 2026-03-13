@@ -18,14 +18,19 @@ mod primitive_type;
 mod resolved_type;
 mod struct_decl;
 mod struct_field;
+mod struct_graph;
 
 pub use primitive_type::PrimitiveType;
 pub use resolved_type::ResolvedType;
 pub use struct_decl::StructDecl;
 pub use struct_field::StructField;
+pub use struct_graph::StructGraph;
 
 use crate::{StructID, SymbolPath};
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
@@ -86,5 +91,9 @@ impl TypeRegistry {
                 .unwrap_or(format!("struct(ID: {})", id)),
             ResolvedType::Void => "Void".to_string(),
         }
+    }
+
+    pub fn get_all_structs(&self) -> HashSet<StructID> {
+        self.structs.keys().copied().collect()
     }
 }

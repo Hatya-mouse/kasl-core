@@ -19,7 +19,7 @@ use crate::{
     error::Ph,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
     symbol_path,
-    type_registry::{StructDecl, StructField},
+    type_registry::{ResolvedType, StructDecl, StructField},
 };
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -61,7 +61,14 @@ impl<'a> GlobalDeclCollector<'a> {
                     name,
                     value_type,
                     def_val,
-                } => self.resolve_struct_field(struct_decl, name, value_type, def_val, stmt.range),
+                } => self.resolve_struct_field(
+                    struct_id,
+                    struct_decl,
+                    name,
+                    value_type,
+                    def_val,
+                    stmt.range,
+                ),
 
                 ParserDeclStmtKind::FuncDecl {
                     is_static,
@@ -93,6 +100,7 @@ impl<'a> GlobalDeclCollector<'a> {
 
     fn resolve_struct_field(
         &mut self,
+        struct_id: StructID,
         struct_decl: &mut StructDecl,
         name: &str,
         value_type: &Option<SymbolPath>,
@@ -104,6 +112,12 @@ impl<'a> GlobalDeclCollector<'a> {
             return;
         };
 
+        // Add the field to the struct graph if the value has a struct type
+        // The graph will be used in the scope graph analyzing phase to check if there aren't any struct cycles
+        if let ResolvedType::Struct(field_struct_id) = def_val.value_type {
+            self.struct_graph.add_edge(struct_id, field_struct_id);
+        }
+
         // Create a struct field
         let struct_field = StructField {
             name: name.to_string(),
@@ -111,6 +125,7 @@ impl<'a> GlobalDeclCollector<'a> {
             def_val,
             range: decl_range,
         };
+
         // Register the struct field in the type registry
         struct_decl.register_field(struct_field);
     }

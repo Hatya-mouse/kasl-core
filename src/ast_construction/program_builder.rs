@@ -21,7 +21,9 @@ use crate::{
     scope_graph_analyzing::ScopeGraphAnalyzer,
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
+    struct_graph_analyzing::StructGraphAnalyzer,
     symbol_table::{FuncBodyMap, OpBodyMap},
+    type_registry::StructGraph,
 };
 
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
@@ -31,19 +33,24 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     let mut op_body_map = OpBodyMap::default();
     let mut comp_state = CompilationState::default();
     let mut scope_graph = ScopeGraph::default();
+    let mut struct_graph = StructGraph::default();
 
     // 1. Collect global declarations, such as inputs, outputs, states, structs, struct fields and functions
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut ec,
-        &statements,
         &mut name_space,
         &mut func_body_map,
         &mut op_body_map,
         &mut comp_state,
+        &mut struct_graph,
     );
-    global_decl_collector.process();
+    global_decl_collector.process(&statements);
 
-    // 2. Build the function bodies
+    // 2. Analyze the struct graph
+    let mut struct_graph_analyzer = StructGraphAnalyzer::new(&mut ec, &comp_state, &struct_graph);
+    struct_graph_analyzer.analyze_all();
+
+    // 3. Build the function bodies
     let mut stmt_builder = StatementBuilder::new(
         &mut ec,
         &mut name_space,
@@ -54,7 +61,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     );
     stmt_builder.build_all();
 
-    // 3. Analyze the scope graph
+    // 4. Analyze the scope graph
     let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &comp_state, &scope_graph);
     scope_graph_analyzer.analyze_all();
 

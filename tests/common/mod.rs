@@ -24,6 +24,7 @@ use kasl::{
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
     symbol_table::{FuncBodyMap, OpBodyMap},
+    type_registry::StructGraph,
 };
 
 #[derive(Default)]
@@ -34,6 +35,7 @@ pub struct TestContext {
     pub op_body_map: OpBodyMap,
     pub comp_state: CompilationState,
     pub scope_graph: ScopeGraph,
+    pub struct_graph: StructGraph,
 }
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
@@ -46,13 +48,13 @@ pub fn collect_global_decls(
 ) -> Result<(), Vec<ErrorRecord>> {
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut test_ctx.ec,
-        statements,
         &mut test_ctx.name_space,
         &mut test_ctx.func_body_map,
         &mut test_ctx.op_body_map,
         &mut test_ctx.comp_state,
+        &mut test_ctx.struct_graph,
     );
-    global_decl_collector.process();
+    global_decl_collector.process(statements);
     test_ctx.ec.as_result()
 }
 

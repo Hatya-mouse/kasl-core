@@ -14,52 +14,50 @@
 // limitations under the License.
 //
 
-mod scope_traversal;
-
 use std::collections::HashMap;
 
-use crate::{CompilationState, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph};
+use crate::{CompilationState, StructID, error::ErrorCollector, type_registry::StructGraph};
+mod struct_traversal;
 
-pub struct ScopeGraphAnalyzer<'a> {
+pub struct StructGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
     comp_state: &'a CompilationState,
-    scope_graph: &'a ScopeGraph,
+    struct_graph: &'a StructGraph,
 }
 
-impl<'a> ScopeGraphAnalyzer<'a> {
+impl<'a> StructGraphAnalyzer<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         comp_state: &'a CompilationState,
-        scope_graph: &'a ScopeGraph,
+        struct_graph: &'a StructGraph,
     ) -> Self {
         Self {
             ec,
             comp_state,
-            scope_graph,
+            struct_graph,
         }
     }
 
     pub fn analyze_all(&mut self) {
-        // Get the global scope ID
-        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
-        // Initialize states for all scopes
-        let mut states: HashMap<ScopeID, ScopeState> = self
-            .comp_state
-            .scope_registry
-            .all_scope_ids()
-            .into_iter()
-            .map(|scope_id| (scope_id, ScopeState::Unvisited))
+        // Get the list of all StructIDs
+        let all_struct_ids = self.comp_state.type_registry.get_all_structs();
+        // Initialize states for all structs
+        let mut states: HashMap<StructID, StructState> = all_struct_ids
+            .iter()
+            .map(|scope_id| (*scope_id, StructState::Unvisited))
             .collect();
-        // Create a total sizes map for all scopes
-        let mut total_sizes: HashMap<ScopeID, i32> = HashMap::new();
 
-        // Analyze the scope graph starting from the global scope
-        self.analyze_scope(&global_scope_id, &mut states, &mut total_sizes);
+        // Analyze the graph recursively
+        for struct_id in &all_struct_ids {
+            if let Some(StructState::Unvisited) = states.get(struct_id) {
+                self.analyze_struct(struct_id, &mut states);
+            }
+        }
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum ScopeState {
+pub enum StructState {
     Unvisited,
     Visiting,
     Visited,

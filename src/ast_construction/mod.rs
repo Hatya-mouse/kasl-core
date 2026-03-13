@@ -20,5 +20,6 @@ pub mod global_decl_collection;
 pub mod program_builder;
 pub mod scope_graph_analyzing;
 pub mod statement_building;
+pub mod struct_graph_analyzing;
 
 pub use program_builder::construct_program;
