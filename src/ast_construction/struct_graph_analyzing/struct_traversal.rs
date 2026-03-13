@@ -41,7 +41,7 @@ impl StructGraphAnalyzer<'_> {
                             &struct_decl.name,
                         );
                     }
-                } else {
+                } else if states.get(field) != Some(&StructState::Visited) {
                     self.analyze_struct(field, states);
                 }
             }
