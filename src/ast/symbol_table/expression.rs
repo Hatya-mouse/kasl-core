@@ -15,8 +15,8 @@
 //
 
 use crate::{
-    FuncCallArg, FunctionID, OperatorID, Range, VariableID, symbol_table::NoTypeFuncCallArg,
-    type_registry::ResolvedType,
+    FuncCallArg, FunctionID, OperatorID, Range, StructID, VariableID,
+    symbol_table::NoTypeFuncCallArg, type_registry::ResolvedType,
 };
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
@@ -70,6 +70,10 @@ pub enum ExprKind<T> {
         id: Option<FunctionID>,
         no_type_args: Vec<NoTypeFuncCallArg>,
         args: Option<Vec<FuncCallArg>>,
+    },
+    StructInit {
+        name: String,
+        id: StructID,
     },
     Chain {
         lhs: Box<Expr<T>>,

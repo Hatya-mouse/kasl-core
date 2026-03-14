@@ -20,7 +20,9 @@ mod identifier_resolver;
 mod literal_resolver;
 mod operator_resolver;
 
-use crate::{Expr, ExprKind, expr_engine::ExpressionResolver, type_registry::ResolvedType};
+use crate::{
+    Expr, ExprKind, error::Ph, expr_engine::ExpressionResolver, type_registry::ResolvedType,
+};
 
 impl ExpressionResolver<'_> {
     pub fn resolve_recursively(&mut self, expr: Expr<()>) -> Option<Expr<ResolvedType>> {
@@ -58,6 +60,15 @@ impl ExpressionResolver<'_> {
             } => self.resolve_func_call(name, no_type_args, expr.range),
 
             ExprKind::Chain { lhs, access } => self.resolve_chain(*lhs, access, expr.range),
+
+            ExprKind::StructInit { .. } => {
+                self.ec.comp_bug(
+                    expr.range,
+                    Ph::ExprEngine,
+                    "Received expression with StructInt",
+                );
+                None
+            }
         }
     }
 }

@@ -31,6 +31,11 @@ pub enum ErrorKind {
     /// A token which is not a struct field or a function is after dot.
     NonMemberTokenAfterDot,
 
+    /// Title: ArgForStructInit
+    /// Payload: None
+    /// Arguments are passed to the struct initializer.
+    ArgForStructInit,
+
     /// Title: ExprBeginsWithDot
     /// Payload: None
     /// The expression begins with a dot.

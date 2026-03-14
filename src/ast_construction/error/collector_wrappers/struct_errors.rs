@@ -81,4 +81,8 @@ impl ErrorCollector {
             Pl::Str(struct_name.to_string()),
         )
     }
+
+    pub fn arg_for_struct_init(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ArgForStructInit, range, phase, Sv::Error, Pl::None);
+    }
 }
