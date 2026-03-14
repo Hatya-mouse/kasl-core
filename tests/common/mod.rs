@@ -25,6 +25,7 @@ use kasl::{
     scope_graph_analyzing::ScopeGraphAnalyzer,
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
+    struct_graph_analyzing::StructGraphAnalyzer,
     symbol_table::{FuncBodyMap, OpBodyMap},
     type_registry::StructGraph,
 };
@@ -61,13 +62,13 @@ pub fn collect_global_decls(
     test_ctx.ec.as_result()
 }
 
-pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
-    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
+pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut struct_graph_analyzer = StructGraphAnalyzer::new(
         &mut test_ctx.ec,
         &test_ctx.comp_state,
-        &mut test_ctx.scope_graph,
+        &test_ctx.struct_graph,
     );
-    scope_graph_analyzer.analyze_all();
+    struct_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()
 }
 
@@ -81,6 +82,16 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
         &mut test_ctx.scope_graph,
     );
     stmt_builder.build_all();
+    test_ctx.ec.as_result()
+}
+
+pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
+        &mut test_ctx.ec,
+        &test_ctx.comp_state,
+        &mut test_ctx.scope_graph,
+    );
+    scope_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()
 }
 

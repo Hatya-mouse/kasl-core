@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use crate::common::{TestContext, build_stmts, collect_global_decls, parse_expr};
+use crate::common::{
+    TestContext, analyze_scopes, analyze_structs, build_stmts, collect_global_decls, parse_expr,
+};
 use insta::{assert_yaml_snapshot, sorted_redaction};
 
 #[test]
@@ -72,7 +74,7 @@ operator infix * {
 }
 
 func infix *(lhs: Int, rhs: Int) -> Int {
-    return Builtin.iadd(lhs, rhs)
+    return Builtin.imul(lhs, rhs)
 }
 
 operator prefix ! {
@@ -85,7 +87,10 @@ func prefix !(operand: Bool) -> Bool {
 "#;
     let parsed = parse_expr(code);
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    analyze_structs(&mut test_ctx).unwrap();
     build_stmts(&mut test_ctx).unwrap();
+    analyze_scopes(&mut test_ctx).unwrap();
+
     assert_yaml_snapshot!(test_ctx.comp_state.op_ctx, {
         ".infix_operator_properties" => sorted_redaction(),
         ".infix_operators" => sorted_redaction(),
