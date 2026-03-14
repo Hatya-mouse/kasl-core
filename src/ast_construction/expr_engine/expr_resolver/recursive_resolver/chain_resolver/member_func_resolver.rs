@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range, StructID,
+    Expr, ExprKind, Range, StructID,
     error::Ph,
     expr_engine::ExpressionResolver,
     symbol_table::{MemberAccess, NoTypeFuncCallArg},
@@ -25,11 +25,12 @@ use crate::{
 impl ExpressionResolver<'_> {
     pub fn resolve_member_func_call(
         &mut self,
+        lhs: Expr<ResolvedType>,
         struct_id: &StructID,
         name: String,
         no_type_args: Vec<NoTypeFuncCallArg>,
         range: Range,
-    ) -> Option<(MemberAccess, ResolvedType)> {
+    ) -> Option<Expr<ResolvedType>> {
         // Get the function ID by name
         let Some(func_id) = self
             .comp_state
@@ -45,16 +46,30 @@ impl ExpressionResolver<'_> {
         // Get the function by ID
         let func = self.comp_state.func_ctx.get_func(&func_id)?;
 
+        // Throw an error if the function is static
+        if func.is_static {
+            self.ec
+                .static_func_call_on_instance(range, Ph::ExprEngine, &func.name);
+            return None;
+        }
+
         // Resolve the arguments
         let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
-        Some((
-            MemberAccess::FuncCall {
-                name,
-                no_type_args,
-                args: Some(args),
-                id: Some(func_id),
+
+        // Construct the member access and the expression
+        let resolved_access = MemberAccess::FuncCall {
+            name,
+            no_type_args,
+            args: Some(args),
+            id: Some(func_id),
+        };
+        Some(Expr::new(
+            ExprKind::Chain {
+                lhs: Box::new(lhs),
+                access: resolved_access,
             },
             func.return_type,
+            range,
         ))
     }
 }

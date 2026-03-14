@@ -14,36 +14,16 @@
 // limitations under the License.
 //
 
-mod builtin_resolver;
-mod chain_lhs_resolver;
-mod field_access_resolver;
-mod member_access_resolver;
-mod member_func_resolver;
-mod static_func_resolver;
-
 use crate::{
-    Expr, Range,
-    expr_engine::ExpressionResolver,
-    symbol_table::{MemberAccess, ResolvedChainLHS},
+    Expr, Range, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
     type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
-    pub fn resolve_chain(
+    pub fn resolve_builtin_call(
         &mut self,
-        lhs: Expr<()>,
         access: MemberAccess,
         range: Range,
     ) -> Option<Expr<ResolvedType>> {
-        // Resolve the LHS expression
-        let resolved_lhs = self.resolve_chain_lhs(lhs)?;
-
-        match resolved_lhs {
-            ResolvedChainLHS::Expr(expr) => self.resolve_member_access(expr, access, range),
-            ResolvedChainLHS::Type(resolved_type) => {
-                self.resolve_static_func_call(&resolved_type, access, range)
-            }
-            ResolvedChainLHS::Builtin => self.resolve_builtin_call(access, range),
-        }
     }
 }

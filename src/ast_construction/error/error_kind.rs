@@ -226,6 +226,21 @@ pub enum ErrorKind {
     /// A struct has a cyclic field, so the compiler cannot determine the size.
     StructCycle,
 
+    /// Title: StaticFuncCallOnInstance
+    /// Payload: Name of the function
+    /// A function is static but called on an instance.
+    StaticFuncCallOnInstance,
+
+    /// Title: StaticCallOfInstanceFunc
+    /// Payload: Name of the function
+    /// A function is not static but called statically.
+    StaticCallOfInstanceFunc,
+
+    /// Title: StaticVarAccess
+    /// Payload: None
+    /// A static access on variable is attempted.
+    StaticVarAccess,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

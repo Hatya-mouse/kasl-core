@@ -79,6 +79,15 @@ pub enum ExprKind<T> {
         lhs: Box<Expr<T>>,
         access: MemberAccess,
     },
+    StaticFuncCall {
+        name: String,
+        id: FunctionID,
+        args: Vec<FuncCallArg>,
+    },
+    BuiltinFuncCall {
+        name: String,
+        args: Option<Vec<FuncCallArg>>,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
@@ -101,4 +110,10 @@ pub struct LValue {
     pub offset: i32,
     pub value_type: ResolvedType,
     pub is_field: bool,
+}
+
+pub enum ResolvedChainLHS {
+    Expr(Expr<ResolvedType>),
+    Type(ResolvedType),
+    Builtin,
 }

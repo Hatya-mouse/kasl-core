@@ -15,18 +15,18 @@
 //
 
 use crate::{
-    Range, error::Ph, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
+    Expr, Range, error::Ph, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
     type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
     pub fn resolve_member_access(
         &mut self,
-        lhs_type: &ResolvedType,
+        lhs: Expr<ResolvedType>,
         access: MemberAccess,
         range: Range,
-    ) -> Option<(MemberAccess, ResolvedType)> {
-        match lhs_type {
+    ) -> Option<Expr<ResolvedType>> {
+        match lhs.value_type {
             // If the LHS is a primitive type, the member access is invalid
             ResolvedType::Primitive(primitive_type) => {
                 self.ec.member_access_on_primitive(
@@ -40,12 +40,11 @@ impl ExpressionResolver<'_> {
             // If the LHS is a struct type, get the offset of the field
             ResolvedType::Struct(struct_id) => match access {
                 MemberAccess::Access { name, .. } => {
-                    self.resolve_field_access(struct_id, name, range)
+                    self.resolve_field_access(lhs, &struct_id, name, range)
                 }
-
                 MemberAccess::FuncCall {
                     name, no_type_args, ..
-                } => self.resolve_member_func_call(struct_id, name, no_type_args, range),
+                } => self.resolve_member_func_call(lhs, &struct_id, name, no_type_args, range),
             },
         }
     }

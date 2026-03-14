@@ -99,4 +99,24 @@ impl ErrorCollector {
     pub fn missing_return(&mut self, range: Range, phase: Phase) {
         self.emit(EK::MissingReturn, range, phase, Sv::Error, Pl::None);
     }
+
+    pub fn static_func_call_on_instance(&mut self, range: Range, phase: Phase, func_name: &str) {
+        self.emit(
+            EK::StaticFuncCallOnInstance,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
+
+    pub fn static_call_of_instance_func(&mut self, range: Range, phase: Phase, func_name: &str) {
+        self.emit(
+            EK::StaticCallOfInstanceFunc,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(func_name.to_string()),
+        );
+    }
 }

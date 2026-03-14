@@ -75,4 +75,8 @@ impl ErrorCollector {
             Pl::Str(var_name.to_string()),
         );
     }
+
+    pub fn static_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
+    }
 }

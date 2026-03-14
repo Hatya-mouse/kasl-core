@@ -15,17 +15,18 @@
 //
 
 use crate::{
-    Range, StructID, error::Ph, expr_engine::ExpressionResolver, symbol_table::MemberAccess,
-    type_registry::ResolvedType,
+    Expr, ExprKind, Range, StructID, error::Ph, expr_engine::ExpressionResolver,
+    symbol_table::MemberAccess, type_registry::ResolvedType,
 };
 
 impl ExpressionResolver<'_> {
     pub fn resolve_field_access(
         &mut self,
+        lhs: Expr<ResolvedType>,
         struct_id: &StructID,
         name: String,
         range: Range,
-    ) -> Option<(MemberAccess, ResolvedType)> {
+    ) -> Option<Expr<ResolvedType>> {
         // Get the struct declaration
         let struct_decl = self.comp_state.type_registry.get_struct(struct_id)?;
 
@@ -43,12 +44,19 @@ impl ExpressionResolver<'_> {
         // Then get the offset of the field
         let field = struct_decl.get_field_by_index(field_index)?;
         let offset = struct_decl.get_offset_by_index(field_index)?;
-        Some((
-            MemberAccess::Access {
-                name,
-                offset: Some(offset),
+
+        // Construct the member access and the expression
+        let resolved_access = MemberAccess::Access {
+            name,
+            offset: Some(offset),
+        };
+        Some(Expr::new(
+            ExprKind::Chain {
+                lhs: Box::new(lhs),
+                access: resolved_access,
             },
             field.value_type,
+            range,
         ))
     }
 }
