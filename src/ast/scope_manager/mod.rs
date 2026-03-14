@@ -22,7 +22,7 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::VariableID;
+use crate::{Range, VariableID};
 use std::collections::{HashMap, HashSet};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
@@ -45,7 +45,7 @@ impl Default for ScopeRegistry {
             next_id: 0,
         };
         // Create the global scope
-        manager.global_scope_id = manager.create_scope(None);
+        manager.global_scope_id = manager.create_scope(None, Range::zero());
         manager
     }
 }
@@ -74,9 +74,9 @@ impl ScopeRegistry {
     }
 
     /// Creates a new scope with the given parent scope.
-    pub fn create_scope(&mut self, parent: Option<ScopeID>) -> ScopeID {
+    pub fn create_scope(&mut self, parent: Option<ScopeID>, range: Range) -> ScopeID {
         let id = self.generate_scope_id();
-        let scope = Scope::new(parent);
+        let scope = Scope::new(parent, range);
         self.scopes.insert(id, scope);
         id
     }

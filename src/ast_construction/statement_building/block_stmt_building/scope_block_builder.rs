@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserScopeStmt, ScopeID, statement_building::BlockStmtBuilder, symbol_table::Block,
+    ParserScopeStmt, Range, ScopeID, statement_building::BlockStmtBuilder, symbol_table::Block,
     type_registry::ResolvedType,
 };
 
@@ -25,6 +25,7 @@ impl BlockStmtBuilder<'_> {
         statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
         expected_return_type: ResolvedType,
+        decl_range: Range,
     ) -> Block {
         let mut body = Vec::new();
 
@@ -32,7 +33,7 @@ impl BlockStmtBuilder<'_> {
         let block_scope_id = self
             .comp_state
             .scope_registry
-            .create_scope(Some(parent_scope_id));
+            .create_scope(Some(parent_scope_id), decl_range);
         // Build each statement in the block scope
         for stmt in statements {
             let Some(resolved_stmt) = self.build_stmt(stmt, block_scope_id, expected_return_type)
@@ -41,9 +42,6 @@ impl BlockStmtBuilder<'_> {
             };
             body.push(resolved_stmt);
         }
-
-        // If the block scope doesn't have any return statement, insert false
-        self.scope_has_return.entry(block_scope_id).or_insert(false);
 
         // Add an edge from the parent scope to the block scope
         self.scope_graph.add_edge(parent_scope_id, block_scope_id);

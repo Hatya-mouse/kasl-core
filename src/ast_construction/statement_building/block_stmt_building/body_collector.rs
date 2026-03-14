@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{
-    FunctionID, OperatorID, Range, ScopeID, error::Ph, statement_building::BlockStmtBuilder,
-};
+use crate::{FunctionID, OperatorID, ScopeID, statement_building::BlockStmtBuilder};
 
 impl BlockStmtBuilder<'_> {
     pub fn build_func_body(&mut self, func_id: FunctionID) {
@@ -38,16 +36,13 @@ impl BlockStmtBuilder<'_> {
             }
         }
 
-        // If the function has non-void return type, check if the function has a return for all paths
-        if let Some(func) = self.comp_state.func_ctx.get_func(&func_id)
-            && !func.return_type.is_void()
-        {
-            self.verify_return_for_func(func.block.scope_id, func.range);
-        }
-
-        // Set the statement to the block
         if let Some(func) = self.comp_state.func_ctx.get_func_mut(&func_id) {
+            // Set the statement to the block
             func.block.set_stmt(resolved_stmts);
+            // Add a function edge to the scope graph
+            let func_scope = func.block.scope_id;
+            let requires_return = !func.return_type.is_void();
+            self.add_func_scope_edge(func_scope, requires_return);
         }
     }
 
@@ -69,14 +64,12 @@ impl BlockStmtBuilder<'_> {
             }
         }
 
-        // Check if the operator has a return for all paths (Operators should have non-void return type)
-        if let Some(op) = self.comp_state.op_ctx.get_infix_op(&op_id) {
-            self.verify_return_for_func(op.block.scope_id, op.range);
-        }
-
         // Set the statement to the block
         if let Some(op) = self.comp_state.op_ctx.get_infix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
+            // Add an operator edge to the scope graph
+            let op_scope = op.block.scope_id;
+            self.add_func_scope_edge(op_scope, true);
         }
     }
 
@@ -99,14 +92,12 @@ impl BlockStmtBuilder<'_> {
             }
         }
 
-        // Check if the operator has a return for all paths (Operators should have non-void return type)
-        if let Some(op) = self.comp_state.op_ctx.get_prefix_op(&op_id) {
-            self.verify_return_for_func(op.block.scope_id, op.range);
-        }
-
         // Set the statement to the block
         if let Some(op) = self.comp_state.op_ctx.get_prefix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
+            // Add an operator edge to the scope graph
+            let op_scope = op.block.scope_id;
+            self.add_func_scope_edge(op_scope, true);
         }
     }
 
@@ -129,21 +120,21 @@ impl BlockStmtBuilder<'_> {
             }
         }
 
-        // Check if the operator has a return for all paths (Operators should have non-void return type)
-        if let Some(op) = self.comp_state.op_ctx.get_postfix_op(&op_id) {
-            self.verify_return_for_func(op.block.scope_id, op.range);
-        }
-
         // Set the statement to the block
         if let Some(op) = self.comp_state.op_ctx.get_postfix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
+            // Add an operator edge to the scope graph
+            let op_scope = op.block.scope_id;
+            self.add_func_scope_edge(op_scope, true);
         }
     }
 
-    fn verify_return_for_func(&mut self, func_scope_id: ScopeID, func_range: Range) {
-        let has_return = *self.scope_has_return.entry(func_scope_id).or_insert(false);
-        if !has_return {
-            self.ec.missing_return(func_range, Ph::StatementCollection);
-        }
+    fn add_func_scope_edge(&mut self, func_scope: ScopeID, requires_return: bool) {
+        // Register the function to the scope graph
+        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        self.scope_graph.add_edge(global_scope_id, func_scope);
+        // Mark the function scope as requires return
+        self.scope_graph
+            .set_requires_return(func_scope, requires_return);
     }
 }

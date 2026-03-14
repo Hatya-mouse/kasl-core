@@ -28,7 +28,7 @@ impl BlockStmtBuilder<'_> {
         expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         // The current scope has a return statement
-        self.scope_has_return.insert(current_scope_id, true);
+        self.scope_graph.set_has_return(current_scope_id, true);
 
         if expected_return_type.is_void() {
             if value.is_some() {

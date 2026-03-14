@@ -9,6 +9,9 @@ scopes:
       state_var: 0
     variables:
       - 0
+    range:
+      start: 0
+      end: 0
 variables:
   0:
     name: state_var

@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/global_var_collection.rs
-expression: comp_state.scope_registry
+expression: test_ctx.comp_state.scope_registry
 ---
 scopes:
   0:
@@ -9,6 +9,9 @@ scopes:
       const: 0
     variables:
       - 0
+    range:
+      start: 0
+      end: 0
 variables:
   0:
     name: const

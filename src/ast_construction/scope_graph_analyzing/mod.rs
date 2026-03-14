@@ -23,14 +23,14 @@ use crate::{CompilationState, ScopeID, error::ErrorCollector, scope_manager::Sco
 pub struct ScopeGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
     comp_state: &'a CompilationState,
-    scope_graph: &'a ScopeGraph,
+    scope_graph: &'a mut ScopeGraph,
 }
 
 impl<'a> ScopeGraphAnalyzer<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         comp_state: &'a CompilationState,
-        scope_graph: &'a ScopeGraph,
+        scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,

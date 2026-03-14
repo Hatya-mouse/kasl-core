@@ -141,6 +141,7 @@ pub enum ParserScopeStmtKind {
         main: ParserIfArm,
         else_ifs: Vec<ParserIfArm>,
         else_body: Option<Vec<ParserScopeStmt>>,
+        else_range: Range,
     },
     Return {
         value: Option<Vec<ExprToken>>,

@@ -38,7 +38,7 @@ impl GlobalDeclCollector<'_> {
         let op_scope_id = self
             .comp_state
             .scope_registry
-            .create_scope(Some(global_scope_id));
+            .create_scope(Some(global_scope_id), decl_range);
         let op_block = Block::new(op_scope_id);
 
         // Resolve the function parameters

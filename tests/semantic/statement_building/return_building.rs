@@ -15,7 +15,7 @@
 //
 
 use crate::common::{
-    TestContext, assert_error, build_stmts,
+    TestContext, analyze_scopes, assert_error, build_stmts,
     builders::{
         float_literal, func_decl, func_param, identifier, if_arm, if_stmt, int_literal, return_stmt,
     },
@@ -230,7 +230,8 @@ fn test_missing_return() {
         &[],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).unwrap_err();
+    build_stmts(&mut test_ctx).unwrap();
+    let error = analyze_scopes(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -258,7 +259,8 @@ fn test_return_only_in_if() {
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).unwrap_err();
+    build_stmts(&mut test_ctx).unwrap();
+    let error = analyze_scopes(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -294,7 +296,8 @@ fn test_return_only_in_else_if() {
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).unwrap_err();
+    build_stmts(&mut test_ctx).unwrap();
+    let error = analyze_scopes(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -333,6 +336,7 @@ fn test_return_only_in_if_and_else_if() {
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    let error = build_stmts(&mut test_ctx).unwrap_err();
+    build_stmts(&mut test_ctx).unwrap();
+    let error = analyze_scopes(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }

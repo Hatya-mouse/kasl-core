@@ -36,19 +36,47 @@ impl ScopeGraphAnalyzer<'_> {
 
         // Analyze the scope recursively
         let mut max_child_size: u32 = 0;
-        if let Some(child_scopes) = self.scope_graph.get_callees(current_scope) {
+        let child_scopes = self.scope_graph.get_callees(current_scope).cloned();
+
+        if let Some(child_scopes) = &child_scopes {
             for child_scope in child_scopes {
                 if states.get(child_scope) == Some(&ScopeState::Visiting) {
                     self.ec
                         .recursive_call(Range::zero(), Ph::ScopeGraphAnalyzing);
                 } else {
                     self.analyze_scope(child_scope, states, total_sizes);
+
                     // Take the maximum of the current total child size and the size of the child scope
                     // Scopes with the same level should not exist at the same type
                     max_child_size = max(max_child_size, total_sizes[child_scope]);
                 }
             }
         }
+
+        // Check if this scope guarantees return
+        let current_scope_has_return = self.scope_graph.guarantees_return(current_scope);
+        let all_children_have_return = child_scopes
+            .map(|children| {
+                children
+                    .iter()
+                    .all(|child| self.scope_graph.guarantees_return(child))
+            })
+            .unwrap_or(false);
+        let guarantees_return = current_scope_has_return || all_children_have_return;
+        // If the current scope requires return but doesn't guarantee return, throw an error
+        if self.scope_graph.requires_return(current_scope) && !guarantees_return {
+            let scope_range = self
+                .comp_state
+                .scope_registry
+                .get_scope(current_scope)
+                .map(|scope| scope.range)
+                .unwrap_or_default();
+            self.ec.missing_return(scope_range, Ph::ScopeGraphAnalyzing);
+        }
+        // Set if the current scope guarantees return
+        self.scope_graph
+            .set_has_return(*current_scope, guarantees_return);
+        println!("{:?}, {}", current_scope, guarantees_return);
 
         // Add the current scope size and the maximum child size to get the maximum scope size in bytes
         let total_size = max_child_size + current_scope_size;

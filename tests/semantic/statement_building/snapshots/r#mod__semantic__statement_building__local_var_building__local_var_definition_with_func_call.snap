@@ -7,16 +7,25 @@ scopes:
     parent: ~
     name_to_id: {}
     variables: []
+    range:
+      start: 0
+      end: 0
   1:
     parent: 0
     name_to_id: {}
     variables: []
+    range:
+      start: 0
+      end: 0
   2:
     parent: 0
     name_to_id:
       local: 0
     variables:
       - 0
+    range:
+      start: 0
+      end: 0
 variables:
   0:
     name: local

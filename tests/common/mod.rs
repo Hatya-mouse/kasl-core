@@ -21,6 +21,7 @@ use kasl::{
     error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
+    scope_graph_analyzing::ScopeGraphAnalyzer,
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
@@ -59,14 +60,14 @@ pub fn collect_global_decls(
     test_ctx.ec.as_result()
 }
 
-pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
-    let mut struct_graph_analyzer = StructGraphAnalyzer::new(
+pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
         &mut test_ctx.ec,
         &test_ctx.comp_state,
-        &test_ctx.struct_graph,
+        &mut test_ctx.scope_graph,
     );
-    struct_graph_analyzer.analyze_all();
-    println!("{:#?}", struct_graph_analyzer);
+    scope_graph_analyzer.analyze_all();
+    println!("{:#?}", &test_ctx.scope_graph);
     test_ctx.ec.as_result()
 }
 

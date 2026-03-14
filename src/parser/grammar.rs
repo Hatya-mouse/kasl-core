@@ -154,7 +154,9 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule if_statement() -> ParserScopeStmt
         = start:position!() main:if_arm()
         else_ifs:(__? "else" _ ifCond:if_arm() { ifCond })*
-        else_body:scope_stmts()?
+        else_start:position!() __? "else" __? "{"
+        __? else_body:scope_stmts()? __?
+        "}" else_end:position!()
         end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
@@ -162,6 +164,7 @@ peg::parser!(pub grammar kasl_parser() for str {
                     main,
                     else_ifs,
                     else_body,
+                    else_range: Range::n(else_start, else_end)
                 }
             }
         }

@@ -28,7 +28,7 @@ impl BlockStmtBuilder<'_> {
     ) -> Option<Statement> {
         match &stmt.kind {
             ParserScopeStmtKind::Block { statements } => {
-                self.build_block_stmt(statements, scope_id, expected_return_type)
+                self.build_block_stmt(statements, scope_id, expected_return_type, stmt.range)
             }
             ParserScopeStmtKind::LocalVar {
                 name,
@@ -48,10 +48,12 @@ impl BlockStmtBuilder<'_> {
                 main,
                 else_ifs,
                 else_body,
+                else_range,
             } => self.build_if_stmt(
                 main,
                 else_ifs,
                 else_body.as_ref(),
+                *else_range,
                 scope_id,
                 expected_return_type,
             ),

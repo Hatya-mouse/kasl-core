@@ -62,7 +62,7 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     stmt_builder.build_all();
 
     // 4. Analyze the scope graph
-    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &comp_state, &scope_graph);
+    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &comp_state, &mut scope_graph);
     scope_graph_analyzer.analyze_all();
 
     ec.as_result()

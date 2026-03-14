@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::{VariableID, scope_manager::ScopeID};
+use crate::{Range, VariableID, scope_manager::ScopeID};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -22,14 +22,16 @@ pub struct Scope {
     pub parent: Option<ScopeID>,
     name_to_id: HashMap<String, VariableID>,
     pub variables: Vec<VariableID>,
+    pub range: Range,
 }
 
 impl Scope {
-    pub fn new(parent: Option<ScopeID>) -> Self {
+    pub fn new(parent: Option<ScopeID>, range: Range) -> Self {
         Self {
             parent,
             name_to_id: HashMap::new(),
             variables: Vec::new(),
+            range,
         }
     }
 

@@ -20,6 +20,12 @@ pub struct Range {
     pub end: usize,
 }
 
+impl Default for Range {
+    fn default() -> Self {
+        Self::zero()
+    }
+}
+
 impl Range {
     pub fn n(start: usize, end: usize) -> Self {
         Range { start, end }

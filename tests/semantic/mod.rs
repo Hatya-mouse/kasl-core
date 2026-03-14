@@ -16,4 +16,3 @@
 
 mod global_decl_collection;
 mod statement_building;
-mod struct_graph_analyzing;

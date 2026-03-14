@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ParserScopeStmt, ScopeID, Statement, statement_building::BlockStmtBuilder,
+    ParserScopeStmt, Range, ScopeID, Statement, statement_building::BlockStmtBuilder,
     type_registry::ResolvedType,
 };
 
@@ -26,13 +26,14 @@ impl BlockStmtBuilder<'_> {
         statements: &[ParserScopeStmt],
         parent_scope_id: ScopeID,
         expected_return_type: ResolvedType,
+        decl_range: Range,
     ) -> Option<Statement> {
-        let block = self.build_scope_block(statements, parent_scope_id, expected_return_type);
-
-        // Check if the child block has a return statement
-        let does_child_have_return = self.scope_guarantees_return(block.scope_id);
-        self.scope_has_return
-            .insert(parent_scope_id, does_child_have_return);
+        let block = self.build_scope_block(
+            statements,
+            parent_scope_id,
+            expected_return_type,
+            decl_range,
+        );
 
         Some(Statement::Block { block })
     }
