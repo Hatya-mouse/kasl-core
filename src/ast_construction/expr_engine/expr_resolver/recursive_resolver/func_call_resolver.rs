@@ -62,7 +62,7 @@ impl ExpressionResolver<'_> {
             ))
         } else {
             self.ec.func_not_found(range, Ph::ExprEngine, &name);
-            return None;
+            None
         }
     }
 

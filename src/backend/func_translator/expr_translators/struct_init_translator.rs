@@ -21,15 +21,13 @@ use cranelift_codegen::ir;
 impl FuncTranslator<'_> {
     pub fn translate_struct_init(&mut self, struct_id: &StructID) -> Option<ir::Value> {
         // Store the value in the stack slot
-        let Some(struct_decl) = self.comp_state.type_registry.get_struct(struct_id) else {
-            return None;
-        };
+        let struct_decl = self.comp_state.type_registry.get_struct(struct_id)?;
 
         // Create a stack slot
         let slot_data = StackSlotData::new(
             StackSlotKind::ExplicitSlot,
             struct_decl.total_size,
-            struct_decl.alignment as u8,
+            struct_decl.alignment,
         );
         let slot = self.builder.func.create_sized_stack_slot(slot_data);
         // Store the fields to the slot
