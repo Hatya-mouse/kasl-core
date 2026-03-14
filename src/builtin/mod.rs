@@ -16,13 +16,10 @@
 
 mod builtin_func;
 mod functions;
-mod utility;
 
-pub use builtin_func::{BuiltinFunc, BuiltinFuncID};
+pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
 
 use crate::type_registry::{PrimitiveType, ResolvedType};
-use cranelift::prelude::FunctionBuilder;
-use cranelift_codegen::ir;
 use std::collections::HashMap;
 
 pub struct BuiltinRegistry {
@@ -64,7 +61,7 @@ impl BuiltinRegistry {
         name: &'static str,
         params: &[PrimitiveType],
         return_type: PrimitiveType,
-        translator: Box<dyn Fn(&mut FunctionBuilder, &[ir::Value]) -> ir::Value>,
+        translator: BuiltinFuncTranslator,
     ) {
         let func_id = self.generate_id();
         let func = BuiltinFunc {
@@ -78,6 +75,10 @@ impl BuiltinRegistry {
         };
         self.functions.insert(func_id, func);
         self.name_to_id.insert(name.to_string(), func_id);
+    }
+
+    pub fn get_id_by_name(&self, name: &str) -> Option<&BuiltinFuncID> {
+        self.name_to_id.get(name)
     }
 
     pub fn get_func_by_id(&self, id: &BuiltinFuncID) -> Option<&BuiltinFunc> {

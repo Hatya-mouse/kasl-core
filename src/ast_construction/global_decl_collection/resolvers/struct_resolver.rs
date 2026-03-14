@@ -40,7 +40,7 @@ impl<'a> GlobalDeclCollector<'a> {
                 .reserved_struct_name(decl_range, Ph::StructCollection, name);
         }
 
-        let struct_id = self.name_space.generate_struct_id();
+        let struct_id = self.comp_state.type_registry.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
 
@@ -153,17 +153,10 @@ impl<'a> GlobalDeclCollector<'a> {
         };
 
         // Register the function
-        let func_id = self.name_space.generate_function_id();
-
-        if info.is_static {
-            self.comp_state
-                .func_ctx
-                .register_static_func(func, struct_id, func_id);
-        } else {
-            self.comp_state
-                .func_ctx
-                .register_member_func(func, struct_id, func_id);
-        }
+        let func_id = self
+            .comp_state
+            .func_ctx
+            .register_member_func(func, struct_id);
 
         // Register the function body to the func body map
         self.func_body_map.register(func_id, info.body.to_vec());

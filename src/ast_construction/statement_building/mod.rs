@@ -19,7 +19,8 @@ mod block_stmt_building;
 pub use block_stmt_building::BlockStmtBuilder;
 
 use crate::{
-    CompilationState, NameSpace,
+    CompilationState,
+    builtin::BuiltinRegistry,
     error::ErrorCollector,
     scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -27,10 +28,10 @@ use crate::{
 
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    name_space: &'a mut NameSpace,
     func_body_map: &'a FuncBodyMap,
     op_body_map: &'a OpBodyMap,
     comp_state: &'a mut CompilationState,
+    builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
 }
@@ -38,18 +39,18 @@ pub struct StatementBuilder<'a> {
 impl<'a> StatementBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        name_space: &'a mut NameSpace,
         func_body_map: &'a FuncBodyMap,
         op_body_map: &'a OpBodyMap,
         comp_state: &'a mut CompilationState,
+        builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            name_space,
             func_body_map,
             op_body_map,
             comp_state,
+            builtin_registry,
             scope_graph,
         }
     }
@@ -64,10 +65,10 @@ impl<'a> StatementBuilder<'a> {
         // Create a block statement builder
         let mut func_stmt_builder = BlockStmtBuilder::new(
             self.ec,
-            self.name_space,
             self.func_body_map,
             self.op_body_map,
             self.comp_state,
+            self.builtin_registry,
             self.scope_graph,
         );
 

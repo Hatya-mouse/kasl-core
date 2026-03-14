@@ -94,6 +94,7 @@ impl GlobalDeclCollector<'_> {
                     self.ec,
                     self.comp_state,
                     self.scope_graph,
+                    self.builtin_registry,
                     global_scope_id,
                     arg,
                 )?;

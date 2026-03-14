@@ -33,7 +33,7 @@ impl ExpressionResolver<'_> {
             return None;
         };
 
-        // Assume that static member access is a func call
+        // Assume static member access is a func call
         match access {
             MemberAccess::Access { .. } => {
                 self.ec.static_var_access(range, Ph::ExprEngine);

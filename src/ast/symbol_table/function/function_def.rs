@@ -62,6 +62,7 @@ pub struct NoTypeFuncCallArg {
 pub struct FuncCallArg {
     pub var_id: VariableID,
     pub value: Expr<ResolvedType>,
+    pub range: Range,
 }
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]

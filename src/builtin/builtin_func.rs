@@ -19,11 +19,13 @@ use cranelift::prelude::FunctionBuilder;
 use cranelift_codegen::ir;
 use std::fmt::Display;
 
+pub type BuiltinFuncTranslator = Box<dyn Fn(&mut FunctionBuilder, &[ir::Value]) -> ir::Value>;
+
 pub struct BuiltinFunc {
     pub name: &'static str,
     pub params: Vec<ResolvedType>,
     pub return_type: ResolvedType,
-    pub translator: Box<dyn Fn(&mut FunctionBuilder, &[ir::Value]) -> ir::Value>,
+    pub translator: BuiltinFuncTranslator,
 }
 
 /// An ID used to identify an builtin function.

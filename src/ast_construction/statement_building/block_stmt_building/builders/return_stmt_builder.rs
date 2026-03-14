@@ -45,6 +45,7 @@ impl BlockStmtBuilder<'_> {
                 self.ec,
                 self.comp_state,
                 self.scope_graph,
+                self.builtin_registry,
                 current_scope_id,
                 value,
             )?;

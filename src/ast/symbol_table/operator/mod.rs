@@ -44,13 +44,23 @@ pub struct OperatorContext {
     postfix_operator_properties: HashMap<String, PostfixOperatorProperties>,
     postfix_operators: HashMap<OperatorID, PostfixOperator>,
     postfix_ids: HashMap<PostfixQuery, OperatorID>,
+
+    next_operator_id: usize,
 }
 
 impl OperatorContext {
-    // -- REGISTER FUNCTIONS --
+    pub fn generate_operator_id(&mut self) -> OperatorID {
+        let id = OperatorID::new(self.next_operator_id);
+        self.next_operator_id += 1;
+        id
+    }
 
-    pub fn register_infix_func(&mut self, infix: InfixOperator, id: OperatorID) {
+    // --- REGISTER FUNCTIONS ---
+
+    pub fn register_infix_func(&mut self, infix: InfixOperator) -> OperatorID {
+        let id = self.generate_operator_id();
         self.infix_operators.insert(id, infix);
+        id
     }
 
     pub fn register_infix_properties(
@@ -61,8 +71,10 @@ impl OperatorContext {
         self.infix_operator_properties.insert(symbol, properties);
     }
 
-    pub fn register_prefix_func(&mut self, prefix: PrefixOperator, id: OperatorID) {
+    pub fn register_prefix_func(&mut self, prefix: PrefixOperator) -> OperatorID {
+        let id = self.generate_operator_id();
         self.prefix_operators.insert(id, prefix);
+        id
     }
 
     pub fn register_prefix_properties(
@@ -73,8 +85,10 @@ impl OperatorContext {
         self.prefix_operator_properties.insert(symbol, properties);
     }
 
-    pub fn register_postfix_func(&mut self, postfix: PostfixOperator, id: OperatorID) {
+    pub fn register_postfix_func(&mut self, postfix: PostfixOperator) -> OperatorID {
+        let id = self.generate_operator_id();
         self.postfix_operators.insert(id, postfix);
+        id
     }
 
     pub fn register_postfix_properties(
@@ -85,7 +99,7 @@ impl OperatorContext {
         self.postfix_operator_properties.insert(symbol, properties);
     }
 
-    // -- PROPERTIES GETTER FUNCTIONS --
+    // --- PROPERTIES GETTER FUNCTIONS ---
 
     pub fn get_infix_props(&self, symbol: &str) -> Option<&InfixOperatorProperties> {
         self.infix_operator_properties.get(symbol)
@@ -99,7 +113,7 @@ impl OperatorContext {
         self.postfix_operator_properties.get(symbol)
     }
 
-    // -- ID GETTER FUNCTIONS --
+    // --- ID GETTER FUNCTIONS ---
 
     pub fn get_infix_id(&self, query: InfixQueryRef) -> Option<OperatorID> {
         self.infix_ids.get(&query).copied()
@@ -113,7 +127,7 @@ impl OperatorContext {
         self.postfix_ids.get(&query).copied()
     }
 
-    // -- OPERATOR FUNC GETTER FUNCTIONS --
+    // --- OPERATOR FUNC GETTER FUNCTIONS ---
 
     pub fn get_infix_op(&self, id: &OperatorID) -> Option<&InfixOperator> {
         self.infix_operators.get(id)
@@ -127,7 +141,7 @@ impl OperatorContext {
         self.postfix_operators.get(id)
     }
 
-    // -- OPERATOR FUNC MUTABLE GETTER FUNCTIONS --
+    // --- OPERATOR FUNC MUTABLE GETTER FUNCTIONS ---
 
     pub fn get_infix_op_mut(&mut self, id: &OperatorID) -> Option<&mut InfixOperator> {
         self.infix_operators.get_mut(id)
@@ -141,7 +155,7 @@ impl OperatorContext {
         self.postfix_operators.get_mut(id)
     }
 
-    // -- ID GETTER --
+    // --- ID GETTER FUNCTIONS ---
 
     pub fn all_infix_ids(&self) -> Vec<OperatorID> {
         self.infix_ids.values().copied().collect()

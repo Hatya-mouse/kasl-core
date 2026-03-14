@@ -111,18 +111,15 @@ impl GlobalDeclCollector<'_> {
                 range: param.range,
                 var_kind: VariableKind::FuncParam,
             };
-            let variable_id = self.name_space.generate_variable_id();
-            self.comp_state.scope_registry.register_var(
-                var,
-                param.name.clone(),
-                variable_id,
-                func_scope_id,
-            );
+            let var_id =
+                self.comp_state
+                    .scope_registry
+                    .register_var(var, param.name.clone(), func_scope_id);
 
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
-                var_id: variable_id,
+                var_id,
                 value_type: resolved_def_val.value_type,
                 def_val: Some(resolved_def_val),
                 range: param.range,
@@ -142,18 +139,15 @@ impl GlobalDeclCollector<'_> {
                 range: param.range,
                 var_kind: VariableKind::FuncParam,
             };
-            let variable_id = self.name_space.generate_variable_id();
-            self.comp_state.scope_registry.register_var(
-                var,
-                param.name.clone(),
-                variable_id,
-                func_scope_id,
-            );
+            let var_id =
+                self.comp_state
+                    .scope_registry
+                    .register_var(var, param.name.clone(), func_scope_id);
 
             Some(FuncParam {
                 label: param.label.clone(),
                 name: param.name.clone(),
-                var_id: variable_id,
+                var_id,
                 value_type: resolved_annotation_type,
                 def_val: None,
                 range: param.range,

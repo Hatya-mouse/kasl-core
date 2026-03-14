@@ -108,6 +108,7 @@ impl ExpressionResolver<'_> {
                 slots[param_index] = Some(FuncCallArg {
                     var_id: func_params[param_index].var_id,
                     value,
+                    range: no_type_arg.range,
                 });
                 next_unlabeled_index = param_index + 1;
             } else {
@@ -125,6 +126,7 @@ impl ExpressionResolver<'_> {
                 slots[next_unlabeled_index] = Some(FuncCallArg {
                     var_id: func_params[next_unlabeled_index].var_id,
                     value,
+                    range: no_type_arg.range,
                 });
                 next_unlabeled_index += 1;
             }
@@ -134,19 +136,27 @@ impl ExpressionResolver<'_> {
         for (slot, param) in slots.iter().zip(func_params.iter()) {
             match slot {
                 Some(arg) => resolved_args.push(arg.clone()),
-                None => {
-                    match param.def_val {
-                        // If the parameter has a default value, use it
-                        Some(ref def_val) => resolved_args.push(FuncCallArg {
-                            var_id: param.var_id,
-                            value: def_val.clone(),
-                        }),
-                        None => {
-                            self.ec.missing_arg(func_call_range, Ph::ExprEngine);
-                            return None;
-                        }
+                None => match param.def_val {
+                    // If the parameter has a default value, use it
+                    Some(ref def_val) => resolved_args.push(FuncCallArg {
+                        var_id: param.var_id,
+                        value: def_val.clone(),
+                        range: Range::zero(),
+                    }),
+                    None => {
+                        self.ec.missing_arg(func_call_range, Ph::ExprEngine);
+                        return None;
                     }
-                }
+                },
+            }
+        }
+
+        // Check if the type of the arguments matches the type of the parameter
+        for (resolved_arg, param) in resolved_args.iter().zip(func_params.iter()) {
+            if resolved_arg.value.value_type != param.value_type {
+                self.ec
+                    .arg_type_mismatch(resolved_arg.range, Ph::ExprEngine, &param.name);
+                return None;
             }
         }
 

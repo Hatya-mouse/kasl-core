@@ -116,6 +116,11 @@ pub enum ErrorKind {
     /// A label of the argument is missing, but the argument requires a label.
     MissingArgLabel,
 
+    /// Title: ArgTypeMismatch
+    /// Payload: The name of the argument
+    /// A type of the argument is wrong.
+    ArgTypeMismatch,
+
     /// Title: TypeAnnotationMismatch
     /// Payload: The type of the annotation and the type of the expression
     /// The type annotation does not match the type of the expression.
@@ -240,6 +245,21 @@ pub enum ErrorKind {
     /// Payload: None
     /// A static access on variable is attempted.
     StaticVarAccess,
+
+    /// Title: BuiltinVarAccess
+    /// Payload: None
+    /// A static access on variable in the Builtin is attempted.
+    BuiltinVarAccess,
+
+    /// Title: BuiltinFuncNotFound
+    /// Payload: The name of the function
+    /// A builtin function not found.
+    BuiltinFuncNotFound,
+
+    /// Title: BuiltinArgTypeMismatch
+    /// Payload: None
+    /// The type of the argument passed to an builtin function is wrong.
+    BuiltinArgTypeMismatch,
 
     /// Title: CompilerBug
     /// Payload: Error message

@@ -33,6 +33,7 @@ impl GlobalDeclCollector<'_> {
             self.ec,
             self.comp_state,
             self.scope_graph,
+            self.builtin_registry,
             global_scope_id,
             def_val,
         )?;
@@ -108,12 +109,8 @@ impl GlobalDeclCollector<'_> {
             range: decl_range,
             var_kind,
         };
-        let variable_id = self.name_space.generate_variable_id();
-        self.comp_state.scope_registry.register_var(
-            var,
-            name.to_string(),
-            variable_id,
-            global_scope_id,
-        );
+        self.comp_state
+            .scope_registry
+            .register_var(var, name.to_string(), global_scope_id);
     }
 }

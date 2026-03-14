@@ -52,9 +52,9 @@ impl FuncTranslator<'_> {
             }
             ExprKind::StructInit { id, .. } => self.translate_struct_init(id),
             ExprKind::Chain { lhs, access } => self.translate_chain(lhs, access, &expr.value_type),
-            ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(&id, &args),
+            ExprKind::StaticFuncCall { id, args, .. } => self.translate_func_call_expr(id, args),
             ExprKind::BuiltinFuncCall { id, args, .. } => {
-                self.translate_builtin_func_call(&id, &args)
+                self.translate_builtin_func_call(id, args)
             }
         }
     }

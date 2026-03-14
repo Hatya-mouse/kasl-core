@@ -79,4 +79,8 @@ impl ErrorCollector {
     pub fn static_var_access(&mut self, range: Range, phase: Phase) {
         self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
     }
+
+    pub fn builtin_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
+    }
 }

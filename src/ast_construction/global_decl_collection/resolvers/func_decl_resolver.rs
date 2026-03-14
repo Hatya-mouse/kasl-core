@@ -49,8 +49,7 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Register the function
-        let func_id = self.name_space.generate_function_id();
-        self.comp_state.func_ctx.register_global_func(func, func_id);
+        let func_id = self.comp_state.func_ctx.register_global_func(func);
 
         // Register the function body to the function body map
         self.func_body_map.register(func_id, info.body.to_vec());

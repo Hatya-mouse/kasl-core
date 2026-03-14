@@ -24,8 +24,7 @@ pub mod type_registry;
 pub use compilation_state::CompilationState;
 pub use data::Range;
 pub use name_space::{
-    FunctionID, NameSpace, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent,
-    VariableID,
+    FunctionID, OperatorID, ParserStmtID, StructID, SymbolPath, SymbolPathComponent, VariableID,
 };
 pub use scope_manager::{InputAttribute, Scope, ScopeID, ScopeRegistry, ScopeVar};
 pub use symbol_table::{

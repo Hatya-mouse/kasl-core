@@ -36,9 +36,16 @@ use std::{
 pub struct TypeRegistry {
     pub structs: HashMap<StructID, StructDecl>,
     pub path_to_id: HashMap<SymbolPath, StructID>,
+    next_struct_id: usize,
 }
 
 impl TypeRegistry {
+    pub fn generate_struct_id(&mut self) -> StructID {
+        let id = StructID::new(self.next_struct_id);
+        self.next_struct_id += 1;
+        id
+    }
+
     pub fn resolve_type_path(&self, type_path: &SymbolPath) -> Option<ResolvedType> {
         if type_path.len() == 1
             && let Ok(primitive_type) = PrimitiveType::from_str(&type_path.last().unwrap().symbol)

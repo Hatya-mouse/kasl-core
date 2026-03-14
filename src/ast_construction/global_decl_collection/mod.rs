@@ -20,7 +20,8 @@ mod stmt_process;
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
-    CompilationState, NameSpace, ParserDeclStmt,
+    CompilationState, ParserDeclStmt,
+    builtin::BuiltinRegistry,
     error::ErrorCollector,
     scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -29,10 +30,10 @@ use crate::{
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
-    name_space: &'a mut NameSpace,
     func_body_map: &'a mut FuncBodyMap,
     op_body_map: &'a mut OpBodyMap,
     comp_state: &'a mut CompilationState,
+    builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
     struct_graph: &'a mut StructGraph,
@@ -41,19 +42,19 @@ pub struct GlobalDeclCollector<'a> {
 impl<'a> GlobalDeclCollector<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        name_space: &'a mut NameSpace,
         func_body_map: &'a mut FuncBodyMap,
         op_body_map: &'a mut OpBodyMap,
         comp_state: &'a mut CompilationState,
+        builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
         struct_graph: &'a mut StructGraph,
     ) -> Self {
         Self {
             ec,
-            name_space,
             func_body_map,
             op_body_map,
             comp_state,
+            builtin_registry,
             scope_graph,
             struct_graph,
         }

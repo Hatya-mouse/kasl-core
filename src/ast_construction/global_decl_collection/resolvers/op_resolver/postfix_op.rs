@@ -55,8 +55,7 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Register the operator
-        let op_id = self.name_space.generate_operator_id();
-        self.comp_state.op_ctx.register_postfix_func(op, op_id);
+        let op_id = self.comp_state.op_ctx.register_postfix_func(op);
 
         // Register the function body to the function body map
         self.op_body_map.register(op_id, body.to_vec());

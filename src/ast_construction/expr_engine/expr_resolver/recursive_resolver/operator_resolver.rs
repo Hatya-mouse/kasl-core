@@ -50,10 +50,12 @@ impl ExpressionResolver<'_> {
         let lhs_arg = FuncCallArg {
             var_id: op.lhs.var_id,
             value: lhs.clone(),
+            range: lhs.range,
         };
         let rhs_arg = FuncCallArg {
             var_id: op.rhs.var_id,
             value: rhs.clone(),
+            range: rhs.range,
         };
 
         // Get the return type of the operator
@@ -98,6 +100,7 @@ impl ExpressionResolver<'_> {
         let operand_arg = FuncCallArg {
             var_id: op.operand.var_id,
             value: operand.clone(),
+            range: operand.range,
         };
 
         // Get the return type of the operator
@@ -140,6 +143,7 @@ impl ExpressionResolver<'_> {
         let operand_arg = FuncCallArg {
             var_id: op.operand.var_id,
             value: operand.clone(),
+            range: operand.range,
         };
 
         // Get the return type of the operator

@@ -17,7 +17,8 @@
 pub mod builders;
 
 use kasl::{
-    CompilationState, NameSpace, ParserDeclStmt,
+    CompilationState, ParserDeclStmt,
+    builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
@@ -31,12 +32,12 @@ use kasl::{
 #[derive(Default)]
 pub struct TestContext {
     pub ec: ErrorCollector,
-    pub name_space: NameSpace,
     pub func_body_map: FuncBodyMap,
     pub op_body_map: OpBodyMap,
     pub comp_state: CompilationState,
     pub scope_graph: ScopeGraph,
     pub struct_graph: StructGraph,
+    pub builtin_registry: BuiltinRegistry,
 }
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
@@ -49,10 +50,10 @@ pub fn collect_global_decls(
 ) -> Result<(), Vec<ErrorRecord>> {
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut test_ctx.ec,
-        &mut test_ctx.name_space,
         &mut test_ctx.func_body_map,
         &mut test_ctx.op_body_map,
         &mut test_ctx.comp_state,
+        &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
         &mut test_ctx.struct_graph,
     );
@@ -73,10 +74,10 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
 pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut stmt_builder = StatementBuilder::new(
         &mut test_ctx.ec,
-        &mut test_ctx.name_space,
         &test_ctx.func_body_map,
         &test_ctx.op_body_map,
         &mut test_ctx.comp_state,
+        &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
     );
     stmt_builder.build_all();

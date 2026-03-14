@@ -33,7 +33,8 @@ pub struct ScopeRegistry {
     pub scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,
     global_scope_id: ScopeID,
-    next_id: usize,
+    next_scope_id: usize,
+    next_variable_id: usize,
 }
 
 impl Default for ScopeRegistry {
@@ -42,7 +43,8 @@ impl Default for ScopeRegistry {
             scopes: HashMap::new(),
             variables: HashMap::new(),
             global_scope_id: ScopeID(0),
-            next_id: 0,
+            next_scope_id: 0,
+            next_variable_id: 0,
         };
         // Create the global scope
         manager.global_scope_id = manager.create_scope(None, Range::zero());
@@ -68,9 +70,16 @@ impl ScopeRegistry {
 
     /// Generates a new `ScopeID` for a new scope.
     pub fn generate_scope_id(&mut self) -> ScopeID {
-        let id = self.next_id;
-        self.next_id += 1;
-        ScopeID(id)
+        let id = ScopeID(self.next_scope_id);
+        self.next_scope_id += 1;
+        id
+    }
+
+    /// Generates a new `VariableID` for a new variable.
+    pub fn generate_var_id(&mut self) -> VariableID {
+        let id = VariableID::new(self.next_variable_id);
+        self.next_variable_id += 1;
+        id
     }
 
     /// Creates a new scope with the given parent scope.
@@ -113,10 +122,12 @@ impl ScopeRegistry {
     }
 
     /// Registers a variable in the scope registry.
-    pub fn register_var(&mut self, var: ScopeVar, name: String, id: VariableID, scope: ScopeID) {
+    pub fn register_var(&mut self, var: ScopeVar, name: String, scope: ScopeID) -> VariableID {
+        let variable_id = self.generate_var_id();
         let target_scope = self.scopes.get_mut(&scope).unwrap();
-        target_scope.register_var(name, id);
-        self.variables.insert(id, var);
+        target_scope.register_var(name, variable_id);
+        self.variables.insert(variable_id, var);
+        variable_id
     }
 
     /// Returns the vector of all scope IDs.

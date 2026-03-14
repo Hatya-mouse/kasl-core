@@ -82,6 +82,16 @@ impl ErrorCollector {
         self.emit(EK::MissingArgLabel, range, phase, Sv::Error, Pl::None);
     }
 
+    pub fn arg_type_mismatch(&mut self, range: Range, phase: Phase, arg_name: &str) {
+        self.emit(
+            EK::ArgTypeMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(arg_name.to_string()),
+        );
+    }
+
     pub fn duplicate_func_name(&mut self, range: Range, phase: Phase, func_name: &str) {
         self.emit(
             EK::DuplicateFuncName,
@@ -117,6 +127,26 @@ impl ErrorCollector {
             phase,
             Sv::Error,
             Pl::Str(func_name.to_string()),
+        );
+    }
+
+    pub fn builtin_func_not_found(&mut self, range: Range, phase: Phase, func_name: String) {
+        self.emit(
+            EK::BuiltinFuncNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(func_name),
+        );
+    }
+
+    pub fn builtin_arg_type_mismatch(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::BuiltinArgTypeMismatch,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
         );
     }
 }

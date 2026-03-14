@@ -27,44 +27,38 @@ use std::collections::HashMap;
 pub struct FunctionContext {
     funcs: HashMap<FunctionID, Function>,
     member_functions: HashMap<StructID, HashMap<String, FunctionID>>,
-    static_functions: HashMap<StructID, HashMap<String, FunctionID>>,
     global_functions: HashMap<String, FunctionID>,
+    next_function_id: usize,
 }
 
 impl FunctionContext {
+    pub fn generate_function_id(&mut self) -> FunctionID {
+        let id = FunctionID::new(self.next_function_id);
+        self.next_function_id += 1;
+        id
+    }
+
     pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
         self.funcs.get(symbol_id).map(|func| func.return_type)
     }
 
-    pub fn register_member_func(
-        &mut self,
-        func: Function,
-        struct_id: StructID,
-        func_id: FunctionID,
-    ) {
+    pub fn register_member_func(&mut self, func: Function, struct_id: StructID) -> FunctionID {
+        let func_id = self.generate_function_id();
+        // Insert the function to the member functions map
         self.member_functions
             .entry(struct_id)
             .or_default()
             .insert(func.name.clone(), func_id);
         self.funcs.insert(func_id, func);
+        func_id
     }
 
-    pub fn register_static_func(
-        &mut self,
-        func: Function,
-        struct_id: StructID,
-        func_id: FunctionID,
-    ) {
-        self.static_functions
-            .entry(struct_id)
-            .or_default()
-            .insert(func.name.clone(), func_id);
-        self.funcs.insert(func_id, func);
-    }
-
-    pub fn register_global_func(&mut self, func: Function, func_id: FunctionID) {
+    pub fn register_global_func(&mut self, func: Function) -> FunctionID {
+        let func_id = self.generate_function_id();
+        // Insert the function to the global functions map
         self.global_functions.insert(func.name.clone(), func_id);
         self.funcs.insert(func_id, func);
+        func_id
     }
 
     pub fn get_global_func_by_name(&self, name: &str) -> Option<FunctionID> {

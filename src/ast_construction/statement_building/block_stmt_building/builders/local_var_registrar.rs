@@ -32,6 +32,7 @@ impl BlockStmtBuilder<'_> {
             self.ec,
             self.comp_state,
             self.scope_graph,
+            self.builtin_registry,
             current_scope_id,
             def_val,
         )?;
@@ -104,11 +105,9 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Register the variable in the scope
-        let var_id = self.name_space.generate_variable_id();
-        self.comp_state.scope_registry.register_var(
+        let var_id = self.comp_state.scope_registry.register_var(
             scope_var,
             name.to_string(),
-            var_id,
             current_scope_id,
         );
 

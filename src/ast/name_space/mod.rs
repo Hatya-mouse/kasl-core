@@ -21,37 +21,3 @@ mod symbol_path;
 pub use reserved_type_names::is_reserved_type_name;
 pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
-
-#[derive(Debug, Default)]
-pub struct NameSpace {
-    next_variable_id: usize,
-    next_struct_id: usize,
-    next_function_id: usize,
-    next_operator_id: usize,
-}
-
-impl NameSpace {
-    pub fn generate_variable_id(&mut self) -> VariableID {
-        let id = VariableID::new(self.next_variable_id);
-        self.next_variable_id += 1;
-        id
-    }
-
-    pub fn generate_struct_id(&mut self) -> StructID {
-        let id = StructID::new(self.next_struct_id);
-        self.next_struct_id += 1;
-        id
-    }
-
-    pub fn generate_function_id(&mut self) -> FunctionID {
-        let id = FunctionID::new(self.next_function_id);
-        self.next_function_id += 1;
-        id
-    }
-
-    pub fn generate_operator_id(&mut self) -> OperatorID {
-        let id = OperatorID::new(self.next_operator_id);
-        self.next_operator_id += 1;
-        id
-    }
-}

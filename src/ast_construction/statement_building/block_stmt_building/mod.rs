@@ -21,7 +21,8 @@ mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    CompilationState, NameSpace,
+    CompilationState,
+    builtin::BuiltinRegistry,
     error::ErrorCollector,
     scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -29,10 +30,10 @@ use crate::{
 
 pub struct BlockStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    name_space: &'a mut NameSpace,
     func_body_map: &'a FuncBodyMap,
     op_body_map: &'a OpBodyMap,
     comp_state: &'a mut CompilationState,
+    builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
 }
@@ -40,18 +41,18 @@ pub struct BlockStmtBuilder<'a> {
 impl<'a> BlockStmtBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        name_space: &'a mut NameSpace,
         func_body_map: &'a FuncBodyMap,
         op_body_map: &'a OpBodyMap,
         comp_state: &'a mut CompilationState,
+        builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            name_space,
             func_body_map,
             op_body_map,
             comp_state,
+            builtin_registry,
             scope_graph,
         }
     }

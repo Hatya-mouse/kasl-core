@@ -15,7 +15,8 @@
 //
 
 use crate::{
-    CompilationState, NameSpace, ParserDeclStmt,
+    CompilationState, ParserDeclStmt,
+    builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     scope_graph_analyzing::ScopeGraphAnalyzer,
@@ -28,20 +29,20 @@ use crate::{
 
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
     let mut ec = ErrorCollector::new();
-    let mut name_space = NameSpace::default();
     let mut func_body_map = FuncBodyMap::default();
     let mut op_body_map = OpBodyMap::default();
     let mut comp_state = CompilationState::default();
+    let builtin_registry = BuiltinRegistry::default();
     let mut scope_graph = ScopeGraph::default();
     let mut struct_graph = StructGraph::default();
 
     // 1. Collect global declarations, such as inputs, outputs, states, structs, struct fields and functions
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut ec,
-        &mut name_space,
         &mut func_body_map,
         &mut op_body_map,
         &mut comp_state,
+        &builtin_registry,
         &mut scope_graph,
         &mut struct_graph,
     );
@@ -54,10 +55,10 @@ pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<Erro
     // 3. Build the function bodies
     let mut stmt_builder = StatementBuilder::new(
         &mut ec,
-        &mut name_space,
         &func_body_map,
         &op_body_map,
         &mut comp_state,
+        &builtin_registry,
         &mut scope_graph,
     );
     stmt_builder.build_all();

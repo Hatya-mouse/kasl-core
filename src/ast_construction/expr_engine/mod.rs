@@ -23,14 +23,15 @@ pub use expr_resolver::ExpressionResolver;
 pub use l_value_resolver::LValueResolver;
 
 use crate::{
-    CompilationState, Expr, ExprToken, ScopeID, error::ErrorCollector, scope_manager::ScopeGraph,
-    type_registry::ResolvedType,
+    CompilationState, Expr, ExprToken, ScopeID, builtin::BuiltinRegistry, error::ErrorCollector,
+    scope_manager::ScopeGraph, type_registry::ResolvedType,
 };
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
     comp_state: &CompilationState,
     scope_graph: &mut ScopeGraph,
+    builtin_registry: &BuiltinRegistry,
     current_scope_id: ScopeID,
     raw_tokens: &[ExprToken],
 ) -> Option<Expr<ResolvedType>> {
@@ -39,6 +40,12 @@ pub fn resolve_expr(
     let expr = expr_builder.build(raw_tokens)?;
 
     // Resolve the type of the expression
-    let mut resolver = ExpressionResolver::new(ec, comp_state, scope_graph, current_scope_id);
+    let mut resolver = ExpressionResolver::new(
+        ec,
+        comp_state,
+        scope_graph,
+        builtin_registry,
+        current_scope_id,
+    );
     resolver.resolve_recursively(expr)
 }
