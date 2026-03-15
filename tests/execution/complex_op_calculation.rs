@@ -89,7 +89,7 @@ input in_val: Int = 0
 output out_val: Int = 0
 
 func main() {
-    out_val = in_val * 2
+    out_val = in_val * 100
 }
 "#;
     let parsed = parse_expr(code);
