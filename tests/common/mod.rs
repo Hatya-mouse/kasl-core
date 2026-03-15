@@ -15,14 +15,14 @@
 //
 
 pub mod builders;
-
-use std::mem;
+use std::{collections::HashSet, mem, path::PathBuf};
 
 use kasl::{
     CompilationState, ParserDeclStmt, ProgramContext,
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
+    compilation_data::CompilerConfig,
     error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
@@ -39,6 +39,9 @@ pub struct TestContext {
     pub comp_state: CompilationState,
     pub scope_graph: ScopeGraph,
     pub builtin_registry: BuiltinRegistry,
+
+    pub comp_config: CompilerConfig,
+    pub imported_paths: HashSet<PathBuf>,
 }
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
@@ -53,8 +56,10 @@ pub fn collect_global_decls(
         &mut test_ctx.ec,
         &mut test_ctx.prog_ctx,
         &mut test_ctx.comp_state,
+        &test_ctx.comp_config,
         &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
+        &mut test_ctx.imported_paths,
     );
     global_decl_collector.process(statements);
     test_ctx.ec.as_result()
