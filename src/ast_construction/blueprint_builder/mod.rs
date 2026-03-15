@@ -45,14 +45,21 @@ impl<'a> BlueprintBuilder<'a> {
                         .comp_state
                         .type_registry
                         .get_type_size(&scope_var.value_type);
-                    blueprint.add_input(input_size);
+                    blueprint.add_input(input_size, scope_var.value_type);
                 }
                 VariableKind::Output => {
                     let output_size = self
                         .comp_state
                         .type_registry
                         .get_type_size(&scope_var.value_type);
-                    blueprint.add_output(output_size);
+                    blueprint.add_output(output_size, scope_var.value_type);
+                }
+                VariableKind::State => {
+                    let state_size = self
+                        .comp_state
+                        .type_registry
+                        .get_type_size(&scope_var.value_type);
+                    blueprint.add_state(state_size, scope_var.value_type);
                 }
                 _ => (),
             }

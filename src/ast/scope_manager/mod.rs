@@ -19,7 +19,7 @@ mod scope;
 mod scope_graph;
 mod scope_var;
 
-pub use io_blueprint::IOBlueprint;
+pub use io_blueprint::{BlueprintItem, IOBlueprint};
 pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};

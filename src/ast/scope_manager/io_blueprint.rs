@@ -14,18 +14,42 @@
 // limitations under the License.
 //
 
+use crate::type_registry::ResolvedType;
+
 #[derive(Default)]
 pub struct IOBlueprint {
-    inputs: Vec<usize>,
-    outputs: Vec<usize>,
+    inputs: Vec<BlueprintItem>,
+    outputs: Vec<BlueprintItem>,
+    states: Vec<BlueprintItem>,
+}
+
+pub struct BlueprintItem {
+    pub size: usize,
+    pub value_type: ResolvedType,
 }
 
 impl IOBlueprint {
-    pub fn add_input(&mut self, size: usize) {
-        self.inputs.push(size);
+    pub fn add_input(&mut self, size: usize, value_type: ResolvedType) {
+        self.inputs.push(BlueprintItem { size, value_type });
     }
 
-    pub fn add_output(&mut self, size: usize) {
-        self.outputs.push(size);
+    pub fn add_output(&mut self, size: usize, value_type: ResolvedType) {
+        self.outputs.push(BlueprintItem { size, value_type });
+    }
+
+    pub fn add_state(&mut self, size: usize, value_type: ResolvedType) {
+        self.states.push(BlueprintItem { size, value_type });
+    }
+
+    pub fn get_inputs(&self) -> &[BlueprintItem] {
+        &self.inputs
+    }
+
+    pub fn get_outputs(&self) -> &[BlueprintItem] {
+        &self.outputs
+    }
+
+    pub fn get_states(&self) -> &[BlueprintItem] {
+        &self.states
     }
 }

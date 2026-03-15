@@ -18,7 +18,7 @@ mod func_translator;
 
 use crate::{
     CompilationState, FunctionID, backend::func_translator::FuncTranslator,
-    builtin::BuiltinRegistry,
+    builtin::BuiltinRegistry, scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{
     AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
@@ -59,9 +59,10 @@ impl Backend {
         &mut self,
         comp_state: &CompilationState,
         builtin_registry: &BuiltinRegistry,
+        blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) -> Result<*const u8, String> {
-        self.translate(comp_state, builtin_registry, entry_point);
+        self.translate(comp_state, builtin_registry, blueprint, entry_point);
 
         let id = self
             .module
@@ -82,30 +83,34 @@ impl Backend {
         &mut self,
         comp_state: &CompilationState,
         builtin_registry: &BuiltinRegistry,
+        blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) {
-        self.ctx
-            .func
-            .signature
-            .returns
-            .push(AbiParam::new(types::I32));
+        // Add parameter for the input and output pointers
+        self.ctx.func.signature.params.extend(&[
+            AbiParam::new(types::I32),
+            AbiParam::new(types::I32),
+            AbiParam::new(types::I32),
+        ]);
 
         // Create a function builder
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_ctx);
+
         // Create an entry block and and switch to the block
         let entry_block = builder.create_block();
+        builder.append_block_params_for_function_params(entry_block);
+
         builder.switch_to_block(entry_block);
         builder.seal_block(entry_block);
 
-        // Create a FuncTranslator and translate the function
+        // Create a return block
         let return_block = builder.create_block();
+        builder.append_block_param(return_block, types::I32);
+
+        // Create a FuncTranslator and translate the function
         let mut translator =
             FuncTranslator::new(builder, &self.module, comp_state, builtin_registry);
-        translator
-            .builder
-            .append_block_param(return_block, types::I32);
-
-        translator.translate(entry_point, return_block);
+        translator.translate(entry_point, blueprint, entry_block, return_block);
 
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);

@@ -104,7 +104,13 @@ pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
     blueprint_builder.build()
 }
 
-pub fn execute_program(test_ctx: &mut TestContext, inputs: &[*mut f32]) -> i32 {
+pub fn execute_program(
+    test_ctx: &mut TestContext,
+    blueprint: &IOBlueprint,
+    inputs: &[*mut f32],
+    outputs: &[*mut f32],
+    states: &[*mut f32],
+) -> i32 {
     let mut backend = Backend::default();
     let main_func_id = test_ctx
         .comp_state
@@ -115,17 +121,24 @@ pub fn execute_program(test_ctx: &mut TestContext, inputs: &[*mut f32]) -> i32 {
         .compile(
             &test_ctx.comp_state,
             &test_ctx.builtin_registry,
+            blueprint,
             &main_func_id,
         )
         .unwrap();
 
-    unsafe { run_code(code, inputs.as_ptr()) }
+    unsafe { run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr()) }
 }
 
-unsafe fn run_code<O>(code_ptr: *const u8, input: *const *mut f32) -> O {
+unsafe fn run_code<O>(
+    code_ptr: *const u8,
+    input: *const *mut f32,
+    output: *const *mut f32,
+    state: *const *mut f32,
+) -> O {
     unsafe {
-        let code_fn: fn(*const *mut f32) -> O = mem::transmute(code_ptr);
-        code_fn(input)
+        let code_fn: fn(*const *mut f32, *const *mut f32, *const *mut f32) -> O =
+            mem::transmute(code_ptr);
+        code_fn(input, output, state)
     }
 }
 
