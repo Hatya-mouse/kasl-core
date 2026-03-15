@@ -21,7 +21,7 @@ use crate::{
     builtin::BuiltinRegistry, scope_manager::IOBlueprint,
 };
 use cranelift::prelude::{
-    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
+    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder,
 };
 use cranelift_codegen::settings;
 use cranelift_jit::{JITBuilder, JITModule};
@@ -87,10 +87,11 @@ impl Backend {
         entry_point: &FunctionID,
     ) {
         // Add parameter for the input and output pointers
+        let pointer_type = self.module.target_config().pointer_type();
         self.ctx.func.signature.params.extend(&[
-            AbiParam::new(types::I32),
-            AbiParam::new(types::I32),
-            AbiParam::new(types::I32),
+            AbiParam::new(pointer_type),
+            AbiParam::new(pointer_type),
+            AbiParam::new(pointer_type),
         ]);
 
         // Create a function builder

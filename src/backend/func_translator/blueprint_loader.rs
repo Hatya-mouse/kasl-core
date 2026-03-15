@@ -38,8 +38,12 @@ impl FuncTranslator<'_> {
         // INPUTS
         let mut input_offset: usize = 0;
         for input_item in blueprint.get_inputs() {
-            let val =
-                self.load_blueprint_item(pointer_type, input_ptr_ptr, input_item, input_offset);
+            let val = self.load_blueprint_item(
+                pointer_type,
+                input_ptr_ptr,
+                input_item,
+                input_offset as i32,
+            );
             self.register_translated_var(input_item.id, input_item.value_type, val);
             input_offset += input_item.size;
         }
@@ -47,8 +51,12 @@ impl FuncTranslator<'_> {
         // OUTPUTS
         let mut output_offset: usize = 0;
         for output_item in blueprint.get_outputs() {
-            let val =
-                self.load_blueprint_item(pointer_type, output_ptr_ptr, output_item, output_offset);
+            let val = self.load_blueprint_item(
+                pointer_type,
+                output_ptr_ptr,
+                output_item,
+                output_offset as i32,
+            );
             self.register_translated_var(output_item.id, output_item.value_type, val);
             output_offset += output_item.size;
         }
@@ -56,8 +64,12 @@ impl FuncTranslator<'_> {
         // STATES
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
-            let val =
-                self.load_blueprint_item(pointer_type, state_ptr_ptr, state_item, state_offset);
+            let val = self.load_blueprint_item(
+                pointer_type,
+                state_ptr_ptr,
+                state_item,
+                state_offset as i32,
+            );
             self.register_translated_var(state_item.id, state_item.value_type, val);
             state_offset += state_item.size;
         }
@@ -68,13 +80,13 @@ impl FuncTranslator<'_> {
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
         item: &BlueprintItem,
-        offset: usize,
+        offset: i32,
     ) -> ir::Value {
         // Get the pointer to the input value by the pointer to the pointers
         let ptr = self
             .builder
             .ins()
-            .load(pointer_type, MemFlags::new(), ptr_ptr, offset as i32);
+            .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
         // Load the input value
         self.builder.ins().load(
