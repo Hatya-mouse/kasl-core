@@ -14,10 +14,12 @@
 // limitations under the License.
 //
 
+mod io_blueprint;
 mod scope;
 mod scope_graph;
 mod scope_var;
 
+pub use io_blueprint::IOBlueprint;
 pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
@@ -59,8 +61,8 @@ impl ScopeRegistry {
     }
 
     /// Returns a mutable reference to the global scope.
-    pub fn get_global_scope_mut(&mut self) -> &mut Scope {
-        self.scopes.get_mut(&self.global_scope_id).unwrap()
+    pub fn get_global_scope(&self) -> &Scope {
+        self.scopes.get(&self.global_scope_id).unwrap()
     }
 
     /// Returns a reference to the scope with the given `ScopeID`.

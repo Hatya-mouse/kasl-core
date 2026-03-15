@@ -21,12 +21,13 @@ use std::mem;
 use kasl::{
     CompilationState, ParserDeclStmt,
     backend::Backend,
+    blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorKind, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     scope_graph_analyzing::ScopeGraphAnalyzer,
-    scope_manager::ScopeGraph,
+    scope_manager::{IOBlueprint, ScopeGraph},
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
     symbol_table::{FuncBodyMap, OpBodyMap},
@@ -98,7 +99,12 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
     test_ctx.ec.as_result()
 }
 
-pub fn execute_program(test_ctx: &mut TestContext) -> i32 {
+pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
+    let blueprint_builder = BlueprintBuilder::new(&test_ctx.comp_state);
+    blueprint_builder.build()
+}
+
+pub fn execute_program(test_ctx: &mut TestContext, inputs: &[*mut f32]) -> i32 {
     let mut backend = Backend::default();
     let main_func_id = test_ctx
         .comp_state
@@ -113,13 +119,13 @@ pub fn execute_program(test_ctx: &mut TestContext) -> i32 {
         )
         .unwrap();
 
-    unsafe { run_code::<i32>(code) }
+    unsafe { run_code(code, inputs.as_ptr()) }
 }
 
-unsafe fn run_code<O>(code_ptr: *const u8) -> O {
+unsafe fn run_code<O>(code_ptr: *const u8, input: *const *mut f32) -> O {
     unsafe {
-        let code_fn: fn() -> O = mem::transmute(code_ptr);
-        code_fn()
+        let code_fn: fn(*const *mut f32) -> O = mem::transmute(code_ptr);
+        code_fn(input)
     }
 }
 

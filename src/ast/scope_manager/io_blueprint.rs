@@ -14,13 +14,18 @@
 // limitations under the License.
 //
 
-pub mod blueprint_builder;
-pub mod error;
-pub mod expr_engine;
-pub mod global_decl_collection;
-pub mod program_builder;
-pub mod scope_graph_analyzing;
-pub mod statement_building;
-pub mod struct_graph_analyzing;
+#[derive(Default)]
+pub struct IOBlueprint {
+    inputs: Vec<usize>,
+    outputs: Vec<usize>,
+}
 
-pub use program_builder::construct_program;
+impl IOBlueprint {
+    pub fn add_input(&mut self, size: usize) {
+        self.inputs.push(size);
+    }
+
+    pub fn add_output(&mut self, size: usize) {
+        self.outputs.push(size);
+    }
+}

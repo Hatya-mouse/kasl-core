@@ -96,6 +96,6 @@ func main() -> Int {
     analyze_scopes(&mut test_ctx).unwrap();
 
     // Compile the program
-    let result = execute_program(&mut test_ctx);
+    let result = execute_program(&mut test_ctx, &[]);
     println!("RESULT: {}", result);
 }
