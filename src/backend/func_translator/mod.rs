@@ -28,7 +28,7 @@ use crate::{
 };
 use cranelift::prelude::{FunctionBuilder, Variable};
 use cranelift_jit::JITModule;
-use std::collections::HashMap;
+use std::{any::Any, collections::HashMap};
 
 pub struct FuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
@@ -72,6 +72,11 @@ impl<'a> FuncTranslator<'a> {
 
         // Get the input and state variables from the blueprint
         self.load_blueprint_access(input_ptr_ptr, state_ptr_ptr, blueprint);
+
+        // Define the output variables
+        for output_item in blueprint.get_outputs() {
+            self.declare_var(output_item.id, &output_item.value_type);
+        }
 
         // Get the entry point function node
         let Some(func_block) = self
