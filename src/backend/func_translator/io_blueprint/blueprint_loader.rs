@@ -27,7 +27,6 @@ impl FuncTranslator<'_> {
     pub fn load_blueprint_access(
         &mut self,
         input_ptr_ptr: ir::Value,
-        output_ptr_ptr: ir::Value,
         state_ptr_ptr: ir::Value,
         blueprint: &IOBlueprint,
     ) {
@@ -46,19 +45,6 @@ impl FuncTranslator<'_> {
             );
             self.register_translated_var(input_item.id, input_item.value_type, val);
             input_offset += input_item.size;
-        }
-
-        // OUTPUTS
-        let mut output_offset: usize = 0;
-        for output_item in blueprint.get_outputs() {
-            let val = self.load_blueprint_item(
-                pointer_type,
-                output_ptr_ptr,
-                output_item,
-                output_offset as i32,
-            );
-            self.register_translated_var(output_item.id, output_item.value_type, val);
-            output_offset += output_item.size;
         }
 
         // STATES

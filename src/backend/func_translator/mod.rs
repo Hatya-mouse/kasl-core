@@ -71,7 +71,7 @@ impl<'a> FuncTranslator<'a> {
         let state_ptr_ptr = block_params[2];
 
         // Get the input and state variables from the blueprint
-        self.load_blueprint_access(input_ptr_ptr, output_ptr_ptr, state_ptr_ptr, blueprint);
+        self.load_blueprint_access(input_ptr_ptr, state_ptr_ptr, blueprint);
 
         // Get the entry point function node
         let Some(func_block) = self
