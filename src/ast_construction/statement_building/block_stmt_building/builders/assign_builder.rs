@@ -33,8 +33,8 @@ impl BlockStmtBuilder<'_> {
         // Resolve the target variable
         let mut l_value_resolver = LValueResolver::new(
             self.ec,
-            &self.comp_state.scope_registry,
-            &self.comp_state.type_registry,
+            &self.prog_ctx.scope_registry,
+            &self.prog_ctx.type_registry,
             current_scope_id,
         );
 
@@ -43,7 +43,7 @@ impl BlockStmtBuilder<'_> {
 
         // Check if the LValue is a writable variable
         if let Some(target_var) = self
-            .comp_state
+            .prog_ctx
             .scope_registry
             .get_var_by_id(&target_l_value.var_id)
             && matches!(
@@ -62,7 +62,7 @@ impl BlockStmtBuilder<'_> {
         // Resolve the expression
         let resolved_value = resolve_expr(
             self.ec,
-            self.comp_state,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
             current_scope_id,
@@ -74,10 +74,10 @@ impl BlockStmtBuilder<'_> {
             self.ec.assign_type_mismatch(
                 stmt_range,
                 Ph::StatementCollection,
-                self.comp_state
+                self.prog_ctx
                     .type_registry
                     .format_type(&target_l_value.value_type),
-                self.comp_state
+                self.prog_ctx
                     .type_registry
                     .format_type(&resolved_value.value_type),
             );

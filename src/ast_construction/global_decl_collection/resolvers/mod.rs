@@ -20,6 +20,8 @@ mod func_builder;
 mod func_decl_resolver;
 /// Resolves the default value and stores it in the global scope with the given kind of variable.
 mod global_var_registrar;
+/// Resolves import statements.
+mod import_resolver;
 /// Resolves operators and stores them in the global scope.
 mod op_resolver;
 /// Resolves struct declarations and stores them in the global scope.

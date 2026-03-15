@@ -30,7 +30,7 @@ impl BlockStmtBuilder<'_> {
     ) -> Option<Expr<ResolvedType>> {
         let resolved_def_val = resolve_expr(
             self.ec,
-            self.comp_state,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
             current_scope_id,
@@ -40,7 +40,7 @@ impl BlockStmtBuilder<'_> {
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
             let Some(resolved_type_annotation) = self
-                .comp_state
+                .prog_ctx
                 .type_registry
                 .resolve_type_path(type_annotation)
             else {
@@ -57,10 +57,10 @@ impl BlockStmtBuilder<'_> {
                 self.ec.type_annotation_mismatch(
                     stmt_range,
                     Ph::StatementCollection,
-                    self.comp_state
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_type_annotation),
-                    self.comp_state
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_def_val.value_type),
                 );
@@ -94,18 +94,14 @@ impl BlockStmtBuilder<'_> {
         };
 
         // Check if the name is already in use in this scope
-        if self
-            .comp_state
-            .scope_registry
-            .has_var(current_scope_id, name)
-        {
+        if self.prog_ctx.scope_registry.has_var(current_scope_id, name) {
             self.ec
                 .duplicate_var_name(stmt_range, Ph::StatementCollection, name);
             return None;
         }
 
         // Register the variable in the scope
-        let var_id = self.comp_state.scope_registry.register_var(
+        let var_id = self.prog_ctx.scope_registry.register_var(
             scope_var,
             name.to_string(),
             current_scope_id,

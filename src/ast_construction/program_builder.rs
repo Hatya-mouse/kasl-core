@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    CompilationState, ParserDeclStmt,
+    CompilationState, ParserDeclStmt, ProgramContext,
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
@@ -23,48 +23,42 @@ use crate::{
     scope_manager::ScopeGraph,
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
-    symbol_table::{FuncBodyMap, OpBodyMap},
-    type_registry::StructGraph,
 };
 
 pub fn construct_program(statements: Vec<ParserDeclStmt>) -> Result<(), Vec<ErrorRecord>> {
     let mut ec = ErrorCollector::new();
-    let mut func_body_map = FuncBodyMap::default();
-    let mut op_body_map = OpBodyMap::default();
+    let mut prog_ctx = ProgramContext::default();
     let mut comp_state = CompilationState::default();
     let builtin_registry = BuiltinRegistry::default();
     let mut scope_graph = ScopeGraph::default();
-    let mut struct_graph = StructGraph::default();
 
     // 1. Collect global declarations, such as inputs, outputs, states, structs, struct fields and functions
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut ec,
-        &mut func_body_map,
-        &mut op_body_map,
+        &mut prog_ctx,
         &mut comp_state,
         &builtin_registry,
         &mut scope_graph,
-        &mut struct_graph,
     );
     global_decl_collector.process(&statements);
 
     // 2. Analyze the struct graph
-    let mut struct_graph_analyzer = StructGraphAnalyzer::new(&mut ec, &comp_state, &struct_graph);
+    let mut struct_graph_analyzer =
+        StructGraphAnalyzer::new(&mut ec, &prog_ctx, &comp_state.struct_graph);
     struct_graph_analyzer.analyze_all();
 
     // 3. Build the function bodies
     let mut stmt_builder = StatementBuilder::new(
         &mut ec,
-        &func_body_map,
-        &op_body_map,
-        &mut comp_state,
+        &mut prog_ctx,
+        &comp_state,
         &builtin_registry,
         &mut scope_graph,
     );
     stmt_builder.build_all();
 
     // 4. Analyze the scope graph
-    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &comp_state, &mut scope_graph);
+    let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(&mut ec, &prog_ctx, &mut scope_graph);
     scope_graph_analyzer.analyze_all();
 
     ec.as_result()

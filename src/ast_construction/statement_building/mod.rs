@@ -19,18 +19,14 @@ mod block_stmt_building;
 pub use block_stmt_building::BlockStmtBuilder;
 
 use crate::{
-    CompilationState,
-    builtin::BuiltinRegistry,
-    error::ErrorCollector,
+    CompilationState, ProgramContext, builtin::BuiltinRegistry, error::ErrorCollector,
     scope_manager::ScopeGraph,
-    symbol_table::{FuncBodyMap, OpBodyMap},
 };
 
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    func_body_map: &'a FuncBodyMap,
-    op_body_map: &'a OpBodyMap,
-    comp_state: &'a mut CompilationState,
+    prog_ctx: &'a mut ProgramContext,
+    comp_state: &'a CompilationState,
     builtin_registry: &'a BuiltinRegistry,
 
     scope_graph: &'a mut ScopeGraph,
@@ -39,16 +35,14 @@ pub struct StatementBuilder<'a> {
 impl<'a> StatementBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        func_body_map: &'a FuncBodyMap,
-        op_body_map: &'a OpBodyMap,
-        comp_state: &'a mut CompilationState,
+        prog_ctx: &'a mut ProgramContext,
+        comp_state: &'a CompilationState,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
     ) -> Self {
         Self {
             ec,
-            func_body_map,
-            op_body_map,
+            prog_ctx,
             comp_state,
             builtin_registry,
             scope_graph,
@@ -57,16 +51,15 @@ impl<'a> StatementBuilder<'a> {
 
     pub fn build_all(&mut self) {
         // Get all the IDs
-        let func_ids = self.comp_state.func_ctx.func_ids();
-        let infix_ids = self.comp_state.op_ctx.all_infix_ids();
-        let prefix_ids = self.comp_state.op_ctx.all_prefix_ids();
-        let postfix_ids = self.comp_state.op_ctx.all_postfix_ids();
+        let func_ids = self.prog_ctx.func_ctx.func_ids();
+        let infix_ids = self.prog_ctx.op_ctx.all_infix_ids();
+        let prefix_ids = self.prog_ctx.op_ctx.all_prefix_ids();
+        let postfix_ids = self.prog_ctx.op_ctx.all_postfix_ids();
 
         // Create a block statement builder
         let mut func_stmt_builder = BlockStmtBuilder::new(
             self.ec,
-            self.func_body_map,
-            self.op_body_map,
+            self.prog_ctx,
             self.comp_state,
             self.builtin_registry,
             self.scope_graph,

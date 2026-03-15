@@ -18,25 +18,18 @@ use crate::{FunctionID, OperatorID, ScopeID, statement_building::BlockStmtBuilde
 
 impl BlockStmtBuilder<'_> {
     pub fn build_func_body(&mut self, func_id: FunctionID) {
-        let mut resolved_stmts = Vec::new();
-        if let Some(body) = self.func_body_map.get_body(&func_id) {
-            for stmt in body {
-                // Get a reference to the function
-                let Some(func) = self.comp_state.func_ctx.get_func(&func_id) else {
-                    continue;
-                };
+        // Get a reference to the function
+        let Some(func) = self.prog_ctx.func_ctx.get_func(&func_id) else {
+            return;
+        };
+        let Some(body) = self.comp_state.func_body_map.get_body(&func_id) else {
+            return;
+        };
 
-                // Build the statements in the function
-                let Some(resolved_stmt) =
-                    self.build_stmt(stmt, func.block.scope_id, func.return_type)
-                else {
-                    continue;
-                };
-                resolved_stmts.push(resolved_stmt);
-            }
-        }
+        // Build the statements in the function
+        let resolved_stmts = self.build_statements(body, func.block.scope_id, func.return_type);
 
-        if let Some(func) = self.comp_state.func_ctx.get_func_mut(&func_id) {
+        if let Some(func) = self.prog_ctx.func_ctx.get_func_mut(&func_id) {
             // Set the statement to the block
             func.block.set_stmt(resolved_stmts);
             // Add a function edge to the scope graph
@@ -47,25 +40,19 @@ impl BlockStmtBuilder<'_> {
     }
 
     pub fn build_infix_body(&mut self, op_id: OperatorID) {
-        let mut resolved_stmts = Vec::new();
-        if let Some(body) = self.op_body_map.get_body(&op_id) {
-            for stmt in body {
-                // Get a reference to the operator
-                let Some(op) = self.comp_state.op_ctx.get_infix_op(&op_id) else {
-                    continue;
-                };
+        // Get a reference to the operator
+        let Some(op) = self.prog_ctx.op_ctx.get_infix_op(&op_id) else {
+            return;
+        };
+        let Some(body) = self.comp_state.op_body_map.get_body(&op_id) else {
+            return;
+        };
 
-                // Build the statements in the infix func
-                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
-                else {
-                    continue;
-                };
-                resolved_stmts.push(resolved_stmt);
-            }
-        }
+        // Build the statements in the operator
+        let resolved_stmts = self.build_statements(body, op.block.scope_id, op.return_type);
 
         // Set the statement to the block
-        if let Some(op) = self.comp_state.op_ctx.get_infix_op_mut(&op_id) {
+        if let Some(op) = self.prog_ctx.op_ctx.get_infix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
             // Add an operator edge to the scope graph
             let op_scope = op.block.scope_id;
@@ -74,26 +61,19 @@ impl BlockStmtBuilder<'_> {
     }
 
     pub fn build_prefix_body(&mut self, op_id: OperatorID) {
-        // Get the ScopeID of the block
-        let mut resolved_stmts = Vec::new();
-        if let Some(body) = self.op_body_map.get_body(&op_id) {
-            for stmt in body {
-                // Get a reference to the operator
-                let Some(op) = self.comp_state.op_ctx.get_prefix_op(&op_id) else {
-                    continue;
-                };
+        // Get a reference to the operator
+        let Some(op) = self.prog_ctx.op_ctx.get_prefix_op(&op_id) else {
+            return;
+        };
+        let Some(body) = self.comp_state.op_body_map.get_body(&op_id) else {
+            return;
+        };
 
-                // Build the statements in the prefix func
-                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
-                else {
-                    continue;
-                };
-                resolved_stmts.push(resolved_stmt);
-            }
-        }
+        // Build the statements in the operator
+        let resolved_stmts = self.build_statements(body, op.block.scope_id, op.return_type);
 
         // Set the statement to the block
-        if let Some(op) = self.comp_state.op_ctx.get_prefix_op_mut(&op_id) {
+        if let Some(op) = self.prog_ctx.op_ctx.get_prefix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
             // Add an operator edge to the scope graph
             let op_scope = op.block.scope_id;
@@ -102,26 +82,19 @@ impl BlockStmtBuilder<'_> {
     }
 
     pub fn build_postfix_body(&mut self, op_id: OperatorID) {
-        // Get the ScopeID of the block
-        let mut resolved_stmts = Vec::new();
-        if let Some(body) = self.op_body_map.get_body(&op_id) {
-            for stmt in body {
-                // Get a reference to the operator
-                let Some(op) = self.comp_state.op_ctx.get_postfix_op(&op_id) else {
-                    continue;
-                };
+        // Get a reference to the operator
+        let Some(op) = self.prog_ctx.op_ctx.get_postfix_op(&op_id) else {
+            return;
+        };
+        let Some(body) = self.comp_state.op_body_map.get_body(&op_id) else {
+            return;
+        };
 
-                // Build the statements in the postfix func
-                let Some(resolved_stmt) = self.build_stmt(stmt, op.block.scope_id, op.return_type)
-                else {
-                    continue;
-                };
-                resolved_stmts.push(resolved_stmt);
-            }
-        }
+        // Build the statements in the operator
+        let resolved_stmts = self.build_statements(body, op.block.scope_id, op.return_type);
 
         // Set the statement to the block
-        if let Some(op) = self.comp_state.op_ctx.get_postfix_op_mut(&op_id) {
+        if let Some(op) = self.prog_ctx.op_ctx.get_postfix_op_mut(&op_id) {
             op.block.set_stmt(resolved_stmts);
             // Add an operator edge to the scope graph
             let op_scope = op.block.scope_id;
@@ -131,7 +104,7 @@ impl BlockStmtBuilder<'_> {
 
     fn add_func_scope_edge(&mut self, func_scope: ScopeID, requires_return: bool) {
         // Register the function to the scope graph
-        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
         // Add an edge from the global scope to the function
         self.scope_graph.add_edge(global_scope_id, func_scope);
         // Mark the function scope as requires return

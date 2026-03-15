@@ -23,6 +23,7 @@ use crate::{
 impl<'a> GlobalDeclCollector<'a> {
     pub fn process_stmt(&mut self, stmt: &'a ParserDeclStmt) {
         match &stmt.kind {
+            ParserDeclStmtKind::Import { path } => self.resolve_import(path, stmt.range),
             ParserDeclStmtKind::Input {
                 name,
                 value_type,

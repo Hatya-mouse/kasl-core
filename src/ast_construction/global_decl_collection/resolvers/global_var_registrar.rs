@@ -28,10 +28,10 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) -> Option<Expr<ResolvedType>> {
         // Resolve the default value expression
-        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
         let resolved_def_val = resolve_expr(
             self.ec,
-            self.comp_state,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
             global_scope_id,
@@ -40,10 +40,7 @@ impl GlobalDeclCollector<'_> {
 
         // Resolve the type annotation if provided
         if let Some(path) = type_annotation {
-            let resolved_type_annotation = match self
-                .comp_state
-                .type_registry
-                .resolve_type_path(path)
+            let resolved_type_annotation = match self.prog_ctx.type_registry.resolve_type_path(path)
             {
                 Some(ty) => ty,
                 None => {
@@ -58,10 +55,10 @@ impl GlobalDeclCollector<'_> {
                 self.ec.type_annotation_mismatch(
                     decl_range,
                     Ph::GlobalDeclCollection,
-                    self.comp_state
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_type_annotation),
-                    self.comp_state
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_def_val.value_type),
                 );
@@ -88,14 +85,10 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Get the global scope ID
-        let global_scope_id = self.comp_state.scope_registry.get_global_scope_id();
+        let global_scope_id = self.prog_ctx.scope_registry.get_global_scope_id();
 
         // Check if the name is already in use in this scope
-        if self
-            .comp_state
-            .scope_registry
-            .has_var(global_scope_id, name)
-        {
+        if self.prog_ctx.scope_registry.has_var(global_scope_id, name) {
             self.ec
                 .duplicate_var_name(decl_range, Ph::StatementCollection, name);
             return;
@@ -109,7 +102,7 @@ impl GlobalDeclCollector<'_> {
             range: decl_range,
             var_kind,
         };
-        self.comp_state
+        self.prog_ctx
             .scope_registry
             .register_var(var, name.to_string(), global_scope_id);
     }

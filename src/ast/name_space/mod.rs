@@ -14,10 +14,12 @@
 // limitations under the License.
 //
 
+mod import_path;
 mod reserved_type_names;
 mod symbol_id;
 mod symbol_path;
 
+pub use import_path::ImportPath;
 pub use reserved_type_names::is_reserved_type_name;
 pub use symbol_id::{FunctionID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};

@@ -16,7 +16,7 @@
 
 use crate::{
     Expr, InfixOperatorProperties, PostfixOperatorProperties, PrefixOperatorProperties, Range,
-    SymbolPath,
+    SymbolPath, name_space::ImportPath,
 };
 use std::fmt::Display;
 
@@ -31,7 +31,7 @@ pub struct ParserDeclStmt {
     pub kind: ParserDeclStmtKind,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ParserScopeStmt {
     pub range: Range,
     pub kind: ParserScopeStmtKind,
@@ -39,6 +39,9 @@ pub struct ParserScopeStmt {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ParserDeclStmtKind {
+    Import {
+        path: ImportPath,
+    },
     FuncDecl {
         is_static: bool,
         name: String,
@@ -100,6 +103,7 @@ pub enum ParserDeclStmtKind {
 impl Display for ParserDeclStmtKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            ParserDeclStmtKind::Import { .. } => write!(f, "import"),
             ParserDeclStmtKind::FuncDecl { .. } => write!(f, "func"),
             ParserDeclStmtKind::Input { .. } => write!(f, "input"),
             ParserDeclStmtKind::Output { .. } => write!(f, "output"),
@@ -115,7 +119,7 @@ impl Display for ParserDeclStmtKind {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum ParserScopeStmtKind {
     Block {
         statements: Vec<ParserScopeStmt>,
@@ -162,7 +166,7 @@ pub struct ParserInputAttribute {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ParserFuncCallArg {
     pub label: Option<String>,
     pub value: Vec<ExprToken>,
@@ -178,20 +182,20 @@ pub struct ParserFuncParam {
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ParserIfArm {
     pub condition: Vec<ExprToken>,
     pub body: Vec<ParserScopeStmt>,
     pub range: Range,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct ExprToken {
     pub range: Range,
     pub kind: ExprTokenKind,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub enum ExprTokenKind {
     IntLiteral(i32),
     FloatLiteral(f32),

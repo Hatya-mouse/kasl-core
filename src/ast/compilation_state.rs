@@ -15,13 +15,22 @@
 //
 
 use crate::{
-    OperatorContext, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
+    OperatorContext, ScopeRegistry,
+    symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
+    type_registry::{StructGraph, TypeRegistry},
 };
 
 #[derive(Debug, Default, serde::Serialize)]
-pub struct CompilationState {
+pub struct ProgramContext {
     pub func_ctx: FunctionContext,
     pub op_ctx: OperatorContext,
     pub scope_registry: ScopeRegistry,
     pub type_registry: TypeRegistry,
+}
+
+#[derive(Debug, Default)]
+pub struct CompilationState {
+    pub func_body_map: FuncBodyMap,
+    pub op_body_map: OpBodyMap,
+    pub struct_graph: StructGraph,
 }

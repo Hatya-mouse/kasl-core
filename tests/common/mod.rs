@@ -19,7 +19,7 @@ pub mod builders;
 use std::mem;
 
 use kasl::{
-    CompilationState, ParserDeclStmt,
+    CompilationState, ParserDeclStmt, ProgramContext,
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
@@ -30,18 +30,14 @@ use kasl::{
     scope_manager::{IOBlueprint, ScopeGraph},
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
-    symbol_table::{FuncBodyMap, OpBodyMap},
-    type_registry::StructGraph,
 };
 
 #[derive(Default)]
 pub struct TestContext {
     pub ec: ErrorCollector,
-    pub func_body_map: FuncBodyMap,
-    pub op_body_map: OpBodyMap,
+    pub prog_ctx: ProgramContext,
     pub comp_state: CompilationState,
     pub scope_graph: ScopeGraph,
-    pub struct_graph: StructGraph,
     pub builtin_registry: BuiltinRegistry,
 }
 
@@ -55,12 +51,10 @@ pub fn collect_global_decls(
 ) -> Result<(), Vec<ErrorRecord>> {
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut test_ctx.ec,
-        &mut test_ctx.func_body_map,
-        &mut test_ctx.op_body_map,
+        &mut test_ctx.prog_ctx,
         &mut test_ctx.comp_state,
         &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
-        &mut test_ctx.struct_graph,
     );
     global_decl_collector.process(statements);
     test_ctx.ec.as_result()
@@ -69,8 +63,8 @@ pub fn collect_global_decls(
 pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut struct_graph_analyzer = StructGraphAnalyzer::new(
         &mut test_ctx.ec,
-        &test_ctx.comp_state,
-        &test_ctx.struct_graph,
+        &test_ctx.prog_ctx,
+        &test_ctx.comp_state.struct_graph,
     );
     struct_graph_analyzer.analyze_all();
     test_ctx.ec.as_result()
@@ -79,9 +73,8 @@ pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord
 pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut stmt_builder = StatementBuilder::new(
         &mut test_ctx.ec,
-        &test_ctx.func_body_map,
-        &test_ctx.op_body_map,
-        &mut test_ctx.comp_state,
+        &mut test_ctx.prog_ctx,
+        &test_ctx.comp_state,
         &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
     );
@@ -92,7 +85,7 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
 pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
         &mut test_ctx.ec,
-        &test_ctx.comp_state,
+        &test_ctx.prog_ctx,
         &mut test_ctx.scope_graph,
     );
     scope_graph_analyzer.analyze_all();
@@ -100,7 +93,7 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
 }
 
 pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
-    let blueprint_builder = BlueprintBuilder::new(&test_ctx.comp_state);
+    let blueprint_builder = BlueprintBuilder::new(&test_ctx.prog_ctx);
     blueprint_builder.build()
 }
 
@@ -113,13 +106,13 @@ pub fn execute_program(
 ) {
     let mut backend = Backend::default();
     let main_func_id = test_ctx
-        .comp_state
+        .prog_ctx
         .func_ctx
         .get_global_func_by_name("main")
         .unwrap();
     let code = backend
         .compile(
-            &test_ctx.comp_state,
+            &test_ctx.prog_ctx,
             &test_ctx.builtin_registry,
             blueprint,
             &main_func_id,

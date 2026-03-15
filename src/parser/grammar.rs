@@ -18,7 +18,7 @@ use crate::{
     ExprToken, ExprTokenKind, InfixOperatorProperties, OperatorAssociativity, ParserDeclStmt,
     ParserDeclStmtKind, ParserFuncCallArg, ParserFuncParam, ParserIfArm, ParserInputAttribute,
     ParserOperatorType, ParserScopeStmt, ParserScopeStmtKind, PostfixOperatorProperties,
-    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent,
+    PrefixOperatorProperties, Range, SymbolPath, SymbolPathComponent, name_space::ImportPath,
 };
 
 peg::parser!(pub grammar kasl_parser() for str {
@@ -54,6 +54,14 @@ peg::parser!(pub grammar kasl_parser() for str {
         / if_statement()
         / block_statement()
         / expected!("statement")
+
+    rule import_statement() -> ParserDeclStmt
+        = start:position!() "import" _ path:import_path() end:position!() {
+            ParserDeclStmt {
+                range: Range::n(start, end),
+                kind: ParserDeclStmtKind::Import { path },
+            }
+        }
 
     rule func_decl_statement() -> ParserDeclStmt
         = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
@@ -348,6 +356,13 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule operator() -> String
         = quiet!{ op:$(['+' | '-' | '*' | '/' | '%' | '^' | '<' | '>' | '=' | '!' | '?' | '%' | '|' | '&']+) { op.to_owned() } }
         / expected!("operator")
+
+    rule import_path() -> ImportPath
+        = path:identifier() ** (_? "/" _?) {
+            ImportPath {
+                path: path.into_iter().collect(),
+            }
+        }
 
     rule number() -> u32
         = n:$(['0'..='9']+) { n.parse().unwrap() }

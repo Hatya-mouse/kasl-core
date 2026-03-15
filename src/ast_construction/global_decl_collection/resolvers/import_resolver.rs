@@ -14,20 +14,8 @@
 // limitations under the License.
 //
 
-use crate::{FunctionID, ParserScopeStmt};
-use std::collections::HashMap;
+use crate::{Range, global_decl_collection::GlobalDeclCollector, name_space::ImportPath};
 
-#[derive(Debug, Default, serde::Serialize)]
-pub struct FuncBodyMap {
-    pub func_map: HashMap<FunctionID, Vec<ParserScopeStmt>>,
-}
-
-impl FuncBodyMap {
-    pub fn register(&mut self, func_id: FunctionID, body: Vec<ParserScopeStmt>) {
-        self.func_map.insert(func_id, body);
-    }
-
-    pub fn get_body(&self, func_id: &FunctionID) -> Option<&Vec<ParserScopeStmt>> {
-        self.func_map.get(func_id)
-    }
+impl GlobalDeclCollector<'_> {
+    pub fn resolve_import(&mut self, path: &ImportPath, decl_range: Range) {}
 }

@@ -16,32 +16,32 @@
 
 use std::collections::HashMap;
 
-use crate::{CompilationState, StructID, error::ErrorCollector, type_registry::StructGraph};
+use crate::{ProgramContext, StructID, error::ErrorCollector, type_registry::StructGraph};
 mod struct_traversal;
 
 #[derive(Debug)]
 pub struct StructGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
-    comp_state: &'a CompilationState,
+    prog_ctx: &'a ProgramContext,
     struct_graph: &'a StructGraph,
 }
 
 impl<'a> StructGraphAnalyzer<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        comp_state: &'a CompilationState,
+        prog_ctx: &'a ProgramContext,
         struct_graph: &'a StructGraph,
     ) -> Self {
         Self {
             ec,
-            comp_state,
+            prog_ctx,
             struct_graph,
         }
     }
 
     pub fn analyze_all(&mut self) {
         // Get the list of all StructIDs
-        let all_struct_ids = self.comp_state.type_registry.get_all_structs();
+        let all_struct_ids = self.prog_ctx.type_registry.get_all_structs();
         // Initialize states for all structs
         let mut states: HashMap<StructID, StructState> = all_struct_ids
             .iter()

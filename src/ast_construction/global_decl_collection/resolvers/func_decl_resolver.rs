@@ -42,16 +42,18 @@ impl GlobalDeclCollector<'_> {
         };
 
         // Check if a function with the same name already exists
-        if self.comp_state.func_ctx.has_global_func(info.name) {
+        if self.prog_ctx.func_ctx.has_global_func(info.name) {
             self.ec
                 .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, info.name);
             return;
         }
 
         // Register the function
-        let func_id = self.comp_state.func_ctx.register_global_func(func);
+        let func_id = self.prog_ctx.func_ctx.register_global_func(func);
 
         // Register the function body to the function body map
-        self.func_body_map.register(func_id, info.body.to_vec());
+        self.comp_state
+            .func_body_map
+            .register(func_id, info.body.to_vec());
     }
 }
