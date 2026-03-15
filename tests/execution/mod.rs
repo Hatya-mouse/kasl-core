@@ -14,4 +14,5 @@
 // limitations under the License.
 //
 
-mod complex_op_calculation;
+mod simple_float_calculation;
+mod simple_int_calculation;

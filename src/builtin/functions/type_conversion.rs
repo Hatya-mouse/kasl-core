@@ -22,7 +22,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     registry.register_func(
         "itof",
         &[PrimitiveType::Int],
-        PrimitiveType::Int,
+        PrimitiveType::Float,
         Box::new(|builder, args| builder.ins().fcvt_from_sint(types::F32, args[0])),
     );
 

@@ -23,73 +23,20 @@ use crate::common::{
 fn complex_op_calculation() {
     let mut test_ctx = TestContext::default();
 
-    let code = r#"operator infix || {
-    precedence: 1,
+    let code = r#"operator infix * {
+    precedence: 10,
     associativity: left
 }
 
-func infix ||(lhs: Bool, rhs: Bool) -> Bool {
-    return Builtin.or(lhs, rhs)
+func infix *(lhs: Float, rhs: Int) -> Float {
+    return Builtin.fmul(lhs, Builtin.itof(rhs))
 }
 
-operator infix && {
-    precedence: 2,
-    associativity: left
-}
-
-func infix &&(lhs: Bool, rhs: Bool) -> Bool {
-    return Builtin.and(lhs, rhs)
-}
-
-operator infix == {
-    precedence: 3,
-    associativity: left
-}
-
-func infix ==(lhs: Int, rhs: Int) -> Bool {
-    return Builtin.ieq(lhs, rhs)
-}
-
-operator infix > {
-    precedence: 4,
-    associativity: left
-}
-
-func infix >(lhs: Int, rhs: Int) -> Bool {
-    return Builtin.igt(lhs, rhs)
-}
-
-operator infix + {
-    precedence: 5,
-    associativity: left
-}
-
-func infix +(lhs: Int, rhs: Int) -> Int {
-    return Builtin.iadd(lhs, rhs)
-}
-
-operator infix * {
-    precedence: 6,
-    associativity: left
-}
-
-func infix *(lhs: Int, rhs: Int) -> Int {
-    return Builtin.imul(lhs, rhs)
-}
-
-operator prefix ! {
-    precedence: 7
-}
-
-func prefix !(operand: Bool) -> Bool {
-    return Builtin.not(operand)
-}
-
-input in_val: Int = 0
-output out_val: Int = 0
+input in_val = 0.0
+output out_val = 0.0
 
 func main() {
-    out_val = in_val * 102
+    out_val = in_val * 123
 }
 "#;
     let parsed = parse_expr(code);
@@ -100,12 +47,12 @@ func main() {
     let blueprint = build_blueprint(&mut test_ctx);
 
     // Compile the program
-    let mut in_val = 42i32;
-    let mut out_val = 0i32;
+    let mut in_val = 3.215f32;
+    let mut out_val = 0f32;
 
-    let in_ptr = &mut in_val as *mut i32;
-    let out_ptr = &mut out_val as *mut i32;
+    let in_ptr = &mut in_val as *mut f32 as *mut ();
+    let out_ptr = &mut out_val as *mut f32 as *mut ();
 
     execute_program(&mut test_ctx, &blueprint, &[in_ptr], &[out_ptr], &[]);
-    assert_eq!(out_val, 4284)
+    assert_eq!(out_val, 3.215f32 * 123f32)
 }

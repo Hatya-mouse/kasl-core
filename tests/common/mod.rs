@@ -107,9 +107,9 @@ pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
 pub fn execute_program(
     test_ctx: &mut TestContext,
     blueprint: &IOBlueprint,
-    inputs: &[*mut i32],
-    outputs: &[*mut i32],
-    states: &[*mut i32],
+    inputs: &[*mut ()],
+    outputs: &[*mut ()],
+    states: &[*mut ()],
 ) {
     let mut backend = Backend::default();
     let main_func_id = test_ctx
@@ -133,13 +133,12 @@ pub fn execute_program(
 
 unsafe fn run_code(
     code_ptr: *const u8,
-    input: *const *mut i32,
-    output: *const *mut i32,
-    state: *const *mut i32,
+    input: *const *mut (),
+    output: *const *mut (),
+    state: *const *mut (),
 ) {
     unsafe {
-        let code_fn: fn(*const *mut i32, *const *mut i32, *const *mut i32) =
-            mem::transmute(code_ptr);
+        let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) = mem::transmute(code_ptr);
         code_fn(input, output, state)
     }
 }
