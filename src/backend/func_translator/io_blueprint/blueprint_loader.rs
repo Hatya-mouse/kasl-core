@@ -24,13 +24,13 @@ use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn load_blueprint_access(&mut self, blueprint: &IOBlueprint, entry_block: ir::Block) {
-        // Get the pointer to the pointer array
-        let block_params = self.builder.block_params(entry_block);
-        let input_ptr_ptr = block_params[0];
-        let output_ptr_ptr = block_params[1];
-        let state_ptr_ptr = block_params[2];
-
+    pub fn load_blueprint_access(
+        &mut self,
+        input_ptr_ptr: ir::Value,
+        output_ptr_ptr: ir::Value,
+        state_ptr_ptr: ir::Value,
+        blueprint: &IOBlueprint,
+    ) {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
@@ -82,13 +82,13 @@ impl FuncTranslator<'_> {
         item: &BlueprintItem,
         offset: i32,
     ) -> ir::Value {
-        // Get the pointer to the input value by the pointer to the pointers
+        // Get the pointer to the value by the pointer to the pointers
         let ptr = self
             .builder
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
-        // Load the input value
+        // Load the value
         self.builder.ins().load(
             self.type_converter.convert(&item.value_type),
             MemFlags::new(),
