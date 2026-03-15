@@ -15,8 +15,10 @@
 //
 
 use crate::{
+    VariableID,
     backend::func_translator::FuncTranslator,
     scope_manager::{BlueprintItem, IOBlueprint},
+    type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
@@ -36,21 +38,27 @@ impl FuncTranslator<'_> {
         // INPUTS
         let mut input_offset: usize = 0;
         for input_item in blueprint.get_inputs() {
-            self.load_blueprint_item(pointer_type, input_ptr_ptr, input_item, input_offset);
+            let val =
+                self.load_blueprint_item(pointer_type, input_ptr_ptr, input_item, input_offset);
+            self.register_translated_var(input_item.id, input_item.value_type, val);
             input_offset += input_item.size;
         }
 
         // OUTPUTS
         let mut output_offset: usize = 0;
         for output_item in blueprint.get_outputs() {
-            self.load_blueprint_item(pointer_type, output_ptr_ptr, output_item, output_offset);
+            let val =
+                self.load_blueprint_item(pointer_type, output_ptr_ptr, output_item, output_offset);
+            self.register_translated_var(output_item.id, output_item.value_type, val);
             output_offset += output_item.size;
         }
 
         // STATES
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
-            self.load_blueprint_item(pointer_type, state_ptr_ptr, state_item, state_offset);
+            let val =
+                self.load_blueprint_item(pointer_type, state_ptr_ptr, state_item, state_offset);
+            self.register_translated_var(state_item.id, state_item.value_type, val);
             state_offset += state_item.size;
         }
     }
@@ -75,5 +83,19 @@ impl FuncTranslator<'_> {
             ptr,
             0,
         )
+    }
+
+    fn register_translated_var(
+        &mut self,
+        var_id: VariableID,
+        var_type: ResolvedType,
+        value: ir::Value,
+    ) {
+        // Declare the variable
+        let var = self.declare_var(var_id, &var_type);
+        // Register the variable to the variables
+        self.variables.insert(var_id, var);
+        // Define the variable
+        self.builder.def_var(var, value);
     }
 }

@@ -144,7 +144,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule assign_statement() -> ParserScopeStmt
-        = start:position!() target:oneline_expression() _ "=" _ value:oneline_expression() end:position!() {
+        = start:position!() target:lvalue_expression() _ "=" _ value:oneline_expression() end:position!() {
             ParserScopeStmt {
                 range: Range::n(start, end),
                 kind: ParserScopeStmtKind::Assign { target, value }
@@ -284,6 +284,9 @@ peg::parser!(pub grammar kasl_parser() for str {
     pub rule multiline_expression() -> Vec<ExprToken>
         = expr_token() ++ (__?)
 
+    pub rule lvalue_expression() -> Vec<ExprToken>
+        = lvalue_token() ++ (__?)
+
     rule expr_token() -> ExprToken
         = start:position!() kind:(
             literal()
@@ -292,6 +295,14 @@ peg::parser!(pub grammar kasl_parser() for str {
             / operator_token()
             / parenthesized_token()
             / dot_token()
+        ) end:position!() {
+            ExprToken { range: Range::n(start, end), kind }
+        }
+
+    rule lvalue_token() -> ExprToken
+        = start:position!() kind:(
+            dot_token()
+            / identifier_token()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }

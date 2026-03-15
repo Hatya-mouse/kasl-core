@@ -105,7 +105,6 @@ impl Backend {
 
         // Create a return block
         let return_block = builder.create_block();
-        builder.append_block_param(return_block, types::I32);
 
         // Create a FuncTranslator and translate the function
         let mut translator =
@@ -116,8 +115,7 @@ impl Backend {
         translator.builder.switch_to_block(return_block);
         translator.builder.seal_block(return_block);
 
-        let return_values: Vec<_> = translator.builder.block_params(return_block).to_vec();
-        translator.builder.ins().return_(&return_values);
+        translator.builder.ins().return_(&[]);
 
         // Finalize the function
         translator.builder.finalize();

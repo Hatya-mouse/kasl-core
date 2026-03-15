@@ -107,10 +107,10 @@ pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
 pub fn execute_program(
     test_ctx: &mut TestContext,
     blueprint: &IOBlueprint,
-    inputs: &[*mut f32],
-    outputs: &[*mut f32],
-    states: &[*mut f32],
-) -> i32 {
+    inputs: &[*mut i32],
+    outputs: &[*mut i32],
+    states: &[*mut i32],
+) {
     let mut backend = Backend::default();
     let main_func_id = test_ctx
         .comp_state
@@ -126,17 +126,19 @@ pub fn execute_program(
         )
         .unwrap();
 
-    unsafe { run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr()) }
+    unsafe {
+        run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
+    }
 }
 
-unsafe fn run_code<O>(
+unsafe fn run_code(
     code_ptr: *const u8,
-    input: *const *mut f32,
-    output: *const *mut f32,
-    state: *const *mut f32,
-) -> O {
+    input: *const *mut i32,
+    output: *const *mut i32,
+    state: *const *mut i32,
+) {
     unsafe {
-        let code_fn: fn(*const *mut f32, *const *mut f32, *const *mut f32) -> O =
+        let code_fn: fn(*const *mut i32, *const *mut i32, *const *mut i32) =
             mem::transmute(code_ptr);
         code_fn(input, output, state)
     }

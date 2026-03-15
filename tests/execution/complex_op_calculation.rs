@@ -15,8 +15,8 @@
 //
 
 use crate::common::{
-    TestContext, analyze_scopes, analyze_structs, build_stmts, collect_global_decls,
-    execute_program, parse_expr,
+    TestContext, analyze_scopes, analyze_structs, build_blueprint, build_stmts,
+    collect_global_decls, execute_program, parse_expr,
 };
 
 #[test]
@@ -85,8 +85,11 @@ func prefix !(operand: Bool) -> Bool {
     return Builtin.not(operand)
 }
 
-func main() -> Int {
-    return 1 + 2 * 3
+input in_val: Int = 0
+output out_val: Int = 0
+
+func main() {
+    out_val = in_val * 2
 }
 "#;
     let parsed = parse_expr(code);
@@ -94,8 +97,15 @@ func main() -> Int {
     analyze_structs(&mut test_ctx).unwrap();
     build_stmts(&mut test_ctx).unwrap();
     analyze_scopes(&mut test_ctx).unwrap();
+    let blueprint = build_blueprint(&mut test_ctx);
 
     // Compile the program
-    let result = execute_program(&mut test_ctx, &[]);
-    println!("RESULT: {}", result);
+    let mut in_val = 42i32;
+    let mut out_val = 0i32;
+
+    let in_ptr = &mut in_val as *mut i32;
+    let out_ptr = &mut out_val as *mut i32;
+
+    execute_program(&mut test_ctx, &blueprint, &[in_ptr], &[out_ptr], &[]);
+    println!("RESULT: {}", out_val);
 }

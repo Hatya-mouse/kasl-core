@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use crate::type_registry::ResolvedType;
+use crate::{VariableID, type_registry::ResolvedType};
 
 #[derive(Default)]
 pub struct IOBlueprint {
@@ -26,19 +26,32 @@ pub struct IOBlueprint {
 pub struct BlueprintItem {
     pub size: usize,
     pub value_type: ResolvedType,
+    pub id: VariableID,
 }
 
 impl IOBlueprint {
-    pub fn add_input(&mut self, size: usize, value_type: ResolvedType) {
-        self.inputs.push(BlueprintItem { size, value_type });
+    pub fn add_input(&mut self, size: usize, value_type: ResolvedType, id: VariableID) {
+        self.inputs.push(BlueprintItem {
+            size,
+            value_type,
+            id,
+        });
     }
 
-    pub fn add_output(&mut self, size: usize, value_type: ResolvedType) {
-        self.outputs.push(BlueprintItem { size, value_type });
+    pub fn add_output(&mut self, size: usize, value_type: ResolvedType, id: VariableID) {
+        self.outputs.push(BlueprintItem {
+            size,
+            value_type,
+            id,
+        });
     }
 
-    pub fn add_state(&mut self, size: usize, value_type: ResolvedType) {
-        self.states.push(BlueprintItem { size, value_type });
+    pub fn add_state(&mut self, size: usize, value_type: ResolvedType, id: VariableID) {
+        self.states.push(BlueprintItem {
+            size,
+            value_type,
+            id,
+        });
     }
 
     pub fn get_inputs(&self) -> &[BlueprintItem] {
