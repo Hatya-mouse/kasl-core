@@ -20,6 +20,6 @@ use crate::{Expr, Range, type_registry::ResolvedType};
 pub struct StructField {
     pub name: String,
     pub value_type: ResolvedType,
-    pub def_val: Expr<ResolvedType>,
+    pub def_val: Expr,
     pub range: Range,
 }

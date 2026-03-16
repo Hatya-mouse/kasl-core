@@ -25,7 +25,10 @@ pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
 use crate::{Range, VariableID};
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
@@ -140,3 +143,9 @@ impl ScopeRegistry {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
 pub struct ScopeID(usize);
+
+impl Display for ScopeID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}

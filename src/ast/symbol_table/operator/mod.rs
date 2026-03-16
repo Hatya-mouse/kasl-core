@@ -28,22 +28,22 @@ pub use postfix_operator::{
 };
 pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery, PrefixQueryRef};
 
-use crate::OperatorID;
+use crate::{NameSpaceID, OperatorID, namespace_registry::NameSpacePair};
 use hashbrown::HashMap;
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct OperatorContext {
     infix_operator_properties: HashMap<String, InfixOperatorProperties>,
-    infix_operators: HashMap<OperatorID, InfixOperator>,
-    infix_ids: HashMap<InfixQuery, OperatorID>,
+    infix_operators: HashMap<NameSpacePair<OperatorID>, InfixOperator>,
+    infix_ids: HashMap<InfixQuery, NameSpacePair<OperatorID>>,
 
     prefix_operator_properties: HashMap<String, PrefixOperatorProperties>,
-    prefix_operators: HashMap<OperatorID, PrefixOperator>,
-    prefix_ids: HashMap<PrefixQuery, OperatorID>,
+    prefix_operators: HashMap<NameSpacePair<OperatorID>, PrefixOperator>,
+    prefix_ids: HashMap<PrefixQuery, NameSpacePair<OperatorID>>,
 
     postfix_operator_properties: HashMap<String, PostfixOperatorProperties>,
-    postfix_operators: HashMap<OperatorID, PostfixOperator>,
-    postfix_ids: HashMap<PostfixQuery, OperatorID>,
+    postfix_operators: HashMap<NameSpacePair<OperatorID>, PostfixOperator>,
+    postfix_ids: HashMap<PostfixQuery, NameSpacePair<OperatorID>>,
 
     next_operator_id: usize,
 }
@@ -57,8 +57,12 @@ impl OperatorContext {
 
     // --- REGISTER FUNCTIONS ---
 
-    pub fn register_infix_func(&mut self, infix: InfixOperator) -> OperatorID {
-        let id = self.generate_operator_id();
+    pub fn register_infix_func(
+        &mut self,
+        namespace_id: NameSpaceID,
+        infix: InfixOperator,
+    ) -> NameSpacePair<OperatorID> {
+        let id = NameSpacePair::new(namespace_id, self.generate_operator_id());
         // Construct an infix query
         let query = InfixQuery {
             symbol: infix.symbol.clone(),
@@ -79,8 +83,12 @@ impl OperatorContext {
         self.infix_operator_properties.insert(symbol, properties);
     }
 
-    pub fn register_prefix_func(&mut self, prefix: PrefixOperator) -> OperatorID {
-        let id = self.generate_operator_id();
+    pub fn register_prefix_func(
+        &mut self,
+        namespace_id: NameSpaceID,
+        prefix: PrefixOperator,
+    ) -> NameSpacePair<OperatorID> {
+        let id = NameSpacePair::new(namespace_id, self.generate_operator_id());
         // Construct a prefix query
         let query = PrefixQuery {
             symbol: prefix.symbol.clone(),
@@ -100,8 +108,12 @@ impl OperatorContext {
         self.prefix_operator_properties.insert(symbol, properties);
     }
 
-    pub fn register_postfix_func(&mut self, postfix: PostfixOperator) -> OperatorID {
-        let id = self.generate_operator_id();
+    pub fn register_postfix_func(
+        &mut self,
+        namespace_id: NameSpaceID,
+        postfix: PostfixOperator,
+    ) -> NameSpacePair<OperatorID> {
+        let id = NameSpacePair::new(namespace_id, self.generate_operator_id());
         // Construct a postfix query
         let query = PostfixQuery {
             symbol: postfix.symbol.clone(),
@@ -137,57 +149,29 @@ impl OperatorContext {
 
     // --- ID GETTER FUNCTIONS ---
 
-    pub fn get_infix_id(&self, query: InfixQueryRef) -> Option<OperatorID> {
+    pub fn get_infix_id(&self, query: InfixQueryRef) -> Option<NameSpacePair<OperatorID>> {
         self.infix_ids.get(&query).copied()
     }
 
-    pub fn get_prefix_id(&self, query: PrefixQueryRef) -> Option<OperatorID> {
+    pub fn get_prefix_id(&self, query: PrefixQueryRef) -> Option<NameSpacePair<OperatorID>> {
         self.prefix_ids.get(&query).copied()
     }
 
-    pub fn get_postfix_id(&self, query: PostfixQueryRef) -> Option<OperatorID> {
+    pub fn get_postfix_id(&self, query: PostfixQueryRef) -> Option<NameSpacePair<OperatorID>> {
         self.postfix_ids.get(&query).copied()
     }
 
     // --- OPERATOR FUNC GETTER FUNCTIONS ---
 
-    pub fn get_infix_op(&self, id: &OperatorID) -> Option<&InfixOperator> {
+    pub fn get_infix_op(&self, id: &NameSpacePair<OperatorID>) -> Option<&InfixOperator> {
         self.infix_operators.get(id)
     }
 
-    pub fn get_prefix_op(&self, id: &OperatorID) -> Option<&PrefixOperator> {
+    pub fn get_prefix_op(&self, id: &NameSpacePair<OperatorID>) -> Option<&PrefixOperator> {
         self.prefix_operators.get(id)
     }
 
-    pub fn get_postfix_op(&self, id: &OperatorID) -> Option<&PostfixOperator> {
+    pub fn get_postfix_op(&self, id: &NameSpacePair<OperatorID>) -> Option<&PostfixOperator> {
         self.postfix_operators.get(id)
-    }
-
-    // --- OPERATOR FUNC MUTABLE GETTER FUNCTIONS ---
-
-    pub fn get_infix_op_mut(&mut self, id: &OperatorID) -> Option<&mut InfixOperator> {
-        self.infix_operators.get_mut(id)
-    }
-
-    pub fn get_prefix_op_mut(&mut self, id: &OperatorID) -> Option<&mut PrefixOperator> {
-        self.prefix_operators.get_mut(id)
-    }
-
-    pub fn get_postfix_op_mut(&mut self, id: &OperatorID) -> Option<&mut PostfixOperator> {
-        self.postfix_operators.get_mut(id)
-    }
-
-    // --- ID GETTER FUNCTIONS ---
-
-    pub fn all_infix_ids(&self) -> Vec<OperatorID> {
-        self.infix_ids.values().copied().collect()
-    }
-
-    pub fn all_prefix_ids(&self) -> Vec<OperatorID> {
-        self.prefix_ids.values().copied().collect()
-    }
-
-    pub fn all_postfix_ids(&self) -> Vec<OperatorID> {
-        self.postfix_ids.values().copied().collect()
     }
 }

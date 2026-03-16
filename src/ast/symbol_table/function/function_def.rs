@@ -14,7 +14,11 @@
 // limitations under the License.
 //
 
-use crate::{Expr, Range, VariableID, symbol_table::Block, type_registry::ResolvedType};
+use crate::{
+    Expr, Range, VariableID,
+    symbol_table::{Block, UnresolvedExpr},
+    type_registry::ResolvedType,
+};
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct Function {
@@ -71,6 +75,6 @@ pub struct FuncParam {
     pub name: String,
     pub var_id: VariableID,
     pub value_type: ResolvedType,
-    pub def_val: Expr<ResolvedType>,
+    pub def_val: Option<Expr>,
     pub range: Range,
 }

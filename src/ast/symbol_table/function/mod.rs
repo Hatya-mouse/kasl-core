@@ -20,14 +20,17 @@ mod function_def;
 pub use func_body_map::FuncBodyMap;
 pub use function_def::{FuncCallArg, FuncParam, Function, NoTypeFuncCallArg};
 
-use crate::{FunctionID, StructID, type_registry::ResolvedType};
+use crate::{
+    FunctionID, NameSpaceID, StructID, namespace_registry::NameSpacePair,
+    type_registry::ResolvedType,
+};
 use std::collections::HashMap;
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct FunctionContext {
-    funcs: HashMap<FunctionID, Function>,
-    member_functions: HashMap<StructID, HashMap<String, FunctionID>>,
-    global_functions: HashMap<String, FunctionID>,
+    funcs: HashMap<NameSpacePair<FunctionID>, Function>,
+    member_functions: HashMap<StructID, HashMap<String, NameSpacePair<FunctionID>>>,
+    global_functions: HashMap<String, NameSpacePair<FunctionID>>,
     next_function_id: usize,
 }
 
@@ -38,12 +41,17 @@ impl FunctionContext {
         id
     }
 
-    pub fn get_type(&self, symbol_id: &FunctionID) -> Option<ResolvedType> {
+    pub fn get_type(&self, symbol_id: &NameSpacePair<FunctionID>) -> Option<ResolvedType> {
         self.funcs.get(symbol_id).map(|func| func.return_type)
     }
 
-    pub fn register_member_func(&mut self, func: Function, struct_id: StructID) -> FunctionID {
-        let func_id = self.generate_function_id();
+    pub fn register_member_func(
+        &mut self,
+        namespace_id: NameSpaceID,
+        func: Function,
+        struct_id: StructID,
+    ) -> NameSpacePair<FunctionID> {
+        let func_id = NameSpacePair::new(namespace_id, self.generate_function_id());
         // Insert the function to the member functions map
         self.member_functions
             .entry(struct_id)
@@ -53,34 +61,42 @@ impl FunctionContext {
         func_id
     }
 
-    pub fn register_global_func(&mut self, func: Function) -> FunctionID {
-        let func_id = self.generate_function_id();
+    pub fn register_global_func(
+        &mut self,
+        namespace_id: NameSpaceID,
+        func: Function,
+    ) -> NameSpacePair<FunctionID> {
+        let func_id = NameSpacePair::new(namespace_id, self.generate_function_id());
         // Insert the function to the global functions map
         self.global_functions.insert(func.name.clone(), func_id);
         self.funcs.insert(func_id, func);
         func_id
     }
 
-    pub fn get_global_func_by_name(&self, name: &str) -> Option<FunctionID> {
+    pub fn get_global_func_by_name(&self, name: &str) -> Option<NameSpacePair<FunctionID>> {
         self.global_functions.get(name).copied()
     }
 
-    pub fn get_member_func_by_name(&self, struct_id: &StructID, name: &str) -> Option<FunctionID> {
+    pub fn get_member_func_by_name(
+        &self,
+        struct_id: &StructID,
+        name: &str,
+    ) -> Option<NameSpacePair<FunctionID>> {
         self.member_functions
             .get(struct_id)
             .and_then(|funcs| funcs.get(name))
             .copied()
     }
 
-    pub fn get_func(&self, func_id: &FunctionID) -> Option<&Function> {
+    pub fn get_func(&self, func_id: &NameSpacePair<FunctionID>) -> Option<&Function> {
         self.funcs.get(func_id)
     }
 
-    pub fn get_func_mut(&mut self, func_id: &FunctionID) -> Option<&mut Function> {
+    pub fn get_func_mut(&mut self, func_id: &NameSpacePair<FunctionID>) -> Option<&mut Function> {
         self.funcs.get_mut(func_id)
     }
 
-    pub fn func_ids(&self) -> Vec<FunctionID> {
+    pub fn func_ids(&self) -> Vec<NameSpacePair<FunctionID>> {
         self.funcs.keys().copied().collect()
     }
 

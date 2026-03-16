@@ -15,15 +15,22 @@
 //
 
 use crate::NameSpaceID;
+use std::fmt::Display;
 
 /// An set of NameSpaceID and other symbol ID.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default, serde::Serialize)]
-pub struct NameSpacePair<T> {
+pub struct NameSpacePair<T: Display> {
     pub namespace_id: NameSpaceID,
     pub symbol_id: T,
 }
 
-impl<T> NameSpacePair<T> {
+impl<T: Display> Display for NameSpacePair<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.namespace_id, self.symbol_id)
+    }
+}
+
+impl<T: Display> NameSpacePair<T> {
     pub fn new(namespace_id: NameSpaceID, symbol_id: T) -> Self {
         Self {
             namespace_id,

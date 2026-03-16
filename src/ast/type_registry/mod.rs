@@ -26,16 +26,13 @@ pub use struct_decl::StructDecl;
 pub use struct_field::StructField;
 pub use struct_graph::StructGraph;
 
-use crate::{StructID, SymbolPath};
-use std::{
-    collections::{HashMap, HashSet},
-    str::FromStr,
-};
+use crate::{NameSpaceID, StructID, namespace_registry::NameSpacePair};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Default, serde::Serialize)]
 pub struct TypeRegistry {
-    pub structs: HashMap<StructID, StructDecl>,
-    pub name_to_id: HashMap<String, StructID>,
+    pub structs: HashMap<NameSpacePair<StructID>, StructDecl>,
+    pub name_to_id: HashMap<String, NameSpacePair<StructID>>,
     next_struct_id: usize,
 }
 
@@ -46,7 +43,7 @@ impl TypeRegistry {
         id
     }
 
-    pub fn get_struct_id_by_name(&self, type_name: &str) -> Option<StructID> {
+    pub fn get_struct_id_by_name(&self, type_name: &str) -> Option<NameSpacePair<StructID>> {
         self.name_to_id.get(type_name).copied()
     }
 
@@ -64,12 +61,19 @@ impl TypeRegistry {
         }
     }
 
-    pub fn register_struct(&mut self, struct_decl: StructDecl, name: String, id: StructID) {
+    pub fn register_struct(
+        &mut self,
+        namespace_id: NameSpaceID,
+        struct_decl: StructDecl,
+        name: String,
+        struct_id: StructID,
+    ) {
+        let id = NameSpacePair::new(namespace_id, struct_id);
         self.structs.insert(id, struct_decl);
         self.name_to_id.insert(name, id);
     }
 
-    pub fn get_struct(&self, id: &StructID) -> Option<&StructDecl> {
+    pub fn get_struct(&self, id: &NameSpacePair<StructID>) -> Option<&StructDecl> {
         self.structs.get(id)
     }
 
@@ -87,7 +91,7 @@ impl TypeRegistry {
         }
     }
 
-    pub fn get_all_structs(&self) -> HashSet<StructID> {
+    pub fn get_all_structs(&self) -> HashSet<NameSpacePair<StructID>> {
         self.structs.keys().copied().collect()
     }
 }

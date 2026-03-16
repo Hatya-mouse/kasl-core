@@ -14,19 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{
-    NameSpaceID, ScopeRegistry, symbol_table::FunctionContext, type_registry::TypeRegistry,
-};
+use crate::NameSpaceID;
 use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct NameSpace {
     pub id: NameSpaceID,
     pub child_namespaces: HashMap<String, NameSpaceID>,
-
-    pub func_ctx: FunctionContext,
-    pub scope_registry: ScopeRegistry,
-    pub type_registry: TypeRegistry,
 }
 
 impl NameSpace {
