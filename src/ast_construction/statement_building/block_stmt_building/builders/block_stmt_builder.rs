@@ -14,27 +14,16 @@
 // limitations under the License.
 //
 
-use crate::{
-    ParserScopeStmt, Range, ScopeID, Statement, statement_building::BlockStmtBuilder,
-    type_registry::ResolvedType,
-};
+use crate::{ParserScopeStmt, Range, Statement, statement_building::BlockStmtBuilder};
 
 impl BlockStmtBuilder<'_> {
     /// Builds a block statement from a list of statements.
     pub fn build_block_stmt(
         &mut self,
         statements: &[ParserScopeStmt],
-        parent_scope_id: ScopeID,
-        expected_return_type: ResolvedType,
         decl_range: Range,
     ) -> Option<Statement> {
-        let block = self.build_scope_block(
-            statements,
-            parent_scope_id,
-            expected_return_type,
-            decl_range,
-        );
-
+        let block = self.build_scope_block(statements, self.scope_id, decl_range);
         Some(Statement::Block { block })
     }
 }

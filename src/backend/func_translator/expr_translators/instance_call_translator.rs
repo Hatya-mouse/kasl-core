@@ -14,26 +14,22 @@
 // limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator, builtin::BuiltinFuncID};
+use crate::{Expr, FuncCallArg, FunctionID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_builtin_func_call(
+    pub fn translate_instance_call_expr(
         &mut self,
-        func_id: &BuiltinFuncID,
-        args: &[Expr],
+        _lhs: &Expr,
+        id: &FunctionID,
+        args: &[FuncCallArg],
     ) -> Option<ir::Value> {
-        // Translate the expressions
-        let mut translated_args = Vec::new();
-        for arg in args {
-            let translated_val = self.translate_expr(arg).unwrap();
-            translated_args.push(translated_val);
-        }
+        // Translate the expression
+        // TODO: Pass the lhs as the first argument
+        // let translated_lhs = self.translate_expr(lhs).unwrap();
 
-        // Get a reference to the function
-        let func = &self.builtin_registry.get_func_by_id(func_id).unwrap();
-
-        // Translate the function
-        Some((func.translator)(&mut self.builder, &translated_args))
+        // Call the function and get the result
+        let func = self.prog_ctx.func_ctx.get_func(id).unwrap();
+        self.call_func(&func.block, args.as_ref(), &func.return_type)
     }
 }

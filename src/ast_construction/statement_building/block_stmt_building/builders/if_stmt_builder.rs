@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    IfArm, ParserIfArm, ParserScopeStmt, Range, ScopeID, Statement,
+    IfArm, ParserIfArm, ParserScopeStmt, Range, Statement,
     error::Ph,
     expr_engine::resolve_expr,
     statement_building::BlockStmtBuilder,
@@ -29,20 +29,17 @@ impl BlockStmtBuilder<'_> {
         else_ifs: &[ParserIfArm],
         else_body: Option<&Vec<ParserScopeStmt>>,
         else_range: Range,
-        current_scope_id: ScopeID,
-        expected_return_type: ResolvedType,
     ) -> Option<Statement> {
         // Build the arms
-        let main_arm = self.build_if_arm(main, current_scope_id, expected_return_type)?;
+        let main_arm = self.build_if_arm(main)?;
         let else_ifs = else_ifs
             .iter()
-            .map(|arm| self.build_if_arm(arm, current_scope_id, expected_return_type))
+            .map(|arm| self.build_if_arm(arm))
             .collect::<Option<Vec<_>>>()?;
         // Build the else block
         // None is allowed because the else block is optional
-        let else_block = else_body.map(|arm| {
-            self.build_scope_block(arm, current_scope_id, expected_return_type, else_range)
-        });
+        let else_block =
+            else_body.map(|arm| self.build_scope_block(arm, self.scope_id, else_range));
 
         // Return the constructed if statement
         Some(Statement::If {
@@ -52,26 +49,22 @@ impl BlockStmtBuilder<'_> {
         })
     }
 
-    fn build_if_arm(
-        &mut self,
-        arm: &ParserIfArm,
-        current_scope_id: ScopeID,
-        expected_return_type: ResolvedType,
-    ) -> Option<IfArm> {
+    fn build_if_arm(&mut self, arm: &ParserIfArm) -> Option<IfArm> {
         // Resolve the condition expression and verify it has a bool type
         let condition = resolve_expr(
             self.ec,
-            self.namespace,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
-            current_scope_id,
+            self.scope_id,
+            self.namespace_id,
             &arm.condition,
         )?;
         if condition.value_type != ResolvedType::Primitive(PrimitiveType::Bool) {
             self.ec.non_bool_type_for_condition(
                 arm.range,
                 Ph::StatementCollection,
-                self.namespace
+                self.prog_ctx
                     .type_registry
                     .format_type(&condition.value_type),
             );
@@ -79,8 +72,7 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Create a block for the arm's body
-        let block =
-            self.build_scope_block(&arm.body, current_scope_id, expected_return_type, arm.range);
+        let block = self.build_scope_block(&arm.body, self.scope_id, arm.range);
         Some(IfArm { condition, block })
     }
 }

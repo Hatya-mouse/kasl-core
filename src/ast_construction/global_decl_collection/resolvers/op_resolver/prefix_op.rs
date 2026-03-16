@@ -15,17 +15,20 @@
 //
 
 use crate::{
-    FuncParam, ParserScopeStmt, PrefixOperator, PrefixOperatorProperties, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, symbol_table::Block, type_registry::ResolvedType,
+    FuncParam, ParserScopeStmt, PrefixOperator, PrefixOperatorProperties, Range,
+    error::{EK, Ph},
+    global_decl_collection::GlobalDeclCollector,
+    symbol_table::Block,
+    type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_prefix_define(&mut self, symbol: &str, props: &PrefixOperatorProperties) {
-        if self
+        if let Err(error_kind) = self
             .prog_ctx
             .op_ctx
             .register_prefix_properties(symbol.to_string(), props.clone())
-            == Err(())
+            && error_kind == EK::DuplicatePrefixDefine
         {
             self.ec
                 .duplicate_prefix_define(props.range, Ph::GlobalDeclCollection, symbol);
@@ -54,6 +57,7 @@ impl GlobalDeclCollector<'_> {
         // Construct prefix operator
         let op = PrefixOperator {
             symbol: symbol.to_string(),
+            namespace_id: self.current_namespace,
             operand: params[0].clone(),
             return_type,
             block,

@@ -25,6 +25,14 @@ pub struct NameSpace {
 }
 
 impl NameSpace {
+    pub fn new(id: NameSpaceID) -> Self {
+        Self {
+            id,
+            child_namespaces: HashMap::new(),
+            defined_names: HashSet::new(),
+        }
+    }
+
     pub fn get_id_by_name(&self, name: &str) -> Option<NameSpaceID> {
         self.child_namespaces.get(name).copied()
     }

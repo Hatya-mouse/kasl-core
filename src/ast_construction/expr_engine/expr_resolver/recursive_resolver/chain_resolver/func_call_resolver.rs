@@ -24,7 +24,7 @@ impl ExpressionResolver<'_> {
         &mut self,
         namespace_id: NameSpaceID,
         name: &str,
-        no_type_args: &Vec<NoTypeFuncCallArg>,
+        no_type_args: &[NoTypeFuncCallArg],
         range: Range,
     ) -> Option<Expr> {
         if let Some(func_id) = self
@@ -63,7 +63,7 @@ impl ExpressionResolver<'_> {
                 range,
             ))
         } else {
-            self.ec.func_not_found(range, Ph::ExprEngine, &name);
+            self.ec.func_not_found(range, Ph::ExprEngine, name);
             None
         }
     }

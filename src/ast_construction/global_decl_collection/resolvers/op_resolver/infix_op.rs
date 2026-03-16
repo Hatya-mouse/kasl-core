@@ -15,17 +15,20 @@
 //
 
 use crate::{
-    FuncParam, InfixOperator, InfixOperatorProperties, ParserScopeStmt, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, symbol_table::Block, type_registry::ResolvedType,
+    FuncParam, InfixOperator, InfixOperatorProperties, ParserScopeStmt, Range,
+    error::{EK, Ph},
+    global_decl_collection::GlobalDeclCollector,
+    symbol_table::Block,
+    type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_infix_define(&mut self, symbol: &str, props: &InfixOperatorProperties) {
-        if self
+        if let Err(error_kind) = self
             .prog_ctx
             .op_ctx
             .register_infix_properties(symbol.to_string(), props.clone())
-            == Err(())
+            && error_kind == EK::DuplicateInfixDefine
         {
             self.ec
                 .duplicate_infix_define(props.range, Ph::GlobalDeclCollection, symbol);
@@ -54,6 +57,7 @@ impl GlobalDeclCollector<'_> {
         // Construct infix operator
         let op = InfixOperator {
             symbol: symbol.to_string(),
+            namespace_id: self.current_namespace,
             lhs: params[0].clone(),
             rhs: params[1].clone(),
             return_type,

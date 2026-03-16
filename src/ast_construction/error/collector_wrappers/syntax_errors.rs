@@ -40,10 +40,6 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn func_call_in_l_value(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::FuncCallInLValue, range, phase, Sv::Error, Pl::None);
-    }
-
     pub(crate) fn assign_type_mismatch(
         &mut self,
         range: Range,

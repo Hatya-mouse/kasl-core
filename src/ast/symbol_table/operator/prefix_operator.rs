@@ -14,12 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
+use crate::{FuncParam, NameSpaceID, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct PrefixOperator {
     pub symbol: String,
+    pub namespace_id: NameSpaceID,
     pub operand: FuncParam,
     pub return_type: ResolvedType,
     pub block: Block,

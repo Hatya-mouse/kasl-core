@@ -24,7 +24,7 @@ impl ExpressionResolver<'_> {
         &mut self,
         lhs: Expr,
         name: &str,
-        no_type_args: &Vec<NoTypeFuncCallArg>,
+        no_type_args: &[NoTypeFuncCallArg],
         range: Range,
     ) -> Option<Expr> {
         // Get the field from the type of the lhs expression
@@ -35,12 +35,12 @@ impl ExpressionResolver<'_> {
                     Ph::ExprEngine,
                     lhs.value_type.to_string(),
                 );
-                return None;
+                None
             }
             ResolvedType::Struct(struct_id) => {
                 // Get the function
                 let Some(member_func_id) =
-                    self.prog_ctx.func_ctx.get_member_func_id(&struct_id, &name)
+                    self.prog_ctx.func_ctx.get_member_func_id(&struct_id, name)
                 else {
                     let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                     self.ec
@@ -49,11 +49,10 @@ impl ExpressionResolver<'_> {
                 };
                 let member_func = self.prog_ctx.func_ctx.get_func(&member_func_id)?;
                 // Resolve the arguments
-                let args =
-                    self.resolve_func_call_args(&member_func.params, &no_type_args, range)?;
+                let args = self.resolve_func_call_args(&member_func.params, no_type_args, range)?;
 
                 // Return the struct field expression
-                return Some(Expr::new(
+                Some(Expr::new(
                     ExprKind::InstanceFuncCall {
                         lhs: Box::new(lhs),
                         id: member_func_id,
@@ -61,7 +60,7 @@ impl ExpressionResolver<'_> {
                     },
                     member_func.return_type,
                     range,
-                ));
+                ))
             }
         }
     }

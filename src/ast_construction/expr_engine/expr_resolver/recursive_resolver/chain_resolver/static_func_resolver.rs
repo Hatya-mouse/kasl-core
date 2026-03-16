@@ -31,7 +31,7 @@ impl ExpressionResolver<'_> {
         match element {
             UnresolvedChainElement::Identifier { .. } => {
                 self.ec.static_var_access(range, Ph::ExprEngine);
-                return None;
+                None
             }
             UnresolvedChainElement::FuncCall {
                 name,
@@ -57,7 +57,7 @@ impl ExpressionResolver<'_> {
                 }
 
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&func.params, &no_type_args, range)?;
+                let args = self.resolve_func_call_args(&func.params, no_type_args, range)?;
 
                 // Construct the expression
                 Some(Expr::new(

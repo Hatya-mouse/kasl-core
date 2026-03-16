@@ -45,16 +45,6 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn no_return_func_in_expr(&mut self, range: Range, phase: Phase, func_name: &str) {
-        self.emit(
-            EK::NoReturnFuncInExpr,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
-    }
-
     pub(crate) fn arg_order_incorrect(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
             EK::ArgOrderIncorrect,
@@ -113,21 +103,6 @@ impl ErrorCollector {
 
     pub(crate) fn missing_return(&mut self, range: Range, phase: Phase) {
         self.emit(EK::MissingReturn, range, phase, Sv::Error, Pl::None);
-    }
-
-    pub(crate) fn static_func_call_on_instance(
-        &mut self,
-        range: Range,
-        phase: Phase,
-        func_name: &str,
-    ) {
-        self.emit(
-            EK::StaticFuncCallOnInstance,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
     }
 
     pub(crate) fn static_call_of_instance_func(

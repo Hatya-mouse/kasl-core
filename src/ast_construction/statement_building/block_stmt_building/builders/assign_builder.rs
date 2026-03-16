@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ExprToken, Range, ScopeID, Statement,
+    ExprToken, Range, Statement,
     error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
     scope_manager::VariableKind,
@@ -27,25 +27,17 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         target: &[ExprToken],
         value: &[ExprToken],
-        current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Statement> {
         // Resolve the target variable
-        let mut l_value_resolver = LValueResolver::new(
-            self.ec,
-            &self.namespace.scope_registry,
-            &self.namespace.type_registry,
-            current_scope_id,
-        );
+        let mut l_value_resolver =
+            LValueResolver::new(self.ec, self.prog_ctx, self.scope_id, self.namespace_id);
 
         // Error will be thrown by the LValueResolver so no need to check for None
         let target_l_value = l_value_resolver.resolve_l_value(target)?;
 
         // Check if the LValue is a writable variable
-        if let Some(target_var) = self
-            .namespace
-            .scope_registry
-            .get_var_by_id(&target_l_value.var_id)
+        if let Some(target_var) = self.prog_ctx.scope_registry.get_var(&target_l_value.var_id)
             && matches!(
                 target_var.var_kind,
                 VariableKind::Input { .. }
@@ -62,10 +54,11 @@ impl BlockStmtBuilder<'_> {
         // Resolve the expression
         let resolved_value = resolve_expr(
             self.ec,
-            self.namespace,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
-            current_scope_id,
+            self.scope_id,
+            self.namespace_id,
             value,
         )?;
 
@@ -74,10 +67,10 @@ impl BlockStmtBuilder<'_> {
             self.ec.assign_type_mismatch(
                 stmt_range,
                 Ph::StatementCollection,
-                self.namespace
+                self.prog_ctx
                     .type_registry
                     .format_type(&target_l_value.value_type),
-                self.namespace
+                self.prog_ctx
                     .type_registry
                     .format_type(&resolved_value.value_type),
             );

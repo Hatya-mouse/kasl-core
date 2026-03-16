@@ -15,17 +15,20 @@
 //
 
 use crate::{
-    FuncParam, ParserScopeStmt, PostfixOperator, PostfixOperatorProperties, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, symbol_table::Block, type_registry::ResolvedType,
+    FuncParam, ParserScopeStmt, PostfixOperator, PostfixOperatorProperties, Range,
+    error::{EK, Ph},
+    global_decl_collection::GlobalDeclCollector,
+    symbol_table::Block,
+    type_registry::ResolvedType,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_postfix_define(&mut self, symbol: &str, props: &PostfixOperatorProperties) {
-        if self
+        if let Err(error_kind) = self
             .prog_ctx
             .op_ctx
             .register_postfix_properties(symbol.to_string(), props.clone())
-            == Err(())
+            && error_kind == EK::DuplicatePostfixDefine
         {
             self.ec
                 .duplicate_postfix_define(props.range, Ph::GlobalDeclCollection, symbol);
@@ -54,6 +57,7 @@ impl GlobalDeclCollector<'_> {
         // Construct postfix operator
         let op = PostfixOperator {
             symbol: symbol.to_string(),
+            namespace_id: self.current_namespace,
             operand: params[0].clone(),
             return_type,
             block,

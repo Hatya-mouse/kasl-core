@@ -17,13 +17,10 @@
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir::immediates::Offset32;
 
-use crate::{
-    Expr, backend::func_translator::FuncTranslator, symbol_table::LValue,
-    type_registry::ResolvedType,
-};
+use crate::{Expr, backend::func_translator::FuncTranslator, symbol_table::LValue};
 
 impl FuncTranslator<'_> {
-    pub fn translate_assign(&mut self, target: &LValue, value: &Expr<ResolvedType>) {
+    pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
         // Translate the RHS value
         let rhs_value = self.translate_expr(value).unwrap();
 

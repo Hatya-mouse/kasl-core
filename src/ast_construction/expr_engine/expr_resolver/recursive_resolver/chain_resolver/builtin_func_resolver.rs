@@ -31,7 +31,7 @@ impl ExpressionResolver<'_> {
         match element {
             UnresolvedChainElement::Identifier { .. } => {
                 self.ec.builtin_var_access(range, Ph::ExprEngine);
-                return None;
+                None
             }
             UnresolvedChainElement::FuncCall {
                 name,

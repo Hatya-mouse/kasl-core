@@ -17,41 +17,43 @@
 use std::{collections::HashSet, path::PathBuf};
 
 use crate::{
-    CompilationData, NameSpace, ParserDeclStmt,
-    blueprint_builder::BlueprintBuilder,
+    CompilationData, NameSpaceID, ParserDeclStmt,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState},
+    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
     error::ErrorCollector,
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
-    scope_graph_analyzing::ScopeGraphAnalyzer,
-    scope_manager::{IOBlueprint, ScopeGraph},
-    statement_building::StatementBuilder,
-    struct_graph_analyzing::StructGraphAnalyzer,
+    scope_manager::ScopeGraph,
 };
 use peg::{error::ParseError, str::LineCol};
 
-pub struct NameSpaceConstructor {
+/// Constructs a single namespace from a raw source code string.
+pub struct NameSpaceConstructor<'a> {
     ec: ErrorCollector,
-    pub namespace: NameSpace,
+    prog_ctx: &'a mut ProgramContext,
     comp_data: CompilationData,
     comp_config: CompilerConfig,
     builtin_registry: BuiltinRegistry,
     scope_graph: ScopeGraph,
 
     constructor_state: ConstructorState,
-
     code: String,
     decl_stmts: Vec<ParserDeclStmt>,
+    namespace_id: NameSpaceID,
 }
 
-impl NameSpaceConstructor {
-    pub fn new(comp_config: CompilerConfig, imported_paths: HashSet<PathBuf>) -> Self {
+impl<'a> NameSpaceConstructor<'a> {
+    pub fn new(
+        prog_ctx: &'a mut ProgramContext,
+        comp_config: CompilerConfig,
+        imported_paths: HashSet<PathBuf>,
+        namespace_id: NameSpaceID,
+    ) -> Self {
         let constructor_state = ConstructorState { imported_paths };
 
         Self {
             ec: ErrorCollector::default(),
-            namespace: NameSpace::default(),
+            prog_ctx,
             comp_data: CompilationData::default(),
             comp_config,
             builtin_registry: BuiltinRegistry::default(),
@@ -59,6 +61,7 @@ impl NameSpaceConstructor {
             constructor_state,
             code: String::new(),
             decl_stmts: Vec::new(),
+            namespace_id,
         }
     }
 
@@ -76,41 +79,14 @@ impl NameSpaceConstructor {
     pub fn collect_global_decls(&mut self) {
         let mut global_decl_collector = GlobalDeclCollector::new(
             &mut self.ec,
-            &mut self.namespace,
+            self.prog_ctx,
             &mut self.comp_data,
             &self.comp_config,
             &self.builtin_registry,
             &mut self.scope_graph,
             &self.constructor_state,
+            self.namespace_id,
         );
         global_decl_collector.process(&self.decl_stmts);
-    }
-
-    pub fn analyze_struct_graph(&mut self) {
-        let mut struct_graph_analyzer =
-            StructGraphAnalyzer::new(&mut self.ec, &self.namespace, &self.comp_data.struct_graph);
-        struct_graph_analyzer.analyze_all();
-    }
-
-    pub fn build_statements(&mut self) {
-        let mut stmt_builder = StatementBuilder::new(
-            &mut self.ec,
-            &mut self.namespace,
-            &self.comp_data,
-            &self.builtin_registry,
-            &mut self.scope_graph,
-        );
-        stmt_builder.build_all();
-    }
-
-    pub fn analyze_scope_graph(&mut self) {
-        let mut scope_graph_analyzer =
-            ScopeGraphAnalyzer::new(&mut self.ec, &self.namespace, &mut self.scope_graph);
-        scope_graph_analyzer.analyze_all();
-    }
-
-    pub fn get_blueprint(&self) -> IOBlueprint {
-        let blueprint_builder = BlueprintBuilder::new(&self.namespace);
-        blueprint_builder.build()
     }
 }

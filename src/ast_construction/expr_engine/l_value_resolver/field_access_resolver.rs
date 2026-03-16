@@ -34,7 +34,7 @@ impl LValueResolver<'_> {
                     Ph::ExprEngine,
                     last_l_value.value_type.to_string(),
                 );
-                return None;
+                None
             }
             ResolvedType::Struct(struct_id) => {
                 let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
@@ -46,7 +46,7 @@ impl LValueResolver<'_> {
                 };
 
                 // Get the offset of the field
-                let field_type = struct_decl.fields[field_index].value_type.clone();
+                let field_type = struct_decl.fields[field_index].value_type;
                 let field_offset = struct_decl.field_offsets[field_index];
                 // Return the resolved l value
                 Some(LValue {

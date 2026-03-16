@@ -71,11 +71,6 @@ pub enum ErrorKind {
     /// Non-associative operator is used consecutively.
     OpNotAssociative,
 
-    /// Title: NoReturnFuncInExpr
-    /// Payload: The name of the function that has no return type
-    /// Function without return type is used in an expression.
-    NoReturnFuncInExpr,
-
     /// Title: MemberAccessOnPrimitive
     /// Payload: None
     /// Member access expression on a primitive type.
@@ -171,11 +166,6 @@ pub enum ErrorKind {
     /// A struct with the same name already exists in the current scope, or its parent scopes.
     DuplicateStructName,
 
-    /// Title: ReservedStructName
-    /// Payload: The name of the struct
-    /// The name of the struct is reserved by the language.
-    ReservedStructName,
-
     /// Title: DuplicateFuncName
     /// Payload: The name of the function
     /// A function with the same name already exists.
@@ -210,11 +200,6 @@ pub enum ErrorKind {
     /// Payload: The symbol of the operator definition
     /// An operator function with the same symbol and the operand type is defined.
     DuplicatePostfixFunc,
-
-    /// Title: FuncCallInLValue
-    /// Payload: None
-    /// A function call is part of an LValue expression.
-    FuncCallInLValue,
 
     /// Title: AssignTypeMismatch
     /// Payload: The type of the target and the type of the assigned value
@@ -260,11 +245,6 @@ pub enum ErrorKind {
     /// Payload: Name of the struct which has a cyclic field
     /// A struct has a cyclic field, so the compiler cannot determine the size.
     StructCycle,
-
-    /// Title: StaticFuncCallOnInstance
-    /// Payload: Name of the function
-    /// A function is static but called on an instance.
-    StaticFuncCallOnInstance,
 
     /// Title: StaticCallOfInstanceFunc
     /// Payload: Name of the function

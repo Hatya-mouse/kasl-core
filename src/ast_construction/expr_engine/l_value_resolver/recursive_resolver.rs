@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{ExprToken, ExprTokenKind, expr_engine::LValueResolver, symbol_table::LValue};
+use crate::{
+    ExprToken, ExprTokenKind, error::Ph, expr_engine::LValueResolver, symbol_table::LValue,
+};
 
 impl LValueResolver<'_> {
     pub fn resolve_l_value(&mut self, tokens: &[ExprToken]) -> Option<LValue> {
@@ -32,6 +34,10 @@ impl LValueResolver<'_> {
                 } else {
                     l_value = self.resolve_identifier(target_scope, name, token.range);
                 }
+            } else {
+                // If the token is not an identifier, throw an error and return None
+                self.ec.invalid_l_value(token.range, Ph::ExprEngine);
+                return None;
             }
         }
         l_value

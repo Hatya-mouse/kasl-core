@@ -82,7 +82,7 @@ impl ExpressionResolver<'_> {
         }
 
         // Resolve member access and function calls
-        while let Some(element) = elements_iter.next() {
+        for element in &mut elements_iter {
             match element {
                 UnresolvedChainElement::Identifier { name } => {
                     if let Some(last_expr) = expr {

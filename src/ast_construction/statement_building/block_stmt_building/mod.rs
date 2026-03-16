@@ -14,40 +14,51 @@
 // limitations under the License.
 //
 
-mod body_collector;
 mod builders;
 /// Builds a Block which contains ScopeID from a list of statements.
 mod scope_block_builder;
 mod stmt_builder;
 
 use crate::{
-    CompilationData, NameSpace, builtin::BuiltinRegistry, error::ErrorCollector,
-    scope_manager::ScopeGraph,
+    CompilationData, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
+    compilation_data::ProgramContext, error::ErrorCollector, scope_manager::ScopeGraph,
+    type_registry::ResolvedType,
 };
 
+/// Builds a statements from raw parser statements.
+/// Should not be reused across multiple blocks.
 pub struct BlockStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
-    namespace: &'a mut NameSpace,
+    prog_ctx: &'a mut ProgramContext,
     comp_data: &'a CompilationData,
     builtin_registry: &'a BuiltinRegistry,
-
     scope_graph: &'a mut ScopeGraph,
+
+    scope_id: ScopeID,
+    namespace_id: NameSpaceID,
+    expected_return_type: ResolvedType,
 }
 
 impl<'a> BlockStmtBuilder<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
-        namespace: &'a mut NameSpace,
+        prog_ctx: &'a mut ProgramContext,
         comp_data: &'a CompilationData,
         builtin_registry: &'a BuiltinRegistry,
         scope_graph: &'a mut ScopeGraph,
+        scope_id: ScopeID,
+        namespace_id: NameSpaceID,
+        expected_return_type: ResolvedType,
     ) -> Self {
         Self {
             ec,
-            namespace,
+            prog_ctx,
             comp_data,
             builtin_registry,
             scope_graph,
+            scope_id,
+            namespace_id,
+            expected_return_type,
         }
     }
 }

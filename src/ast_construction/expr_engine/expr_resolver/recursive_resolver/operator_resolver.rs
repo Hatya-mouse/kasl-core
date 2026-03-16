@@ -38,7 +38,7 @@ impl ExpressionResolver<'_> {
             lhs_type: &lhs.value_type,
             rhs_type: &rhs.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_infix_op(&op_id)?;
+        let op = self.prog_ctx.op_ctx.get_infix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -85,7 +85,7 @@ impl ExpressionResolver<'_> {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_prefix_op(&op_id)?;
+        let op = self.prog_ctx.op_ctx.get_prefix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
@@ -126,7 +126,7 @@ impl ExpressionResolver<'_> {
             symbol: &symbol,
             operand_type: &operand.value_type,
         })?;
-        let op = self.prog_ctx.op_ctx.get_postfix_op(&op_id)?;
+        let op = self.prog_ctx.op_ctx.get_postfix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion

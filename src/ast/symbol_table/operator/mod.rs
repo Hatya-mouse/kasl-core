@@ -28,7 +28,10 @@ pub use postfix_operator::{
 };
 pub use prefix_operator::{PrefixOperator, PrefixOperatorProperties, PrefixQuery, PrefixQueryRef};
 
-use crate::OperatorID;
+use crate::{
+    OperatorID,
+    error::{EK, ErrorKind},
+};
 use hashbrown::{HashMap, hash_map::Entry};
 
 #[derive(Debug, Default, serde::Serialize)]
@@ -57,7 +60,8 @@ impl OperatorContext {
 
     // --- REGISTER FUNCTIONS ---
 
-    pub fn register_infix_func(&mut self, infix: InfixOperator) -> Result<OperatorID, ()> {
+    /// Registers an infix operator and returns its ID.
+    pub fn register_infix_func(&mut self, infix: InfixOperator) -> Result<OperatorID, ErrorKind> {
         let id = self.generate_operator_id();
         // Construct an infix query
         let query = InfixQuery {
@@ -72,7 +76,7 @@ impl OperatorContext {
                 self.infix_operators.insert(id, infix);
                 Ok(id)
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicateInfixFunc),
         }
     }
 
@@ -80,17 +84,21 @@ impl OperatorContext {
         &mut self,
         symbol: String,
         properties: InfixOperatorProperties,
-    ) -> Result<(), ()> {
+    ) -> Result<(), ErrorKind> {
         match self.infix_operator_properties.entry(symbol) {
             Entry::Vacant(vacant_entry) => {
                 vacant_entry.insert(properties);
                 Ok(())
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicateInfixDefine),
         }
     }
 
-    pub fn register_prefix_func(&mut self, prefix: PrefixOperator) -> Result<OperatorID, ()> {
+    /// Registers an prefix operator and returns its ID.
+    pub fn register_prefix_func(
+        &mut self,
+        prefix: PrefixOperator,
+    ) -> Result<OperatorID, ErrorKind> {
         let id = self.generate_operator_id();
         // Construct a prefix query
         let query = PrefixQuery {
@@ -104,7 +112,7 @@ impl OperatorContext {
                 self.prefix_operators.insert(id, prefix);
                 Ok(id)
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicatePrefixFunc),
         }
     }
 
@@ -112,17 +120,21 @@ impl OperatorContext {
         &mut self,
         symbol: String,
         properties: PrefixOperatorProperties,
-    ) -> Result<(), ()> {
+    ) -> Result<(), ErrorKind> {
         match self.prefix_operator_properties.entry(symbol) {
             Entry::Vacant(vacant_entry) => {
                 vacant_entry.insert(properties);
                 Ok(())
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicatePrefixDefine),
         }
     }
 
-    pub fn register_postfix_func(&mut self, postfix: PostfixOperator) -> Result<OperatorID, ()> {
+    /// Registers an postfix operator and returns its ID.
+    pub fn register_postfix_func(
+        &mut self,
+        postfix: PostfixOperator,
+    ) -> Result<OperatorID, ErrorKind> {
         let id = self.generate_operator_id();
         // Construct a postfix query
         let query = PostfixQuery {
@@ -136,7 +148,7 @@ impl OperatorContext {
                 self.postfix_operators.insert(id, postfix);
                 Ok(id)
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicatePostfixFunc),
         }
     }
 
@@ -144,13 +156,13 @@ impl OperatorContext {
         &mut self,
         symbol: String,
         properties: PostfixOperatorProperties,
-    ) -> Result<(), ()> {
+    ) -> Result<(), ErrorKind> {
         match self.postfix_operator_properties.entry(symbol) {
             Entry::Vacant(vacant_entry) => {
                 vacant_entry.insert(properties);
                 Ok(())
             }
-            Entry::Occupied(_) => Err(()),
+            Entry::Occupied(_) => Err(EK::DuplicatePostfixDefine),
         }
     }
 
@@ -184,16 +196,30 @@ impl OperatorContext {
 
     // --- OPERATOR FUNC GETTER FUNCTIONS ---
 
-    pub fn get_infix_op(&self, id: &OperatorID) -> Option<&InfixOperator> {
+    pub fn get_infix_func(&self, id: &OperatorID) -> Option<&InfixOperator> {
         self.infix_operators.get(id)
     }
 
-    pub fn get_prefix_op(&self, id: &OperatorID) -> Option<&PrefixOperator> {
+    pub fn get_prefix_func(&self, id: &OperatorID) -> Option<&PrefixOperator> {
         self.prefix_operators.get(id)
     }
 
-    pub fn get_postfix_op(&self, id: &OperatorID) -> Option<&PostfixOperator> {
+    pub fn get_postfix_func(&self, id: &OperatorID) -> Option<&PostfixOperator> {
         self.postfix_operators.get(id)
+    }
+
+    // --- OPERATOR MUTABLE FUNC GETTER FUNCTIONS ---
+
+    pub fn get_infix_func_mut(&mut self, id: &OperatorID) -> Option<&mut InfixOperator> {
+        self.infix_operators.get_mut(id)
+    }
+
+    pub fn get_prefix_func_mut(&mut self, id: &OperatorID) -> Option<&mut PrefixOperator> {
+        self.prefix_operators.get_mut(id)
+    }
+
+    pub fn get_postfix_func_mut(&mut self, id: &OperatorID) -> Option<&mut PostfixOperator> {
+        self.postfix_operators.get_mut(id)
     }
 
     // --- ALL IDS GETTER FUNCTIONS ---

@@ -15,9 +15,8 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeID, ScopeVar, SymbolPath, VariableID, error::Ph,
-    expr_engine::resolve_expr, scope_manager::VariableKind, statement_building::BlockStmtBuilder,
-    type_registry::ResolvedType,
+    Expr, ExprToken, Range, ScopeVar, SymbolPath, VariableID, error::Ph, expr_engine::resolve_expr,
+    scope_manager::VariableKind, statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {
@@ -25,24 +24,30 @@ impl BlockStmtBuilder<'_> {
         &mut self,
         def_val: &[ExprToken],
         value_type: &Option<SymbolPath>,
-        current_scope_id: ScopeID,
         stmt_range: Range,
-    ) -> Option<Expr<ResolvedType>> {
+    ) -> Option<Expr> {
         let resolved_def_val = resolve_expr(
             self.ec,
-            self.namespace,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
-            current_scope_id,
+            self.scope_id,
+            self.namespace_id,
             def_val,
         )?;
 
         // Resolve the type annotation if provided
         if let Some(type_annotation) = value_type {
+            // Get the namespace that the type belongs to
+            let (namespace_id, type_name) = self
+                .prog_ctx
+                .namespace_registry
+                .resolve_namespace_from_path(type_annotation.clone());
+            // Then get the type from the type registry
             let Some(resolved_type_annotation) = self
-                .namespace
+                .prog_ctx
                 .type_registry
-                .resolve_type_path(type_annotation)
+                .resolve_type(namespace_id, &type_name.to_string())
             else {
                 self.ec.type_not_found(
                     stmt_range,
@@ -57,10 +62,10 @@ impl BlockStmtBuilder<'_> {
                 self.ec.type_annotation_mismatch(
                     stmt_range,
                     Ph::StatementCollection,
-                    self.namespace
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_type_annotation),
-                    self.namespace
+                    self.prog_ctx
                         .type_registry
                         .format_type(&resolved_def_val.value_type),
                 );
@@ -76,13 +81,11 @@ impl BlockStmtBuilder<'_> {
         name: &str,
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
-        current_scope_id: ScopeID,
         stmt_range: Range,
         var_kind: VariableKind,
     ) -> Option<VariableID> {
         // Resolve the default value expression
-        let resolved_def_val =
-            self.resolve_def_val(def_val, value_type, current_scope_id, stmt_range)?;
+        let resolved_def_val = self.resolve_def_val(def_val, value_type, stmt_range)?;
 
         // Create a ScopeVar
         let scope_var = ScopeVar {
@@ -95,9 +98,9 @@ impl BlockStmtBuilder<'_> {
 
         // Check if the name is already in use in this scope
         if self
-            .namespace
-            .scope_registry
-            .has_var(current_scope_id, name)
+            .prog_ctx
+            .namespace_registry
+            .is_name_used(&self.namespace_id, name)
         {
             self.ec
                 .duplicate_var_name(stmt_range, Ph::StatementCollection, name);
@@ -105,11 +108,10 @@ impl BlockStmtBuilder<'_> {
         }
 
         // Register the variable in the scope
-        let var_id = self.namespace.scope_registry.register_var(
-            scope_var,
-            name.to_string(),
-            current_scope_id,
-        );
+        let var_id =
+            self.prog_ctx
+                .scope_registry
+                .register_var(scope_var, name.to_string(), &self.scope_id);
 
         Some(var_id)
     }

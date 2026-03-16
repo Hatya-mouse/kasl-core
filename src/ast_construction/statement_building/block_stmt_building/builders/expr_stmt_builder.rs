@@ -15,21 +15,18 @@
 //
 
 use crate::{
-    ExprToken, ScopeID, Statement, expr_engine::resolve_expr, statement_building::BlockStmtBuilder,
+    ExprToken, Statement, expr_engine::resolve_expr, statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {
-    pub fn build_expr_stmt(
-        &mut self,
-        expr: &[ExprToken],
-        current_scope_id: ScopeID,
-    ) -> Option<Statement> {
+    pub fn build_expr_stmt(&mut self, expr: &[ExprToken]) -> Option<Statement> {
         let expr = resolve_expr(
             self.ec,
-            self.namespace,
+            self.prog_ctx,
             self.scope_graph,
             self.builtin_registry,
-            current_scope_id,
+            self.scope_id,
+            self.namespace_id,
             expr,
         )?;
         Some(Statement::Expression { expr })

@@ -15,6 +15,7 @@
 //
 
 mod block_stmt_building;
+mod body_collector;
 
 pub use block_stmt_building::BlockStmtBuilder;
 
@@ -55,30 +56,21 @@ impl<'a> StatementBuilder<'a> {
         let prefix_ids = self.prog_ctx.op_ctx.all_prefix_ids();
         let postfix_ids = self.prog_ctx.op_ctx.all_postfix_ids();
 
-        // Create a block statement builder
-        let mut func_stmt_builder = BlockStmtBuilder::new(
-            self.ec,
-            self.prog_ctx,
-            self.comp_data,
-            self.builtin_registry,
-            self.scope_graph,
-        );
-
         // Loop over the ids and build the function body
         for func_id in func_ids {
-            func_stmt_builder.build_func_body(func_id);
+            self.build_func_body(func_id);
         }
 
         for op_id in infix_ids {
-            func_stmt_builder.build_infix_body(op_id);
+            self.build_infix_body(op_id);
         }
 
         for op_id in prefix_ids {
-            func_stmt_builder.build_prefix_body(op_id);
+            self.build_prefix_body(op_id);
         }
 
         for op_id in postfix_ids {
-            func_stmt_builder.build_postfix_body(op_id);
+            self.build_postfix_body(op_id);
         }
     }
 }

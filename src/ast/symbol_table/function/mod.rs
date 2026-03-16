@@ -57,6 +57,10 @@ impl FunctionContext {
         self.funcs.get(func_id)
     }
 
+    pub fn get_func_mut(&mut self, func_id: &FunctionID) -> Option<&mut Function> {
+        self.funcs.get_mut(func_id)
+    }
+
     pub fn get_all_func_ids(&self) -> Vec<FunctionID> {
         self.funcs.keys().copied().collect()
     }

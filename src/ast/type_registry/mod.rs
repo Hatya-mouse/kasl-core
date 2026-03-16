@@ -50,7 +50,7 @@ impl TypeRegistry {
             Ok(primitive) => Some(ResolvedType::Primitive(primitive)),
             Err(_) => self
                 .get_struct_id(namespace_id, type_name)
-                .map(|id| ResolvedType::Struct(id)),
+                .map(ResolvedType::Struct),
         }
     }
 

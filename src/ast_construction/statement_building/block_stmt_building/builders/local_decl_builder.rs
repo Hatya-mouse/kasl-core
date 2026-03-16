@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    ExprToken, Range, ScopeID, Statement, SymbolPath, scope_manager::VariableKind,
+    ExprToken, Range, Statement, SymbolPath, scope_manager::VariableKind,
     statement_building::BlockStmtBuilder,
 };
 
@@ -25,7 +25,6 @@ impl BlockStmtBuilder<'_> {
         name: &str,
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
-        current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Statement> {
         // Build and register the scope variable
@@ -33,7 +32,6 @@ impl BlockStmtBuilder<'_> {
             name,
             value_type,
             def_val,
-            current_scope_id,
             stmt_range,
             VariableKind::LocalVar,
         )?;
@@ -48,7 +46,6 @@ impl BlockStmtBuilder<'_> {
         name: &str,
         value_type: &Option<SymbolPath>,
         def_val: &[ExprToken],
-        current_scope_id: ScopeID,
         stmt_range: Range,
     ) -> Option<Statement> {
         // Build and register the scope variable
@@ -56,7 +53,6 @@ impl BlockStmtBuilder<'_> {
             name,
             value_type,
             def_val,
-            current_scope_id,
             stmt_range,
             VariableKind::LocalConst,
         )?;

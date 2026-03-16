@@ -32,7 +32,7 @@ use std::{collections::HashMap, fmt::Display};
 /// and doesn't manage the struct fields.
 #[derive(Default, Debug, serde::Serialize)]
 pub struct ScopeRegistry {
-    pub scopes: HashMap<ScopeID, Scope>,
+    scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,
     global_scope_ids: HashMap<NameSpaceID, ScopeID>,
     next_scope_id: usize,
@@ -99,6 +99,16 @@ impl ScopeRegistry {
     /// Gets a reference to the variable with the given `VariableID`.
     pub fn get_var(&self, var_id: &VariableID) -> Option<&ScopeVar> {
         self.variables.get(var_id)
+    }
+
+    /// Returns a reference to the scope with the given `ScopeID`.
+    pub fn get_scope(&self, scope_id: &ScopeID) -> Option<&Scope> {
+        self.scopes.get(scope_id)
+    }
+
+    /// Gets IDs of all scopes.
+    pub fn get_all_scope_ids(&self) -> Vec<ScopeID> {
+        self.scopes.keys().copied().collect()
     }
 
     // --- REGISTRATION ---

@@ -15,50 +15,37 @@
 //
 
 use crate::{
-    ParserScopeStmt, ParserScopeStmtKind, ScopeID, Statement, statement_building::BlockStmtBuilder,
-    type_registry::ResolvedType,
+    ParserScopeStmt, ParserScopeStmtKind, Statement, statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {
-    pub fn build_stmt(
-        &mut self,
-        stmt: &ParserScopeStmt,
-        scope_id: ScopeID,
-        expected_return_type: ResolvedType,
-    ) -> Option<Statement> {
+    pub fn build_stmt(&mut self, stmt: &ParserScopeStmt) -> Option<Statement> {
         match &stmt.kind {
             ParserScopeStmtKind::Block { statements } => {
-                self.build_block_stmt(statements, scope_id, expected_return_type, stmt.range)
+                self.build_block_stmt(statements, stmt.range)
             }
             ParserScopeStmtKind::LocalVar {
                 name,
                 value_type,
                 def_val,
-            } => self.build_local_var(name, value_type, def_val, scope_id, stmt.range),
+            } => self.build_local_var(name, value_type, def_val, stmt.range),
             ParserScopeStmtKind::LocalConst {
                 name,
                 value_type,
                 def_val,
-            } => self.build_local_const(name, value_type, def_val, scope_id, stmt.range),
+            } => self.build_local_const(name, value_type, def_val, stmt.range),
             ParserScopeStmtKind::Assign { target, value } => {
-                self.build_assign(target, value, scope_id, stmt.range)
+                self.build_assign(target, value, stmt.range)
             }
-            ParserScopeStmtKind::Expression { expr } => self.build_expr_stmt(expr, scope_id),
+            ParserScopeStmtKind::Expression { expr } => self.build_expr_stmt(expr),
             ParserScopeStmtKind::If {
                 main,
                 else_ifs,
                 else_body,
                 else_range,
-            } => self.build_if_stmt(
-                main,
-                else_ifs,
-                else_body.as_ref(),
-                *else_range,
-                scope_id,
-                expected_return_type,
-            ),
+            } => self.build_if_stmt(main, else_ifs, else_body.as_ref(), *else_range),
             ParserScopeStmtKind::Return { value } => {
-                self.build_return_stmt(value.as_ref(), scope_id, stmt.range, expected_return_type)
+                self.build_return_stmt(value.as_ref(), stmt.range)
             }
         }
     }

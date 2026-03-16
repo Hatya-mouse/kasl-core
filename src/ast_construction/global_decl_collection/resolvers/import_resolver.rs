@@ -45,22 +45,23 @@ impl GlobalDeclCollector<'_> {
         let mut imported_paths = self.constructor_state.imported_paths.clone();
         imported_paths.insert(full_path);
 
+        // Generate a new namespace for the imported program
+        let namespace_id = self.prog_ctx.namespace_registry.register_namespace(
+            import_path.path.last().cloned().unwrap(),
+            Some(self.current_namespace),
+        );
+
         // Create a constructor and pass the program to it
-        let mut constructor = NameSpaceConstructor::new(self.comp_config.clone(), imported_paths);
+        let mut constructor = NameSpaceConstructor::new(
+            self.prog_ctx,
+            self.comp_config.clone(),
+            imported_paths,
+            namespace_id,
+        );
         constructor.set_code(&program);
 
         // Construct the program
         constructor.collect_global_decls();
-        constructor.analyze_struct_graph();
-        constructor.build_statements();
-        constructor.analyze_scope_graph();
-
-        // Register the namespace with the import path
-        self.prog_ctx.namespace_registry.register_namespace(
-            import_path.path.last().cloned().unwrap(),
-            constructor.namespace,
-            Some(self.current_namespace),
-        );
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {

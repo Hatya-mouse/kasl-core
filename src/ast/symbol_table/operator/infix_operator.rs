@@ -14,12 +14,13 @@
 // limitations under the License.
 //
 
-use crate::{FuncParam, Range, symbol_table::Block, type_registry::ResolvedType};
+use crate::{FuncParam, NameSpaceID, Range, symbol_table::Block, type_registry::ResolvedType};
 use hashbrown::Equivalent;
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct InfixOperator {
     pub symbol: String,
+    pub namespace_id: NameSpaceID,
     pub lhs: FuncParam,
     pub rhs: FuncParam,
     pub return_type: ResolvedType,

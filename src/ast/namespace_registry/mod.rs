@@ -69,29 +69,27 @@ impl NameSpaceRegistry {
 
     // --- REGISTRATION ---
 
-    pub fn register_namespace(
-        &mut self,
-        name: String,
-        namespace: NameSpace,
-        parent: Option<NameSpaceID>,
-    ) {
-        let namespace_id = self.generate_namespace_id();
-        self.namespaces.insert(namespace_id, namespace);
-        if let Some(parent) = parent {
-            self.namespaces
-                .get_mut(&parent)
-                .unwrap()
-                .add_child(name, namespace_id);
+    pub fn register_namespace(&mut self, name: String, parent: Option<NameSpaceID>) -> NameSpaceID {
+        let id = self.generate_namespace_id();
+        let namespace = NameSpace::new(id);
+        self.namespaces.insert(id, namespace);
+
+        // Register the new namespace as a child of the parent namespace
+        if let Some(parent) = parent
+            && let Some(parent) = self.namespaces.get_mut(&parent)
+        {
+            parent.add_child(name, id);
         }
+        id
     }
 
     // --- NAME DUPLICATION DETECTION ---
 
     /// Add the name to the set of defined names for the given namespace.
     pub fn mark_as_defined(&mut self, namespace_id: &NameSpaceID, name: String) {
-        self.namespaces
-            .get_mut(namespace_id)
-            .map(|namespace| namespace.mark_as_defined(name));
+        if let Some(namespace) = self.namespaces.get_mut(namespace_id) {
+            namespace.mark_as_defined(name)
+        }
     }
 
     /// Returns if the name is already used.
