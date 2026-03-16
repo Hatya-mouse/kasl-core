@@ -103,7 +103,7 @@ impl BlockStmtBuilder<'_> {
             .is_name_used(&self.namespace_id, name)
         {
             self.ec
-                .duplicate_var_name(stmt_range, Ph::StatementCollection, name);
+                .duplicate_name(stmt_range, Ph::StatementCollection, name);
             return None;
         }
 
@@ -112,6 +112,9 @@ impl BlockStmtBuilder<'_> {
             self.prog_ctx
                 .scope_registry
                 .register_var(scope_var, name.to_string(), &self.scope_id);
+
+        // Mark the variable name as used in the namespace
+        self.mark_name_used(name);
 
         Some(var_id)
     }

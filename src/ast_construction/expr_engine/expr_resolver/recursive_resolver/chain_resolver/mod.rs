@@ -73,10 +73,15 @@ impl ExpressionResolver<'_> {
                     // Resolve the static function call
                     expr = Some(self.resolve_static_func_call(struct_id, next_element, range)?);
                 } else if name == "Builtin" {
-                    // It's safe to unwrap because it has already been peeked
-                    let element = elements_iter.next().unwrap();
+                    // Consume the "Builtin" element
+                    elements_iter.next();
+                    // Get the next element
+                    let Some(next_element) = elements_iter.next() else {
+                        self.ec.expr_ends_with_type(range, Ph::ExprEngine);
+                        return None;
+                    };
                     // Resolve the builtin function call
-                    expr = Some(self.resolve_builtin_func_call(element, range)?);
+                    expr = Some(self.resolve_builtin_func_call(next_element, range)?);
                 }
             }
         }

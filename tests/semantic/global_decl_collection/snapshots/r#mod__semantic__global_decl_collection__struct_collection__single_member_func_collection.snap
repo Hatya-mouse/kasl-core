@@ -1,23 +1,22 @@
 ---
 source: tests/semantic/global_decl_collection/struct_collection.rs
-expression: test_ctx.namespace.func_ctx
+expression: "&test_ctx.prog_ctx.type_registry"
 ---
-funcs:
+structs:
   0:
-    name: new
-    is_member: true
-    is_static: false
-    params: []
-    return_type:
-      Primitive: Void
-    block:
-      body: []
-      scope_id: 1
+    name: Type
+    fields: []
+    indices: {}
+    instance_methods: []
+    static_methods: []
+    field_offsets: []
+    total_size: 0
+    alignment: 1
     range:
       start: 0
       end: 0
-member_functions:
-  0:
-    new: 0
-global_functions: {}
-next_function_id: 1
+name_to_id:
+  ? - 0
+    - Type
+  : 0
+next_struct_id: 1

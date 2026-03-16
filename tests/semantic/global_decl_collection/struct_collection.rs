@@ -14,15 +14,19 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext,
-    builders::{
-        bool_literal, float_literal, func_decl, int_literal, state_var, struct_decl, struct_field,
+use crate::{
+    assert_type_registry_snapshot,
+    common::{
+        TestContext,
+        assert::assert_error,
+        builders::{
+            bool_literal, float_literal, func_decl, int_literal, state_var, struct_decl,
+            struct_field,
+        },
+        collect_global_decls,
     },
-    collect_global_decls,
 };
-use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::symbol_path;
+use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -35,11 +39,7 @@ fn test_single_field_collection() {
         &[struct_field("field", None, &[float_literal(5.3)])],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.type_registry, {
-        ".structs" => sorted_redaction(),
-        ".path_to_id" => sorted_redaction(),
-        ".**.indices" => sorted_redaction(),
-    });
+    assert_type_registry_snapshot!(&test_ctx.prog_ctx.type_registry);
 }
 
 #[test]
@@ -51,12 +51,7 @@ fn test_single_member_func_collection() {
         &[func_decl(false, "new", &[], None, &[])],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_type_registry_snapshot!(&test_ctx.prog_ctx.type_registry);
 }
 
 #[test]
@@ -85,11 +80,7 @@ fn test_complex_struct_collection() {
         ],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.type_registry, {
-        ".structs" => sorted_redaction(),
-        ".path_to_id" => sorted_redaction(),
-        ".**.indices" => sorted_redaction()
-    });
+    assert_type_registry_snapshot!(&test_ctx.prog_ctx.type_registry);
 }
 
 // --- ERROR CASES ---
@@ -103,5 +94,5 @@ fn invalid_struct_decl_error() {
         &[state_var("this_is_state", None, &[float_literal(0.5)])],
     )];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::InvalidStructStmt);
 }

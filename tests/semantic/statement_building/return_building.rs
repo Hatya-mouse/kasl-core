@@ -14,14 +14,19 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext, assert_error, build_stmts,
-    builders::{
-        float_literal, func_decl, func_param, identifier, if_arm, if_stmt, int_literal, return_stmt,
+use crate::{
+    assert_func_ctx_snapshot,
+    common::{
+        TestContext,
+        assert::assert_error,
+        build_stmts,
+        builders::{
+            float_literal, func_decl, func_param, identifier, if_arm, if_stmt, int_literal,
+            return_stmt,
+        },
+        collect_global_decls,
     },
-    collect_global_decls,
 };
-use insta::{assert_yaml_snapshot, sorted_redaction};
 use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
@@ -33,12 +38,7 @@ fn test_return_on_no_return_func() {
     let parsed = vec![func_decl(false, "main", &[], None, &[return_stmt(None)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -54,12 +54,7 @@ fn test_return_int() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -87,12 +82,7 @@ fn test_return_in_both_if_and_else() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -116,12 +106,7 @@ fn test_return_after_if() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -160,12 +145,7 @@ fn test_return_in_if_else_if_else() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 // --- ERROR CASES ---

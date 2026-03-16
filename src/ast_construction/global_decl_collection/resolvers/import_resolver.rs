@@ -31,6 +31,17 @@ impl GlobalDeclCollector<'_> {
             return;
         };
 
+        // If the name is already used, throw an error
+        if let Some(last_component) = import_path.path.last()
+            && self
+                .prog_ctx
+                .namespace_registry
+                .is_name_used(&self.current_namespace, last_component)
+        {
+            self.ec
+                .duplicate_name(decl_range, Ph::GlobalDeclCollection, last_component);
+        }
+
         // If the path is already in the set of imported paths, skip it and throw an error
         if self.constructor_state.imported_paths.contains(&full_path) {
             self.ec.cyclic_dependency(

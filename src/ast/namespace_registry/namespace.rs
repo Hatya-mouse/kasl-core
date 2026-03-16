@@ -41,8 +41,8 @@ impl NameSpace {
         self.child_namespaces.insert(name, id);
     }
 
-    pub fn mark_as_defined(&mut self, name: String) {
-        self.defined_names.insert(name);
+    pub fn mark_name_used(&mut self, name: &str) {
+        self.defined_names.insert(name.to_string());
     }
 
     pub fn is_name_used(&self, name: &str) -> bool {

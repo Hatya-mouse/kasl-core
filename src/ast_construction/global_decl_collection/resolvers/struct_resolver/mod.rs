@@ -39,7 +39,7 @@ impl<'a> GlobalDeclCollector<'a> {
             .is_name_used(&self.current_namespace, name)
         {
             self.ec
-                .duplicate_struct_name(decl_range, Ph::StructCollection, name);
+                .duplicate_name(decl_range, Ph::StructCollection, name);
         }
 
         // Generate a unique struct ID and create a new struct decl
@@ -57,6 +57,9 @@ impl<'a> GlobalDeclCollector<'a> {
             name.to_string(),
             struct_id,
         );
+
+        // Mark the struct name as used in the namespace
+        self.mark_name_used(name);
     }
 
     fn resolve_struct_body(

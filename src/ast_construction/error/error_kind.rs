@@ -156,20 +156,10 @@ pub enum ErrorKind {
     /// A postfix operator definition has a wrong number of parameters.
     WrongParamCountForPostfix,
 
-    /// Title: DuplicateVarName
-    /// Payload: The name of the variable
-    /// A variable with the same name already exists in the current scope, or its parent scopes.
-    DuplicateVarName,
-
-    /// Title: DuplicateStructName
-    /// Payload: The name of the struct
-    /// A struct with the same name already exists in the current scope, or its parent scopes.
-    DuplicateStructName,
-
-    /// Title: DuplicateFuncName
-    /// Payload: The name of the function
-    /// A function with the same name already exists.
-    DuplicateFuncName,
+    /// Title: DuplicateName
+    /// Payload: The name that is already used
+    /// A declaration with the same name already exists in the current scope, or its parent scopes.
+    DuplicateName,
 
     /// Title: DuplicateInfixDefine
     /// Payload: The symbol of the operator definition

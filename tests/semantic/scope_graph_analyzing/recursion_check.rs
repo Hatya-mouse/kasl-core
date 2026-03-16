@@ -15,7 +15,9 @@
 //
 
 use crate::common::{
-    TestContext, analyze_scopes, assert_error, build_stmts,
+    TestContext, analyze_scopes,
+    assert::assert_error,
+    build_stmts,
     builders::{block, bool_literal, expression, func_call, func_decl, if_arm, if_stmt},
     collect_global_decls,
 };

@@ -14,12 +14,14 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext, build_stmts,
-    builders::{expression, func_call, func_decl},
-    collect_global_decls,
+use crate::{
+    assert_func_ctx_snapshot,
+    common::{
+        TestContext, build_stmts,
+        builders::{expression, func_call, func_decl},
+        collect_global_decls,
+    },
 };
-use insta::{assert_yaml_snapshot, sorted_redaction};
 
 // -- SUCCESS CASES ---
 
@@ -39,10 +41,5 @@ fn test_func_call_stmt() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }

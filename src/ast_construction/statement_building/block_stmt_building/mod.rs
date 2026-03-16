@@ -61,4 +61,11 @@ impl<'a> BlockStmtBuilder<'a> {
             expected_return_type,
         }
     }
+
+    pub fn mark_name_used(&mut self, name: &str) {
+        // Mark the name as used in the namespace
+        self.prog_ctx
+            .namespace_registry
+            .mark_name_used(&self.namespace_id, name);
+    }
 }

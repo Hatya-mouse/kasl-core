@@ -67,4 +67,11 @@ impl<'a> GlobalDeclCollector<'a> {
             self.process_stmt(stmt);
         }
     }
+
+    pub fn mark_name_used(&mut self, name: &str) {
+        // Mark the name as used in the namespace
+        self.prog_ctx
+            .namespace_registry
+            .mark_name_used(&self.current_namespace, name);
+    }
 }

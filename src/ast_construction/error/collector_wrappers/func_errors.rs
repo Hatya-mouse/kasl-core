@@ -87,16 +87,6 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn duplicate_func_name(&mut self, range: Range, phase: Phase, func_name: &str) {
-        self.emit(
-            EK::DuplicateFuncName,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(func_name.to_string()),
-        );
-    }
-
     pub(crate) fn recursive_call(&mut self, range: Range, phase: Phase) {
         self.emit(EK::RecursiveCall, range, phase, Sv::Error, Pl::None);
     }

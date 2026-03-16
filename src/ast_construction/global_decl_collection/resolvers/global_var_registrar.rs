@@ -94,7 +94,7 @@ impl GlobalDeclCollector<'_> {
             .is_name_used(&self.current_namespace, name)
         {
             self.ec
-                .duplicate_var_name(decl_range, Ph::StatementCollection, name);
+                .duplicate_name(decl_range, Ph::StatementCollection, name);
             return;
         }
 
@@ -122,5 +122,8 @@ impl GlobalDeclCollector<'_> {
         self.prog_ctx
             .scope_registry
             .register_var(var, name.to_string(), &global_scope_id);
+
+        // Mark the variable name as used in the namespace
+        self.mark_name_used(name);
     }
 }

@@ -1,12 +1,12 @@
 ---
 source: tests/semantic/global_decl_collection/func_collection.rs
-expression: test_ctx.namespace.func_ctx
+expression: "&test_ctx.prog_ctx.func_ctx"
 ---
 funcs:
   0:
     name: one
-    is_member: false
-    is_static: false
+    namespace_id: 0
+    func_type: Global
     params: []
     return_type:
       Primitive: Void
@@ -18,8 +18,8 @@ funcs:
       end: 0
   1:
     name: two
-    is_member: false
-    is_static: false
+    namespace_id: 0
+    func_type: Global
     params: []
     return_type:
       Primitive: Void
@@ -31,6 +31,10 @@ funcs:
       end: 0
 member_functions: {}
 global_functions:
-  one: 0
-  two: 1
+  ? - 0
+    - one
+  : 0
+  ? - 0
+    - two
+  : 1
 next_function_id: 2

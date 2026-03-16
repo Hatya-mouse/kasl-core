@@ -1,12 +1,12 @@
 ---
 source: tests/semantic/statement_building/local_let_building.rs
-expression: test_ctx.namespace.func_ctx
+expression: "&test_ctx.prog_ctx.func_ctx"
 ---
 funcs:
   0:
     name: main
-    is_member: false
-    is_static: false
+    namespace_id: 0
+    func_type: Global
     params: []
     return_type:
       Primitive: Void
@@ -20,5 +20,7 @@ funcs:
       end: 0
 member_functions: {}
 global_functions:
-  main: 0
+  ? - 0
+    - main
+  : 0
 next_function_id: 1

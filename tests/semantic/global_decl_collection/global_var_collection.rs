@@ -14,12 +14,16 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext,
-    builders::{float_literal, global_const, input, input_attr, int_literal, output, state_var},
-    collect_global_decls,
+use crate::{
+    assert_scope_registry_snapshot,
+    common::{
+        TestContext,
+        builders::{
+            float_literal, global_const, input, input_attr, int_literal, output, state_var,
+        },
+        collect_global_decls,
+    },
 };
-use insta::{assert_yaml_snapshot, sorted_redaction};
 
 // --- SUCCESS CASES ---
 
@@ -29,11 +33,7 @@ fn test_simple_input_resolution() {
 
     let parsed = vec![input("in", None, &[int_literal(0)], &[])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }
 
 #[test]
@@ -42,11 +42,7 @@ fn test_simple_output_resolution() {
 
     let parsed = vec![output("output", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }
 
 #[test]
@@ -55,11 +51,7 @@ fn test_simple_state_var_resolution() {
 
     let parsed = vec![state_var("state_var", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }
 
 #[test]
@@ -68,11 +60,7 @@ fn test_simple_let_resolution() {
 
     let parsed = vec![global_const("const", None, &[int_literal(0)])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }
 
 #[test]
@@ -86,11 +74,7 @@ fn test_multiple_variables_resolution() {
         global_const("const", None, &[int_literal(0)]),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }
 
 #[test]
@@ -107,9 +91,5 @@ fn test_input_with_attribute() {
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.scope_registry, {
-        ".scopes" => sorted_redaction(),
-        ".variables" => sorted_redaction(),
-        ".**.name_to_id" => sorted_redaction()
-    });
+    assert_scope_registry_snapshot!(&test_ctx.prog_ctx.scope_registry);
 }

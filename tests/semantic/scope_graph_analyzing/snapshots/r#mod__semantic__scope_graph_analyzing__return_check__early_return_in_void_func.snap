@@ -1,12 +1,12 @@
 ---
 source: tests/semantic/scope_graph_analyzing/return_check.rs
-expression: test_ctx.namespace.func_ctx
+expression: "&test_ctx.prog_ctx.func_ctx"
 ---
 funcs:
   0:
     name: do_something
-    is_member: false
-    is_static: false
+    namespace_id: 0
+    func_type: Global
     params:
       - label: ~
         name: param
@@ -26,7 +26,6 @@ funcs:
               condition:
                 kind:
                   Identifier:
-                    name: param
                     id: 0
                 value_type:
                   Primitive: Bool
@@ -48,5 +47,7 @@ funcs:
       end: 0
 member_functions: {}
 global_functions:
-  do_something: 0
+  ? - 0
+    - do_something
+  : 0
 next_function_id: 1

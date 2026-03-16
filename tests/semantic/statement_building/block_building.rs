@@ -14,15 +14,19 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext, assert_error, build_stmts,
-    builders::{
-        block, expression, func_call, func_call_arg, func_decl, func_param, identifier,
-        int_literal, local_var,
+use crate::{
+    assert_func_ctx_snapshot,
+    common::{
+        TestContext,
+        assert::assert_error,
+        build_stmts,
+        builders::{
+            block, expression, func_call, func_call_arg, func_decl, func_param, identifier,
+            int_literal, local_var,
+        },
+        collect_global_decls,
     },
-    collect_global_decls,
 };
-use insta::{assert_yaml_snapshot, sorted_redaction};
 use kasl::{error::EK, symbol_path};
 
 // -- SUCCESS CASES ---
@@ -34,12 +38,7 @@ fn test_empty_block_building() {
     let parsed = vec![func_decl(false, "main", &[], None, &[block(&[])])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -58,12 +57,7 @@ fn test_block_with_func_call() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -99,12 +93,7 @@ fn test_block_with_access_to_outside_var() {
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 // --- ERROR CASES ---

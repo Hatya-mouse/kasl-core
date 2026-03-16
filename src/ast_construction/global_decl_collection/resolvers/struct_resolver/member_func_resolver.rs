@@ -40,6 +40,9 @@ impl GlobalDeclCollector<'_> {
         // Register the function
         let func_id = self.prog_ctx.func_ctx.register_member_func(func, struct_id);
 
+        // Mark the function name as used in the namespace
+        self.mark_name_used(info.name);
+
         // Register the function body to the func body map
         self.comp_data
             .func_body_map

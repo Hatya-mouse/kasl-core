@@ -22,6 +22,7 @@ use crate::{
     symbol_table::{Block, FunctionType},
     type_registry::{PrimitiveType, ResolvedType},
 };
+use std::collections::HashSet;
 
 impl GlobalDeclCollector<'_> {
     pub fn build_func(
@@ -89,10 +90,19 @@ impl GlobalDeclCollector<'_> {
         func_scope_id: ScopeID,
     ) -> Option<Vec<FuncParam>> {
         let mut resolved_params = Vec::new();
+        let mut used_param_names = HashSet::new();
         // Resolve each parameter
         for param in params {
             let resolved_param = self.resolve_func_param(param, func_scope_id)?;
             resolved_params.push(resolved_param);
+
+            // Add the parameter name to the used names set
+            if used_param_names.contains(&param.name) {
+                self.ec
+                    .duplicate_name(param.range, Ph::StatementCollection, &param.name);
+            } else {
+                used_param_names.insert(param.name.clone());
+            }
         }
         Some(resolved_params)
     }
@@ -109,7 +119,7 @@ impl GlobalDeclCollector<'_> {
             .is_name_used(&self.current_namespace, &param.name)
         {
             self.ec
-                .duplicate_var_name(param.range, Ph::StatementCollection, &param.name);
+                .duplicate_name(param.range, Ph::StatementCollection, &param.name);
             return None;
         }
 

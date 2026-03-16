@@ -1,12 +1,12 @@
 ---
 source: tests/semantic/statement_building/assign_building.rs
-expression: test_ctx.namespace.func_ctx
+expression: "&test_ctx.prog_ctx.func_ctx"
 ---
 funcs:
   0:
     name: greet
-    is_member: false
-    is_static: false
+    namespace_id: 0
+    func_type: Global
     params:
       - label: ~
         name: number
@@ -31,7 +31,6 @@ funcs:
             value:
               kind:
                 Identifier:
-                  name: number
                   id: 1
               value_type:
                 Primitive: Int
@@ -44,5 +43,7 @@ funcs:
       end: 0
 member_functions: {}
 global_functions:
-  greet: 0
+  ? - 0
+    - greet
+  : 0
 next_function_id: 1

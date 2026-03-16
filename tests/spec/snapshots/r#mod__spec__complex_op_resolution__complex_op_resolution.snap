@@ -1,6 +1,6 @@
 ---
 source: tests/spec/complex_op_resolution.rs
-expression: test_ctx.namespace.op_ctx
+expression: test_ctx.prog_ctx.op_ctx
 ---
 infix_operator_properties:
   "&&":
@@ -42,6 +42,7 @@ infix_operator_properties:
 infix_operators:
   0:
     symbol: "||"
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -70,12 +71,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: or
                   id: 30
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 0
                       value_type:
                         Primitive: Bool
@@ -84,7 +83,6 @@ infix_operators:
                         end: 137
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 1
                       value_type:
                         Primitive: Bool
@@ -94,14 +92,15 @@ infix_operators:
               value_type:
                 Primitive: Bool
               range:
-                start: 131
-                end: 143
+                start: 123
+                end: 130
       scope_id: 1
     range:
       start: 66
       end: 145
   1:
     symbol: "&&"
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -130,12 +129,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: and
                   id: 29
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 2
                       value_type:
                         Primitive: Bool
@@ -144,7 +141,6 @@ infix_operators:
                         end: 285
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 3
                       value_type:
                         Primitive: Bool
@@ -154,14 +150,15 @@ infix_operators:
               value_type:
                 Primitive: Bool
               range:
-                start: 278
-                end: 291
+                start: 270
+                end: 277
       scope_id: 2
     range:
       start: 213
       end: 293
   2:
     symbol: "=="
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -190,12 +187,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: ieq
                   id: 9
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 4
                       value_type:
                         Primitive: Int
@@ -204,7 +199,6 @@ infix_operators:
                         end: 431
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 5
                       value_type:
                         Primitive: Int
@@ -214,14 +208,15 @@ infix_operators:
               value_type:
                 Primitive: Bool
               range:
-                start: 424
-                end: 437
+                start: 416
+                end: 423
       scope_id: 3
     range:
       start: 361
       end: 439
   3:
     symbol: ">"
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -250,12 +245,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: igt
                   id: 11
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 6
                       value_type:
                         Primitive: Int
@@ -264,7 +257,6 @@ infix_operators:
                         end: 575
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 7
                       value_type:
                         Primitive: Int
@@ -274,14 +266,15 @@ infix_operators:
               value_type:
                 Primitive: Bool
               range:
-                start: 568
-                end: 581
+                start: 560
+                end: 567
       scope_id: 4
     range:
       start: 506
       end: 583
   4:
     symbol: +
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -310,12 +303,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: iadd
                   id: 0
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 8
                       value_type:
                         Primitive: Int
@@ -324,7 +315,6 @@ infix_operators:
                         end: 719
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 9
                       value_type:
                         Primitive: Int
@@ -334,14 +324,15 @@ infix_operators:
               value_type:
                 Primitive: Int
               range:
-                start: 711
-                end: 725
+                start: 703
+                end: 710
       scope_id: 5
     range:
       start: 650
       end: 727
   5:
     symbol: "*"
+    namespace_id: 0
     lhs:
       label: ~
       name: lhs
@@ -370,12 +361,10 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: imul
                   id: 2
                   args:
                     - kind:
                         Identifier:
-                          name: lhs
                           id: 10
                       value_type:
                         Primitive: Int
@@ -384,7 +373,6 @@ infix_operators:
                         end: 863
                     - kind:
                         Identifier:
-                          name: rhs
                           id: 11
                       value_type:
                         Primitive: Int
@@ -394,8 +382,8 @@ infix_operators:
               value_type:
                 Primitive: Int
               range:
-                start: 855
-                end: 869
+                start: 847
+                end: 854
       scope_id: 6
     range:
       start: 794
@@ -446,6 +434,7 @@ prefix_operator_properties:
 prefix_operators:
   6:
     symbol: "!"
+    namespace_id: 0
     operand:
       label: ~
       name: operand
@@ -464,12 +453,10 @@ prefix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  name: not
                   id: 35
                   args:
                     - kind:
                         Identifier:
-                          name: operand
                           id: 12
                       value_type:
                         Primitive: Bool
@@ -479,8 +466,8 @@ prefix_operators:
               value_type:
                 Primitive: Bool
               range:
-                start: 972
-                end: 984
+                start: 964
+                end: 971
       scope_id: 7
     range:
       start: 914

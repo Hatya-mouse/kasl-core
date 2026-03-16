@@ -14,15 +14,16 @@
 // limitations under the License.
 //
 
+pub mod assert;
 pub mod builders;
 
 use kasl::{
-    CompilationData, NameSpace, ParserDeclStmt,
+    CompilationData, ParserDeclStmt,
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState},
-    error::{ErrorCollector, ErrorKind, ErrorRecord},
+    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
+    error::{ErrorCollector, ErrorRecord},
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     scope_graph_analyzing::ScopeGraphAnalyzer,
@@ -32,16 +33,36 @@ use kasl::{
 };
 use std::mem;
 
-#[derive(Default)]
 pub struct TestContext {
     pub ec: ErrorCollector,
-    pub namespace: NameSpace,
+    pub prog_ctx: ProgramContext,
     pub comp_data: CompilationData,
     pub scope_graph: ScopeGraph,
     pub builtin_registry: BuiltinRegistry,
 
     pub comp_config: CompilerConfig,
     pub constructor_state: ConstructorState,
+}
+
+impl Default for TestContext {
+    fn default() -> Self {
+        let mut test_ctx = Self {
+            ec: ErrorCollector::default(),
+            prog_ctx: ProgramContext::default(),
+            comp_data: CompilationData::default(),
+            scope_graph: ScopeGraph::default(),
+            builtin_registry: BuiltinRegistry::default(),
+
+            comp_config: CompilerConfig::default(),
+            constructor_state: ConstructorState::default(),
+        };
+        let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
+        test_ctx
+            .prog_ctx
+            .scope_registry
+            .create_global_scope(root_namespace_id);
+        test_ctx
+    }
 }
 
 pub fn parse_expr(input: &str) -> Vec<ParserDeclStmt> {
@@ -52,14 +73,16 @@ pub fn collect_global_decls(
     test_ctx: &mut TestContext,
     statements: &[ParserDeclStmt],
 ) -> Result<(), Vec<ErrorRecord>> {
+    let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
     let mut global_decl_collector = GlobalDeclCollector::new(
         &mut test_ctx.ec,
-        &mut test_ctx.namespace,
+        &mut test_ctx.prog_ctx,
         &mut test_ctx.comp_data,
         &test_ctx.comp_config,
         &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
         &test_ctx.constructor_state,
+        root_namespace_id,
     );
     global_decl_collector.process(statements);
     test_ctx.ec.as_result()
@@ -68,7 +91,7 @@ pub fn collect_global_decls(
 pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut struct_graph_analyzer = StructGraphAnalyzer::new(
         &mut test_ctx.ec,
-        &test_ctx.namespace,
+        &test_ctx.prog_ctx,
         &test_ctx.comp_data.struct_graph,
     );
     struct_graph_analyzer.analyze_all();
@@ -78,7 +101,7 @@ pub fn analyze_structs(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord
 pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut stmt_builder = StatementBuilder::new(
         &mut test_ctx.ec,
-        &mut test_ctx.namespace,
+        &mut test_ctx.prog_ctx,
         &test_ctx.comp_data,
         &test_ctx.builtin_registry,
         &mut test_ctx.scope_graph,
@@ -90,7 +113,7 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
 pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
     let mut scope_graph_analyzer = ScopeGraphAnalyzer::new(
         &mut test_ctx.ec,
-        &test_ctx.namespace,
+        &test_ctx.prog_ctx,
         &mut test_ctx.scope_graph,
     );
     scope_graph_analyzer.analyze_all();
@@ -98,7 +121,7 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
 }
 
 pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
-    let blueprint_builder = BlueprintBuilder::new(&test_ctx.namespace);
+    let blueprint_builder = BlueprintBuilder::new(&test_ctx.prog_ctx);
     blueprint_builder.build()
 }
 
@@ -110,14 +133,15 @@ pub fn execute_program(
     states: &[*mut ()],
 ) {
     let mut backend = Backend::default();
+    let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
     let main_func_id = test_ctx
-        .namespace
+        .prog_ctx
         .func_ctx
-        .get_global_func_by_name("main")
+        .get_global_func_id(root_namespace_id, "main")
         .unwrap();
     let code = backend
         .compile(
-            &test_ctx.namespace,
+            &test_ctx.prog_ctx,
             &test_ctx.builtin_registry,
             blueprint,
             &main_func_id,
@@ -139,8 +163,4 @@ unsafe fn run_code(
         let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) = mem::transmute(code_ptr);
         code_fn(input, output, state)
     }
-}
-
-pub fn assert_error(error: &[ErrorRecord], expected: ErrorKind) {
-    assert!(error.iter().any(|r| r.key.kind == expected))
 }

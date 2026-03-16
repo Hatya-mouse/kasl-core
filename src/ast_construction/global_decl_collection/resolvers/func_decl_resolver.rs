@@ -18,15 +18,18 @@ use crate::{
     Range,
     error::Ph,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    symbol_table::FunctionType,
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_global_func_decl(&mut self, info: FuncDeclInfo<'_>, decl_range: Range) {
-        // Check if is_static is not set
-        if info.func_type == FunctionType::Static {
+        // Check if a function with the same name already exists
+        if self
+            .prog_ctx
+            .namespace_registry
+            .is_name_used(&self.current_namespace, info.name)
+        {
             self.ec
-                .global_func_cannot_be_static(decl_range, Ph::GlobalDeclCollection, info.name);
+                .duplicate_name(decl_range, Ph::GlobalDeclCollection, info.name);
             return;
         }
 
@@ -41,22 +44,14 @@ impl GlobalDeclCollector<'_> {
             return;
         };
 
-        // Check if a function with the same name already exists
-        if self
-            .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.current_namespace, info.name)
-        {
-            self.ec
-                .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, info.name);
-            return;
-        }
-
         // Register the function
         let func_id = self
             .prog_ctx
             .func_ctx
             .register_global_func(self.current_namespace, func);
+
+        // Mark the function name as used in the namespace
+        self.mark_name_used(info.name);
 
         // Register the function body to the function body map
         self.comp_data

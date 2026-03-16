@@ -1,6 +1,6 @@
 ---
 source: tests/semantic/global_decl_collection/global_var_collection.rs
-expression: test_ctx.namespace.scope_registry
+expression: "&test_ctx.prog_ctx.scope_registry"
 ---
 scopes:
   0:
@@ -31,6 +31,7 @@ variables:
     var_kind:
       Input:
         attrs: []
-global_scope_id: 0
+global_scope_ids:
+  0: 0
 next_scope_id: 1
 next_variable_id: 1

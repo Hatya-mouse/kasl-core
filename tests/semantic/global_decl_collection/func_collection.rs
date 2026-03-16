@@ -14,13 +14,16 @@
 // limitations under the License.
 //
 
-use crate::common::{
-    TestContext,
-    builders::{func_decl, func_param, int_literal, struct_decl},
-    collect_global_decls,
+use crate::{
+    assert_func_ctx_snapshot,
+    common::{
+        TestContext,
+        assert::assert_error,
+        builders::{func_decl, func_param, int_literal, struct_decl},
+        collect_global_decls,
+    },
 };
-use insta::{assert_debug_snapshot, assert_yaml_snapshot, sorted_redaction};
-use kasl::symbol_path;
+use kasl::{error::EK, symbol_path};
 
 // --- SUCCESS CASES ---
 
@@ -30,12 +33,7 @@ fn test_simple_func_resolution() {
 
     let parsed = vec![func_decl(false, "greet", &[], None, &[])];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -47,12 +45,7 @@ fn test_multiple_func_resolution() {
         func_decl(false, "two", &[], None, &[]),
     ];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 #[test]
@@ -67,12 +60,7 @@ fn test_func_with_param() {
         &[],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
-    assert_yaml_snapshot!(test_ctx.namespace.func_ctx, {
-        ".funcs" => sorted_redaction(),
-        ".member_functions" => sorted_redaction(),
-        ".static_functions" => sorted_redaction(),
-        ".global_functions" => sorted_redaction()
-    });
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
 // --- ERROR CASES ---
@@ -89,7 +77,7 @@ fn test_type_not_found_func() {
         &[],
     )];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::TypeNotFound);
 }
 
 #[test]
@@ -101,7 +89,7 @@ fn test_duplicate_func() {
         func_decl(false, "greet", &[], None, &[]),
     ];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::DuplicateName);
 }
 
 #[test]
@@ -110,7 +98,7 @@ fn test_global_static_func() {
 
     let parsed = vec![func_decl(true, "greet", &[], None, &[])];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::GlobalFuncCannotBeStatic);
 }
 
 #[test]
@@ -141,5 +129,5 @@ fn test_duplicate_param_func() {
         ),
     ];
     let error = collect_global_decls(&mut test_ctx, &parsed).unwrap_err();
-    assert_debug_snapshot!(error);
+    assert_error(&error, EK::DuplicateName);
 }

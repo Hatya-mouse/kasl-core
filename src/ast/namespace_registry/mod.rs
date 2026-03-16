@@ -32,25 +32,30 @@ use std::collections::HashMap;
 
 /// Stores a id-namespace pair of all namespaces in compilation.
 /// Should only exist one instance per compilation.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct NameSpaceRegistry {
     pub namespaces: HashMap<NameSpaceID, NameSpace>,
     root_namespace_id: NameSpaceID,
     next_namespace_id: usize,
 }
 
-impl NameSpaceRegistry {
+impl Default for NameSpaceRegistry {
     /// Creates a new `NameSpaceRegistry` with the root namespace registered.
-    pub fn new() -> Self {
-        let mut registry = Self::default();
+    fn default() -> Self {
+        let mut registry = Self {
+            namespaces: HashMap::new(),
+            root_namespace_id: NameSpaceID::new(0),
+            next_namespace_id: 1,
+        };
         // Register the root namespace
-        registry.root_namespace_id = registry.generate_namespace_id();
         registry
             .namespaces
             .insert(registry.root_namespace_id, NameSpace::default());
         registry
     }
+}
 
+impl NameSpaceRegistry {
     pub fn generate_namespace_id(&mut self) -> NameSpaceID {
         let id = NameSpaceID::new(self.next_namespace_id);
         self.next_namespace_id += 1;
@@ -86,9 +91,9 @@ impl NameSpaceRegistry {
     // --- NAME DUPLICATION DETECTION ---
 
     /// Add the name to the set of defined names for the given namespace.
-    pub fn mark_as_defined(&mut self, namespace_id: &NameSpaceID, name: String) {
+    pub fn mark_name_used(&mut self, namespace_id: &NameSpaceID, name: &str) {
         if let Some(namespace) = self.namespaces.get_mut(namespace_id) {
-            namespace.mark_as_defined(name)
+            namespace.mark_name_used(name)
         }
     }
 
