@@ -14,11 +14,6 @@
 // limitations under the License.
 //
 
-pub mod blueprint_builder;
-pub mod error;
-pub mod expr_engine;
-pub mod global_decl_collection;
-pub mod namespace_constructor;
-pub mod scope_graph_analyzing;
-pub mod statement_building;
-pub mod struct_graph_analyzing;
+pub struct KaslCompiler {}
+
+impl KaslCompiler {}
