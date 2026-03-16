@@ -85,6 +85,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ceil",
         &[PrimitiveType::Float],
         PrimitiveType::Float,
+        Box::new(|builder, args| builder.ins().ceil(args[0])),
+    );
+
+    registry.register_func(
+        "round",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
         Box::new(|builder, args| builder.ins().nearest(args[0])),
     );
 
