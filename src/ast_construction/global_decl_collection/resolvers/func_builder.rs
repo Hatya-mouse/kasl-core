@@ -19,15 +19,14 @@ use crate::{
     error::Ph,
     global_decl_collection::GlobalDeclCollector,
     scope_manager::VariableKind,
-    symbol_table::Block,
+    symbol_table::{Block, FunctionType},
     type_registry::{PrimitiveType, ResolvedType},
 };
 
 impl GlobalDeclCollector<'_> {
     pub fn build_func(
         &mut self,
-        is_member: bool,
-        is_static: bool,
+        func_type: FunctionType,
         name: &str,
         params: &[ParserFuncParam],
         return_type: &Option<SymbolPath>,
@@ -75,8 +74,8 @@ impl GlobalDeclCollector<'_> {
 
         Some(Function {
             name: name.to_string(),
-            is_member,
-            is_static,
+            namespace_id: self.current_namespace,
+            func_type,
             params,
             return_type,
             block,

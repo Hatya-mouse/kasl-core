@@ -18,7 +18,7 @@ mod func_body_map;
 mod function_def;
 
 pub use func_body_map::FuncBodyMap;
-pub use function_def::{FuncCallArg, FuncParam, Function, NoTypeFuncCallArg};
+pub use function_def::{FuncCallArg, FuncParam, Function, FunctionType, NoTypeFuncCallArg};
 
 use crate::{FunctionID, NameSpaceID, StructID};
 use std::collections::HashMap;
@@ -55,6 +55,10 @@ impl FunctionContext {
 
     pub fn get_func(&self, func_id: &FunctionID) -> Option<&Function> {
         self.funcs.get(func_id)
+    }
+
+    pub fn get_all_func_ids(&self) -> Vec<FunctionID> {
+        self.funcs.keys().copied().collect()
     }
 
     // --- REGISTRATION ---

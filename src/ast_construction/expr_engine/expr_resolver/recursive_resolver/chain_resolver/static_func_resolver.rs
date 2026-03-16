@@ -15,8 +15,10 @@
 //
 
 use crate::{
-    Expr, ExprKind, Range, StructID, error::Ph, expr_engine::ExpressionResolver,
-    symbol_table::UnresolvedChainElement,
+    Expr, ExprKind, Range, StructID,
+    error::Ph,
+    expr_engine::ExpressionResolver,
+    symbol_table::{FunctionType, UnresolvedChainElement},
 };
 
 impl ExpressionResolver<'_> {
@@ -48,7 +50,7 @@ impl ExpressionResolver<'_> {
                 let func = self.prog_ctx.func_ctx.get_func(&func_id)?;
 
                 // Throw an error if the function is not static
-                if !func.is_static {
+                if func.func_type != FunctionType::Static {
                     self.ec
                         .static_call_of_instance_func(range, Ph::ExprEngine, &func.name);
                     return None;

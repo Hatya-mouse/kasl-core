@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Expr, Range, VariableID,
+    Expr, NameSpaceID, Range, VariableID,
     symbol_table::{Block, UnresolvedExpr},
     type_registry::ResolvedType,
 };
@@ -23,8 +23,8 @@ use crate::{
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct Function {
     pub name: String,
-    pub is_member: bool,
-    pub is_static: bool,
+    pub namespace_id: NameSpaceID,
+    pub func_type: FunctionType,
     pub params: Vec<FuncParam>,
     pub return_type: ResolvedType,
     pub block: Block,
@@ -77,4 +77,11 @@ pub struct FuncParam {
     pub value_type: ResolvedType,
     pub def_val: Option<Expr>,
     pub range: Range,
+}
+
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
+pub enum FunctionType {
+    Global,
+    Instance,
+    Static,
 }

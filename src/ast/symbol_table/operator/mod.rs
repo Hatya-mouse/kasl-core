@@ -195,4 +195,18 @@ impl OperatorContext {
     pub fn get_postfix_op(&self, id: &OperatorID) -> Option<&PostfixOperator> {
         self.postfix_operators.get(id)
     }
+
+    // --- ALL IDS GETTER FUNCTIONS ---
+
+    pub fn all_infix_ids(&self) -> Vec<OperatorID> {
+        self.infix_operators.keys().copied().collect()
+    }
+
+    pub fn all_prefix_ids(&self) -> Vec<OperatorID> {
+        self.prefix_operators.keys().copied().collect()
+    }
+
+    pub fn all_postfix_ids(&self) -> Vec<OperatorID> {
+        self.postfix_operators.keys().copied().collect()
+    }
 }

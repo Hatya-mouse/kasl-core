@@ -18,6 +18,7 @@ use crate::{
     ParserDeclStmt, ParserDeclStmtKind,
     error::Ph,
     global_decl_collection::{FuncDeclInfo, GlobalDeclCollector},
+    symbol_table::FunctionType,
 };
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -57,8 +58,17 @@ impl<'a> GlobalDeclCollector<'a> {
                 return_type,
                 body,
             } => {
+                // Throw an error if the function is static
+                if *is_static {
+                    self.ec.global_func_cannot_be_static(
+                        stmt.range,
+                        Ph::GlobalDeclCollection,
+                        name,
+                    );
+                }
+
                 let info = FuncDeclInfo {
-                    is_static: *is_static,
+                    func_type: FunctionType::Global,
                     name,
                     params,
                     return_type,

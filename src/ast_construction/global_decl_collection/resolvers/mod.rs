@@ -29,10 +29,10 @@ mod struct_resolver;
 /// Calls `register_var_globally` from `global_var_registrar` to resolve variable declarations and store them in the global scope.
 mod var_resolver;
 
-use crate::{ParserFuncParam, ParserScopeStmt, SymbolPath};
+use crate::{ParserFuncParam, ParserScopeStmt, SymbolPath, symbol_table::FunctionType};
 
 pub struct FuncDeclInfo<'a> {
-    pub is_static: bool,
+    pub func_type: FunctionType,
     pub name: &'a str,
     pub params: &'a [ParserFuncParam],
     pub return_type: &'a Option<SymbolPath>,

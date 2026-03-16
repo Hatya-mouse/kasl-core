@@ -23,7 +23,7 @@ pub use expression::{
     Expr, ExprKind, LValue, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
 };
 pub use function::{
-    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, NoTypeFuncCallArg,
+    FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, FunctionType, NoTypeFuncCallArg,
 };
 pub use operator::{
     InfixOperator, InfixOperatorProperties, InfixQueryRef, OpBodyMap, OperatorAssociativity,

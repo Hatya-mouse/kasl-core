@@ -14,11 +14,15 @@
 // limitations under the License.
 //
 
+mod member_func_resolver;
+mod struct_field_resolver;
+
 use crate::{
-    ExprToken, ParserDeclStmt, ParserDeclStmtKind, Range, StructID, SymbolPath,
+    ParserDeclStmt, ParserDeclStmtKind, Range, StructID,
     error::Ph,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    type_registry::{ResolvedType, StructDecl, StructField},
+    symbol_table::FunctionType,
+    type_registry::StructDecl,
 };
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -38,6 +42,7 @@ impl<'a> GlobalDeclCollector<'a> {
                 .duplicate_struct_name(decl_range, Ph::StructCollection, name);
         }
 
+        // Generate a unique struct ID and create a new struct decl
         let struct_id = self.prog_ctx.type_registry.generate_struct_id();
         let mut struct_decl = StructDecl::new(name.to_string(), decl_range);
         self.resolve_struct_body(struct_id, &mut struct_decl, body);
@@ -82,8 +87,14 @@ impl<'a> GlobalDeclCollector<'a> {
                     return_type,
                     body,
                 } => {
+                    let func_type = if *is_static {
+                        FunctionType::Static
+                    } else {
+                        FunctionType::Instance
+                    };
+
                     let info = FuncDeclInfo {
-                        is_static: *is_static,
+                        func_type,
                         name,
                         params,
                         return_type,
@@ -101,66 +112,5 @@ impl<'a> GlobalDeclCollector<'a> {
                 }
             }
         }
-    }
-
-    fn resolve_struct_field(
-        &mut self,
-        struct_id: StructID,
-        struct_decl: &mut StructDecl,
-        name: &str,
-        value_type: &Option<SymbolPath>,
-        def_val: &[ExprToken],
-        decl_range: Range,
-    ) {
-        // Resolve the default value expression
-        let Some(def_val) = self.resolve_def_val_global(value_type, def_val, decl_range) else {
-            return;
-        };
-
-        // Add the field to the struct graph if the value has a struct type
-        // The graph will be used in the scope graph analyzing phase to check if there aren't any struct cycles
-        if let ResolvedType::Struct(field_struct_id) = def_val.value_type {
-            self.comp_data
-                .struct_graph
-                .add_edge(struct_id, field_struct_id);
-        }
-
-        // Create a struct field
-        let struct_field = StructField {
-            name: name.to_string(),
-            value_type: def_val.value_type,
-            def_val,
-            range: decl_range,
-        };
-
-        // Register the struct field in the type registry
-        struct_decl.register_field(struct_field);
-    }
-
-    fn resolve_member_func_decl(
-        &mut self,
-        struct_id: StructID,
-        decl_range: Range,
-        info: FuncDeclInfo<'_>,
-    ) {
-        // Build the function node
-        let Some(func) = self.build_func(
-            true,
-            info.is_static,
-            info.name,
-            info.params,
-            info.return_type,
-            decl_range,
-        ) else {
-            return;
-        };
-
-        // Register the function
-        let func_id = self.prog_ctx.func_ctx.register_member_func(func, struct_id);
-
-        // Register the function body to the func body map
-        self.comp_data
-            .func_body_map
-            .register(func_id, info.body.to_vec());
     }
 }

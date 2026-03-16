@@ -15,21 +15,17 @@
 //
 
 use crate::{
-    Range,
-    error::Ph,
+    Range, StructID,
     global_decl_collection::{GlobalDeclCollector, resolvers::FuncDeclInfo},
-    symbol_table::FunctionType,
 };
 
 impl GlobalDeclCollector<'_> {
-    pub fn resolve_global_func_decl(&mut self, info: FuncDeclInfo<'_>, decl_range: Range) {
-        // Check if is_static is not set
-        if info.func_type == FunctionType::Static {
-            self.ec
-                .global_func_cannot_be_static(decl_range, Ph::GlobalDeclCollection, info.name);
-            return;
-        }
-
+    pub fn resolve_member_func_decl(
+        &mut self,
+        struct_id: StructID,
+        decl_range: Range,
+        info: FuncDeclInfo<'_>,
+    ) {
         // Build the function node
         let Some(func) = self.build_func(
             info.func_type,
@@ -41,24 +37,10 @@ impl GlobalDeclCollector<'_> {
             return;
         };
 
-        // Check if a function with the same name already exists
-        if self
-            .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.current_namespace, info.name)
-        {
-            self.ec
-                .duplicate_func_name(decl_range, Ph::GlobalDeclCollection, info.name);
-            return;
-        }
-
         // Register the function
-        let func_id = self
-            .prog_ctx
-            .func_ctx
-            .register_global_func(self.current_namespace, func);
+        let func_id = self.prog_ctx.func_ctx.register_member_func(func, struct_id);
 
-        // Register the function body to the function body map
+        // Register the function body to the func body map
         self.comp_data
             .func_body_map
             .register(func_id, info.body.to_vec());
