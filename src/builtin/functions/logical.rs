@@ -18,7 +18,7 @@ use crate::{builtin::BuiltinRegistry, type_registry::PrimitiveType};
 use cranelift::prelude::InstBuilder;
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
-    // --- BINARY OPERATIONS ---
+    // --- BINARY OPERATORS ---
     registry.register_func(
         "and",
         &[PrimitiveType::Bool, PrimitiveType::Bool],
@@ -61,7 +61,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         Box::new(|builder, args| builder.ins().bxor_not(args[0], args[1])),
     );
 
-    // --- UNARY OPERATIONS ---
+    // --- UNARY OPERATORS ---
 
     registry.register_func(
         "not",

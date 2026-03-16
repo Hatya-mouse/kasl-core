@@ -32,8 +32,9 @@ impl Default for BuiltinRegistry {
     fn default() -> Self {
         let mut registry = Self::new();
 
-        functions::int_op::register_builtins(&mut registry);
+        functions::bool_op::register_builtins(&mut registry);
         functions::float_op::register_builtins(&mut registry);
+        functions::int_op::register_builtins(&mut registry);
         functions::logical::register_builtins(&mut registry);
         functions::type_conversion::register_builtins(&mut registry);
 

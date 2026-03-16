@@ -18,7 +18,7 @@ use crate::{builtin::BuiltinRegistry, type_registry::PrimitiveType};
 use cranelift::prelude::{FloatCC, InstBuilder, types};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
-    // --- BINARY OPERATIONS ---
+    // --- BINARY OPERATORS ---
 
     registry.register_func(
         "fadd",
