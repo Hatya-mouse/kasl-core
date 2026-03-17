@@ -43,6 +43,11 @@ impl<'a> BlueprintBuilder<'a> {
             };
 
             // If the variable is an input or output variable, add it to the blueprint
+            let actual_size = self
+                .prog_ctx
+                .type_registry
+                .get_type_actual_size(&scope_var.value_type)
+                .unwrap();
             let size = self
                 .prog_ctx
                 .type_registry
@@ -54,10 +59,10 @@ impl<'a> BlueprintBuilder<'a> {
             // Input/Output/State variables must have a default value
             let item = BlueprintItem {
                 name: scope_var.name.clone(),
+                actual_size,
                 size,
                 align,
                 value_type: scope_var.value_type,
-                def_val: scope_var.def_val.clone().unwrap(),
                 id: *var_id,
             };
 

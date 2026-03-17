@@ -72,6 +72,15 @@ impl TypeRegistry {
 
     // --- TYPE SIZE AND ALIGNMENT ---
 
+    pub fn get_type_actual_size(&self, type_id: &ResolvedType) -> Option<usize> {
+        match type_id {
+            ResolvedType::Primitive(ty) => Some(ty.size()),
+            ResolvedType::Struct(struct_id) => {
+                self.get_struct(struct_id).map(|s| s.total_size as usize)
+            }
+        }
+    }
+
     pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {
         match type_id {
             ResolvedType::Primitive(ty) => ty.size(),
