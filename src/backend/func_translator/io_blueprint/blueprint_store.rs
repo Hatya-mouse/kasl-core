@@ -92,15 +92,29 @@ impl FuncTranslator<'_> {
                 for (field, field_offset) in struct_type
                     .fields
                     .iter()
-                    .zip(struct_type.field_offsets.iter())
+                    .zip(struct_type.field_offsets.iter().copied())
                 {
-                    let ir_type = self.type_converter.convert(&field.value_type);
-                    let field_val =
-                        self.builder
-                            .ins()
-                            .load(ir_type, MemFlags::new(), val, *field_offset);
-                    let child_offset = offset + field_offset;
-                    self.store_value(&field.value_type, field_val, ptr, child_offset);
+                    match &field.value_type {
+                        ResolvedType::Primitive(_) => {
+                            let ir_type = self.type_converter.convert(&field.value_type);
+                            let field_val = self.builder.ins().load(
+                                ir_type,
+                                MemFlags::new(),
+                                val,
+                                field_offset,
+                            );
+                            self.builder.ins().store(
+                                MemFlags::new(),
+                                field_val,
+                                ptr,
+                                offset + field_offset,
+                            );
+                        }
+                        ResolvedType::Struct(_) => {
+                            let child_offset = offset + field_offset;
+                            self.store_value(&field.value_type, val, ptr, child_offset);
+                        }
+                    }
                 }
             }
         }
