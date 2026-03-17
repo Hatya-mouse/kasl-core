@@ -35,7 +35,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         = __? statements:(scope_stmt() ** ((_? "\n" _?)+)) __? { statements }
 
     rule decl_stmt() -> ParserDeclStmt
-        = func_decl_statement()
+        = import_statement()
+        / func_decl_statement()
         / input_statement()
         / output_statement()
         / state_var_statement()
