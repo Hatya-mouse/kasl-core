@@ -124,6 +124,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         }),
     );
 
+    registry.register_func(
+        "ineg",
+        &[PrimitiveType::Int],
+        PrimitiveType::Int,
+        Box::new(|builder, args| builder.ins().ineg(args[0])),
+    );
+
     // --- COMPARISON OPERATORS ---
 
     registry.register_func(

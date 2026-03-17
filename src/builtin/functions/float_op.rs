@@ -107,6 +107,13 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     );
 
     registry.register_func(
+        "fneg",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| builder.ins().fneg(args[0])),
+    );
+
+    registry.register_func(
         "floor",
         &[PrimitiveType::Float],
         PrimitiveType::Float,

@@ -200,7 +200,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Operator Properties
     rule precedence_prop() -> u32
-        = "precedence" _? ":" _? value:number() { value }
+        = "precedence" _? ":" _? value:integer() { value }
 
     rule associativity_prop() -> OperatorAssociativity
         = "associativity" _? ":" _? value:(
@@ -325,7 +325,7 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule literal() -> ExprTokenKind
         = decimal:decimal() { ExprTokenKind::FloatLiteral(decimal) }
-        / integer:integer() { ExprTokenKind::IntLiteral(integer) }
+        / integer:integer() { ExprTokenKind::IntLiteral(integer as i32) }
         / boolean:boolean() { ExprTokenKind::BoolLiteral(boolean) }
 
     rule func_call() -> ExprTokenKind
@@ -370,16 +370,12 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
-    rule number() -> u32
+    rule integer() -> u32
         = n:$(['0'..='9']+) { n.parse().unwrap() }
 
-    rule integer() -> i32
-        = is_neg:("-" _?)? n:number() { n as i32 * if is_neg.is_some() { -1 } else { 1 } }
-
     rule decimal() -> f32
-        = is_neg:("-" _?)? n:$(['0'..='9']+) "." d:$(['0'..='9']+) {
+        = n:$(['0'..='9']+) "." d:$(['0'..='9']+) {
             (n.to_owned() + "." + d).parse::<f32>().unwrap()
-            * (if is_neg.is_some() { -1.0 } else { 1.0 })
         }
 
     rule boolean() -> bool
