@@ -115,7 +115,7 @@ impl KaslCompiler {
                 blueprint,
                 &main_func_id,
             )
-            .unwrap();
+            .unwrap_or_else(|e| panic!("{}", e));
 
         unsafe {
             KaslCompiler::run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
