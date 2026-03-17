@@ -27,7 +27,7 @@ impl LValueResolver<'_> {
 
         // Resolve the identifier
         let mut l_value: Option<LValue> = None;
-        while let Some(token) = token_iter.peek() {
+        for token in token_iter {
             if let ExprTokenKind::Identifier(name) = &token.kind {
                 if let Some(last_l_value) = l_value {
                     l_value = self.resolve_field_access(last_l_value, name, token.range);
