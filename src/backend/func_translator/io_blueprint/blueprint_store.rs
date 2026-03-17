@@ -40,14 +40,17 @@ impl FuncTranslator<'_> {
                 output_item,
                 output_offset as i32,
             );
-            output_offset += output_item.size;
+            // Increment the output offset by the size of a pointer
+            // because each output is stored as a pointer to the actual value
+            output_offset += pointer_type.bytes() as usize;
         }
 
         // STATES
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
             self.store_blueprint_item(pointer_type, state_ptr_ptr, state_item, state_offset as i32);
-            state_offset += state_item.size;
+            // Increment the state offset by the size of a pointer
+            state_offset += pointer_type.bytes() as usize;
         }
     }
 

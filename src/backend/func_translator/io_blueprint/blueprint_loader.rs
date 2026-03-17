@@ -44,7 +44,8 @@ impl FuncTranslator<'_> {
                 input_offset as i32,
             );
             self.register_translated_var(input_item.id, input_item.value_type, val);
-            input_offset += input_item.size;
+            // Increment the input offset by the size of a pointer
+            input_offset += pointer_type.bytes() as usize;
         }
 
         // STATES
@@ -57,7 +58,8 @@ impl FuncTranslator<'_> {
                 state_offset as i32,
             );
             self.register_translated_var(state_item.id, state_item.value_type, val);
-            state_offset += state_item.size;
+            // Increment the state offset by the size of a pointer
+            state_offset += pointer_type.bytes() as usize;
         }
     }
 
