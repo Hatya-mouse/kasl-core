@@ -17,7 +17,6 @@
 mod import_path;
 mod namespace;
 mod namespace_pair;
-mod reserved_type_names;
 mod symbol_id;
 mod symbol_path;
 
@@ -27,7 +26,6 @@ pub use namespace_pair::NameSpacePair;
 pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
-use crate::namespace_registry::reserved_type_names::is_reserved_name;
 use std::collections::HashMap;
 
 /// Stores a id-namespace pair of all namespaces in compilation.
@@ -86,23 +84,6 @@ impl NameSpaceRegistry {
             parent.add_child(name, id);
         }
         id
-    }
-
-    // --- NAME DUPLICATION DETECTION ---
-
-    /// Add the name to the set of defined names for the given namespace.
-    pub fn mark_name_used(&mut self, namespace_id: &NameSpaceID, name: &str) {
-        if let Some(namespace) = self.namespaces.get_mut(namespace_id) {
-            namespace.mark_name_used(name)
-        }
-    }
-
-    /// Returns if the name is already used.
-    /// Returns `true` if the namespace is not found.
-    pub fn is_name_used(&mut self, namespace_id: &NameSpaceID, name: &str) -> bool {
-        self.get_namespace_by_id(namespace_id)
-            .is_none_or(|namespace| namespace.is_name_used(name))
-            || is_reserved_name(name)
     }
 
     // --- NAMESPACE RESOLUTION ---

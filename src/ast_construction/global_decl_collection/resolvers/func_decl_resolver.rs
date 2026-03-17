@@ -23,11 +23,7 @@ use crate::{
 impl GlobalDeclCollector<'_> {
     pub fn resolve_global_func_decl(&mut self, info: FuncDeclInfo<'_>, decl_range: Range) {
         // Check if a function with the same name already exists
-        if self
-            .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.current_namespace, info.name)
-        {
+        if self.is_name_used(info.name) {
             self.ec
                 .duplicate_name(decl_range, Ph::GlobalDeclCollection, info.name);
             return;

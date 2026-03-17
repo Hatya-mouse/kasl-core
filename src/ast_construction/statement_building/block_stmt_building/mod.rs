@@ -61,7 +61,13 @@ impl<'a> BlockStmtBuilder<'a> {
     pub fn mark_name_used(&mut self, name: &str) {
         // Mark the name as used in the namespace
         self.prog_ctx
-            .namespace_registry
-            .mark_name_used(&self.namespace_id, name);
+            .scope_registry
+            .mark_name_used(&self.scope_id, name);
+    }
+
+    pub fn is_name_used(&self, name: &str) -> bool {
+        self.prog_ctx
+            .scope_registry
+            .is_name_used(&self.scope_id, name)
     }
 }

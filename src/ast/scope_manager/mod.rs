@@ -15,6 +15,7 @@
 //
 
 mod io_blueprint;
+mod reserved_type_names;
 mod scope;
 mod scope_graph;
 mod scope_var;
@@ -24,7 +25,7 @@ pub use scope::Scope;
 pub use scope_graph::ScopeGraph;
 pub use scope_var::{InputAttribute, ScopeVar, VariableKind};
 
-use crate::{NameSpaceID, Range, VariableID};
+use crate::{NameSpaceID, Range, VariableID, scope_manager::reserved_type_names::is_reserved_name};
 use std::{collections::HashMap, fmt::Display};
 
 /// ScopeRegistry manages scopes and variables belonging to them.
@@ -122,6 +123,23 @@ impl ScopeRegistry {
             .unwrap()
             .register_var(name, var_id);
         var_id
+    }
+
+    // --- NAME DUPLICATION DETECTION ---
+
+    /// Add the name to the set of defined names for the given namespace.
+    pub fn mark_name_used(&mut self, scope_id: &ScopeID, name: &str) {
+        if let Some(scope) = self.scopes.get_mut(scope_id) {
+            scope.mark_name_used(name)
+        }
+    }
+
+    /// Returns if the name is already used.
+    /// Returns `true` if the namespace is not found.
+    pub fn is_name_used(&self, scope_id: &ScopeID, name: &str) -> bool {
+        self.get_scope(scope_id)
+            .is_none_or(|scope| scope.is_name_used(name))
+            || is_reserved_name(name)
     }
 }
 

@@ -97,11 +97,7 @@ impl BlockStmtBuilder<'_> {
         };
 
         // Check if the name is already in use in this scope
-        if self
-            .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.namespace_id, name)
-        {
+        if self.is_name_used(name) {
             self.ec
                 .duplicate_name(stmt_range, Ph::StatementCollection, name);
             return None;

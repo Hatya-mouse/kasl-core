@@ -88,11 +88,7 @@ impl GlobalDeclCollector<'_> {
         decl_range: Range,
     ) {
         // Check if the name is already in use in this scope
-        if self
-            .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.current_namespace, name)
-        {
+        if self.is_name_used(name) {
             self.ec
                 .duplicate_name(decl_range, Ph::StatementCollection, name);
             return;

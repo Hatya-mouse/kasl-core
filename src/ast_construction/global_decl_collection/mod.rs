@@ -20,7 +20,7 @@ mod stmt_process;
 pub use resolvers::FuncDeclInfo;
 
 use crate::{
-    CompilationData, NameSpaceID, ParserDeclStmt,
+    CompilationData, NameSpaceID, ParserDeclStmt, ScopeID,
     builtin::BuiltinRegistry,
     compilation_data::{CompilerState, ProgramContext},
     error::ErrorCollector,
@@ -34,6 +34,7 @@ pub struct GlobalDeclCollector<'a> {
     builtin_registry: &'a BuiltinRegistry,
 
     current_namespace: NameSpaceID,
+    global_scope_id: ScopeID,
 }
 
 impl<'a> GlobalDeclCollector<'a> {
@@ -45,6 +46,10 @@ impl<'a> GlobalDeclCollector<'a> {
         builtin_registry: &'a BuiltinRegistry,
         current_namespace: NameSpaceID,
     ) -> Self {
+        let global_scope_id = prog_ctx
+            .scope_registry
+            .get_global_scope_id(&current_namespace);
+
         Self {
             ec,
             prog_ctx,
@@ -52,6 +57,7 @@ impl<'a> GlobalDeclCollector<'a> {
             comp_state,
             builtin_registry,
             current_namespace,
+            global_scope_id,
         }
     }
 
@@ -64,7 +70,13 @@ impl<'a> GlobalDeclCollector<'a> {
     pub fn mark_name_used(&mut self, name: &str) {
         // Mark the name as used in the namespace
         self.prog_ctx
-            .namespace_registry
-            .mark_name_used(&self.current_namespace, name);
+            .scope_registry
+            .mark_name_used(&self.global_scope_id, name);
+    }
+
+    pub fn is_name_used(&self, name: &str) -> bool {
+        self.prog_ctx
+            .scope_registry
+            .is_name_used(&self.global_scope_id, name)
     }
 }

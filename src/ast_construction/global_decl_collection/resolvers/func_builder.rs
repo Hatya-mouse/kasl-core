@@ -115,8 +115,8 @@ impl GlobalDeclCollector<'_> {
         // Check if the name is already in use in this scope
         if self
             .prog_ctx
-            .namespace_registry
-            .is_name_used(&self.current_namespace, &param.name)
+            .scope_registry
+            .is_name_used(&func_scope_id, &param.name)
         {
             self.ec
                 .duplicate_name(param.range, Ph::StatementCollection, &param.name);

@@ -15,13 +15,12 @@
 //
 
 use crate::NameSpaceID;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct NameSpace {
     pub id: NameSpaceID,
     child_namespaces: HashMap<String, NameSpaceID>,
-    defined_names: HashSet<String>,
 }
 
 impl NameSpace {
@@ -29,7 +28,6 @@ impl NameSpace {
         Self {
             id,
             child_namespaces: HashMap::new(),
-            defined_names: HashSet::new(),
         }
     }
 
@@ -39,13 +37,5 @@ impl NameSpace {
 
     pub fn add_child(&mut self, name: String, id: NameSpaceID) {
         self.child_namespaces.insert(name, id);
-    }
-
-    pub fn mark_name_used(&mut self, name: &str) {
-        self.defined_names.insert(name.to_string());
-    }
-
-    pub fn is_name_used(&self, name: &str) -> bool {
-        self.defined_names.contains(name)
     }
 }

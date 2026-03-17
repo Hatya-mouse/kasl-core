@@ -33,10 +33,7 @@ impl GlobalDeclCollector<'_> {
 
         // If the name is already used, throw an error
         if let Some(last_component) = import_path.path.last()
-            && self
-                .prog_ctx
-                .namespace_registry
-                .is_name_used(&self.current_namespace, last_component)
+            && self.is_name_used(last_component)
         {
             self.ec
                 .duplicate_name(decl_range, Ph::GlobalDeclCollection, last_component);
