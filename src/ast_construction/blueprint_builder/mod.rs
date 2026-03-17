@@ -16,7 +16,7 @@
 
 use crate::{
     compilation_data::ProgramContext,
-    scope_manager::{IOBlueprint, VariableKind},
+    scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
 };
 
 pub struct BlueprintBuilder<'a> {
@@ -51,15 +51,23 @@ impl<'a> BlueprintBuilder<'a> {
                 .prog_ctx
                 .type_registry
                 .get_type_alignment(&scope_var.value_type);
+            let item = BlueprintItem {
+                name: scope_var.name.clone(),
+                size,
+                align,
+                value_type: scope_var.value_type,
+                id: *var_id,
+            };
+
             match &scope_var.var_kind {
                 VariableKind::Input { .. } => {
-                    blueprint.add_input(size, align, scope_var.value_type, *var_id);
+                    blueprint.add_input(item);
                 }
                 VariableKind::Output => {
-                    blueprint.add_output(size, align, scope_var.value_type, *var_id);
+                    blueprint.add_output(item);
                 }
                 VariableKind::State => {
-                    blueprint.add_state(size, align, scope_var.value_type, *var_id);
+                    blueprint.add_state(item);
                 }
                 _ => (),
             }

@@ -24,6 +24,7 @@ pub struct IOBlueprint {
 }
 
 pub struct BlueprintItem {
+    pub name: String,
     pub size: usize,
     pub align: u8,
     pub value_type: ResolvedType,
@@ -31,31 +32,16 @@ pub struct BlueprintItem {
 }
 
 impl IOBlueprint {
-    pub fn add_input(&mut self, size: usize, align: u8, value_type: ResolvedType, id: VariableID) {
-        self.inputs.push(BlueprintItem {
-            size,
-            align,
-            value_type,
-            id,
-        });
+    pub fn add_input(&mut self, item: BlueprintItem) {
+        self.inputs.push(item);
     }
 
-    pub fn add_output(&mut self, size: usize, align: u8, value_type: ResolvedType, id: VariableID) {
-        self.outputs.push(BlueprintItem {
-            size,
-            align,
-            value_type,
-            id,
-        });
+    pub fn add_output(&mut self, item: BlueprintItem) {
+        self.outputs.push(item);
     }
 
-    pub fn add_state(&mut self, size: usize, align: u8, value_type: ResolvedType, id: VariableID) {
-        self.states.push(BlueprintItem {
-            size,
-            align,
-            value_type,
-            id,
-        });
+    pub fn add_state(&mut self, item: BlueprintItem) {
+        self.states.push(item);
     }
 
     pub fn get_inputs(&self) -> &[BlueprintItem] {
