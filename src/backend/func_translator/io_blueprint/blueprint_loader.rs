@@ -35,40 +35,45 @@ impl FuncTranslator<'_> {
         let pointer_type = self.type_converter.pointer_type();
 
         // Loop over the inputs, outputs and states and load them
-        // INPUTS
+        self.load_inputs(pointer_type, input_ptr_ptr, blueprint);
+        self.init_outputs(blueprint);
+        self.load_or_init_states(pointer_type, state_ptr_ptr, should_init, blueprint);
+    }
+
+    fn load_inputs(&mut self, pointer_type: ir::Type, ptr_ptr: ir::Value, blueprint: &IOBlueprint) {
         let mut input_offset: usize = 0;
         for input_item in blueprint.get_inputs() {
-            let val = self.load_blueprint_item(
-                pointer_type,
-                input_ptr_ptr,
-                input_item,
-                input_offset as i32,
-            );
+            let val =
+                self.load_blueprint_item(pointer_type, ptr_ptr, input_item, input_offset as i32);
             self.register_translated_var(input_item.id, input_item.value_type, val);
             // Increment the input offset by the size of a pointer
             input_offset += pointer_type.bytes() as usize;
         }
+    }
 
-        // OUTPUTS
+    fn init_outputs(&mut self, blueprint: &IOBlueprint) {
         for output_item in blueprint.get_outputs() {
             let output_var = self.declare_var(output_item.id, &output_item.value_type);
             // Output variables must have a default value
             let def_val = self.translate_expr(&output_item.def_val);
             self.builder.def_var(output_var, def_val);
         }
+    }
 
-        // STATES
-        // Initialize the variables with the default value if should_init is true,
-        // and otherwise load the value from memory
+    /// Initialize the variables with the default value if should_init is true,
+    /// and otherwise load the value from memory
+    fn load_or_init_states(
+        &mut self,
+        pointer_type: ir::Type,
+        ptr_ptr: ir::Value,
+        should_init: ir::Value,
+        blueprint: &IOBlueprint,
+    ) {
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
             // Load the value from memory
-            let loaded_val = self.load_blueprint_item(
-                pointer_type,
-                state_ptr_ptr,
-                state_item,
-                state_offset as i32,
-            );
+            let loaded_val =
+                self.load_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset as i32);
             // Get the default value for the state
             let translated_def_val = self.translate_expr(&state_item.def_val);
 
@@ -83,6 +88,8 @@ impl FuncTranslator<'_> {
             state_offset += pointer_type.bytes() as usize;
         }
     }
+
+    // --- LOAD HELPERS ---
 
     fn load_blueprint_item(
         &mut self,

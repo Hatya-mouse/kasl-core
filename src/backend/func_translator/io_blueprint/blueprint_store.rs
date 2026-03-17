@@ -32,28 +32,41 @@ impl FuncTranslator<'_> {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
-        // OUTPUTS
+        // Store outputs and states
+        self.store_outputs(pointer_type, output_ptr_ptr, blueprint);
+        self.store_states(pointer_type, state_ptr_ptr, blueprint);
+    }
+
+    fn store_outputs(
+        &mut self,
+        pointer_type: ir::Type,
+        ptr_ptr: ir::Value,
+        blueprint: &IOBlueprint,
+    ) {
         let mut output_offset: usize = 0;
         for output_item in blueprint.get_outputs() {
-            self.store_blueprint_item(
-                pointer_type,
-                output_ptr_ptr,
-                output_item,
-                output_offset as i32,
-            );
+            self.store_blueprint_item(pointer_type, ptr_ptr, output_item, output_offset as i32);
             // Increment the output offset by the size of a pointer
             // because each output is stored as a pointer to the actual value
             output_offset += pointer_type.bytes() as usize;
         }
+    }
 
-        // STATES
+    fn store_states(
+        &mut self,
+        pointer_type: ir::Type,
+        ptr_ptr: ir::Value,
+        blueprint: &IOBlueprint,
+    ) {
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
-            self.store_blueprint_item(pointer_type, state_ptr_ptr, state_item, state_offset as i32);
+            self.store_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset as i32);
             // Increment the state offset by the size of a pointer
             state_offset += pointer_type.bytes() as usize;
         }
     }
+
+    // --- STORE HELPERS ---
 
     fn store_blueprint_item(
         &mut self,

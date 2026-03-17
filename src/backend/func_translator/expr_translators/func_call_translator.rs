@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    FuncCallArg, FunctionID, backend::func_translator::FuncTranslator, symbol_table,
+    FuncCallArg, FunctionID, Statement, backend::func_translator::FuncTranslator, symbol_table,
     type_registry::ResolvedType,
 };
 use cranelift::prelude::InstBuilder;
@@ -44,6 +44,17 @@ impl FuncTranslator<'_> {
             let arg_var = self.declare_var(arg.var_id, &arg.value.value_type);
             let translated_val = self.translate_expr(&arg.value);
             self.builder.def_var(arg_var, translated_val);
+        }
+
+        // If the body of the function is a single return statement, we can optimize by jumping directly to the return block
+        if block.body.len() == 1
+            && let Statement::Return { value } = &block.body[0]
+        {
+            if let Some(value) = value {
+                return Some(self.translate_expr(value));
+            } else {
+                return None;
+            }
         }
 
         // Create a return block and set it as the return block
