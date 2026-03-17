@@ -57,6 +57,7 @@ impl<'a> GlobalDeclCollector<'a> {
 
     pub fn process(&mut self, decl_stmts: &'a [ParserDeclStmt]) {
         for stmt in decl_stmts.iter() {
+            println!("Stmt: {:?}", stmt);
             self.process_stmt(stmt);
         }
     }
