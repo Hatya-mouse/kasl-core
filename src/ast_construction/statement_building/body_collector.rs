@@ -25,7 +25,7 @@ impl StatementBuilder<'_> {
         let Some(func) = self.prog_ctx.func_ctx.get_func(&func_id) else {
             return;
         };
-        let Some(body) = self.comp_data.func_body_map.get_body(&func_id) else {
+        let Some(body) = self.comp_data.func_body_map.get_body(&func_id).cloned() else {
             return;
         };
 
@@ -39,13 +39,12 @@ impl StatementBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
-            self.scope_graph,
             func_scope,
             func_namespace,
             func_return_type,
         );
         // Build the statements in the function
-        let resolved_stmts = block_builder.build_statements(body);
+        let resolved_stmts = block_builder.build_statements(&body);
 
         if let Some(func) = self.prog_ctx.func_ctx.get_func_mut(&func_id) {
             // Set the statement to the block
@@ -61,7 +60,7 @@ impl StatementBuilder<'_> {
         let Some(op) = self.prog_ctx.op_ctx.get_infix_func(&op_id) else {
             return;
         };
-        let Some(body) = self.comp_data.op_body_map.get_body(&op_id) else {
+        let Some(body) = self.comp_data.op_body_map.get_body(&op_id).cloned() else {
             return;
         };
 
@@ -75,13 +74,12 @@ impl StatementBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
-            self.scope_graph,
             op_scope,
             op_namespace,
             op_return_type,
         );
         // Build the statements in the operator
-        let resolved_stmts = block_builder.build_statements(body);
+        let resolved_stmts = block_builder.build_statements(&body);
 
         // Set the statement to the block
         if let Some(op) = self.prog_ctx.op_ctx.get_infix_func_mut(&op_id) {
@@ -96,7 +94,7 @@ impl StatementBuilder<'_> {
         let Some(op) = self.prog_ctx.op_ctx.get_prefix_func(&op_id) else {
             return;
         };
-        let Some(body) = self.comp_data.op_body_map.get_body(&op_id) else {
+        let Some(body) = self.comp_data.op_body_map.get_body(&op_id).cloned() else {
             return;
         };
 
@@ -110,13 +108,12 @@ impl StatementBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
-            self.scope_graph,
             op_scope,
             op_namespace,
             op_return_type,
         );
         // Build the statements in the operator
-        let resolved_stmts = block_builder.build_statements(body);
+        let resolved_stmts = block_builder.build_statements(&body);
 
         // Set the statement to the block
         if let Some(op) = self.prog_ctx.op_ctx.get_prefix_func_mut(&op_id) {
@@ -131,7 +128,7 @@ impl StatementBuilder<'_> {
         let Some(op) = self.prog_ctx.op_ctx.get_postfix_func(&op_id) else {
             return;
         };
-        let Some(body) = self.comp_data.op_body_map.get_body(&op_id) else {
+        let Some(body) = self.comp_data.op_body_map.get_body(&op_id).cloned() else {
             return;
         };
 
@@ -145,13 +142,12 @@ impl StatementBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
-            self.scope_graph,
             op_scope,
             op_namespace,
             op_return_type,
         );
         // Build the statements in the operator
-        let resolved_stmts = block_builder.build_statements(body);
+        let resolved_stmts = block_builder.build_statements(&body);
 
         // Set the statement to the block
         if let Some(op) = self.prog_ctx.op_ctx.get_postfix_func_mut(&op_id) {
@@ -173,9 +169,12 @@ impl StatementBuilder<'_> {
             .scope_registry
             .get_global_scope_id(&func_namespace);
         // Add an edge from the global scope to the function
-        self.scope_graph.add_edge(global_scope_id, func_scope);
+        self.comp_data
+            .scope_graph
+            .add_edge(global_scope_id, func_scope);
         // Mark the function scope as requires return
-        self.scope_graph
+        self.comp_data
+            .scope_graph
             .set_requires_return(func_scope, requires_return);
     }
 }

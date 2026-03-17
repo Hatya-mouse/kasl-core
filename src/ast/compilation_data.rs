@@ -17,6 +17,7 @@
 use crate::{
     OperatorContext, ScopeRegistry,
     namespace_registry::NameSpaceRegistry,
+    scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
     type_registry::{StructGraph, TypeRegistry},
 };
@@ -36,14 +37,11 @@ pub struct CompilationData {
     pub func_body_map: FuncBodyMap,
     pub op_body_map: OpBodyMap,
     pub struct_graph: StructGraph,
-}
-
-#[derive(Debug, Default)]
-pub struct ConstructorState {
-    pub imported_paths: HashSet<PathBuf>,
+    pub scope_graph: ScopeGraph,
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct CompilerConfig {
-    pub search_paths: Vec<PathBuf>,
+pub struct CompilerState {
+    pub child_search_paths: Vec<PathBuf>,
+    pub imported_paths: HashSet<PathBuf>,
 }

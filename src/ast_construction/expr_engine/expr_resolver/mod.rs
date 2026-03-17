@@ -17,14 +17,14 @@
 mod recursive_resolver;
 
 use crate::{
-    NameSpaceID, ScopeID, builtin::BuiltinRegistry, compilation_data::ProgramContext,
-    error::ErrorCollector, scope_manager::ScopeGraph,
+    CompilationData, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
+    compilation_data::ProgramContext, error::ErrorCollector,
 };
 
 pub struct ExpressionResolver<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a ProgramContext,
-    scope_graph: &'a mut ScopeGraph,
+    comp_data: &'a mut CompilationData,
     builtin_registry: &'a BuiltinRegistry,
     current_scope: ScopeID,
     current_namespace: NameSpaceID,
@@ -34,7 +34,7 @@ impl<'a> ExpressionResolver<'a> {
     pub fn new(
         ec: &'a mut ErrorCollector,
         prog_ctx: &'a ProgramContext,
-        scope_graph: &'a mut ScopeGraph,
+        comp_data: &'a mut CompilationData,
         builtin_registry: &'a BuiltinRegistry,
         current_scope: ScopeID,
         current_namespace: NameSpaceID,
@@ -42,7 +42,7 @@ impl<'a> ExpressionResolver<'a> {
         Self {
             ec,
             prog_ctx,
-            scope_graph,
+            comp_data,
             builtin_registry,
             current_scope,
             current_namespace,

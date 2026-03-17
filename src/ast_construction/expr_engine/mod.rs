@@ -23,14 +23,14 @@ pub use expr_resolver::ExpressionResolver;
 pub use l_value_resolver::LValueResolver;
 
 use crate::{
-    Expr, ExprToken, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
-    compilation_data::ProgramContext, error::ErrorCollector, scope_manager::ScopeGraph,
+    CompilationData, Expr, ExprToken, NameSpaceID, ScopeID, builtin::BuiltinRegistry,
+    compilation_data::ProgramContext, error::ErrorCollector,
 };
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
     prog_ctx: &ProgramContext,
-    scope_graph: &mut ScopeGraph,
+    comp_data: &mut CompilationData,
     builtin_registry: &BuiltinRegistry,
     current_scope_id: ScopeID,
     current_namespace: NameSpaceID,
@@ -44,7 +44,7 @@ pub fn resolve_expr(
     let mut resolver = ExpressionResolver::new(
         ec,
         prog_ctx,
-        scope_graph,
+        comp_data,
         builtin_registry,
         current_scope_id,
         current_namespace,

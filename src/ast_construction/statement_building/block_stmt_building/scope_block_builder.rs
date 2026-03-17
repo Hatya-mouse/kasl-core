@@ -50,7 +50,6 @@ impl BlockStmtBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
-            self.scope_graph,
             block_scope_id,
             self.namespace_id,
             self.expected_return_type,
@@ -59,7 +58,9 @@ impl BlockStmtBuilder<'_> {
         let body = block_builder.build_statements(statements);
 
         // Add an edge from the parent scope to the block scope
-        self.scope_graph.add_edge(parent_scope_id, block_scope_id);
+        self.comp_data
+            .scope_graph
+            .add_edge(parent_scope_id, block_scope_id);
 
         // Create a block for the resolved statements
         let mut block = Block::new(block_scope_id);

@@ -27,7 +27,7 @@ use kasl::{
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
     scope_graph_analyzing::ScopeGraphAnalyzer,
-    scope_manager::{IOBlueprint, ScopeGraph},
+    scope_manager::IOBlueprint,
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
 };
@@ -37,7 +37,6 @@ pub struct TestContext {
     pub ec: ErrorCollector,
     pub prog_ctx: ProgramContext,
     pub comp_data: CompilationData,
-    pub scope_graph: ScopeGraph,
     pub builtin_registry: BuiltinRegistry,
 
     pub comp_config: CompilerConfig,
@@ -50,7 +49,6 @@ impl Default for TestContext {
             ec: ErrorCollector::default(),
             prog_ctx: ProgramContext::default(),
             comp_data: CompilationData::default(),
-            scope_graph: ScopeGraph::default(),
             builtin_registry: BuiltinRegistry::default(),
 
             comp_config: CompilerConfig::default(),
@@ -80,7 +78,6 @@ pub fn collect_global_decls(
         &mut test_ctx.comp_data,
         &test_ctx.comp_config,
         &test_ctx.builtin_registry,
-        &mut test_ctx.scope_graph,
         &test_ctx.constructor_state,
         root_namespace_id,
     );

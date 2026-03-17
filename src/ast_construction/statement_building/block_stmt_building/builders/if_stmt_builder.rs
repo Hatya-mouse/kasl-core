@@ -54,7 +54,7 @@ impl BlockStmtBuilder<'_> {
         let condition = resolve_expr(
             self.ec,
             self.prog_ctx,
-            self.scope_graph,
+            self.comp_data,
             self.builtin_registry,
             self.scope_id,
             self.namespace_id,

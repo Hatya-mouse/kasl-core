@@ -34,7 +34,7 @@ impl GlobalDeclCollector<'_> {
         let resolved_def_val = resolve_expr(
             self.ec,
             self.prog_ctx,
-            self.scope_graph,
+            self.comp_data,
             self.builtin_registry,
             global_scope_id,
             self.current_namespace,

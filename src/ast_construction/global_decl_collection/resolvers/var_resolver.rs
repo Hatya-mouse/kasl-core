@@ -96,7 +96,7 @@ impl GlobalDeclCollector<'_> {
                 let resolved_arg = resolve_expr(
                     self.ec,
                     self.prog_ctx,
-                    self.scope_graph,
+                    self.comp_data,
                     self.builtin_registry,
                     global_scope_id,
                     self.current_namespace,

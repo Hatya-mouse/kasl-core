@@ -22,20 +22,17 @@ pub use resolvers::FuncDeclInfo;
 use crate::{
     CompilationData, NameSpaceID, ParserDeclStmt,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
+    compilation_data::{CompilerState, ProgramContext},
     error::ErrorCollector,
-    scope_manager::ScopeGraph,
 };
 
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,
     comp_data: &'a mut CompilationData,
-    comp_config: &'a CompilerConfig,
+    comp_state: &'a CompilerState,
     builtin_registry: &'a BuiltinRegistry,
-    scope_graph: &'a mut ScopeGraph,
 
-    constructor_state: &'a ConstructorState,
     current_namespace: NameSpaceID,
 }
 
@@ -44,20 +41,16 @@ impl<'a> GlobalDeclCollector<'a> {
         ec: &'a mut ErrorCollector,
         prog_ctx: &'a mut ProgramContext,
         comp_data: &'a mut CompilationData,
-        comp_config: &'a CompilerConfig,
+        comp_state: &'a CompilerState,
         builtin_registry: &'a BuiltinRegistry,
-        scope_graph: &'a mut ScopeGraph,
-        constructor_state: &'a ConstructorState,
         current_namespace: NameSpaceID,
     ) -> Self {
         Self {
             ec,
             prog_ctx,
             comp_data,
-            comp_config,
+            comp_state,
             builtin_registry,
-            scope_graph,
-            constructor_state,
             current_namespace,
         }
     }

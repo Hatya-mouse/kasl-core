@@ -38,7 +38,8 @@ impl ExpressionResolver<'_> {
 
             // Add a function call edge to the scope graph
             // This is used to detect recursion
-            self.scope_graph
+            self.comp_data
+                .scope_graph
                 .add_edge(self.current_scope, func.block.scope_id);
 
             Some(Expr::new(

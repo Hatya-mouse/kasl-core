@@ -42,7 +42,8 @@ impl ExpressionResolver<'_> {
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
-        self.scope_graph
+        self.comp_data
+            .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
         // Construct arguments
@@ -89,7 +90,8 @@ impl ExpressionResolver<'_> {
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
-        self.scope_graph
+        self.comp_data
+            .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
         // Construct arguments
@@ -130,7 +132,8 @@ impl ExpressionResolver<'_> {
 
         // Add an operator call edge to the scope graph
         // This is used to detect recursion
-        self.scope_graph
+        self.comp_data
+            .scope_graph
             .add_edge(self.current_scope, op.block.scope_id);
 
         // Construct arguments

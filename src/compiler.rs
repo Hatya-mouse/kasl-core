@@ -14,6 +14,26 @@
 // limitations under the License.
 //
 
-pub struct KaslCompiler {}
+use std::path::PathBuf;
 
-impl KaslCompiler {}
+use crate::{
+    CompilationData,
+    builtin::BuiltinRegistry,
+    compilation_data::{CompilerState, ProgramContext},
+    error::ErrorCollector,
+};
+
+#[derive(Default)]
+pub struct KaslCompiler {
+    ec: ErrorCollector,
+    prog_ctx: ProgramContext,
+    comp_data: CompilationData,
+    comp_state: CompilerState,
+    builtin_registry: BuiltinRegistry,
+}
+
+impl KaslCompiler {
+    pub fn add_search_path(&mut self, path: PathBuf) {
+        self.comp_state.child_search_paths.push(path);
+    }
+}

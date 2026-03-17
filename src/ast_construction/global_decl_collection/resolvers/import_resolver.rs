@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    Range, error::Ph, global_decl_collection::GlobalDeclCollector,
+    Range, compilation_data::CompilerState, error::Ph, global_decl_collection::GlobalDeclCollector,
     namespace_constructor::NameSpaceConstructor, namespace_registry::ImportPath,
 };
 use std::{fs::File, io::Read, path::PathBuf};
@@ -43,7 +43,7 @@ impl GlobalDeclCollector<'_> {
         }
 
         // If the path is already in the set of imported paths, skip it and throw an error
-        if self.constructor_state.imported_paths.contains(&full_path) {
+        if self.comp_state.imported_paths.contains(&full_path) {
             self.ec.cyclic_dependency(
                 decl_range,
                 Ph::GlobalDeclCollection,
@@ -53,8 +53,20 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Add the imported path to the set of paths to search for imports
-        let mut imported_paths = self.constructor_state.imported_paths.clone();
-        imported_paths.insert(full_path);
+        let mut imported_paths = self.comp_state.imported_paths.clone();
+        imported_paths.insert(full_path.clone());
+
+        // Get the parent directory of the imported path and add it to the child search paths
+        let mut child_search_paths = self.comp_state.child_search_paths.clone();
+        if let Some(parent_path) = full_path.parent() {
+            child_search_paths.push(parent_path.to_path_buf());
+        }
+
+        // Create a new compiler state
+        let comp_state = CompilerState {
+            child_search_paths,
+            imported_paths,
+        };
 
         // Generate a new namespace for the imported program
         let namespace_id = self.prog_ctx.namespace_registry.register_namespace(
@@ -64,9 +76,11 @@ impl GlobalDeclCollector<'_> {
 
         // Create a constructor and pass the program to it
         let mut constructor = NameSpaceConstructor::new(
+            self.ec,
             self.prog_ctx,
-            self.comp_config.clone(),
-            imported_paths,
+            self.comp_data,
+            comp_state,
+            self.builtin_registry,
             namespace_id,
         );
         constructor.set_code(&program);
@@ -76,7 +90,7 @@ impl GlobalDeclCollector<'_> {
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {
-        for base_path in &self.comp_config.search_paths {
+        for base_path in &self.comp_state.child_search_paths {
             // Create a full path by joining the base path with the import path
             let full_path = base_path.join(import_path.to_path()).with_extension("kasl");
 

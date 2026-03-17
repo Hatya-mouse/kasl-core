@@ -14,29 +14,26 @@
 // limitations under the License.
 //
 
-use std::{collections::HashSet, path::PathBuf};
+use std::path::PathBuf;
 
 use crate::{
     CompilationData, NameSpaceID, ParserDeclStmt,
     builtin::BuiltinRegistry,
-    compilation_data::{CompilerConfig, ConstructorState, ProgramContext},
+    compilation_data::{CompilerState, ProgramContext},
     error::ErrorCollector,
     global_decl_collection::GlobalDeclCollector,
     kasl_parser,
-    scope_manager::ScopeGraph,
 };
 use peg::{error::ParseError, str::LineCol};
 
 /// Constructs a single namespace from a raw source code string.
 pub struct NameSpaceConstructor<'a> {
-    ec: ErrorCollector,
+    ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,
-    comp_data: CompilationData,
-    comp_config: CompilerConfig,
-    builtin_registry: BuiltinRegistry,
-    scope_graph: ScopeGraph,
+    comp_data: &'a mut CompilationData,
+    comp_state: CompilerState,
+    builtin_registry: &'a BuiltinRegistry,
 
-    constructor_state: ConstructorState,
     code: String,
     decl_stmts: Vec<ParserDeclStmt>,
     namespace_id: NameSpaceID,
@@ -44,21 +41,19 @@ pub struct NameSpaceConstructor<'a> {
 
 impl<'a> NameSpaceConstructor<'a> {
     pub fn new(
+        ec: &'a mut ErrorCollector,
         prog_ctx: &'a mut ProgramContext,
-        comp_config: CompilerConfig,
-        imported_paths: HashSet<PathBuf>,
+        comp_data: &'a mut CompilationData,
+        comp_state: CompilerState,
+        builtin_registry: &'a BuiltinRegistry,
         namespace_id: NameSpaceID,
     ) -> Self {
-        let constructor_state = ConstructorState { imported_paths };
-
         Self {
-            ec: ErrorCollector::default(),
+            ec,
             prog_ctx,
-            comp_data: CompilationData::default(),
-            comp_config,
-            builtin_registry: BuiltinRegistry::default(),
-            scope_graph: ScopeGraph::default(),
-            constructor_state,
+            comp_data,
+            comp_state,
+            builtin_registry,
             code: String::new(),
             decl_stmts: Vec::new(),
             namespace_id,
@@ -81,10 +76,8 @@ impl<'a> NameSpaceConstructor<'a> {
             &mut self.ec,
             self.prog_ctx,
             &mut self.comp_data,
-            &self.comp_config,
+            &self.comp_state,
             &self.builtin_registry,
-            &mut self.scope_graph,
-            &self.constructor_state,
             self.namespace_id,
         );
         global_decl_collector.process(&self.decl_stmts);

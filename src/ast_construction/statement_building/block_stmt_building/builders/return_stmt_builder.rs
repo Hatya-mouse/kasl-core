@@ -26,7 +26,9 @@ impl BlockStmtBuilder<'_> {
         decl_range: Range,
     ) -> Option<Statement> {
         // The current scope has a return statement
-        self.scope_graph.set_has_return(self.scope_id, true);
+        self.comp_data
+            .scope_graph
+            .set_has_return(self.scope_id, true);
 
         if self.expected_return_type.is_void() {
             if value.is_some() {
@@ -42,7 +44,7 @@ impl BlockStmtBuilder<'_> {
             let resolved_value = resolve_expr(
                 self.ec,
                 self.prog_ctx,
-                self.scope_graph,
+                self.comp_data,
                 self.builtin_registry,
                 self.scope_id,
                 self.namespace_id,
