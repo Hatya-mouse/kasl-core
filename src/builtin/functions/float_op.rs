@@ -15,7 +15,7 @@
 //
 
 use crate::{builtin::BuiltinRegistry, type_registry::PrimitiveType};
-use cranelift::prelude::{FloatCC, InstBuilder, types};
+use cranelift::prelude::{FloatCC, InstBuilder};
 
 pub fn register_builtins(registry: &mut BuiltinRegistry) {
     // --- BINARY OPERATORS ---
@@ -133,40 +133,28 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "feq",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().fcmp(FloatCC::Equal, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().fcmp(FloatCC::Equal, args[0], args[1])),
     );
 
     registry.register_func(
         "fne",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().fcmp(FloatCC::NotEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().fcmp(FloatCC::NotEqual, args[0], args[1])),
     );
 
     registry.register_func(
         "fgt",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().fcmp(FloatCC::GreaterThan, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().fcmp(FloatCC::GreaterThan, args[0], args[1])),
     );
 
     registry.register_func(
         "flt",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().fcmp(FloatCC::LessThan, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().fcmp(FloatCC::LessThan, args[0], args[1])),
     );
 
     registry.register_func(
@@ -174,10 +162,9 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
-            let result = builder
+            builder
                 .ins()
-                .fcmp(FloatCC::GreaterThanOrEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
+                .fcmp(FloatCC::GreaterThanOrEqual, args[0], args[1])
         }),
     );
 
@@ -186,10 +173,9 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
-            let result = builder
+            builder
                 .ins()
-                .fcmp(FloatCC::LessThanOrEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
+                .fcmp(FloatCC::LessThanOrEqual, args[0], args[1])
         }),
     );
 }

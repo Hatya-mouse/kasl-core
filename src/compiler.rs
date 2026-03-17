@@ -100,7 +100,7 @@ impl KaslCompiler {
         inputs: &[*mut ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
-    ) {
+    ) -> Result<(), String> {
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
         let main_func_id = self
@@ -108,18 +108,18 @@ impl KaslCompiler {
             .func_ctx
             .get_global_func_id(root_namespace_id, "main")
             .unwrap();
-        let code = backend
-            .compile(
-                &self.prog_ctx,
-                &self.builtin_registry,
-                blueprint,
-                &main_func_id,
-            )
-            .unwrap_or_else(|e| panic!("{}", e));
+        let code = backend.compile(
+            &self.prog_ctx,
+            &self.builtin_registry,
+            blueprint,
+            &main_func_id,
+        )?;
 
         unsafe {
             KaslCompiler::run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
         }
+
+        Ok(())
     }
 
     unsafe fn run_code(

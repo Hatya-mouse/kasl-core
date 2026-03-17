@@ -130,20 +130,14 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ieq",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().icmp(IntCC::Equal, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::Equal, args[0], args[1])),
     );
 
     registry.register_func(
         "ine",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().icmp(IntCC::NotEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::NotEqual, args[0], args[1])),
     );
 
     registry.register_func(
@@ -151,10 +145,9 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
-            let result = builder
+            builder
                 .ins()
-                .icmp(IntCC::SignedGreaterThan, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
+                .icmp(IntCC::SignedGreaterThan, args[0], args[1])
         }),
     );
 
@@ -162,10 +155,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         "ilt",
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
-        Box::new(|builder, args| {
-            let result = builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
-        }),
+        Box::new(|builder, args| builder.ins().icmp(IntCC::SignedLessThan, args[0], args[1])),
     );
 
     registry.register_func(
@@ -173,10 +163,9 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
-            let result = builder
+            builder
                 .ins()
-                .icmp(IntCC::SignedGreaterThanOrEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
+                .icmp(IntCC::SignedGreaterThanOrEqual, args[0], args[1])
         }),
     );
 
@@ -185,10 +174,9 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
         &[PrimitiveType::Int, PrimitiveType::Int],
         PrimitiveType::Bool,
         Box::new(|builder, args| {
-            let result = builder
+            builder
                 .ins()
-                .icmp(IntCC::SignedLessThanOrEqual, args[0], args[1]);
-            builder.ins().ireduce(types::I8, result)
+                .icmp(IntCC::SignedLessThanOrEqual, args[0], args[1])
         }),
     );
 }
