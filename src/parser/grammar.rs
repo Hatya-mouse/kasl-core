@@ -284,9 +284,9 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     // Function Call Argument
     rule func_call_args() -> Vec<ParserFuncCallArg>
-        = start:position!() entries:((label:(n:identifier() _? ":" _? { n })? value:multiline_expression() end:position!() {
+        = start:position!() entries:((label:(n:identifier() __? ":" __? { n })? value:multiline_expression() __? end:position!() {
             ParserFuncCallArg { label, value, range: Range::n(start, end) }
-        }) ** comma()) comma()? {
+        }) ** comma()) __? comma()? {
             entries
         }
 
