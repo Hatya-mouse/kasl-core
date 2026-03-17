@@ -17,6 +17,7 @@
 use crate::{
     backend::func_translator::FuncTranslator,
     scope_manager::{BlueprintItem, IOBlueprint},
+    type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
@@ -61,19 +62,47 @@ impl FuncTranslator<'_> {
         item: &BlueprintItem,
         offset: i32,
     ) {
-        // get the pointer to the value by the pointer to the pointers
-        let output_ptr = self
+        // Get the pointer to store the value at
+        let ptr = self
             .builder
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
-        // Get the value to store
+        // Get the value to be stored
         let var = self.variables.get(&item.id).unwrap();
         let val = self.builder.use_var(*var);
 
         // Store the value
-        self.builder
-            .ins()
-            .store(MemFlags::new(), val, output_ptr, 0);
+        self.store_value(&item.value_type, val, ptr, offset);
+    }
+
+    fn store_value(
+        &mut self,
+        value_type: &ResolvedType,
+        val: ir::Value,
+        ptr: ir::Value,
+        offset: i32,
+    ) {
+        match value_type {
+            ResolvedType::Primitive(_) => {
+                self.builder.ins().store(MemFlags::new(), val, ptr, offset);
+            }
+            ResolvedType::Struct(struct_id) => {
+                let struct_type = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
+                for (field, field_offset) in struct_type
+                    .fields
+                    .iter()
+                    .zip(struct_type.field_offsets.iter())
+                {
+                    let ir_type = self.type_converter.convert(&field.value_type);
+                    let field_val =
+                        self.builder
+                            .ins()
+                            .load(ir_type, MemFlags::new(), val, *field_offset);
+                    let child_offset = offset + field_offset;
+                    self.store_value(&field.value_type, field_val, ptr, child_offset);
+                }
+            }
+        }
     }
 }

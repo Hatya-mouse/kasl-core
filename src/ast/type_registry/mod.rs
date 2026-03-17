@@ -81,13 +81,6 @@ impl TypeRegistry {
         }
     }
 
-    pub fn get_type_size(&self, type_id: &ResolvedType) -> usize {
-        match type_id {
-            ResolvedType::Primitive(ty) => ty.size(),
-            ResolvedType::Struct(_) => size_of::<usize>(),
-        }
-    }
-
     pub fn get_type_alignment(&self, type_id: &ResolvedType) -> u8 {
         match type_id {
             ResolvedType::Primitive(ty) => ty.alignment(),

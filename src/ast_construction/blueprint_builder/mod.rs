@@ -48,10 +48,6 @@ impl<'a> BlueprintBuilder<'a> {
                 .type_registry
                 .get_type_actual_size(&scope_var.value_type)
                 .unwrap();
-            let size = self
-                .prog_ctx
-                .type_registry
-                .get_type_size(&scope_var.value_type);
             let align = self
                 .prog_ctx
                 .type_registry
@@ -60,7 +56,6 @@ impl<'a> BlueprintBuilder<'a> {
             let item = BlueprintItem {
                 name: scope_var.name.clone(),
                 actual_size,
-                size,
                 align,
                 value_type: scope_var.value_type,
                 id: *var_id,

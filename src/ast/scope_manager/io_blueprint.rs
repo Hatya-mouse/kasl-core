@@ -25,7 +25,6 @@ pub struct IOBlueprint {
 
 pub struct BlueprintItem {
     pub name: String,
-    pub size: usize,
     pub actual_size: usize,
     pub align: u8,
     pub value_type: ResolvedType,

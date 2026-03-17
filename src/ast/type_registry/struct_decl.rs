@@ -81,7 +81,9 @@ impl StructDecl {
 
         for field in &mut self.fields {
             // Get the size and alignment of the field's type
-            let size = type_registry.get_type_size(&field.value_type);
+            let size = type_registry
+                .get_type_actual_size(&field.value_type)
+                .unwrap();
             let alignment = type_registry.get_type_alignment(&field.value_type);
             // If the alignment is greater than the max_alignment, update it
             if alignment > max_alignment {

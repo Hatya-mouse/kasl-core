@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
-use cranelift::prelude::{InstBuilder, MemFlags};
-use cranelift_codegen::ir::immediates::Offset32;
-
 use crate::{Expr, backend::func_translator::FuncTranslator, symbol_table::LValue};
+use cranelift::prelude::{InstBuilder, MemFlags};
 
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
@@ -30,12 +28,9 @@ impl FuncTranslator<'_> {
         // Set the value to the variable depending on the value type
         if target.is_field {
             let addr = self.builder.use_var(var);
-            self.builder.ins().store(
-                MemFlags::new(),
-                rhs_value,
-                addr,
-                Offset32::new(target.offset),
-            );
+            self.builder
+                .ins()
+                .store(MemFlags::new(), rhs_value, addr, target.offset);
         } else {
             self.builder.def_var(var, rhs_value);
         }

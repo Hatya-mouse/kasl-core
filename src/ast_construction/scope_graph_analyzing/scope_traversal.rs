@@ -31,8 +31,8 @@ impl ScopeGraphAnalyzer<'_> {
         // Update the state to Visiting
         states.insert(*current_scope, ScopeState::Visiting);
 
-        // Calculate the memory layout of the current scope
-        let current_scope_size = self.calculate_scope_layout(current_scope);
+        // Calculate the size of the current scope
+        let current_scope_size = self.calculate_scope_size(current_scope);
 
         // Analyze the scope recursively
         let mut max_child_size: usize = 0;
@@ -86,7 +86,7 @@ impl ScopeGraphAnalyzer<'_> {
         total_sizes.insert(*current_scope, total_size);
     }
 
-    pub fn calculate_scope_layout(&mut self, scope_id: &ScopeID) -> usize {
+    fn calculate_scope_size(&mut self, scope_id: &ScopeID) -> usize {
         let mut size = 0;
         if let Some(scope) = self.prog_ctx.scope_registry.get_scope(scope_id) {
             for var_id in &scope.variables {
@@ -95,7 +95,11 @@ impl ScopeGraphAnalyzer<'_> {
                 };
 
                 // Get the size of the variable type
-                let var_size = self.prog_ctx.type_registry.get_type_size(&var.value_type);
+                let var_size = self
+                    .prog_ctx
+                    .type_registry
+                    .get_type_actual_size(&var.value_type)
+                    .unwrap();
                 // Update the total size of the scope
                 size += var_size;
             }
