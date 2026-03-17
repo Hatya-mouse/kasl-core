@@ -45,11 +45,13 @@ impl FuncTranslator<'_> {
         }
 
         // Build the else block
+        let mut has_else_return = false;
         if let Some(else_block) = else_block {
-            let has_return = self.translate_block(else_block, return_block);
-            if !has_return {
-                self.builder.ins().jump(merge_block, &[]);
-            }
+            has_else_return = self.translate_block(else_block, return_block);
+        }
+
+        if !has_else_return {
+            self.builder.ins().jump(merge_block, &[]);
         }
 
         // Switch to the merge block
