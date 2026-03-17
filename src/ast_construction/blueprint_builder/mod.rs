@@ -43,27 +43,23 @@ impl<'a> BlueprintBuilder<'a> {
             };
 
             // If the variable is an input or output variable, add it to the blueprint
+            let size = self
+                .prog_ctx
+                .type_registry
+                .get_type_size(&scope_var.value_type);
+            let align = self
+                .prog_ctx
+                .type_registry
+                .get_type_alignment(&scope_var.value_type);
             match &scope_var.var_kind {
                 VariableKind::Input { .. } => {
-                    let input_size = self
-                        .prog_ctx
-                        .type_registry
-                        .get_type_size(&scope_var.value_type);
-                    blueprint.add_input(input_size, scope_var.value_type, *var_id);
+                    blueprint.add_input(size, align, scope_var.value_type, *var_id);
                 }
                 VariableKind::Output => {
-                    let output_size = self
-                        .prog_ctx
-                        .type_registry
-                        .get_type_size(&scope_var.value_type);
-                    blueprint.add_output(output_size, scope_var.value_type, *var_id);
+                    blueprint.add_output(size, align, scope_var.value_type, *var_id);
                 }
                 VariableKind::State => {
-                    let state_size = self
-                        .prog_ctx
-                        .type_registry
-                        .get_type_size(&scope_var.value_type);
-                    blueprint.add_state(state_size, scope_var.value_type, *var_id);
+                    blueprint.add_state(size, align, scope_var.value_type, *var_id);
                 }
                 _ => (),
             }
