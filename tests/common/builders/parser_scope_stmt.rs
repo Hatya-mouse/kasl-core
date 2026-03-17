@@ -84,7 +84,7 @@ pub fn if_stmt(
             main,
             else_ifs: else_ifs.to_vec(),
             else_body: else_body.map(|s| s.to_vec()),
-            else_range: Range::zero(),
+            else_range: Some(Range::zero()),
         },
         range: Range::zero(),
     }

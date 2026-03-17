@@ -47,8 +47,8 @@ impl FuncTranslator<'_> {
         // Build the else block
         if let Some(else_block) = else_block {
             self.translate_block(else_block, return_block);
+            self.builder.ins().jump(merge_block, &[]);
         }
-        self.builder.ins().jump(merge_block, &[]);
 
         // Switch to the merge block
         self.builder.switch_to_block(merge_block);
