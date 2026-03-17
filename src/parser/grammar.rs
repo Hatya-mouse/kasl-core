@@ -305,8 +305,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         = start:position!() kind:(
             operator_token()
             / literal()
-            / identifier_token()
             / func_call()
+            / identifier_token()
             / parenthesized_token()
             / dot_token()
         ) end:position!() {
