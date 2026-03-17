@@ -66,8 +66,8 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule func_decl_statement() -> ParserDeclStmt
-        = start:position!() is_static:("static" _)? "func" _ name:identifier() _? "(" _? params:(func_param() ** comma()) comma()? ")" _?
-        return_type:("->" _? t:type_name() { t })? __? "{"
+        = start:position!() is_static:("static" __)? "func" __ name:identifier() __? "(" __? params:(func_param() ** comma()) comma()? ")" __?
+        return_type:("->" __? t:type_name() { t })? __? "{"
         __? body:scope_stmts() __?
         "}" end:position!() {
             ParserDeclStmt {
