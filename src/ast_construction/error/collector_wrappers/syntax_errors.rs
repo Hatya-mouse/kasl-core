@@ -18,8 +18,19 @@ use crate::{
     Range,
     error::{EK, ErrorCollector, Phase, Pl, Sv},
 };
+use peg::error::ExpectedSet;
 
 impl ErrorCollector {
+    pub(crate) fn parser_error(&mut self, range: Range, phase: Phase, expected: ExpectedSet) {
+        self.emit(
+            EK::ParserError,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(expected.to_string()),
+        );
+    }
+
     pub(crate) fn invalid_struct_stmt(&mut self, range: Range, phase: Phase, stmt_kind: String) {
         self.emit(
             EK::InvalidStructStmt,

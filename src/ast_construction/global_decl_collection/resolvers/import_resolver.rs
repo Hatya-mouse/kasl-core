@@ -88,7 +88,15 @@ impl GlobalDeclCollector<'_> {
         );
         constructor.set_code(&program);
 
-        // Construct the program
+        // Parse and construct the program
+        if let Err(parser_error) = constructor.parse() {
+            self.ec.parser_error(
+                Range::n(parser_error.location.offset, parser_error.location.offset),
+                Ph::Parse,
+                parser_error.expected,
+            );
+            return;
+        }
         constructor.collect_global_decls();
     }
 

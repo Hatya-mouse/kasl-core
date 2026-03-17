@@ -16,6 +16,10 @@
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum ErrorKind {
+    /// Title: ParserError
+    /// Payload: ParserError
+    ParserError,
+
     /// Title: TopLevelStructField
     /// Payload: The name of the struct field that is defined in the top level
     /// Struct field is defined in the top level though it should be defined in a struct.
