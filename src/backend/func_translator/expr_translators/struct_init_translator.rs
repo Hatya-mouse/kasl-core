@@ -41,7 +41,6 @@ impl FuncTranslator<'_> {
     }
 
     fn store_fields_to_slot(&mut self, struct_id: &StructID, slot: StackSlot, base_offset: i32) {
-        // Get the struct decl
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
         for (field, offset) in struct_decl
             .fields

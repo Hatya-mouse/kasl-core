@@ -14,8 +14,12 @@
 // limitations under the License.
 //
 
-use crate::{Expr, backend::func_translator::FuncTranslator, symbol_table::LValue};
+use crate::{
+    Expr, StructID, backend::func_translator::FuncTranslator, symbol_table::LValue,
+    type_registry::ResolvedType,
+};
 use cranelift::prelude::{InstBuilder, MemFlags};
+use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
@@ -28,11 +32,49 @@ impl FuncTranslator<'_> {
         // Set the value to the variable depending on the value type
         if target.is_field {
             let addr = self.builder.use_var(var);
-            self.builder
-                .ins()
-                .store(MemFlags::new(), rhs_value, addr, target.offset);
+            match &target.value_type {
+                ResolvedType::Primitive(_) => {
+                    self.builder
+                        .ins()
+                        .store(MemFlags::new(), rhs_value, addr, target.offset);
+                }
+                ResolvedType::Struct(struct_id) => {
+                    self.copy_struct(struct_id, rhs_value, addr, target.offset);
+                }
+            }
         } else {
             self.builder.def_var(var, rhs_value);
+        }
+    }
+
+    pub fn copy_struct(
+        &mut self,
+        struct_id: &StructID,
+        src: ir::Value,
+        dst: ir::Value,
+        base_offset: i32,
+    ) {
+        let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
+        for (field, offset) in struct_decl
+            .fields
+            .iter()
+            .zip(struct_decl.field_offsets.iter())
+        {
+            match &field.value_type {
+                ResolvedType::Primitive(_) => {
+                    let ir_type = self.type_converter.convert(&field.value_type);
+                    let val = self
+                        .builder
+                        .ins()
+                        .load(ir_type, MemFlags::new(), src, *offset);
+                    self.builder
+                        .ins()
+                        .store(MemFlags::new(), val, dst, base_offset + *offset);
+                }
+                ResolvedType::Struct(inner_id) => {
+                    self.copy_struct(inner_id, src, dst, base_offset + offset);
+                }
+            }
         }
     }
 }
