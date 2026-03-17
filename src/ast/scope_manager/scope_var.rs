@@ -27,9 +27,7 @@ pub struct ScopeVar {
 
 impl ScopeVar {
     pub fn expect_def_val(&self) -> &Expr {
-        self.def_val
-            .as_ref()
-            .expect("Compiler error: Variable kind requires a default value but it was missing.")
+        self.def_val.as_ref().unwrap()
     }
 }
 

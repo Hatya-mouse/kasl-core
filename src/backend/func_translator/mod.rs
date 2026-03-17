@@ -76,7 +76,9 @@ impl<'a> FuncTranslator<'a> {
 
         // Declare the output variables
         for output_item in blueprint.get_outputs() {
-            self.declare_var(output_item.id, &output_item.value_type);
+            let output_var = self.declare_var(output_item.id, &output_item.value_type);
+            let def_val = self.translate_expr(&output_item.def_val);
+            self.builder.def_var(output_var, def_val);
         }
 
         // Get the entry point function node

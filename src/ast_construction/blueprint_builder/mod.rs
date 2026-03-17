@@ -51,11 +51,13 @@ impl<'a> BlueprintBuilder<'a> {
                 .prog_ctx
                 .type_registry
                 .get_type_alignment(&scope_var.value_type);
+            // Input/Output/State variables must have a default value
             let item = BlueprintItem {
                 name: scope_var.name.clone(),
                 size,
                 align,
                 value_type: scope_var.value_type,
+                def_val: scope_var.def_val.clone().unwrap(),
                 id: *var_id,
             };
 
