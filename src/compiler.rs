@@ -93,6 +93,10 @@ impl KaslCompiler {
         let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
         let blueprint = blueprint_builder.build();
 
+        self.ec.as_result().map(|_| blueprint)
+    }
+
+    pub fn compile(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
         // 6. Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
@@ -105,7 +109,7 @@ impl KaslCompiler {
             .compile(
                 &self.prog_ctx,
                 &self.builtin_registry,
-                &blueprint,
+                blueprint,
                 &main_func_id,
             )
             .map_err(|e| {
@@ -117,7 +121,7 @@ impl KaslCompiler {
                 )]
             })?;
 
-        self.ec.as_result().map(|_| blueprint)
+        Ok(())
     }
 
     pub fn run(
