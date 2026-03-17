@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use crate::{StructID, backend::func_translator::FuncTranslator};
+use crate::{StructID, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
 use cranelift::prelude::{InstBuilder, StackSlotData, StackSlotKind};
-use cranelift_codegen::ir;
+use cranelift_codegen::ir::{self, StackSlot};
 
 impl FuncTranslator<'_> {
     pub fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
@@ -30,16 +30,35 @@ impl FuncTranslator<'_> {
             struct_decl.alignment,
         );
         let slot = self.builder.func.create_sized_stack_slot(slot_data);
+
         // Store the fields to the slot
-        for (field, offset) in struct_decl.fields.iter().zip(&struct_decl.field_offsets) {
-            let translated_def_val = self.translate_expr(&field.def_val);
-            self.builder
-                .ins()
-                .stack_store(translated_def_val, slot, *offset);
-        }
+        self.store_fields_to_slot(struct_id, slot, 0);
+
         // Return the address to the struct
         self.builder
             .ins()
             .stack_addr(self.type_converter.pointer_type(), slot, 0)
+    }
+
+    fn store_fields_to_slot(&mut self, struct_id: &StructID, slot: StackSlot, base_offset: i32) {
+        // Get the struct decl
+        let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
+        for (field, offset) in struct_decl
+            .fields
+            .iter()
+            .zip(struct_decl.field_offsets.iter())
+        {
+            match field.value_type {
+                ResolvedType::Primitive(_) => {
+                    let val = self.translate_expr(&field.def_val);
+                    self.builder
+                        .ins()
+                        .stack_store(val, slot, base_offset + offset);
+                }
+                ResolvedType::Struct(inner_id) => {
+                    self.store_fields_to_slot(&inner_id, slot, base_offset + offset);
+                }
+            }
+        }
     }
 }
