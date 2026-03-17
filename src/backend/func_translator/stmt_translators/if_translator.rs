@@ -46,8 +46,10 @@ impl FuncTranslator<'_> {
 
         // Build the else block
         if let Some(else_block) = else_block {
-            self.translate_block(else_block, return_block);
-            self.builder.ins().jump(merge_block, &[]);
+            let has_return = self.translate_block(else_block, return_block);
+            if !has_return {
+                self.builder.ins().jump(merge_block, &[]);
+            }
         }
 
         // Switch to the merge block
@@ -76,10 +78,12 @@ impl FuncTranslator<'_> {
         self.builder.switch_to_block(then_block);
         self.builder.seal_block(then_block);
 
-        self.translate_block(&if_arm.block, return_block);
+        let has_return = self.translate_block(&if_arm.block, return_block);
 
         // Jump to the merge block
-        self.builder.ins().jump(merge_block, &[]);
+        if !has_return {
+            self.builder.ins().jump(merge_block, &[]);
+        }
 
         // Return the else block
         else_block
