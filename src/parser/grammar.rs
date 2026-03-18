@@ -293,13 +293,13 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- EXPRESSIONS ---
 
     pub rule oneline_expression() -> Vec<ExprToken>
-        = _? expr:expr_token() ++ (_?) _? { expr }
+        = expr:expr_token() ++ (_?) { expr }
 
     pub rule multiline_expression() -> Vec<ExprToken>
-        = __? expr:expr_token() ++ (__?) __? { expr }
+        = expr:expr_token() ++ (__?) { expr }
 
     pub rule lvalue_expression() -> Vec<ExprToken>
-        = __? expr:lvalue_token() ++ (__?) __? { expr }
+        = expr:lvalue_token() ++ (__?) { expr }
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
@@ -340,7 +340,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = op:operator() { ExprTokenKind::Operator(op) }
 
     rule parenthesized_token() -> ExprTokenKind
-        = "(" __? expr:multiline_expression() ")" { ExprTokenKind::Parenthesized(expr) }
+        = "(" __? expr:multiline_expression() __? ")" { ExprTokenKind::Parenthesized(expr) }
 
     rule dot_token() -> ExprTokenKind
         = "." { ExprTokenKind::Dot }
