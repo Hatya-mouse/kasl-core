@@ -293,13 +293,13 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- EXPRESSIONS ---
 
     pub rule oneline_expression() -> Vec<ExprToken>
-        = expr_token() ++ (_?)
+        = expr:expr_token() ++ (_?) { expr }
 
     pub rule multiline_expression() -> Vec<ExprToken>
-        = expr_token() ++ (__?)
+        = expr:expr_token() ++ (__?) { expr }
 
     pub rule lvalue_expression() -> Vec<ExprToken>
-        = lvalue_token() ++ (__?)
+        = expr:lvalue_token() ++ (__?) __? { expr }
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
