@@ -37,7 +37,6 @@ NoTypeAnnotationOrDefVal = "型または初期値が指定されていません"
 NonBoolTypeForCondition = '条件式には "Bool" 型の値が必要ですが、"{$0}" 型の値が指定されています'
 NonMemberTokenAfterDot = '"."の後には変数名または関数呼び出しが必要です'
 OpNotAssociative = '演算子 "{$0}" は連続して使用できません'
-ParserError = "文法に誤りがあります。{$0} が必要です"
 PrefixOpNotFound = '前置演算子 "{$0}" が見つかりません'
 RecursiveCall = "再帰呼び出しは使用できません"
 ReturnTypeMismatch = '戻り値の型が一致しません。"{$0}" 型の値が必要ですが、"{$1}" 型の値が指定されています'
@@ -53,3 +52,7 @@ VarNotFound = '変数 "{$0}" が見つかりません'
 WrongParamCountForInfix = '中置演算子 "{$0}" には2個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPostfix = '後置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
 WrongParamCountForPrefix = '前置演算子 "{$0}" には1個の引数が必要ですが、{$1}個の引数が指定されています'
+
+[parser_error]
+MultipleExpected = "文法に誤りがあります。{$0} または {$1} のいずれかが必要です"
+SingleExpected = "文法に誤りがあります。{$0} が必要です"

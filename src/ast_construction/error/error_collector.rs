@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-
 use crate::{
     Range,
     error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
 };
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct ErrorCollector {

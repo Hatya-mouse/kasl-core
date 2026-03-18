@@ -37,7 +37,6 @@ NoTypeAnnotationOrDefVal = "The type of the value and the default value is not s
 NonBoolTypeForCondition = 'The condition expression must be of type "Bool", but a value of type "{$0}" is given'
 NonMemberTokenAfterDot = '"." must be followed by a function call or a variable name'
 OpNotAssociative = 'The operator "{$0}" cannot be used consecutively'
-ParserError = "Syntax error. Expected {$0}"
 PrefixOpNotFound = 'Prefix operator "{$0}" could not be found in scope'
 RecursiveCall = "Functions cannot be called recursively"
 ReturnTypeMismatch = 'The type of the return value does not match. A value of type "{$0}" is expected, but a value of type "{$1}" is passed'
@@ -53,3 +52,7 @@ VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
+
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"

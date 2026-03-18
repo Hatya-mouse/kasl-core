@@ -17,7 +17,7 @@
 use crate::{
     Range,
     compilation_data::CompilerState,
-    error::{ErrorCollector, ErrorRecord, Ph},
+    error::{ErrorCollector, Ph},
     global_decl_collection::GlobalDeclCollector,
     namespace_constructor::NameSpaceConstructor,
     namespace_registry::ImportPath,
@@ -54,9 +54,9 @@ impl GlobalDeclCollector<'_> {
         }
 
         // Change the ranges of the errors to the import path range and insert them into the error collector
-        let module_errors = self.compile_imported_program(program, full_path, import_path);
+        let child_ec = self.compile_imported_program(program, full_path, import_path);
 
-        for mut error in module_errors {
+        for mut error in child_ec.records.values().cloned() {
             error.ranges = HashSet::from([decl_range]);
             self.ec.push_error(error);
         }
@@ -67,7 +67,7 @@ impl GlobalDeclCollector<'_> {
         program: String,
         full_path: PathBuf,
         import_path: &ImportPath,
-    ) -> Vec<ErrorRecord> {
+    ) -> ErrorCollector {
         // Add the imported path to the set of paths to search for imports
         let mut imported_paths = self.comp_state.imported_paths.clone();
         imported_paths.insert(full_path.clone());
@@ -108,17 +108,18 @@ impl GlobalDeclCollector<'_> {
         constructor.set_code(&program);
 
         // Parse and construct the program
-        if let Err(parser_error) = constructor.parse() {
-            self.ec.parser_error(
-                Range::n(parser_error.location.offset, parser_error.location.offset),
-                Ph::Parse,
-                parser_error.expected,
+        if let Err(parse_error) = constructor.parse() {
+            let offset = parse_error.location.offset;
+            self.ec.parse_error(
+                Range::n(offset, offset),
+                Ph::GlobalDeclCollection,
+                parse_error.expected,
             );
-            return vec![];
+            return ec;
         }
         constructor.collect_global_decls();
 
-        ec.records.values().cloned().collect()
+        ec
     }
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {

@@ -21,13 +21,13 @@ use crate::{
 use peg::error::ExpectedSet;
 
 impl ErrorCollector {
-    pub(crate) fn parser_error(&mut self, range: Range, phase: Phase, expected: ExpectedSet) {
+    pub(crate) fn parse_error(&mut self, range: Range, phase: Phase, expected: ExpectedSet) {
         self.emit(
             EK::ParserError,
             range,
             phase,
             Sv::Error,
-            Pl::Str(expected.to_string()),
+            Pl::StrVec(expected.tokens().map(|t| t.to_string()).collect()),
         );
     }
 

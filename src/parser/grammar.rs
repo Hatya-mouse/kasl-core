@@ -45,7 +45,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / struct_decl_statement()
         / operator_definition_statement()
         / operator_func_statement()
-        / expected!("statement")
+        / expected!("STATEMENT")
 
     rule scope_stmt() -> ParserScopeStmt
         = return_statement()
@@ -55,7 +55,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         / expr_statement()
         / if_statement()
         / block_statement()
-        / expected!("statement")
+        / expected!("STATEMENT")
 
     rule import_statement() -> ParserDeclStmt
         = start:position!() "import" _ path:import_path() end:position!() {
@@ -293,13 +293,13 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- EXPRESSIONS ---
 
     pub rule oneline_expression() -> Vec<ExprToken>
-        = expr:expr_token() ++ (_?) { expr }
+        = expr:expr_token() ++ (_?) { expr } / expected!("EXPRESSION")
 
     pub rule multiline_expression() -> Vec<ExprToken>
-        = expr:expr_token() ++ (__?) { expr }
+        = expr:expr_token() ++ (__?) { expr } / expected!("EXPRESSION")
 
     pub rule lvalue_expression() -> Vec<ExprToken>
-        = expr:lvalue_token() ++ (__?) { expr }
+        = expr:lvalue_token() ++ (__?) { expr } / expected!("EXPRESSION")
 
     rule expr_token() -> ExprToken
         = start:position!() kind:(
