@@ -60,7 +60,7 @@ fn format_parse_error(record: &ErrorRecord, locale: &str) -> String {
         .filter(|token| {
             !matches!(
                 token.as_str(),
-                "\"\n\"" | "\"#\"" | "\"EOF\"" | "\"STATEMENT\"" | "\"EXPRESSION\""
+                "\"\\n\"" | "\"#\"" | "EOF" | "STATEMENT" | "EXPRESSION"
             )
         })
         .collect();
