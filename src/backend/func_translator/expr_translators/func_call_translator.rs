@@ -57,11 +57,9 @@ impl FuncTranslator<'_> {
         if block.body.len() == 1
             && let Statement::Return { value } = &block.body[0]
         {
-            if let Some(value) = value {
-                return Some(self.translate_expr(value));
-            } else {
-                return None;
-            }
+            let return_value = value.as_ref().map(|v| self.translate_expr(v));
+            self.scope_registry.pop_deepest();
+            return return_value;
         }
 
         // Get the return type
