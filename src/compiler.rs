@@ -50,7 +50,10 @@ impl KaslCompiler {
     pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
         self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {
             Box::new(ErrorRecord::new(
-                ErrorKey::new(EK::ParserError, Pl::Str(e.expected.to_string())),
+                ErrorKey::new(
+                    EK::ParserError,
+                    Pl::StrVec(e.expected.tokens().map(|t| t.to_string()).collect()),
+                ),
                 Range::n(e.location.offset, e.location.offset),
                 Ph::Parse,
                 Sv::Error,
