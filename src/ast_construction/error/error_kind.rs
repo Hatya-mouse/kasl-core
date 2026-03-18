@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, strum::Display)]
 pub enum ErrorKind {
     /// Title: ParserError
     /// Payload: ParserError

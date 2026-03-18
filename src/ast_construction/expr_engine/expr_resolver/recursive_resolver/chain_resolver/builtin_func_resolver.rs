@@ -74,7 +74,7 @@ impl ExpressionResolver<'_> {
                     range,
                     Ph::ExprEngine,
                     expected_type.to_string(),
-                    &resolved_arg.value_type.to_string(),
+                    resolved_arg.value_type.to_string(),
                 );
             }
 

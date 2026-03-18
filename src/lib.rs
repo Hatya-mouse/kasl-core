@@ -21,6 +21,7 @@ pub mod ast_construction;
 pub mod backend;
 pub mod builtin;
 pub mod compiler;
+pub mod localization;
 pub mod parser;
 
 pub use ast::*;

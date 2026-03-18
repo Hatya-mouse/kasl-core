@@ -16,7 +16,10 @@ cranelift-module = "0.129.1"
 cranelift-native = "0.129.1"
 hashbrown = { version = "0.16.1", features = ["serde"] }
 peg = "0.8.5"
+rust-embed = "8.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
+strum = { version = "0.28.0", features = ["derive"] }
+toml = "1.0.7"
 
 [dev-dependencies]
 insta = { version = "1.46.3", features = ["yaml", "redactions"] }
