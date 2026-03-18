@@ -76,23 +76,11 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn static_var_access(&mut self, range: Range, phase: Phase, var_name: &str) {
-        self.emit(
-            EK::StaticVarAccess,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(var_name.to_string()),
-        );
+    pub(crate) fn static_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::StaticVarAccess, range, phase, Sv::Error, Pl::None);
     }
 
-    pub(crate) fn builtin_var_access(&mut self, range: Range, phase: Phase, var_name: &str) {
-        self.emit(
-            EK::BuiltinVarAccess,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(var_name.to_string()),
-        );
+    pub(crate) fn builtin_var_access(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::BuiltinVarAccess, range, phase, Sv::Error, Pl::None);
     }
 }

@@ -66,8 +66,12 @@ impl GlobalDeclCollector<'_> {
 
         // Register the operator
         let Ok(op_id) = self.prog_ctx.op_ctx.register_postfix_func(op) else {
-            self.ec
-                .duplicate_postfix_func(decl_range, Ph::GlobalDeclCollection, symbol);
+            self.ec.duplicate_postfix_func(
+                decl_range,
+                Ph::GlobalDeclCollection,
+                symbol,
+                params[0].value_type.to_string(),
+            );
             return;
         };
 

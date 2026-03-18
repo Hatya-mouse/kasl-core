@@ -55,9 +55,9 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn duplicate_arg(&mut self, range: Range, phase: Phase, param_label: &str) {
+    pub(crate) fn duplicate_arg_is_given(&mut self, range: Range, phase: Phase, param_label: &str) {
         self.emit(
-            EK::DuplicateArg,
+            EK::DuplicateArgIsGiven,
             range,
             phase,
             Sv::Error,
@@ -65,25 +65,56 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn extra_arg(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::ExtraArg, range, phase, Sv::Error, Pl::None);
+    pub(crate) fn extra_arg(&mut self, range: Range, phase: Phase, desired_count: usize) {
+        self.emit(
+            EK::ExtraArg,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Num(desired_count),
+        );
     }
 
-    pub(crate) fn missing_arg(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::MissingArg, range, phase, Sv::Error, Pl::None);
+    pub(crate) fn missing_arg(&mut self, range: Range, phase: Phase, param_name: &str) {
+        self.emit(
+            EK::MissingArg,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(param_name.to_string()),
+        );
     }
 
-    pub(crate) fn missing_arg_label(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::MissingArgLabel, range, phase, Sv::Error, Pl::None);
+    pub(crate) fn missing_arg_label(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        param_name: &str,
+        param_label: &str,
+    ) {
+        self.emit(
+            EK::MissingArgLabel,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(param_name.to_string(), param_label.to_string()),
+        );
     }
 
-    pub(crate) fn arg_type_mismatch(&mut self, range: Range, phase: Phase, arg_name: &str) {
+    pub(crate) fn arg_type_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        arg_name: &str,
+        expected_type: String,
+        actual_type: String,
+    ) {
         self.emit(
             EK::ArgTypeMismatch,
             range,
             phase,
             Sv::Error,
-            Pl::Str(arg_name.to_string()),
+            Pl::StrTriple(arg_name.to_string(), expected_type, actual_type),
         );
     }
 
@@ -120,13 +151,19 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn builtin_arg_type_mismatch(&mut self, range: Range, phase: Phase) {
+    pub(crate) fn builtin_arg_type_mismatch(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        expected_type: String,
+        actual_type: String,
+    ) {
         self.emit(
             EK::BuiltinArgTypeMismatch,
             range,
             phase,
             Sv::Error,
-            Pl::None,
+            Pl::StrPair(expected_type, actual_type),
         );
     }
 }

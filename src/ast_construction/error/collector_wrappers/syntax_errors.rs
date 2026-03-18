@@ -41,14 +41,8 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn top_level_struct_field(&mut self, range: Range, phase: Phase, field_name: &str) {
-        self.emit(
-            EK::TopLevelStructField,
-            range,
-            phase,
-            Sv::Error,
-            Pl::Str(field_name.to_string()),
-        );
+    pub(crate) fn top_level_var(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::TopLevelVar, range, phase, Sv::Error, Pl::None);
     }
 
     pub(crate) fn assign_type_mismatch(

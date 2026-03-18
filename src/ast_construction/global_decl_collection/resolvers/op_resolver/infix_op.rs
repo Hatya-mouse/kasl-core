@@ -67,8 +67,13 @@ impl GlobalDeclCollector<'_> {
 
         // Register the operator
         let Ok(op_id) = self.prog_ctx.op_ctx.register_infix_func(op) else {
-            self.ec
-                .duplicate_infix_func(decl_range, Ph::GlobalDeclCollection, symbol);
+            self.ec.duplicate_infix_func(
+                decl_range,
+                Ph::GlobalDeclCollection,
+                symbol,
+                params[0].value_type.to_string(),
+                params[1].value_type.to_string(),
+            );
             return;
         };
 

@@ -29,8 +29,8 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr> {
         match element {
-            UnresolvedChainElement::Identifier { name } => {
-                self.ec.static_var_access(range, Ph::ExprEngine, name);
+            UnresolvedChainElement::Identifier { .. } => {
+                self.ec.static_var_access(range, Ph::ExprEngine);
                 None
             }
             UnresolvedChainElement::FuncCall {

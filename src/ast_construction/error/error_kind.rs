@@ -20,15 +20,10 @@ pub enum ErrorKind {
     /// Payload: ParserError
     ParserError,
 
-    /// Title: TopLevelStructField
-    /// Payload: The name of the struct field that is defined in the top level
-    /// Struct field is defined in the top level though it should be defined in a struct.
-    TopLevelStructField,
-
-    /// Title: ExprEndsWithDot
-    /// Payload: None
-    /// The expression ends with a dot.
-    ExprEndsWithDot,
+    /// Title: TopLevelVar
+    /// Payload: The name of the variable declared with `var` keyword that is defined in the top level
+    /// A `var` variable is defined in the top level.
+    TopLevelVar,
 
     /// Title: NonMemberTokenAfterDot
     /// Payload: None
@@ -39,6 +34,11 @@ pub enum ErrorKind {
     /// Payload: None
     /// Arguments are passed to the struct initializer.
     ArgForStructInit,
+
+    /// Title: ExprEndsWithDot
+    /// Payload: None
+    /// The expression ends with a dot.
+    ExprEndsWithDot,
 
     /// Title: ExprBeginsWithDot
     /// Payload: None
@@ -91,32 +91,32 @@ pub enum ErrorKind {
     MemberFuncNotFound,
 
     /// Title: ArgOrderIncorrect
-    /// Payload: The name of the function and the name of the argument that is out of order
+    /// Payload: The name of the argument that is out of order
     /// Argument order is incorrect.
     ArgOrderIncorrect,
 
     /// Title: DuplicateArg
-    /// Payload: The name of the function and the name of the duplicate argument
+    /// Payload: The name of the duplicate argument
     /// The same argument is given more than once.
-    DuplicateArg,
+    DuplicateArgIsGiven,
 
     /// Title: ExtraArg
-    /// Payload: The name of the function
+    /// Payload: The number of arguments expected
     /// Too many arguments are given.
     ExtraArg,
 
     /// Title: MissingArg
-    /// Payload: The name of the function
+    /// Payload: The name of the argument that is missing
     /// Not enough arguments are given.
     MissingArg,
 
     /// Title: MissingArgLabel
-    /// Payload: The name of the function
+    /// Payload: The name and the label of the argument that is missing a label
     /// A label of the argument is missing, but the argument requires a label.
     MissingArgLabel,
 
     /// Title: ArgTypeMismatch
-    /// Payload: The name of the argument
+    /// Payload: The name of the argument, the expected type, and the actual type
     /// A type of the argument is wrong.
     ArgTypeMismatch,
 
@@ -181,17 +181,17 @@ pub enum ErrorKind {
     DuplicatePostfixDefine,
 
     /// Title: DuplicateInfixFunc
-    /// Payload: The symbol of the operator definition
+    /// Payload: The symbol of the operator definition, lhs value type, rhs value type
     /// An operator function with the same symbol and the operand type is defined.
     DuplicateInfixFunc,
 
     /// Title: DuplicatePrefixFunc
-    /// Payload: The symbol of the operator definition
+    /// Payload: The symbol of the operator definition and operand value type
     /// An operator function with the same symbol and the operand type is defined.
     DuplicatePrefixFunc,
 
     /// Title: DuplicatePostfixFunc
-    /// Payload: The symbol of the operator definition
+    /// Payload: The symbol of the operator definition and operand value type
     /// An operator function with the same symbol and the operand type is defined.
     DuplicatePostfixFunc,
 
@@ -221,8 +221,8 @@ pub enum ErrorKind {
     ReturnWithoutValueForReturnFunc,
 
     /// Title: MissingReturn
-    /// Payload: The return type of the function
-    /// A function requires a return value but return statement is missing
+    /// Payload: None
+    /// A function requires a return value, but return statement is missing in single or multiple scopes.
     MissingReturn,
 
     /// Title: RecursiveCall
@@ -261,7 +261,7 @@ pub enum ErrorKind {
     BuiltinFuncNotFound,
 
     /// Title: BuiltinArgTypeMismatch
-    /// Payload: None
+    /// Payload: The expected type and the actual type of the argument
     /// The type of the argument passed to an builtin function is wrong.
     BuiltinArgTypeMismatch,
 

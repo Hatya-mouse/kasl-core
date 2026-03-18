@@ -44,7 +44,7 @@ impl ExpressionResolver<'_> {
                 // If the slot is already occupied, throw an duplicate parameter error
                 if slots[param_index].is_some() {
                     self.ec
-                        .duplicate_arg(no_type_arg.range, Ph::ExprEngine, label);
+                        .duplicate_arg_is_given(no_type_arg.range, Ph::ExprEngine, label);
                     return None;
                 }
                 // If the label order is incorrect, throw an error
@@ -63,13 +63,18 @@ impl ExpressionResolver<'_> {
             } else {
                 // Check if the index is within bounds
                 if next_unlabeled_index >= slots.len() {
-                    self.ec.extra_arg(no_type_arg.range, Ph::ExprEngine);
+                    self.ec
+                        .extra_arg(no_type_arg.range, Ph::ExprEngine, slots.len());
                     return None;
                 }
                 // Check if the target argument doesn't require a label
                 if func_params[next_unlabeled_index].label.is_some() {
-                    self.ec.missing_arg_label(no_type_arg.range, Ph::ExprEngine);
-                    return None;
+                    self.ec.missing_arg_label(
+                        no_type_arg.range,
+                        Ph::ExprEngine,
+                        &func_params[next_unlabeled_index].name,
+                        func_params[next_unlabeled_index].label.as_ref().unwrap(),
+                    );
                 }
 
                 slots[next_unlabeled_index] = Some(FuncCallArg {
@@ -92,8 +97,8 @@ impl ExpressionResolver<'_> {
                         range: Range::zero(),
                     }),
                     None => {
-                        self.ec.missing_arg(func_call_range, Ph::ExprEngine);
-                        return None;
+                        self.ec
+                            .missing_arg(func_call_range, Ph::ExprEngine, &param.name);
                     }
                 },
             }
@@ -102,8 +107,13 @@ impl ExpressionResolver<'_> {
         // Check if the type of the arguments matches the type of the parameter
         for (resolved_arg, param) in resolved_args.iter().zip(func_params.iter()) {
             if resolved_arg.value.value_type != param.value_type {
-                self.ec
-                    .arg_type_mismatch(resolved_arg.range, Ph::ExprEngine, &param.name);
+                self.ec.arg_type_mismatch(
+                    resolved_arg.range,
+                    Ph::ExprEngine,
+                    &param.name,
+                    param.value_type.to_string(),
+                    resolved_arg.value.value_type.to_string(),
+                );
                 return None;
             }
         }

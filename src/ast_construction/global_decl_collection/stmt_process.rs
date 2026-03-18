@@ -95,9 +95,8 @@ impl<'a> GlobalDeclCollector<'a> {
                 body,
             } => self.resolve_operator_func(op_type, symbol, params, return_type, body, stmt.range),
 
-            ParserDeclStmtKind::StructField { name, .. } => {
-                self.ec
-                    .top_level_struct_field(stmt.range, Ph::GlobalDeclCollection, name)
+            ParserDeclStmtKind::StructField { .. } => {
+                self.ec.top_level_var(stmt.range, Ph::GlobalDeclCollection)
             }
         }
     }

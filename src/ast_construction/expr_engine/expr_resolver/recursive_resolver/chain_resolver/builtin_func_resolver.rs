@@ -29,8 +29,8 @@ impl ExpressionResolver<'_> {
         range: Range,
     ) -> Option<Expr> {
         match element {
-            UnresolvedChainElement::Identifier { name } => {
-                self.ec.builtin_var_access(range, Ph::ExprEngine, name);
+            UnresolvedChainElement::Identifier { .. } => {
+                self.ec.builtin_var_access(range, Ph::ExprEngine);
                 None
             }
             UnresolvedChainElement::FuncCall {
@@ -70,7 +70,12 @@ impl ExpressionResolver<'_> {
             let resolved_arg = self.resolve_recursively(no_type_arg.value.clone())?;
             // Check if the type of the argument matches the expected type
             if &resolved_arg.value_type != expected_type {
-                self.ec.builtin_arg_type_mismatch(range, Ph::ExprEngine);
+                self.ec.builtin_arg_type_mismatch(
+                    range,
+                    Ph::ExprEngine,
+                    expected_type.to_string(),
+                    &resolved_arg.value_type.to_string(),
+                );
             }
 
             args.push(resolved_arg);

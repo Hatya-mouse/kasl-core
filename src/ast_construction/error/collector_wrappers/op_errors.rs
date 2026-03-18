@@ -133,33 +133,52 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn duplicate_infix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+    pub(crate) fn duplicate_infix_func(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        op_symbol: &str,
+        lhs_type: String,
+        rhs_type: String,
+    ) {
         self.emit(
             EK::DuplicateInfixFunc,
             range,
             phase,
             Sv::Error,
-            Pl::Str(op_symbol.to_string()),
+            Pl::StrTriple(op_symbol.to_string(), lhs_type, rhs_type),
         );
     }
 
-    pub(crate) fn duplicate_prefix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+    pub(crate) fn duplicate_prefix_func(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        op_symbol: &str,
+        operand_type: String,
+    ) {
         self.emit(
             EK::DuplicatePrefixFunc,
             range,
             phase,
             Sv::Error,
-            Pl::Str(op_symbol.to_string()),
+            Pl::StrPair(op_symbol.to_string(), operand_type),
         );
     }
 
-    pub(crate) fn duplicate_postfix_func(&mut self, range: Range, phase: Phase, op_symbol: &str) {
+    pub(crate) fn duplicate_postfix_func(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        op_symbol: &str,
+        operand_type: String,
+    ) {
         self.emit(
             EK::DuplicatePostfixFunc,
             range,
             phase,
             Sv::Error,
-            Pl::Str(op_symbol.to_string()),
+            Pl::StrPair(op_symbol.to_string(), operand_type),
         );
     }
 }
