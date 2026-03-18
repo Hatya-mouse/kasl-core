@@ -16,6 +16,7 @@
 
 use crate::{
     Expr, ExprKind, FuncCallArg, Range,
+    error::Ph,
     expr_engine::ExpressionResolver,
     symbol_table::{InfixQueryRef, PostfixQueryRef, PrefixQueryRef, UnresolvedExpr},
 };
@@ -33,11 +34,20 @@ impl ExpressionResolver<'_> {
         let rhs = self.resolve_recursively(rhs)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_infix_id(InfixQueryRef {
+        let Some(op_id) = self.prog_ctx.op_ctx.get_infix_id(InfixQueryRef {
             symbol: &symbol,
             lhs_type: &lhs.value_type,
             rhs_type: &rhs.value_type,
-        })?;
+        }) else {
+            self.ec.infix_op_not_found(
+                range,
+                Ph::ExprEngine,
+                &symbol,
+                &self.prog_ctx.type_registry.format_type(&lhs.value_type),
+                &self.prog_ctx.type_registry.format_type(&rhs.value_type),
+            );
+            return None;
+        };
         let op = self.prog_ctx.op_ctx.get_infix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph
@@ -82,10 +92,18 @@ impl ExpressionResolver<'_> {
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_prefix_id(PrefixQueryRef {
+        let Some(op_id) = self.prog_ctx.op_ctx.get_prefix_id(PrefixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
-        })?;
+        }) else {
+            self.ec.prefix_op_not_found(
+                range,
+                Ph::ExprEngine,
+                &symbol,
+                &self.prog_ctx.type_registry.format_type(&operand.value_type),
+            );
+            return None;
+        };
         let op = self.prog_ctx.op_ctx.get_prefix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph
@@ -124,10 +142,18 @@ impl ExpressionResolver<'_> {
         let operand = self.resolve_recursively(operand)?;
 
         // Get a reference to the actual operator
-        let op_id = self.prog_ctx.op_ctx.get_postfix_id(PostfixQueryRef {
+        let Some(op_id) = self.prog_ctx.op_ctx.get_postfix_id(PostfixQueryRef {
             symbol: &symbol,
             operand_type: &operand.value_type,
-        })?;
+        }) else {
+            self.ec.postfix_op_not_found(
+                range,
+                Ph::ExprEngine,
+                &symbol,
+                &self.prog_ctx.type_registry.format_type(&operand.value_type),
+            );
+            return None;
+        };
         let op = self.prog_ctx.op_ctx.get_postfix_func(&op_id)?;
 
         // Add an operator call edge to the scope graph

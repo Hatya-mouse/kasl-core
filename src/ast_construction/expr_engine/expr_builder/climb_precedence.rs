@@ -60,7 +60,7 @@ impl ExpressionBuilder<'_> {
                     Some(op_props) => op_props,
                     None => {
                         // If the both infix and postfix operators are not found, emit an error
-                        self.ec.infix_or_postfix_op_not_found(
+                        self.ec.infix_or_postfix_op_not_defined(
                             op_token.range,
                             Ph::ExprEngine,
                             &op_symbol,

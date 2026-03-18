@@ -1,3 +1,7 @@
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"
+
 [errors]
 ArgForStructInit = "Arguments cannot be passed to a struct initializer"
 ArgOrderIncorrect = 'The position of the argument "{$0}" is incorrect'
@@ -10,7 +14,7 @@ CompilerBug = "An internal compiler error has occured. Please report this issue 
 CyclicDependency = 'Importing "{$0}.kasl" creates a cyclic dependency'
 DuplicateArgIsGiven = 'The argument "{$0}" is passed multiple times'
 DuplicateInfixDefine = 'An infix operator "{$0}" has already been defined'
-DuplicateInfixFunc = 'A function for the infix operator "{$0}" that takes operands of type "{$1}" and "{$2}" has already been defined'
+DuplicateInfixFunc = 'A function for the infix operator "{$0}" that takes operands of type "{$1}" and "{$2}" respectively has already been defined'
 DuplicateName = 'The name "{$0}" has already been used'
 DuplicatePostfixDefine = 'A postfix operator "{$0}" has already been defined'
 DuplicatePostfixFunc = 'A function for the postfix operator "{$0}" that takes an operand of type "{$1}" has already been defined'
@@ -24,7 +28,8 @@ FuncNotFound = 'Function "{$0}" could not be found in scope'
 GlobalFuncCannotBeStatic = 'The function "{$0}" is a global function, thus "static" keyword cannot be specified'
 ImmutableAssignment = "The value cannot be assigned to a constant"
 ImportNotFound = 'A KASL file "{$0}.kasl" could not be found'
-InfixOrPostfixOpNotFound = 'Infix or postfix operator "{$0}" could not be found in scope'
+InfixOpNotFound = 'Infix operator "{$0}" which takes operands of type "{$1}" and "{$2}" respectively could not be found'
+InfixOrPostfixOpNotDefined = 'Infix or postfix operator "{$0}" is not defined'
 InvalidLValue = "Only variables can be used as a left-hand side of an assignment statement"
 InvalidStructStmt = '"{$0}" statement cannot be used in "struct"'
 MemberAccessOnPrimitive = 'The value of type "{$0}" does not have members'
@@ -37,7 +42,9 @@ NoTypeAnnotationOrDefVal = "The type of the value and the default value is not s
 NonBoolTypeForCondition = 'The condition expression must be of type "Bool", but a value of type "{$0}" is given'
 NonMemberTokenAfterDot = '"." must be followed by a function call or a variable name'
 OpNotAssociative = 'The operator "{$0}" cannot be used consecutively'
-PrefixOpNotFound = 'Prefix operator "{$0}" could not be found in scope'
+PostfixOpNotFound = 'Postfix operator "{$0}" which takes an operand of type "{$1}" could not be found'
+PrefixOpNotDefined = 'Prefix operator "{$0}" is not defined'
+PrefixOpNotFound = 'Prefix operator "{$0}" which takes an operand of type "{$1}" could not be found'
 RecursiveCall = "Functions cannot be called recursively"
 ReturnTypeMismatch = 'The type of the return value does not match. A value of type "{$0}" is expected, but a value of type "{$1}" is passed'
 ReturnValueForNoReturnFunc = 'The function does not return a value, so "return" statements cannot have a value'
@@ -52,7 +59,3 @@ VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
-
-[parser_error]
-MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
-SingleExpected = "Syntax error. Expected {$0}"

@@ -60,15 +60,30 @@ pub enum ErrorKind {
     /// Function is not found.
     FuncNotFound,
 
+    /// Title: PrefixOpNotDefined
+    /// Payload: The symbol of the prefix operator that is not defined
+    /// Prefix operator is not defined.
+    PrefixOpNotDefined,
+
+    /// Title: InfixOrPostfixOpNotDefined
+    /// Payload: The symbol of the infix or postfix operator that is not defined
+    /// Infix or postfix operator is not defined.
+    InfixOrPostfixOpNotDefined,
+
+    /// Title: InfixOpNotFound
+    /// Payload: The symbol of the infix operator, the type of the left operand, and the type of the right operand
+    /// Infix operator is not found for the given types.
+    InfixOpNotFound,
+
     /// Title: PrefixOpNotFound
-    /// Payload: The symbol of the prefix operator that is not found
-    /// Prefix operator is not found.
+    /// Payload: The symbol of the prefix operator, and the type of the operand
+    /// Prefix operator is not found for the given type.
     PrefixOpNotFound,
 
-    /// Title: InfixOrPostfixOpNotFound
-    /// Payload: The symbol of the infix or postfix operator that is not found
-    /// Infix or postfix operator is not found.
-    InfixOrPostfixOpNotFound,
+    /// Title: PostfixOpNotFound
+    /// Payload: The symbol of the postfix operator, and the type of the operand
+    /// Postfix operator is not found for the given type.
+    PostfixOpNotFound,
 
     /// Title: OpNotAssociative
     /// Payload: The symbol of the operator that is not associative

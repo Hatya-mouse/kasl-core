@@ -1,13 +1,18 @@
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, strum::Display)]
+ParserError
 TopLevelVar
-ExprEndsWithDot
 NonMemberTokenAfterDot
 ArgForStructInit
+ExprEndsWithDot
 ExprBeginsWithDot
 InvalidLValue
 VarNotFound
 FuncNotFound
+PrefixOpNotDefined
+InfixOrPostfixOpNotDefined
+InfixOpNotFound
 PrefixOpNotFound
-InfixOrPostfixOpNotFound
+PostfixOpNotFound
 OpNotAssociative
 MemberAccessOnPrimitive
 MemberFieldNotFound

@@ -34,7 +34,7 @@ impl ExpressionBuilder<'_> {
                     Some(op_props) => op_props.precedence,
                     None => {
                         self.ec
-                            .prefix_op_not_found(token.range, Ph::ExprEngine, symbol);
+                            .prefix_op_not_defined(token.range, Ph::ExprEngine, symbol);
                         return None;
                     }
                 };

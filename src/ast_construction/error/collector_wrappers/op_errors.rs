@@ -20,9 +20,9 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub(crate) fn prefix_op_not_found(&mut self, range: Range, phase: Phase, symbol: &str) {
+    pub(crate) fn prefix_op_not_defined(&mut self, range: Range, phase: Phase, symbol: &str) {
         self.emit(
-            EK::PrefixOpNotFound,
+            EK::PrefixOpNotDefined,
             range,
             phase,
             Sv::Error,
@@ -30,18 +30,71 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn infix_or_postfix_op_not_found(
+    pub(crate) fn infix_or_postfix_op_not_defined(
         &mut self,
         range: Range,
         phase: Phase,
         symbol: &str,
     ) {
         self.emit(
-            EK::InfixOrPostfixOpNotFound,
+            EK::InfixOrPostfixOpNotDefined,
             range,
             phase,
             Sv::Error,
             Pl::Str(symbol.to_string()),
+        );
+    }
+
+    pub(crate) fn infix_op_not_found(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        symbol: &str,
+        left_type: &str,
+        right_type: &str,
+    ) {
+        self.emit(
+            EK::InfixOpNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrTriple(
+                symbol.to_string(),
+                left_type.to_string(),
+                right_type.to_string(),
+            ),
+        );
+    }
+
+    pub(crate) fn prefix_op_not_found(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        symbol: &str,
+        operand_type: &str,
+    ) {
+        self.emit(
+            EK::PrefixOpNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(symbol.to_string(), operand_type.to_string()),
+        );
+    }
+
+    pub(crate) fn postfix_op_not_found(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        symbol: &str,
+        operand_type: &str,
+    ) {
+        self.emit(
+            EK::PostfixOpNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::StrPair(symbol.to_string(), operand_type.to_string()),
         );
     }
 
