@@ -15,13 +15,13 @@
 //
 
 use crate::{
-    VariableID,
+    StructID, VariableID,
     backend::func_translator::FuncTranslator,
     scope_manager::{BlueprintItem, IOBlueprint},
     type_registry::ResolvedType,
 };
-use cranelift::prelude::{InstBuilder, MemFlags};
-use cranelift_codegen::ir;
+use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind};
+use cranelift_codegen::ir::{self, StackSlot};
 
 impl FuncTranslator<'_> {
     pub fn load_blueprint_access(
@@ -91,28 +91,6 @@ impl FuncTranslator<'_> {
 
     // --- LOAD HELPERS ---
 
-    fn load_blueprint_item(
-        &mut self,
-        pointer_type: ir::Type,
-        ptr_ptr: ir::Value,
-        item: &BlueprintItem,
-        offset: i32,
-    ) -> ir::Value {
-        // Get the pointer to the value by the pointer to the pointers
-        let ptr = self
-            .builder
-            .ins()
-            .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
-
-        // Load the value
-        self.builder.ins().load(
-            self.type_converter.convert(&item.value_type),
-            MemFlags::new(),
-            ptr,
-            0,
-        )
-    }
-
     fn register_translated_var(
         &mut self,
         var_id: VariableID,
@@ -125,5 +103,85 @@ impl FuncTranslator<'_> {
         self.scope_registry.add_var(var_id, var);
         // Define the variable
         self.builder.def_var(var, value);
+    }
+
+    fn load_blueprint_item(
+        &mut self,
+        pointer_type: ir::Type,
+        ptr_ptr: ir::Value,
+        item: &BlueprintItem,
+        offset: i32,
+    ) -> ir::Value {
+        // Get the pointer to the value by the pointer to the pointers
+        let val_ptr = self
+            .builder
+            .ins()
+            .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
+
+        // Load the value
+        self.load_value(&item.value_type, val_ptr)
+    }
+
+    fn load_value(&mut self, value_type: &ResolvedType, ptr: ir::Value) -> ir::Value {
+        match value_type {
+            ResolvedType::Primitive(_) => self.builder.ins().load(
+                self.type_converter.convert(value_type),
+                MemFlags::new(),
+                ptr,
+                0,
+            ),
+            ResolvedType::Struct(struct_id) => {
+                // Store the value in the stack slot
+                let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
+
+                // Create a stack slot
+                let slot_data = StackSlotData::new(
+                    StackSlotKind::ExplicitSlot,
+                    struct_decl.total_size,
+                    struct_decl.alignment,
+                );
+                let slot = self.builder.func.create_sized_stack_slot(slot_data);
+
+                // Load and struct the value in the stack slot
+                self.load_struct(struct_id, ptr, slot, 0);
+
+                // Return the address to the struct
+                self.builder
+                    .ins()
+                    .stack_addr(self.type_converter.pointer_type(), slot, 0)
+            }
+        }
+    }
+
+    fn load_struct(
+        &mut self,
+        struct_id: &StructID,
+        val_ptr: ir::Value,
+        stack_slot: StackSlot,
+        offset: i32,
+    ) {
+        let struct_type = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
+        for (field, field_offset) in struct_type
+            .fields
+            .iter()
+            .zip(struct_type.field_offsets.iter().copied())
+        {
+            match &field.value_type {
+                ResolvedType::Primitive(_) => {
+                    let ir_type = self.type_converter.convert(&field.value_type);
+                    let val =
+                        self.builder
+                            .ins()
+                            .load(ir_type, MemFlags::new(), val_ptr, field_offset);
+                    self.builder
+                        .ins()
+                        .stack_store(val, stack_slot, offset + field_offset);
+                }
+                ResolvedType::Struct(struct_id) => {
+                    let child_offset = offset + field_offset;
+                    self.load_struct(struct_id, val_ptr, stack_slot, child_offset);
+                }
+            }
+        }
     }
 }
