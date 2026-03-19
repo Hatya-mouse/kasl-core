@@ -86,4 +86,8 @@ impl ErrorCollector {
     pub(crate) fn expr_ends_with_type(&mut self, range: Range, phase: Phase) {
         self.emit(EK::ExprEndsWithType, range, phase, Sv::Error, Pl::None);
     }
+
+    pub(crate) fn expr_ends_with_builtin(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::ExprEndsWithBuiltin, range, phase, Sv::Error, Pl::None);
+    }
 }

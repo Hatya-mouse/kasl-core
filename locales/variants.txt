@@ -55,4 +55,5 @@ BuiltinArgTypeMismatch
 ImportNotFound
 CyclicDependency
 ExprEndsWithType
+ExprEndsWithBuiltin
 CompilerBug

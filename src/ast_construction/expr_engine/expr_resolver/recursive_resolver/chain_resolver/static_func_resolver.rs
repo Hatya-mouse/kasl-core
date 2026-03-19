@@ -26,23 +26,24 @@ impl ExpressionResolver<'_> {
         &mut self,
         struct_id: StructID,
         element: &UnresolvedChainElement,
-        range: Range,
+        type_name_range: Range,
     ) -> Option<Expr> {
         match element {
-            UnresolvedChainElement::Identifier { .. } => {
-                self.ec.static_var_access(range, Ph::ExprEngine);
+            UnresolvedChainElement::Identifier { range, .. } => {
+                self.ec.static_var_access(*range, Ph::ExprEngine);
                 None
             }
             UnresolvedChainElement::FuncCall {
                 name,
                 args: no_type_args,
+                range,
             } => {
                 // Get the function ID by name
                 let Some(func_id) = self.prog_ctx.func_ctx.get_member_func_id(&struct_id, name)
                 else {
                     let struct_decl = self.prog_ctx.type_registry.get_struct(&struct_id)?;
                     self.ec
-                        .member_func_not_found(range, Ph::ExprEngine, &struct_decl.name, name);
+                        .member_func_not_found(*range, Ph::ExprEngine, &struct_decl.name, name);
                     return None;
                 };
 
@@ -52,18 +53,18 @@ impl ExpressionResolver<'_> {
                 // Throw an error if the function is not static
                 if func.func_type != FunctionType::Static {
                     self.ec
-                        .static_call_of_instance_func(range, Ph::ExprEngine, &func.name);
+                        .static_call_of_instance_func(*range, Ph::ExprEngine, &func.name);
                     return None;
                 }
 
                 // Resolve the arguments
-                let args = self.resolve_func_call_args(&func.params, None, no_type_args, range)?;
+                let args = self.resolve_func_call_args(&func.params, None, no_type_args, *range)?;
 
                 // Construct the expression
                 Some(Expr::new(
                     ExprKind::StaticFuncCall { id: func_id, args },
                     func.return_type,
-                    range,
+                    Range::n(type_name_range.start, range.end),
                 ))
             }
         }

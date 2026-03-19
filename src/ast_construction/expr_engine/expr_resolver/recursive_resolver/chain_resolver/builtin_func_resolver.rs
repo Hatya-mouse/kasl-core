@@ -26,20 +26,21 @@ impl ExpressionResolver<'_> {
     pub fn resolve_builtin_func_call(
         &mut self,
         element: &UnresolvedChainElement,
-        range: Range,
+        builtin_range: Range,
     ) -> Option<Expr> {
         match element {
-            UnresolvedChainElement::Identifier { .. } => {
-                self.ec.builtin_var_access(range, Ph::ExprEngine);
+            UnresolvedChainElement::Identifier { range, .. } => {
+                self.ec.builtin_var_access(*range, Ph::ExprEngine);
                 None
             }
             UnresolvedChainElement::FuncCall {
                 name,
                 args: no_type_args,
+                range,
             } => {
                 // Get the function ID by name
                 let Some(func_id) = self.builtin_registry.get_id_by_name(name) else {
-                    self.ec.builtin_func_not_found(range, Ph::ExprEngine, name);
+                    self.ec.builtin_func_not_found(*range, Ph::ExprEngine, name);
                     return None;
                 };
 
@@ -47,13 +48,13 @@ impl ExpressionResolver<'_> {
                 let func = self.builtin_registry.get_func_by_id(func_id)?;
 
                 // Resolve the arguments
-                let args = self.resolve_builtin_args(&func.params, no_type_args, range)?;
+                let args = self.resolve_builtin_args(&func.params, no_type_args, *range)?;
 
                 // Construct the expression
                 Some(Expr::new(
                     ExprKind::BuiltinFuncCall { id: *func_id, args },
                     func.return_type,
-                    range,
+                    Range::n(builtin_range.start, range.end),
                 ))
             }
         }

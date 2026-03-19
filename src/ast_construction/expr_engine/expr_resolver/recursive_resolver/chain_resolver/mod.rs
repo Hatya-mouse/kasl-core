@@ -36,7 +36,7 @@ impl ExpressionResolver<'_> {
         &mut self,
         lhs: Option<UnresolvedExpr>,
         elements: Vec<UnresolvedChainElement>,
-        range: Range,
+        expr_range: Range,
     ) -> Option<Expr> {
         // Resolve the LHS expression
         // let resolved_lhs = self.resolve_chain_lhs(lhs)?;
@@ -54,7 +54,7 @@ impl ExpressionResolver<'_> {
         } else {
             (target_scope, target_namespace) = self.resolve_namespace_scope(&mut elements_iter);
 
-            if let Some(UnresolvedChainElement::Identifier { name }) = elements_iter.peek() {
+            if let Some(UnresolvedChainElement::Identifier { name, range }) = elements_iter.peek() {
                 // Check if the next element is a type
                 if let Some(struct_id) = self
                     .prog_ctx
@@ -66,22 +66,23 @@ impl ExpressionResolver<'_> {
 
                     // Assume that the next element is a static function
                     let Some(next_element) = elements_iter.next() else {
-                        self.ec.expr_ends_with_type(range, Ph::ExprEngine);
+                        self.ec.expr_ends_with_type(*range, Ph::ExprEngine);
                         return None;
                     };
 
                     // Resolve the static function call
-                    expr = Some(self.resolve_static_func_call(struct_id, next_element, range)?);
+                    expr =
+                        Some(self.resolve_static_func_call(struct_id, next_element, expr_range)?);
                 } else if name == "Builtin" {
                     // Consume the "Builtin" element
                     elements_iter.next();
                     // Get the next element
                     let Some(next_element) = elements_iter.next() else {
-                        self.ec.expr_ends_with_type(range, Ph::ExprEngine);
+                        self.ec.expr_ends_with_builtin(*range, Ph::ExprEngine);
                         return None;
                     };
                     // Resolve the builtin function call
-                    expr = Some(self.resolve_builtin_func_call(next_element, range)?);
+                    expr = Some(self.resolve_builtin_func_call(next_element, expr_range)?);
                 }
             }
         }
@@ -89,30 +90,31 @@ impl ExpressionResolver<'_> {
         // Resolve member access and function calls
         for element in &mut elements_iter {
             match element {
-                UnresolvedChainElement::Identifier { name } => {
+                UnresolvedChainElement::Identifier { name, range } => {
                     if let Some(last_expr) = expr {
-                        expr = Some(self.resolve_field_access(last_expr, name, range)?)
+                        expr = Some(self.resolve_field_access(last_expr, name, *range)?)
                     } else {
-                        expr = Some(self.resolve_identifier(target_scope, name, range)?)
+                        expr = Some(self.resolve_identifier(target_scope, name, *range)?)
                     }
                 }
                 UnresolvedChainElement::FuncCall {
                     name,
                     args: no_type_args,
+                    range,
                 } => {
                     if let Some(last_expr) = expr {
                         expr = Some(self.resolve_instance_func_call(
                             last_expr,
                             name,
                             no_type_args,
-                            range,
+                            *range,
                         )?)
                     } else {
                         expr = Some(self.resolve_func_call(
                             target_namespace,
                             name,
                             no_type_args,
-                            range,
+                            *range,
                         )?)
                     }
                 }

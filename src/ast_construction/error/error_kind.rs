@@ -295,6 +295,11 @@ pub enum ErrorKind {
     /// An expression ends with a type.
     ExprEndsWithType,
 
+    /// Title: ExprEndsWithBuiltin
+    /// Payload: None
+    /// An expression ends with "Builtin" keyword.
+    ExprEndsWithBuiltin,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

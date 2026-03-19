@@ -1,7 +1,3 @@
-[parser_error]
-MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
-SingleExpected = "Syntax error. Expected {$0}"
-
 [errors]
 ArgForStructInit = "Arguments cannot be passed to a struct initializer"
 ArgOrderIncorrect = 'The position of the argument "{$0}" is incorrect'
@@ -21,8 +17,9 @@ DuplicatePostfixFunc = 'A function for the postfix operator "{$0}" that takes an
 DuplicatePrefixDefine = 'A prefix operator "{$0}" has already been defined'
 DuplicatePrefixFunc = 'A function for the prefix operator "{$0}" that takes an operand of type "{$1}" has already been defined'
 ExprBeginsWithDot = 'Expression begins with "."'
+ExprEndsWithBuiltin = 'Expression ends with "Builtin" keyword'
 ExprEndsWithDot = 'Expression ends with "."'
-ExprEndsWithType = "Expression ends with a name of a type."
+ExprEndsWithType = "Expression ends with a name of a type"
 ExtraArg = "Too many arguments are passed to the function. The function requires up to {$0} arguments"
 FuncNotFound = 'Function "{$0}" could not be found in scope'
 GlobalFuncCannotBeStatic = 'The function "{$0}" is a global function, thus "static" keyword cannot be specified'
@@ -59,3 +56,7 @@ VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'
 WrongParamCountForPrefix = 'Prefix operator "{$0}" requires 1 parameter, but got {$1}'
+
+[parser_error]
+MultipleExpected = "Syntax error. Expected one of {$0} or {$1}"
+SingleExpected = "Syntax error. Expected {$0}"

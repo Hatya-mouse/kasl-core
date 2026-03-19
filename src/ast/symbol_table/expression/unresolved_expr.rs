@@ -56,9 +56,11 @@ pub enum UnresolvedExprKind {
 pub enum UnresolvedChainElement {
     Identifier {
         name: String,
+        range: Range,
     },
     FuncCall {
         name: String,
         args: Vec<NoTypeFuncCallArg>,
+        range: Range,
     },
 }
