@@ -47,6 +47,14 @@ impl KaslCompiler {
         self.comp_state.child_search_paths.push(path);
     }
 
+    pub fn set_search_paths(&mut self, paths: Vec<PathBuf>) {
+        self.comp_state.child_search_paths = paths;
+    }
+
+    pub fn clear_search_paths(&mut self) {
+        self.comp_state.child_search_paths.clear();
+    }
+
     pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
         self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {
             Box::new(ErrorRecord::new(
