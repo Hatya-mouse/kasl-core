@@ -20,7 +20,7 @@ use crate::{
     scope_manager::{BlueprintItem, BlueprintItemKind, IOBlueprint},
     type_registry::ResolvedType,
 };
-use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind, types};
+use cranelift::prelude::{InstBuilder, IntCC, MemFlags, StackSlotData, StackSlotKind, types};
 use cranelift_codegen::ir::{self, StackSlot};
 
 impl FuncTranslator<'_> {
@@ -28,7 +28,7 @@ impl FuncTranslator<'_> {
         &mut self,
         params: &TranslatorParams,
         blueprint: &IOBlueprint,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
@@ -36,6 +36,13 @@ impl FuncTranslator<'_> {
         // Assume that the inputs, outputs and states are packed in the order they are declared
         let mut input_offset: i32 = 0;
         let mut state_offset: i32 = 0;
+
+        // Calculate whether this is the first iteration and should be initialized
+        let i32_zero = self.builder.ins().iconst(types::I32, 0);
+        let is_first = iteration_index
+            .map(|index| self.builder.ins().icmp(IntCC::Equal, index, i32_zero))
+            .unwrap_or_else(|| self.builder.ins().iconst(types::I8, 1));
+        let is_first_and_should_init = self.builder.ins().band(is_first, params.should_init);
 
         // Loop over the inputs, outputs and states in declaration order and load them
         for (var_id, item_kind) in blueprint.get_order() {
@@ -47,7 +54,7 @@ impl FuncTranslator<'_> {
                             params.input_ptr_ptr,
                             item,
                             input_offset,
-                            sample_index,
+                            iteration_index,
                         );
                         input_offset += pointer_type.bytes() as i32;
                     }
@@ -58,7 +65,7 @@ impl FuncTranslator<'_> {
                         self.load_or_init_state(
                             pointer_type,
                             params.state_ptr_ptr,
-                            params.should_init,
+                            is_first_and_should_init,
                             item,
                             state_offset,
                         );
@@ -75,7 +82,7 @@ impl FuncTranslator<'_> {
         ptr_ptr: ir::Value,
         input_item: &BlueprintItem,
         input_offset: i32,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) {
         // Pass the optional sample index the buffer index in buffer mode
         let val = self.load_blueprint_item(
@@ -83,7 +90,7 @@ impl FuncTranslator<'_> {
             ptr_ptr,
             input_item,
             input_offset,
-            sample_index,
+            iteration_index,
         );
         self.register_translated_var(input_item.id, input_item.value_type, val);
     }
@@ -116,6 +123,7 @@ impl FuncTranslator<'_> {
             .builder
             .ins()
             .select(should_init, translated_def_val, loaded_val);
+
         // Register the variable with the value
         self.register_translated_var(state_item.id, state_item.value_type, value);
     }
@@ -142,7 +150,7 @@ impl FuncTranslator<'_> {
         ptr_ptr: ir::Value,
         item: &BlueprintItem,
         offset: i32,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) -> ir::Value {
         // Get the pointer to the value by the pointer to the pointers
         let val_ptr = self
@@ -150,7 +158,7 @@ impl FuncTranslator<'_> {
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
-        let val_ptr = if let Some(i) = sample_index {
+        let val_ptr = if let Some(i) = iteration_index {
             // Calculate the pointer offset if it is in the buffer mode
             let item_size = self
                 .builder

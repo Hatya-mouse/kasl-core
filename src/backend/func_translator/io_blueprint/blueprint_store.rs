@@ -27,13 +27,18 @@ impl FuncTranslator<'_> {
         &mut self,
         params: &TranslatorParams,
         blueprint: &IOBlueprint,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
         // Store outputs and states
-        self.store_outputs(pointer_type, params.output_ptr_ptr, blueprint, sample_index);
+        self.store_outputs(
+            pointer_type,
+            params.output_ptr_ptr,
+            blueprint,
+            iteration_index,
+        );
         self.store_states(pointer_type, params.state_ptr_ptr, blueprint);
     }
 
@@ -42,7 +47,7 @@ impl FuncTranslator<'_> {
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
         blueprint: &IOBlueprint,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) {
         let mut output_offset: usize = 0;
         for output_item in blueprint.get_outputs() {
@@ -51,7 +56,7 @@ impl FuncTranslator<'_> {
                 ptr_ptr,
                 output_item,
                 output_offset as i32,
-                sample_index,
+                iteration_index,
             );
             // Increment the output offset by the size of a pointer
             // because each output is stored as a pointer to the actual value
@@ -82,7 +87,7 @@ impl FuncTranslator<'_> {
         ptr_ptr: ir::Value,
         item: &BlueprintItem,
         offset: i32,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
     ) {
         // Get the pointer to store the value at
         let ptr = self
@@ -90,7 +95,7 @@ impl FuncTranslator<'_> {
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
 
-        let ptr = if let Some(i) = sample_index {
+        let ptr = if let Some(i) = iteration_index {
             // Calculate the pointer offset if it is in the buffer mode
             let item_size = self
                 .builder

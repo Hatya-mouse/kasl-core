@@ -64,13 +64,13 @@ impl<'a> FuncTranslator<'a> {
     pub fn translate(
         &mut self,
         params: TranslatorParams,
-        sample_index: Option<ir::Value>,
+        iteration_index: Option<ir::Value>,
         entry_point: &FunctionID,
         blueprint: &IOBlueprint,
         exit_block: ir::Block,
     ) {
         // Get the input and state variables from the blueprint
-        self.load_blueprint_access(&params, blueprint, sample_index);
+        self.load_blueprint_access(&params, blueprint, iteration_index);
 
         // Get the entry point function node
         let Some(func_block) = self
@@ -85,7 +85,7 @@ impl<'a> FuncTranslator<'a> {
         self.translate_block(func_block, exit_block);
 
         // Push the values in the states and outputs to the original pointer
-        self.store_blueprint(&params, blueprint, sample_index);
+        self.store_blueprint(&params, blueprint, iteration_index);
     }
 }
 
