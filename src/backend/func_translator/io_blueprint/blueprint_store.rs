@@ -99,7 +99,7 @@ impl FuncTranslator<'_> {
             let byte_offset = self.builder.ins().imul(i, item_size);
             // Extend the type to the pointer type
             let ptr_type_offset = self.builder.ins().uextend(pointer_type, byte_offset);
-            self.builder.ins().iadd(ptr_ptr, ptr_type_offset)
+            self.builder.ins().iadd(ptr, ptr_type_offset)
         } else {
             ptr
         };
