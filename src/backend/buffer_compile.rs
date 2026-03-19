@@ -126,6 +126,7 @@ impl Backend {
         // Create a body block and the return block
         builder.switch_to_block(body_block);
         builder.seal_block(body_block);
+        let current_i = builder.use_var(i);
 
         // Create a FuncTranslator and translate the function
         let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
