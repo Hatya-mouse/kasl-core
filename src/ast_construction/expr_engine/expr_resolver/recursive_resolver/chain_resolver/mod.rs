@@ -133,7 +133,7 @@ impl ExpressionResolver<'_> {
         // Loop over the elements in the chain and get the namespace ID from the first tokens
         while let Some(element) = elements.peek() {
             match element {
-                UnresolvedChainElement::Identifier { name } => {
+                UnresolvedChainElement::Identifier { name, .. } => {
                     let namespace_ref = self
                         .prog_ctx
                         .namespace_registry

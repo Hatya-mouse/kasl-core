@@ -64,7 +64,10 @@ impl ExpressionBuilder<'_> {
             ExprTokenKind::Identifier(name) => Some(UnresolvedExpr::new(
                 UnresolvedExprKind::Chain {
                     lhs: None,
-                    elements: vec![UnresolvedChainElement::Identifier { name: name.clone() }],
+                    elements: vec![UnresolvedChainElement::Identifier {
+                        name: name.clone(),
+                        range: token.range,
+                    }],
                 },
                 token.range,
             )),
@@ -75,6 +78,7 @@ impl ExpressionBuilder<'_> {
                     elements: vec![UnresolvedChainElement::FuncCall {
                         name: name.clone(),
                         args: self.parse_func_args(args)?,
+                        range: token.range,
                     }],
                 },
                 token.range,

@@ -41,12 +41,14 @@ impl ExpressionBuilder<'_> {
             };
 
             let chain_element = match &next_token.kind {
-                ExprTokenKind::Identifier(name) => {
-                    UnresolvedChainElement::Identifier { name: name.clone() }
-                }
+                ExprTokenKind::Identifier(name) => UnresolvedChainElement::Identifier {
+                    name: name.clone(),
+                    range: next_token.range,
+                },
                 ExprTokenKind::FuncCall { name, args } => UnresolvedChainElement::FuncCall {
                     name: name.clone(),
                     args: self.parse_func_args(args)?,
+                    range: next_token.range,
                 },
                 _ => {
                     self.ec
