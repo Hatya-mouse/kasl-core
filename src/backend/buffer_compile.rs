@@ -115,10 +115,10 @@ impl Backend {
         builder.ins().jump(loop_header_block, &[]);
         builder.switch_to_block(loop_header_block);
 
-        let i_val = builder.use_var(i);
+        let current_i = builder.use_var(i);
         let continue_loop = builder
             .ins()
-            .icmp(IntCC::UnsignedLessThan, i_val, buffer_size);
+            .icmp(IntCC::UnsignedLessThan, current_i, buffer_size);
         builder
             .ins()
             .brif(continue_loop, body_block, &[], return_block, &[]);
@@ -131,21 +131,22 @@ impl Backend {
         let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
-            Some(i_val),
+            Some(current_i),
             entry_point,
             blueprint,
             increment_block,
         );
 
-        // // Add jump instruction to the increment block at the end of the body
-        // translator.builder.ins().jump(increment_block, &[]);
-        // translator.builder.switch_to_block(increment_block);
-        // translator.builder.seal_block(increment_block);
+        // Add jump instruction to the increment block at the end of the body
+        translator.builder.ins().jump(increment_block, &[]);
+        translator.builder.switch_to_block(increment_block);
+        translator.builder.seal_block(increment_block);
 
-        // // Increment the index
-        // let one_val = translator.builder.ins().iconst(types::I32, 1);
-        // let next_i = translator.builder.ins().iadd(i_val, one_val);
-        // translator.builder.def_var(i, next_i);
+        // Increment the index
+        let current_i = translator.builder.use_var(i);
+        let one_val = translator.builder.ins().iconst(types::I32, 1);
+        let next_i = translator.builder.ins().iadd(current_i, one_val);
+        translator.builder.def_var(i, next_i);
 
         // Add jump instruction to the loop header block
         translator.builder.ins().jump(loop_header_block, &[]);
