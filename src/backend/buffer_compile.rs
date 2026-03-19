@@ -137,15 +137,15 @@ impl Backend {
             increment_block,
         );
 
-        // Add jump instruction to the increment block at the end of the body
-        translator.builder.ins().jump(increment_block, &[]);
-        translator.builder.switch_to_block(increment_block);
-        translator.builder.seal_block(increment_block);
+        // // Add jump instruction to the increment block at the end of the body
+        // translator.builder.ins().jump(increment_block, &[]);
+        // translator.builder.switch_to_block(increment_block);
+        // translator.builder.seal_block(increment_block);
 
-        // Increment the index
-        let one_val = translator.builder.ins().iconst(types::I32, 1);
-        let next_i = translator.builder.ins().iadd(i_val, one_val);
-        translator.builder.def_var(i, next_i);
+        // // Increment the index
+        // let one_val = translator.builder.ins().iconst(types::I32, 1);
+        // let next_i = translator.builder.ins().iadd(i_val, one_val);
+        // translator.builder.def_var(i, next_i);
 
         // Add jump instruction to the loop header block
         translator.builder.ins().jump(loop_header_block, &[]);
