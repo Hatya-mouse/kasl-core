@@ -14,66 +14,34 @@
 // limitations under the License.
 //
 
-mod buffer_compile;
-mod func_translator;
-
 use crate::{
     FunctionID,
-    backend::func_translator::{FuncTranslator, TranslatorParams},
+    backend::{
+        Backend,
+        func_translator::{FuncTranslator, TranslatorParams},
+    },
     builtin::BuiltinRegistry,
     compilation_data::ProgramContext,
     scope_manager::IOBlueprint,
 };
-use cranelift::prelude::{
-    AbiParam, Configurable, FunctionBuilder, FunctionBuilderContext, InstBuilder, types,
-};
+use cranelift::prelude::{AbiParam, FunctionBuilder, InstBuilder, IntCC, types};
 use cranelift_codegen::{settings, verify_function};
-use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
 
-pub struct Backend {
-    builder_ctx: FunctionBuilderContext,
-    ctx: cranelift_codegen::Context,
-    module: JITModule,
-}
-
-impl Default for Backend {
-    fn default() -> Self {
-        let mut flag_builder = settings::builder();
-        flag_builder.set("use_colocated_libcalls", "false").unwrap();
-        flag_builder.set("is_pic", "false").unwrap();
-        flag_builder.set("opt_level", "speed").unwrap();
-        flag_builder.set("enable_alias_analysis", "true").unwrap();
-        let isa_builder = cranelift_native::builder()
-            .unwrap_or_else(|msg| panic!("The host machine is not supported: {}", msg));
-        let isa = isa_builder
-            .finish(settings::Flags::new(flag_builder))
-            .unwrap();
-        let builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
-        let module = JITModule::new(builder);
-
-        Self {
-            builder_ctx: FunctionBuilderContext::new(),
-            ctx: module.make_context(),
-            module,
-        }
-    }
-}
-
 impl Backend {
-    /// Compiles the program which runs once.
+    /// Compiles the program that processes a buffer.
     /// Signature:
     /// ```
-    /// fn(input, output, state, should_init)
+    /// fn(input, output, state, should_init, buffer_size)
     /// ```
-    pub fn compile(
+    pub fn compile_buffer(
         &mut self,
         prog_ctx: &ProgramContext,
         builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) -> Result<*const u8, String> {
-        self.translate(prog_ctx, builtin_registry, blueprint, entry_point);
+        self.translate_buffer(prog_ctx, builtin_registry, blueprint, entry_point);
 
         // Verify the function
         let verifier_flags = settings::Flags::new(settings::builder());
@@ -94,7 +62,7 @@ impl Backend {
         Ok(code)
     }
 
-    pub fn translate(
+    pub fn translate_buffer(
         &mut self,
         prog_ctx: &ProgramContext,
         builtin_registry: &BuiltinRegistry,
@@ -108,19 +76,26 @@ impl Backend {
             AbiParam::new(pointer_type), // Output pointers
             AbiParam::new(pointer_type), // State pointers
             AbiParam::new(types::I8),    // Should init
+            AbiParam::new(types::I32),   // Size of the buffer
         ]);
 
         // Create a function builder
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_ctx);
 
-        // Create an entry block and and switch to the block
+        // Create needed blocks
         let entry_block = builder.create_block();
-        builder.append_block_params_for_function_params(entry_block);
+        let body_block = builder.create_block();
+        let return_block = builder.create_block();
+        let loop_header_block = builder.create_block();
 
+        // Append block params for function params
+        builder.append_block_params_for_function_params(entry_block);
+        // Switch to the entry block
         builder.switch_to_block(entry_block);
         builder.seal_block(entry_block);
+        // Get the buffer size
 
-        // Get the pointer to the pointer array
+        // Get the pointer to the pointer array and the buffer size
         let block_params = builder.block_params(entry_block);
         let translator_params = TranslatorParams {
             input_ptr_ptr: block_params[0],
@@ -128,22 +103,42 @@ impl Backend {
             state_ptr_ptr: block_params[2],
             should_init: block_params[3],
         };
+        let buffer_size = block_params[4];
 
-        // Create a return block
-        let return_block = builder.create_block();
+        // Create a variable to store the current loop index
+        let i = builder.declare_var(types::I32);
+        let zero_val = builder.ins().iconst(types::I32, 0);
+        builder.def_var(i, zero_val);
+
+        // Jump to the body or the return block depending on the index
+        builder.ins().jump(loop_header_block, &[]);
+        builder.switch_to_block(loop_header_block);
+
+        let i_val = builder.use_var(i);
+        let continue_loop = builder
+            .ins()
+            .icmp(IntCC::UnsignedLessThan, i_val, buffer_size);
+        builder
+            .ins()
+            .brif(continue_loop, body_block, &[], return_block, &[]);
+
+        // Create a body block and the return block
+        builder.switch_to_block(body_block);
+        builder.seal_block(body_block);
 
         // Create a FuncTranslator and translate the function
         let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
-            None,
+            Some(i_val),
             entry_point,
             blueprint,
-            return_block,
+            loop_header_block,
         );
 
-        // Add jump instruction
-        translator.builder.ins().jump(return_block, &[]);
+        // Add jump instruction at the end of the body
+        translator.builder.ins().jump(loop_header_block, &[]);
+        translator.builder.seal_block(loop_header_block);
 
         // Add return instruction to the return block
         translator.builder.switch_to_block(return_block);

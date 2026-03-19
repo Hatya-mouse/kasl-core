@@ -20,20 +20,20 @@ use crate::{Statement, backend::func_translator::FuncTranslator, symbol_table::B
 
 impl FuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.
-    pub fn translate_block(&mut self, block: &Block, return_block: ir::Block) -> bool {
+    pub fn translate_block(&mut self, block: &Block, exit_block: ir::Block) -> bool {
         // Loop over the statements in the function and translate them
         for stmt in &block.body {
-            if self.translate_stmt(stmt, return_block) {
+            if self.translate_stmt(stmt, exit_block) {
                 return true;
             }
         }
         false
     }
 
-    fn translate_stmt(&mut self, stmt: &Statement, return_block: ir::Block) -> bool {
+    fn translate_stmt(&mut self, stmt: &Statement, exit_block: ir::Block) -> bool {
         match stmt {
             Statement::Block { block } => {
-                return self.translate_block(block, return_block);
+                return self.translate_block(block, exit_block);
             }
             Statement::LocalVar { var_id } => self.translate_local_var(var_id),
             Statement::LocalConst { var_id } => self.translate_local_const(var_id),
@@ -45,9 +45,9 @@ impl FuncTranslator<'_> {
                 main,
                 else_ifs,
                 else_block,
-            } => self.translate_if(main, else_ifs, else_block.as_ref(), return_block),
+            } => self.translate_if(main, else_ifs, else_block.as_ref(), exit_block),
             Statement::Return { value } => {
-                self.translate_return(value, return_block);
+                self.translate_return(value, exit_block);
                 return true;
             }
         }

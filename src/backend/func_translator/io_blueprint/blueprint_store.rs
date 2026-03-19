@@ -15,26 +15,26 @@
 //
 
 use crate::{
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::{FuncTranslator, TranslatorParams},
     scope_manager::{BlueprintItem, IOBlueprint},
     type_registry::ResolvedType,
 };
-use cranelift::prelude::{InstBuilder, MemFlags};
+use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
     pub fn store_blueprint(
         &mut self,
-        output_ptr_ptr: ir::Value,
-        state_ptr_ptr: ir::Value,
+        params: &TranslatorParams,
         blueprint: &IOBlueprint,
+        sample_index: Option<ir::Value>,
     ) {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
         // Store outputs and states
-        self.store_outputs(pointer_type, output_ptr_ptr, blueprint);
-        self.store_states(pointer_type, state_ptr_ptr, blueprint);
+        self.store_outputs(pointer_type, params.output_ptr_ptr, blueprint, sample_index);
+        self.store_states(pointer_type, params.state_ptr_ptr, blueprint);
     }
 
     fn store_outputs(
@@ -42,10 +42,17 @@ impl FuncTranslator<'_> {
         pointer_type: ir::Type,
         ptr_ptr: ir::Value,
         blueprint: &IOBlueprint,
+        sample_index: Option<ir::Value>,
     ) {
         let mut output_offset: usize = 0;
         for output_item in blueprint.get_outputs() {
-            self.store_blueprint_item(pointer_type, ptr_ptr, output_item, output_offset as i32);
+            self.store_blueprint_item(
+                pointer_type,
+                ptr_ptr,
+                output_item,
+                output_offset as i32,
+                sample_index,
+            );
             // Increment the output offset by the size of a pointer
             // because each output is stored as a pointer to the actual value
             output_offset += pointer_type.bytes() as usize;
@@ -60,7 +67,8 @@ impl FuncTranslator<'_> {
     ) {
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
-            self.store_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset as i32);
+            // States shares the memory over the loop so we do not need to pass a sample index
+            self.store_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset as i32, None);
             // Increment the state offset by the size of a pointer
             state_offset += pointer_type.bytes() as usize;
         }
@@ -74,12 +82,25 @@ impl FuncTranslator<'_> {
         ptr_ptr: ir::Value,
         item: &BlueprintItem,
         offset: i32,
+        sample_index: Option<ir::Value>,
     ) {
         // Get the pointer to store the value at
         let ptr = self
             .builder
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
+
+        let ptr = if let Some(i) = sample_index {
+            // Calculate the pointer offset if it is in the buffer mode
+            let item_size = self
+                .builder
+                .ins()
+                .iconst(types::I32, item.actual_size as i64);
+            let byte_offset = self.builder.ins().imul(i, item_size);
+            self.builder.ins().iadd(ptr_ptr, byte_offset)
+        } else {
+            ptr
+        };
 
         // Get the value to be stored
         let var = self.scope_registry.get_var(&item.id);

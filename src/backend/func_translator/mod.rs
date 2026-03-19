@@ -63,20 +63,14 @@ impl<'a> FuncTranslator<'a> {
 
     pub fn translate(
         &mut self,
+        params: TranslatorParams,
+        sample_index: Option<ir::Value>,
         entry_point: &FunctionID,
         blueprint: &IOBlueprint,
-        entry_block: ir::Block,
-        return_block: ir::Block,
+        exit_block: ir::Block,
     ) {
-        // Get the pointer to the pointer array
-        let block_params = self.builder.block_params(entry_block);
-        let input_ptr_ptr = block_params[0];
-        let output_ptr_ptr = block_params[1];
-        let state_ptr_ptr = block_params[2];
-        let should_init = block_params[3];
-
         // Get the input and state variables from the blueprint
-        self.load_blueprint_access(input_ptr_ptr, state_ptr_ptr, should_init, blueprint);
+        self.load_blueprint_access(&params, blueprint, sample_index);
 
         // Get the entry point function node
         let Some(func_block) = self
@@ -88,9 +82,16 @@ impl<'a> FuncTranslator<'a> {
             return;
         };
 
-        self.translate_block(func_block, return_block);
+        self.translate_block(func_block, exit_block);
 
         // Push the values in the states and outputs to the original pointer
-        self.store_blueprint(output_ptr_ptr, state_ptr_ptr, blueprint);
+        self.store_blueprint(&params, blueprint, sample_index);
     }
+}
+
+pub struct TranslatorParams {
+    pub input_ptr_ptr: ir::Value,
+    pub output_ptr_ptr: ir::Value,
+    pub state_ptr_ptr: ir::Value,
+    pub should_init: ir::Value,
 }

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-pub const MAIN_FUNCTION_NAME: &str = "main";
+pub(crate) const MAIN_FUNCTION_NAME: &str = "main";
 
 pub mod ast;
 pub mod ast_construction;

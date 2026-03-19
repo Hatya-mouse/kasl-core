@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    CompilationData, ParserDeclStmt, Range,
+    CompilationData, MAIN_FUNCTION_NAME, ParserDeclStmt, Range,
     backend::Backend,
     blueprint_builder::BlueprintBuilder,
     builtin::BuiltinRegistry,
@@ -108,11 +108,20 @@ impl KaslCompiler {
         // 6. Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        // Look up the main function, or return an error if it doesn't exist
         let main_func_id = self
             .prog_ctx
             .func_ctx
-            .get_global_func_id(root_namespace_id, "main")
-            .unwrap();
+            .get_global_func_id(root_namespace_id, MAIN_FUNCTION_NAME)
+            .ok_or_else(|| {
+                vec![ErrorRecord::new(
+                    ErrorKey::new(EK::NoMainFunc, Pl::None),
+                    Range::zero(),
+                    Ph::Backend,
+                    Sv::Error,
+                )]
+            })?;
+
         self.compiled = backend
             .compile(
                 &self.prog_ctx,

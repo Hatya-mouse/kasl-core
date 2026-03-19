@@ -300,6 +300,11 @@ pub enum ErrorKind {
     /// An expression ends with "Builtin" keyword.
     ExprEndsWithBuiltin,
 
+    /// Title: NoMainFunc
+    /// Payload: None
+    /// The compile target does not have a main function.
+    NoMainFunc,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

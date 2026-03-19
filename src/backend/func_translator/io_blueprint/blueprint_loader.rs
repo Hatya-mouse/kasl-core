@@ -16,35 +16,51 @@
 
 use crate::{
     StructID, VariableID,
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::{FuncTranslator, TranslatorParams},
     scope_manager::{BlueprintItem, IOBlueprint},
     type_registry::ResolvedType,
 };
-use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind};
+use cranelift::prelude::{InstBuilder, MemFlags, StackSlotData, StackSlotKind, types};
 use cranelift_codegen::ir::{self, StackSlot};
 
 impl FuncTranslator<'_> {
     pub fn load_blueprint_access(
         &mut self,
-        input_ptr_ptr: ir::Value,
-        state_ptr_ptr: ir::Value,
-        should_init: ir::Value,
+        params: &TranslatorParams,
         blueprint: &IOBlueprint,
+        sample_index: Option<ir::Value>,
     ) {
         // Get the type of a pointer
         let pointer_type = self.type_converter.pointer_type();
 
         // Loop over the inputs, outputs and states and load them
-        self.load_inputs(pointer_type, input_ptr_ptr, blueprint);
+        self.load_inputs(pointer_type, params.input_ptr_ptr, blueprint, sample_index);
         self.init_outputs(blueprint);
-        self.load_or_init_states(pointer_type, state_ptr_ptr, should_init, blueprint);
+        self.load_or_init_states(
+            pointer_type,
+            params.state_ptr_ptr,
+            params.should_init,
+            blueprint,
+        );
     }
 
-    fn load_inputs(&mut self, pointer_type: ir::Type, ptr_ptr: ir::Value, blueprint: &IOBlueprint) {
+    fn load_inputs(
+        &mut self,
+        pointer_type: ir::Type,
+        ptr_ptr: ir::Value,
+        blueprint: &IOBlueprint,
+        sample_index: Option<ir::Value>,
+    ) {
         let mut input_offset: usize = 0;
         for input_item in blueprint.get_inputs() {
-            let val =
-                self.load_blueprint_item(pointer_type, ptr_ptr, input_item, input_offset as i32);
+            // Pass the optional sample index the buffer index in buffer mode
+            let val = self.load_blueprint_item(
+                pointer_type,
+                ptr_ptr,
+                input_item,
+                input_offset as i32,
+                sample_index,
+            );
             self.register_translated_var(input_item.id, input_item.value_type, val);
             // Increment the input offset by the size of a pointer
             input_offset += pointer_type.bytes() as usize;
@@ -72,8 +88,13 @@ impl FuncTranslator<'_> {
         let mut state_offset: usize = 0;
         for state_item in blueprint.get_states() {
             // Load the value from memory
-            let loaded_val =
-                self.load_blueprint_item(pointer_type, ptr_ptr, state_item, state_offset as i32);
+            let loaded_val = self.load_blueprint_item(
+                pointer_type,
+                ptr_ptr,
+                state_item,
+                state_offset as i32,
+                None,
+            );
             // Get the default value for the state
             let translated_def_val = self.translate_expr(&state_item.def_val);
 
@@ -111,12 +132,25 @@ impl FuncTranslator<'_> {
         ptr_ptr: ir::Value,
         item: &BlueprintItem,
         offset: i32,
+        sample_index: Option<ir::Value>,
     ) -> ir::Value {
         // Get the pointer to the value by the pointer to the pointers
         let val_ptr = self
             .builder
             .ins()
             .load(pointer_type, MemFlags::new(), ptr_ptr, offset);
+
+        let val_ptr = if let Some(i) = sample_index {
+            // Calculate the pointer offset if it is in the buffer mode
+            let item_size = self
+                .builder
+                .ins()
+                .iconst(types::I32, item.actual_size as i64);
+            let byte_offset = self.builder.ins().imul(i, item_size);
+            self.builder.ins().iadd(ptr_ptr, byte_offset)
+        } else {
+            val_ptr
+        };
 
         // Load the value
         self.load_value(&item.value_type, val_ptr)
