@@ -43,6 +43,8 @@ impl Backend {
     ) -> Result<*const u8, String> {
         self.translate_buffer(prog_ctx, builtin_registry, blueprint, entry_point);
 
+        println!("{}", self.ctx.func.display());
+
         // Verify the function
         let verifier_flags = settings::Flags::new(settings::builder());
         verify_function(&self.ctx.func, &verifier_flags).map_err(|e| e.to_string())?;
@@ -126,7 +128,6 @@ impl Backend {
         // Create a body block and the return block
         builder.switch_to_block(body_block);
         builder.seal_block(body_block);
-        let current_i = builder.use_var(i);
 
         // Create a FuncTranslator and translate the function
         let mut translator = FuncTranslator::new(builder, &self.module, prog_ctx, builtin_registry);
@@ -144,7 +145,6 @@ impl Backend {
         translator.builder.seal_block(increment_block);
 
         // Increment the index
-        let current_i = translator.builder.use_var(i);
         let one_val = translator.builder.ins().iconst(types::I32, 1);
         let next_i = translator.builder.ins().iadd(current_i, one_val);
         translator.builder.def_var(i, next_i);
