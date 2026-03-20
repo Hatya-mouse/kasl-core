@@ -50,7 +50,7 @@ impl GlobalDeclCollector<'_> {
             let resolved_type_annotation = match self
                 .prog_ctx
                 .type_registry
-                .resolve_type(namespace_id, &type_name.to_string())
+                .resolve_type_name(namespace_id, &type_name.to_string())
             {
                 Some(ty) => ty,
                 None => {

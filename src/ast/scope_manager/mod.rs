@@ -68,7 +68,7 @@ impl ScopeRegistry {
 
     /// Generates a new `VariableID` for a new variable.
     pub fn generate_var_id(&mut self) -> VariableID {
-        let id = VariableID::new(self.next_variable_id);
+        let id = VariableID(self.next_variable_id);
         self.next_variable_id += 1;
         id
     }

@@ -38,14 +38,18 @@ pub struct TypeRegistry {
 
 impl TypeRegistry {
     pub fn generate_struct_id(&mut self) -> StructID {
-        let id = StructID::new(self.next_struct_id);
+        let id = StructID(self.next_struct_id);
         self.next_struct_id += 1;
         id
     }
 
     // --- TYPE RESOLUTION ---
 
-    pub fn resolve_type(&self, namespace_id: NameSpaceID, type_name: &str) -> Option<ResolvedType> {
+    pub fn resolve_type_name(
+        &self,
+        namespace_id: NameSpaceID,
+        type_name: &str,
+    ) -> Option<ResolvedType> {
         match PrimitiveType::from_str(type_name) {
             Ok(primitive) => Some(ResolvedType::Primitive(primitive)),
             Err(_) => self
@@ -109,7 +113,7 @@ impl TypeRegistry {
             ResolvedType::Struct(id) => self
                 .get_struct(id)
                 .map(|s| s.name.clone())
-                .unwrap_or(format!("struct(ID: {})", id)),
+                .unwrap_or(format!("struct(ID: {})", id.0)),
         }
     }
 }

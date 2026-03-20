@@ -53,7 +53,7 @@ pub struct OperatorContext {
 
 impl OperatorContext {
     pub fn generate_operator_id(&mut self) -> OperatorID {
-        let id = OperatorID::new(self.next_operator_id);
+        let id = OperatorID(self.next_operator_id);
         self.next_operator_id += 1;
         id
     }

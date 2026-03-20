@@ -37,7 +37,7 @@ impl Display for ResolvedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ResolvedType::Primitive(ty) => write!(f, "{}", ty),
-            ResolvedType::Struct(id) => write!(f, "struct({})", id),
+            ResolvedType::Struct(id) => write!(f, "struct({})", id.0),
         }
     }
 }

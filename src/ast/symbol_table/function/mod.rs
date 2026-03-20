@@ -33,7 +33,7 @@ pub struct FunctionContext {
 
 impl FunctionContext {
     pub fn generate_function_id(&mut self) -> FunctionID {
-        let id = FunctionID::new(self.next_function_id);
+        let id = FunctionID(self.next_function_id);
         self.next_function_id += 1;
         id
     }

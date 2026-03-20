@@ -16,13 +16,11 @@
 
 mod import_path;
 mod namespace;
-mod namespace_pair;
 mod symbol_id;
 mod symbol_path;
 
 pub use import_path::ImportPath;
 pub use namespace::NameSpace;
-pub use namespace_pair::NameSpacePair;
 pub use symbol_id::{FunctionID, NameSpaceID, OperatorID, ParserStmtID, StructID, VariableID};
 pub use symbol_path::{SymbolPath, SymbolPathComponent};
 
@@ -42,7 +40,7 @@ impl Default for NameSpaceRegistry {
     fn default() -> Self {
         let mut registry = Self {
             namespaces: HashMap::new(),
-            root_namespace_id: NameSpaceID::new(0),
+            root_namespace_id: NameSpaceID(0),
             next_namespace_id: 1,
         };
         // Register the root namespace
@@ -55,7 +53,7 @@ impl Default for NameSpaceRegistry {
 
 impl NameSpaceRegistry {
     pub fn generate_namespace_id(&mut self) -> NameSpaceID {
-        let id = NameSpaceID::new(self.next_namespace_id);
+        let id = NameSpaceID(self.next_namespace_id);
         self.next_namespace_id += 1;
         id
     }

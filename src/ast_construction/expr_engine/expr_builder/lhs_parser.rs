@@ -49,7 +49,7 @@ impl ExpressionBuilder<'_> {
             }
 
             ExprTokenKind::IntLiteral(value) => Some(UnresolvedExpr::new(
-                UnresolvedExprKind::IntLiteral(*value),
+                UnresolvedExprKind::IntLiteral(*value as i32),
                 token.range,
             )),
             ExprTokenKind::FloatLiteral(value) => Some(UnresolvedExpr::new(

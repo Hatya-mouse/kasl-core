@@ -47,7 +47,7 @@ impl BlockStmtBuilder<'_> {
             let Some(resolved_type_annotation) = self
                 .prog_ctx
                 .type_registry
-                .resolve_type(namespace_id, &type_name.to_string())
+                .resolve_type_name(namespace_id, &type_name.to_string())
             else {
                 self.ec.type_not_found(
                     stmt_range,

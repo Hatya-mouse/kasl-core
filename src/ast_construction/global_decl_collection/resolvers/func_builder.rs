@@ -85,7 +85,7 @@ impl GlobalDeclCollector<'_> {
                 match self
                     .prog_ctx
                     .type_registry
-                    .resolve_type(namespace_id, &type_name.to_string())
+                    .resolve_type_name(namespace_id, &type_name.to_string())
                 {
                     Some(resolved) => resolved,
                     None => {
@@ -186,7 +186,7 @@ impl GlobalDeclCollector<'_> {
             let resolved_annotation_type = self
                 .prog_ctx
                 .type_registry
-                .resolve_type(namespace_id, &type_name.to_string())?;
+                .resolve_type_name(namespace_id, &type_name.to_string())?;
 
             // Register the variable in the function scope
             let var = ScopeVar {
