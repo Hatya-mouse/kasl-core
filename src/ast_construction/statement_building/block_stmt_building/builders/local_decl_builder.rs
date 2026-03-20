@@ -15,15 +15,15 @@
 //
 
 use crate::{
-    ExprToken, Range, Statement, SymbolPath, scope_manager::VariableKind,
-    statement_building::BlockStmtBuilder,
+    ExprToken, Range, Statement, SymbolPath, parser_ast::ParserTypeName,
+    scope_manager::VariableKind, statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {
     pub fn build_local_var(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         stmt_range: Range,
     ) -> Option<Statement> {
@@ -44,7 +44,7 @@ impl BlockStmtBuilder<'_> {
     pub fn build_local_const(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         stmt_range: Range,
     ) -> Option<Statement> {

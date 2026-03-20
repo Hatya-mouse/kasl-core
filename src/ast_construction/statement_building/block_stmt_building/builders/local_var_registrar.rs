@@ -16,14 +16,14 @@
 
 use crate::{
     Expr, ExprToken, Range, ScopeVar, SymbolPath, VariableID, error::Ph, expr_engine::resolve_expr,
-    scope_manager::VariableKind, statement_building::BlockStmtBuilder,
+    parser_ast::ParserTypeName, scope_manager::VariableKind, statement_building::BlockStmtBuilder,
 };
 
 impl BlockStmtBuilder<'_> {
     fn resolve_def_val(
         &mut self,
         def_val: &[ExprToken],
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         stmt_range: Range,
     ) -> Option<Expr> {
         let resolved_def_val = resolve_expr(
@@ -79,7 +79,7 @@ impl BlockStmtBuilder<'_> {
     pub fn build_and_register_scope_var(
         &mut self,
         name: &str,
-        value_type: &Option<SymbolPath>,
+        value_type: &Option<ParserTypeName>,
         def_val: &[ExprToken],
         stmt_range: Range,
         var_kind: VariableKind,
