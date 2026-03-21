@@ -19,7 +19,7 @@ use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_subscript(
+    pub(super) fn translate_subscript(
         &mut self,
         lhs: &Expr,
         value_type: &ResolvedType,

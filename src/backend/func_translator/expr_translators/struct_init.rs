@@ -19,7 +19,7 @@ use cranelift::prelude::{InstBuilder, StackSlotData, StackSlotKind};
 use cranelift_codegen::ir::{self};
 
 impl FuncTranslator<'_> {
-    pub fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
+    pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
 
         // Create a stack slot

@@ -22,7 +22,7 @@ use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_func_call_expr(
+    pub(super) fn translate_func_call_expr(
         &mut self,
         func_id: &FunctionID,
         args: &[FuncCallArg],
@@ -33,7 +33,7 @@ impl FuncTranslator<'_> {
             .unwrap()
     }
 
-    pub fn call_func(
+    pub(super) fn call_func(
         &mut self,
         block: &symbol_table::Block,
         args: &[FuncCallArg],

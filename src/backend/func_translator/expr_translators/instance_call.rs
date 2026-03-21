@@ -18,7 +18,7 @@ use crate::{FuncCallArg, FunctionID, backend::func_translator::FuncTranslator};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_instance_call_expr(
+    pub(super) fn translate_instance_call_expr(
         &mut self,
         id: &FunctionID,
         args: &[FuncCallArg],

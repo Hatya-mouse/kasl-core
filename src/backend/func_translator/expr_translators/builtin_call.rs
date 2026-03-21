@@ -18,7 +18,7 @@ use crate::{Expr, backend::func_translator::FuncTranslator, builtin::BuiltinFunc
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_builtin_func_call(
+    pub(super) fn translate_builtin_func_call(
         &mut self,
         func_id: &BuiltinFuncID,
         args: &[Expr],

@@ -20,7 +20,7 @@ use cranelift_codegen::ir;
 use crate::{Expr, backend::func_translator::FuncTranslator, type_registry::ResolvedType};
 
 impl FuncTranslator<'_> {
-    pub fn translate_struct_field_expr(
+    pub(super) fn translate_struct_field_expr(
         &mut self,
         lhs: &Expr,
         value_type: &ResolvedType,

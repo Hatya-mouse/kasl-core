@@ -19,7 +19,7 @@ use cranelift::prelude::{InstBuilder, StackSlotData, StackSlotKind};
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_array_literal(&mut self, array_expr: &Expr) -> ir::Value {
+    pub(super) fn translate_array_literal(&mut self, array_expr: &Expr) -> ir::Value {
         // Assume the type is array
         let array_id = match array_expr.value_type {
             ResolvedType::Array(array_id) => array_id,

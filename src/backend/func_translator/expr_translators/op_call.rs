@@ -19,7 +19,7 @@ use cranelift_codegen::ir;
 use std::slice;
 
 impl FuncTranslator<'_> {
-    pub fn translate_infix_op_expr(
+    pub(super) fn translate_infix_op_expr(
         &mut self,
         op_id: &OperatorID,
         lhs: &FuncCallArg,
@@ -31,7 +31,7 @@ impl FuncTranslator<'_> {
             .unwrap()
     }
 
-    pub fn translate_prefix_op_expr(
+    pub(super) fn translate_prefix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
@@ -42,7 +42,7 @@ impl FuncTranslator<'_> {
             .unwrap()
     }
 
-    pub fn translate_postfix_op_expr(
+    pub(super) fn translate_postfix_op_expr(
         &mut self,
         op_id: &OperatorID,
         operand: &FuncCallArg,
