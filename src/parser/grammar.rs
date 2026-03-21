@@ -202,7 +202,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         }
 
     rule loop_statement() -> ParserScopeStmt
-        = start:position!() "loop" _ count:multiline_expression() __? "{"
+        = start:position!() "loop" _ count:oneline_expression() __? "{"
         __? body:scope_stmts() __?
         "}" end:position!() {
             ParserScopeStmt {
