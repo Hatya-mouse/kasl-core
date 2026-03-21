@@ -33,16 +33,13 @@ impl FuncTranslator<'_> {
         // Calculate the pointer to the corresponding value
         let val_ptr = self.calculate_array_offset(item_type, base_ptr, index);
 
-        // Get the value depending on the type
-        // match item_type {
-        //     ResolvedType::Primitive(_) => {
-        //     }
-        //     // Add offset to the array pointer
-        //     ResolvedType::Array(_) => val_ptr,
-        //     ResolvedType::Struct(_) => val_ptr,
-        // }
-        self.builder
-            .ins()
-            .load(translated_type, MemFlags::new(), val_ptr, 0)
+        match item_type {
+            ResolvedType::Primitive(_) => {
+                self.builder
+                    .ins()
+                    .load(translated_type, MemFlags::new(), val_ptr, 0)
+            }
+            ResolvedType::Struct(_) | ResolvedType::Array(_) => val_ptr,
+        }
     }
 }

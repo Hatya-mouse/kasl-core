@@ -90,7 +90,8 @@ impl FuncTranslator<'_> {
                 self.copy_array(inner_id, src, dst, base_offset + offset);
             }
             ResolvedType::Struct(inner_id) => {
-                self.copy_struct(inner_id, src, dst, base_offset + offset);
+                let src_offsetted = self.builder.ins().iadd_imm(src, offset as i64);
+                self.copy_struct(inner_id, src_offsetted, dst, base_offset + offset);
             }
         }
     }
