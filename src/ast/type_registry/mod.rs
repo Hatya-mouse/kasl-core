@@ -39,6 +39,9 @@ pub struct TypeRegistry {
     array_id_to_decl: HashMap<ArrayID, ArrayDecl>,
     decl_to_array_id: HashMap<ArrayDecl, ArrayID>,
 
+    // Typealiases
+    alias_to_type: HashMap<(NameSpaceID, String), ResolvedType>,
+
     // ID Generation
     next_struct_id: usize,
     next_array_id: usize,
@@ -67,8 +70,12 @@ impl TypeRegistry {
         match PrimitiveType::from_str(type_name) {
             Ok(primitive) => Some(ResolvedType::Primitive(primitive)),
             Err(_) => self
-                .get_struct_id(namespace_id, type_name)
-                .map(ResolvedType::Struct),
+                .get_alias_type(namespace_id, type_name)
+                .copied()
+                .or_else(|| {
+                    self.get_struct_id(namespace_id, type_name)
+                        .map(ResolvedType::Struct)
+                }),
         }
     }
 
@@ -104,6 +111,10 @@ impl TypeRegistry {
 
     pub fn get_array_decl(&self, id: &ArrayID) -> Option<&ArrayDecl> {
         self.array_id_to_decl.get(id)
+    }
+
+    pub fn get_alias_type(&self, namespace_id: NameSpaceID, alias: &str) -> Option<&ResolvedType> {
+        self.alias_to_type.get(&(namespace_id, alias.to_string()))
     }
 
     // --- TYPE SIZE AND ALIGNMENT ---
@@ -142,6 +153,15 @@ impl TypeRegistry {
     ) {
         self.structs.insert(struct_id, struct_decl);
         self.name_to_id.insert((namespace_id, name), struct_id);
+    }
+
+    pub fn register_typealias(
+        &mut self,
+        namespace_id: NameSpaceID,
+        alias: String,
+        target: ResolvedType,
+    ) {
+        self.alias_to_type.insert((namespace_id, alias), target);
     }
 
     // --- FORMATTING ---

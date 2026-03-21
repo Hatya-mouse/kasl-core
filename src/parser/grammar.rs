@@ -66,6 +66,14 @@ peg::parser!(pub grammar kasl_parser() for str {
             }
         }
 
+    rule typealias_statement() -> ParserDeclStmt
+    = start:position!() "typealias" _ alias:identifier() _? "=" _? target:type_name() end:position!() {
+        ParserDeclStmt {
+            range: Range::n(start, end),
+            kind: ParserDeclStmtKind::Typealias { alias, target }
+        }
+    }
+
     rule func_decl_statement() -> ParserDeclStmt
         = start:position!() is_static:("static" __)? "func" __ name:identifier() __? "(" __? params:(func_param() ** comma()) __? comma()? ")" __?
         return_type:("->" __? t:type_name() { t })? __? "{"

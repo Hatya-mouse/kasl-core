@@ -42,6 +42,10 @@ pub enum ParserDeclStmtKind {
     Import {
         path: ImportPath,
     },
+    Typealias {
+        alias: String,
+        target: ParserTypeName,
+    },
     FuncDecl {
         is_static: bool,
         name: String,
@@ -104,6 +108,7 @@ impl Display for ParserDeclStmtKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParserDeclStmtKind::Import { .. } => write!(f, "import"),
+            ParserDeclStmtKind::Typealias { .. } => write!(f, "typealias"),
             ParserDeclStmtKind::FuncDecl { .. } => write!(f, "func"),
             ParserDeclStmtKind::Input { .. } => write!(f, "input"),
             ParserDeclStmtKind::Output { .. } => write!(f, "output"),

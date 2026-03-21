@@ -26,6 +26,8 @@ mod import_resolver;
 mod op_resolver;
 /// Resolves struct declarations and stores them in the global scope.
 mod struct_resolver;
+/// Resolves typealias statements.
+mod typealias_resolver;
 /// Calls `register_var_globally` from `global_var_registrar` to resolve variable declarations and store them in the global scope.
 mod var_resolver;
 
