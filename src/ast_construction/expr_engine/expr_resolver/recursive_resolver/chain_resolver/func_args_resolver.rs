@@ -64,7 +64,7 @@ impl ExpressionResolver<'_> {
                     return None;
                 }
                 // If the label order is incorrect, throw an error
-                if param_index <= next_unlabeled_index {
+                if param_index < next_unlabeled_index {
                     self.ec
                         .arg_order_incorrect(no_type_arg.range, Ph::ExprEngine, label);
                     return None;
