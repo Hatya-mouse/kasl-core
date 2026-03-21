@@ -50,12 +50,12 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule scope_stmt() -> ParserScopeStmt
         = return_statement()
         / local_var_statement()
-        / assign_statement()
         / local_let_statement()
-        / expr_statement()
+        / loop_statement()
         / if_statement()
         / block_statement()
-        / loop_statement()
+        / assign_statement()
+        / expr_statement()
         / expected!("STATEMENT")
 
     rule import_statement() -> ParserDeclStmt
