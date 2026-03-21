@@ -64,7 +64,6 @@ SubscriptOnNonArray = 'Cannot subscript a value of type "{$0}". "[]" can only be
 TopLevelVar = '"var" can only be used inside "struct" and "func"'
 TypeAnnotationMismatch = 'Type does not match. The type "{$0}" is specified, but a value of type "{$1}" is passed'
 TypeNotFound = 'The type "{$0}" cannot be found in scope'
-UnmatchedBracket = 'Unmatched bracket ("[" or "]")'
 VarNotFound = 'Variable "{$0}" could not be found in scope'
 WrongParamCountForInfix = 'Infix operator "{$0}" requires 2 parameters, but got {$1}'
 WrongParamCountForPostfix = 'Postfix operator "{$0}" requires 1 parameter, but got {$1}'

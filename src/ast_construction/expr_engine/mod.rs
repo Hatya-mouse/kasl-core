@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-mod bracket_content;
 mod expr_builder;
 mod expr_resolver;
 mod l_value_resolver;

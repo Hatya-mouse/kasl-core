@@ -310,11 +310,6 @@ pub enum ErrorKind {
     /// The compile target does not have a main function.
     NoMainFunc,
 
-    /// Title: UnmatchedBracket
-    /// Payload: None
-    /// Bracket [] does not match.
-    UnmatchedBracket,
-
     /// Title: SubscriptOnNonArray
     /// Payload: Type of the non-array value
     /// Subscript access is performed on a non-array value.

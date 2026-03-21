@@ -48,7 +48,7 @@ impl ExpressionBuilder<'_> {
                 ))
             }
 
-            ExprTokenKind::BracketOpen => self.parse_array_literal(token, rest),
+            ExprTokenKind::Bracketed(_) => self.parse_array_literal(token),
 
             ExprTokenKind::IntLiteral(value) => Some(UnresolvedExpr::new(
                 UnresolvedExprKind::IntLiteral(*value),
@@ -100,12 +100,6 @@ impl ExpressionBuilder<'_> {
             ExprTokenKind::Dot => {
                 self.ec
                     .expr_begins_with_invalid(token.range, Ph::ExprEngine, ".");
-                None
-            }
-
-            ExprTokenKind::BracketClose => {
-                self.ec
-                    .expr_begins_with_invalid(token.range, Ph::ExprEngine, "]");
                 None
             }
 

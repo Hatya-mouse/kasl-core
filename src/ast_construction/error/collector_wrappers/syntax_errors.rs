@@ -97,10 +97,6 @@ impl ErrorCollector {
         self.emit(EK::ExprEndsWithBuiltin, range, phase, Sv::Error, Pl::None);
     }
 
-    pub(crate) fn unmatched_bracket(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::UnmatchedBracket, range, phase, Sv::Error, Pl::None);
-    }
-
     pub(crate) fn empty_array_literal(&mut self, range: Range, phase: Phase) {
         self.emit(EK::EmptyArrayLiteral, range, phase, Sv::Error, Pl::None);
     }

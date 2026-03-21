@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-use crate::Range;
 use crate::expr_engine::ExpressionBuilder;
-use crate::expr_engine::bracket_content::collect_bracket_contents;
 use crate::symbol_table::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 use crate::{ExprToken, ExprTokenKind, error::Ph};
 use std::{iter::Peekable, slice::Iter};
@@ -44,7 +42,7 @@ impl ExpressionBuilder<'_> {
                 Some(ExprTokenKind::Dot) => {
                     result = self.resolve_member_access(result, tokens)?;
                 }
-                Some(ExprTokenKind::BracketOpen) => {
+                Some(ExprTokenKind::Bracketed(_)) => {
                     result = self.resolve_subscript(result, tokens)?;
                 }
                 _ => break,
@@ -123,16 +121,14 @@ impl ExpressionBuilder<'_> {
     ) -> Option<UnresolvedExpr> {
         let mut result_expr = expr;
 
-        while let Some(ExprTokenKind::BracketOpen) = tokens.peek().map(|token| &token.kind) {
-            // Consume the bracket open token
-            let bracket_open_range = tokens.next().unwrap().range;
-
-            // Collect until the matching bracket
-            let (index_tokens, close_bracket_end) =
-                collect_bracket_contents(self.ec, bracket_open_range, tokens)?;
+        while let Some(ExprTokenKind::Bracketed(index_tokens)) =
+            tokens.peek().map(|token| &token.kind)
+        {
+            // Consume the bracket token
+            let bracket_range = tokens.next().unwrap().range;
 
             // Build the unresolved token for the index expression
-            let index_expr = self.build(&index_tokens)?;
+            let index_expr = self.build(index_tokens)?;
 
             // Create a new subscript token ans return it
             result_expr = UnresolvedExpr::new(
@@ -140,7 +136,7 @@ impl ExpressionBuilder<'_> {
                     lhs: Box::new(result_expr),
                     index: Box::new(index_expr),
                 },
-                Range::n(bracket_open_range.start, close_bracket_end),
+                bracket_range,
             );
         }
 

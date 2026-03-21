@@ -225,8 +225,7 @@ pub enum ExprTokenKind {
     },
     Dot,
     Parenthesized(Vec<ExprToken>),
-    BracketOpen,
-    BracketClose,
+    Bracketed(Vec<ExprToken>),
     Semicolon,
     Comma,
     /// An unresolved expression which is used only in the ExprEngine.

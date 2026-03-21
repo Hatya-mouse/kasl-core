@@ -58,7 +58,6 @@ CyclicDependency
 ExprEndsWithType
 ExprEndsWithBuiltin
 NoMainFunc
-UnmatchedBracket
 SubscriptOnNonArray
 NonIntegerInSubscript
 NonIntegerForCount

@@ -15,21 +15,17 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, Range,
-    expr_engine::{ExpressionBuilder, bracket_content::collect_bracket_contents},
+    ExprToken, ExprTokenKind,
+    expr_engine::ExpressionBuilder,
     symbol_table::{UnresolvedExpr, UnresolvedExprKind},
 };
-use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {
-    pub fn parse_array_literal(
-        &mut self,
-        token: &ExprToken,
-        rest: &mut Peekable<Iter<ExprToken>>,
-    ) -> Option<UnresolvedExpr> {
+    pub fn parse_array_literal(&mut self, token: &ExprToken) -> Option<UnresolvedExpr> {
         // Collect until the matching bracket
-        let (bracket_items, close_bracket_end) =
-            collect_bracket_contents(self.ec, token.range, rest)?;
+        let ExprTokenKind::Bracketed(bracket_items) = &token.kind else {
+            return None;
+        };
 
         // Parse the array literal
         if let Some(semi_pos) = bracket_items
@@ -48,14 +44,14 @@ impl ExpressionBuilder<'_> {
                 token.range,
             ))
         } else {
-            let items = self.split_by_comma(&bracket_items);
+            let items = self.split_by_comma(bracket_items);
             let exprs: Vec<UnresolvedExpr> = items
                 .iter()
                 .map(|item| self.build(item))
                 .collect::<Option<Vec<_>>>()?;
             Some(UnresolvedExpr::new(
                 UnresolvedExprKind::ArrayList(exprs),
-                Range::n(token.range.start, close_bracket_end),
+                token.range,
             ))
         }
     }
@@ -63,18 +59,9 @@ impl ExpressionBuilder<'_> {
     fn split_by_comma(&self, tokens: &[ExprToken]) -> Vec<Vec<ExprToken>> {
         let mut result = Vec::new();
         let mut current = Vec::new();
-        let mut depth = 0;
         for token in tokens {
             match &token.kind {
-                ExprTokenKind::BracketOpen => {
-                    depth += 1;
-                    current.push(token.clone());
-                }
-                ExprTokenKind::BracketClose => {
-                    depth -= 1;
-                    current.push(token.clone());
-                }
-                ExprTokenKind::Comma if depth == 0 => {
+                ExprTokenKind::Comma => {
                     result.push(current.clone());
                     current = Vec::new();
                 }

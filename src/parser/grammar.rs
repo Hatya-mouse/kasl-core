@@ -298,6 +298,9 @@ peg::parser!(pub grammar kasl_parser() for str {
     pub rule multiline_expression() -> Vec<ExprToken>
         = expr:expr_token() ++ (__?) { expr } / expected!("EXPRESSION")
 
+    pub rule bracket_content() -> Vec<ExprToken>
+        = expr:bracket_content_token() ++ (__?) { expr } / expected!("EXPRESSION")
+
     pub rule lvalue_expression() -> Vec<ExprToken>
         = expr:lvalue_token() ++ (__?) { expr } / expected!("EXPRESSION")
 
@@ -309,8 +312,20 @@ peg::parser!(pub grammar kasl_parser() for str {
             / identifier_token()
             / parenthesized_token()
             / dot_token()
-            / bracket_open()
-            / bracket_close()
+            / bracketed_token()
+        ) end:position!() {
+            ExprToken { range: Range::n(start, end), kind }
+        }
+
+    rule bracket_content_token() -> ExprToken
+        = start:position!() kind:(
+            operator_token()
+            / literal()
+            / func_call()
+            / identifier_token()
+            / parenthesized_token()
+            / dot_token()
+            / bracketed_token()
             / semicolon()
             / colon()
         ) end:position!() {
@@ -321,8 +336,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = start:position!() kind:(
             dot_token()
             / identifier_token()
-            / bracket_open()
-            / bracket_close()
+            / bracketed_token()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
@@ -348,11 +362,12 @@ peg::parser!(pub grammar kasl_parser() for str {
     rule parenthesized_token() -> ExprTokenKind
         = "(" __? expr:multiline_expression() __? ")" { ExprTokenKind::Parenthesized(expr) }
 
+    rule bracketed_token() -> ExprTokenKind
+        = "[" __? inner:bracket_content() __? "]" { ExprTokenKind::Bracketed(inner) }
+
     rule dot_token() -> ExprTokenKind
         = "." { ExprTokenKind::Dot }
 
-    rule bracket_open() -> ExprTokenKind = "[" { ExprTokenKind::BracketOpen }
-    rule bracket_close() -> ExprTokenKind = "]" { ExprTokenKind::BracketClose }
     rule semicolon() -> ExprTokenKind = ";" { ExprTokenKind::Semicolon }
     rule colon() -> ExprTokenKind = "," { ExprTokenKind::Comma }
 
