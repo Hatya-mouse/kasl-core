@@ -50,6 +50,9 @@ impl FuncTranslator<'_> {
                 self.translate_return(value, exit_block);
                 return true;
             }
+            Statement::Loop { count, body } => {
+                self.translate_loop(*count, body, exit_block);
+            }
         }
         false
     }

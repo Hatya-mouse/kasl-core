@@ -14,9 +14,18 @@
 // limitations under the License.
 //
 
-mod assign_translator;
-mod if_translator;
-mod local_decl_translator;
-mod loop_translator;
-mod return_translator;
-mod var_declaration;
+use crate::{backend::func_translator::FuncTranslator, symbol_table};
+use cranelift_codegen::ir;
+
+impl FuncTranslator<'_> {
+    pub fn translate_loop(
+        &mut self,
+        count: u32,
+        block: &symbol_table::Block,
+        exit_block: ir::Block,
+    ) {
+        for _ in 0..count {
+            self.translate_block(block, exit_block);
+        }
+    }
+}
