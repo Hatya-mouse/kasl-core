@@ -69,7 +69,7 @@ impl FuncTranslator<'_> {
                         .ins()
                         .stack_addr(self.type_converter.pointer_type(), slot, 0);
                 // Copy the value to the stack slot
-                self.copy_array(array_id, ptr, stack_addr, 0);
+                self.copy_array(array_id, ptr, stack_addr, 0, 0);
 
                 stack_addr
             }
@@ -80,7 +80,7 @@ impl FuncTranslator<'_> {
                         .ins()
                         .stack_addr(self.type_converter.pointer_type(), slot, 0);
                 // Copy the value in the stack slot
-                self.copy_struct(struct_id, ptr, stack_addr, 0);
+                self.copy_struct(struct_id, ptr, stack_addr, 0, 0);
 
                 stack_addr
             }

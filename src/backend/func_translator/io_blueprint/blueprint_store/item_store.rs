@@ -70,10 +70,10 @@ impl FuncTranslator<'_> {
                 self.builder.ins().store(MemFlags::new(), val, ptr, offset);
             }
             ResolvedType::Array(array_id) => {
-                self.copy_array(array_id, val, ptr, offset);
+                self.copy_array(array_id, val, ptr, 0, offset);
             }
             ResolvedType::Struct(struct_id) => {
-                self.copy_struct(struct_id, val, ptr, offset);
+                self.copy_struct(struct_id, val, ptr, 0, offset);
             }
         }
     }

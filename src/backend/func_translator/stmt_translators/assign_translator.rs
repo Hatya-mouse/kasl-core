@@ -41,10 +41,10 @@ impl FuncTranslator<'_> {
                         .store(MemFlags::new(), rhs_value, val_ptr, 0);
                 }
                 ResolvedType::Struct(struct_id) => {
-                    self.copy_struct(struct_id, rhs_value, val_ptr, 0);
+                    self.copy_struct(struct_id, rhs_value, val_ptr, 0, 0);
                 }
                 ResolvedType::Array(array_id) => {
-                    self.copy_array(array_id, rhs_value, val_ptr, 0);
+                    self.copy_array(array_id, rhs_value, val_ptr, 0, 0);
                 }
             }
         }
