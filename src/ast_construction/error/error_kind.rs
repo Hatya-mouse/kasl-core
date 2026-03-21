@@ -350,6 +350,11 @@ pub enum ErrorKind {
     /// The type of the array item is does not match.
     ArrayItemTypeMismatch,
 
+    /// Title: ArgLabelNotFound
+    /// Payload: The passed label
+    /// There is no parameter with the given label
+    ArgLabelNotFound,
+
     /// Title: CompilerBug
     /// Payload: Error message
     CompilerBug,

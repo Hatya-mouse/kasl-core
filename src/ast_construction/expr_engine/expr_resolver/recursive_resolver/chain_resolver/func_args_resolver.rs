@@ -48,9 +48,14 @@ impl ExpressionResolver<'_> {
 
             if let Some(label) = &no_type_arg.label {
                 // Resolve the type and check order
-                let param_index = func_params
+                let Some(param_index) = func_params
                     .iter()
-                    .position(|p| p.label.as_ref().is_some_and(|l| l == label))?;
+                    .position(|p| p.label.as_ref().is_some_and(|l| l == label))
+                else {
+                    self.ec
+                        .arg_label_not_found(no_type_arg.range, Ph::ExprEngine, label);
+                    return None;
+                };
 
                 // If the slot is already occupied, throw an duplicate parameter error
                 if slots[param_index].is_some() {

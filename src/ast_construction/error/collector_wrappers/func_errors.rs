@@ -118,6 +118,16 @@ impl ErrorCollector {
         );
     }
 
+    pub(crate) fn arg_label_not_found(&mut self, range: Range, phase: Phase, passed_label: &str) {
+        self.emit(
+            EK::ArgLabelNotFound,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(passed_label.to_string()),
+        );
+    }
+
     pub(crate) fn recursive_call(&mut self, range: Range, phase: Phase) {
         self.emit(EK::RecursiveCall, range, phase, Sv::Error, Pl::None);
     }
