@@ -22,7 +22,7 @@ use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
 impl FuncTranslator<'_> {
-    pub fn translate_int_literal(&mut self, value: i32) -> ir::Value {
+    pub fn translate_int_literal(&mut self, value: u32) -> ir::Value {
         self.builder.ins().iconst(
             self.type_converter
                 .convert(&ResolvedType::Primitive(PrimitiveType::Int)),

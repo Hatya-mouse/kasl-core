@@ -38,11 +38,7 @@ impl GlobalDeclCollector<'_> {
 
         // Add the field to the struct graph if the value has a struct type
         // The graph will be used in the scope graph analyzing phase to check if there aren't any struct cycles
-        if let ResolvedType::Struct(field_struct_id) = def_val.value_type {
-            self.comp_data
-                .struct_graph
-                .add_edge(struct_id, field_struct_id);
-        }
+        self.add_struct_dependency(struct_id, &def_val.value_type);
 
         // Create a struct field
         let struct_field = StructField {
@@ -54,5 +50,22 @@ impl GlobalDeclCollector<'_> {
 
         // Register the struct field in the type registry
         struct_decl.register_field(struct_field);
+    }
+
+    fn add_struct_dependency(&mut self, struct_id: StructID, value_type: &ResolvedType) {
+        match value_type {
+            ResolvedType::Struct(field_struct_id) => {
+                self.comp_data
+                    .struct_graph
+                    .add_edge(struct_id, *field_struct_id);
+            }
+            ResolvedType::Array(array_id) => {
+                if let Some(array_decl) = self.prog_ctx.type_registry.get_array_decl(array_id) {
+                    let item_type = *array_decl.item_type();
+                    self.add_struct_dependency(struct_id, &item_type);
+                }
+            }
+            _ => {}
+        }
     }
 }
