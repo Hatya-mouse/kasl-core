@@ -16,6 +16,7 @@
 
 use crate::Range;
 use crate::expr_engine::ExpressionBuilder;
+use crate::expr_engine::bracket_content::collect_bracket_contents;
 use crate::symbol_table::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 use crate::{ExprToken, ExprTokenKind, error::Ph};
 use std::{iter::Peekable, slice::Iter};
@@ -128,7 +129,7 @@ impl ExpressionBuilder<'_> {
 
             // Collect until the matching bracket
             let (index_tokens, close_bracket_end) =
-                self.collect_bracket_contents(bracket_open_range, tokens)?;
+                collect_bracket_contents(self.ec, bracket_open_range, tokens)?;
 
             // Build the unresolved token for the index expression
             let index_expr = self.build(&index_tokens)?;

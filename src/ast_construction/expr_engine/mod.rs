@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+mod bracket_content;
 mod expr_builder;
 mod expr_resolver;
 mod l_value_resolver;
@@ -29,7 +30,7 @@ use crate::{
 
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
-    prog_ctx: &ProgramContext,
+    prog_ctx: &mut ProgramContext,
     comp_data: &mut CompilationData,
     builtin_registry: &BuiltinRegistry,
     current_scope_id: ScopeID,

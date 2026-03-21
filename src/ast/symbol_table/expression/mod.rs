@@ -17,7 +17,7 @@
 mod l_value;
 mod unresolved_expr;
 
-pub use l_value::LValue;
+pub use l_value::{LValue, LValueKind};
 pub use unresolved_expr::{UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind};
 
 use crate::{

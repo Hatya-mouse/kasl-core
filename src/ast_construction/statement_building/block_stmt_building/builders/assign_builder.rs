@@ -18,7 +18,6 @@ use crate::{
     ExprToken, Range, Statement,
     error::Ph,
     expr_engine::{LValueResolver, resolve_expr},
-    scope_manager::VariableKind,
     statement_building::BlockStmtBuilder,
 };
 
@@ -30,26 +29,17 @@ impl BlockStmtBuilder<'_> {
         stmt_range: Range,
     ) -> Option<Statement> {
         // Resolve the target variable
-        let mut l_value_resolver =
-            LValueResolver::new(self.ec, self.prog_ctx, self.scope_id, self.namespace_id);
+        let mut l_value_resolver = LValueResolver::new(
+            self.ec,
+            self.prog_ctx,
+            self.comp_data,
+            self.builtin_registry,
+            self.scope_id,
+            self.namespace_id,
+        );
 
         // Error will be thrown by the LValueResolver so no need to check for None
         let target_l_value = l_value_resolver.resolve_l_value(target)?;
-
-        // Check if the LValue is a writable variable
-        if let Some(target_var) = self.prog_ctx.scope_registry.get_var(&target_l_value.var_id)
-            && matches!(
-                target_var.var_kind,
-                VariableKind::Input { .. }
-                    | VariableKind::GlobalConst
-                    | VariableKind::LocalConst
-                    | VariableKind::FuncParam
-            )
-        {
-            self.ec
-                .immutable_assignment(stmt_range, Ph::StatementBuilding, &target_var.name);
-            return None;
-        }
 
         // Resolve the expression
         let resolved_value = resolve_expr(

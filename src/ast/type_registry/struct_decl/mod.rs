@@ -88,7 +88,7 @@ impl StructDecl {
             let size = type_registry
                 .get_type_actual_size(&field.value_type)
                 .unwrap();
-            let alignment = type_registry.get_type_alignment(&field.value_type);
+            let alignment = type_registry.get_type_alignment(&field.value_type).unwrap();
             // If the alignment is greater than the max_alignment, update it
             if alignment > max_alignment {
                 max_alignment = alignment;

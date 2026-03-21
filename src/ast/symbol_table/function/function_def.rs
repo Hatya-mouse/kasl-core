@@ -19,14 +19,13 @@ use crate::{
     symbol_table::{Block, UnresolvedExpr},
     type_registry::ResolvedType,
 };
-use std::sync::Arc;
 
 #[derive(Debug, PartialEq, Clone, serde::Serialize)]
 pub struct Function {
     pub name: String,
     pub namespace_id: NameSpaceID,
     pub func_type: FunctionType,
-    pub params: Arc<Vec<FuncParam>>,
+    pub params: Vec<FuncParam>,
     pub return_type: ResolvedType,
     pub block: Block,
     pub range: Range,

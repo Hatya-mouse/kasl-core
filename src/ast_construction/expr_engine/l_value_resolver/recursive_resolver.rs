@@ -15,65 +15,77 @@
 //
 
 use crate::{
-    ExprToken, ExprTokenKind, error::Ph, expr_engine::LValueResolver, symbol_table::LValue,
+    Expr, ExprKind, ExprToken,
+    error::Ph,
+    expr_engine::{LValueResolver, resolve_expr},
+    scope_manager::VariableKind,
+    symbol_table::{LValue, LValueKind},
 };
 
 impl LValueResolver<'_> {
     pub fn resolve_l_value(&mut self, tokens: &[ExprToken]) -> Option<LValue> {
-        let mut token_iter = tokens.iter().peekable();
+        // Resolve the expression to LValue
+        let expr = resolve_expr(
+            self.ec,
+            self.prog_ctx,
+            self.comp_data,
+            self.builtin_registry,
+            self.current_scope,
+            self.current_namespace,
+            tokens,
+        )?;
 
-        // Get the target scope from the tokens
-        let target_scope = self.resolve_namespace_scope(&mut token_iter);
+        // Recursively validate the l-value expression
+        self.expr_to_l_value(expr)
+    }
 
-        // Resolve the identifier
-        let first_token = match token_iter.next() {
-            Some(token) => token,
-            None => {
-                // If the expression does not have any tokens, it is invalid
-                self.ec.invalid_l_value(tokens[0].range, Ph::ExprEngine);
-                return None;
-            }
-        };
-
-        let mut l_value = if let ExprTokenKind::Identifier(name) = &first_token.kind {
-            match self.resolve_identifier(target_scope, name, first_token.range) {
-                Some(lv) => lv,
-                None => {
-                    self.ec.invalid_l_value(first_token.range, Ph::ExprEngine);
+    fn expr_to_l_value(&mut self, expr: Expr) -> Option<LValue> {
+        match expr.kind {
+            ExprKind::Identifier(var_id) => {
+                // Check if the LValue is a writable variable
+                if let Some(target_var) = self.prog_ctx.scope_registry.get_var(&var_id)
+                    && matches!(
+                        target_var.var_kind,
+                        VariableKind::Input { .. }
+                            | VariableKind::GlobalConst
+                            | VariableKind::LocalConst
+                            | VariableKind::FuncParam
+                    )
+                {
+                    self.ec.immutable_assignment(
+                        expr.range,
+                        Ph::StatementBuilding,
+                        &target_var.name,
+                    );
                     return None;
                 }
+
+                Some(LValue::new(LValueKind::Identifier(var_id), expr.value_type))
             }
-        } else {
-            self.ec.invalid_l_value(first_token.range, Ph::ExprEngine);
-            return None;
-        };
-
-        while let Some(token) = token_iter.next() {
-            if token.kind != ExprTokenKind::Dot {
-                self.ec.invalid_l_value(token.range, Ph::ExprEngine);
-                break;
+            ExprKind::StructField { lhs, offset } => {
+                let l_vaule_lhs = self.expr_to_l_value(*lhs)?;
+                Some(LValue::new(
+                    LValueKind::StructField {
+                        lhs: Box::new(l_vaule_lhs),
+                        offset,
+                    },
+                    expr.value_type,
+                ))
             }
-
-            let Some(next_token) = token_iter.next() else {
-                self.ec.expr_ends_with_dot(token.range, Ph::ExprEngine);
-                break;
-            };
-
-            if let ExprTokenKind::Identifier(name) = &next_token.kind {
-                l_value = match self.resolve_field_access(l_value, name, next_token.range) {
-                    Some(lv) => lv,
-                    None => {
-                        self.ec.invalid_l_value(next_token.range, Ph::ExprEngine);
-                        return None;
-                    }
-                };
-            } else {
-                // If the token is not an identifier, throw an error and return None
-                self.ec.invalid_l_value(next_token.range, Ph::ExprEngine);
-                return None;
+            ExprKind::Subscript { lhs, index } => {
+                let l_vaule_lhs = self.expr_to_l_value(*lhs)?;
+                Some(LValue::new(
+                    LValueKind::Subscript {
+                        lhs: Box::new(l_vaule_lhs),
+                        index,
+                    },
+                    expr.value_type,
+                ))
+            }
+            _ => {
+                self.ec.invalid_l_value(expr.range, Ph::ExprEngine);
+                None
             }
         }
-
-        Some(l_value)
     }
 }

@@ -16,48 +16,12 @@
 
 use crate::{
     ExprToken, ExprTokenKind, Range,
-    error::Ph,
-    expr_engine::ExpressionBuilder,
+    expr_engine::{ExpressionBuilder, bracket_content::collect_bracket_contents},
     symbol_table::{UnresolvedExpr, UnresolvedExprKind},
 };
 use std::{iter::Peekable, slice::Iter};
 
 impl ExpressionBuilder<'_> {
-    pub fn collect_bracket_contents(
-        &mut self,
-        bracket_open_range: Range,
-        tokens: &mut Peekable<Iter<ExprToken>>,
-    ) -> Option<(Vec<ExprToken>, usize)> {
-        let mut index_tokens: Vec<ExprToken> = Vec::new();
-        let close_bracket_end: usize;
-        let mut depth = 1;
-        loop {
-            let Some(token) = tokens.next() else {
-                self.ec
-                    .unmatched_bracket(bracket_open_range, Ph::ExprEngine);
-                return None;
-            };
-            match &token.kind {
-                ExprTokenKind::BracketOpen => {
-                    depth += 1;
-                    index_tokens.push(token.clone());
-                }
-                ExprTokenKind::BracketClose => {
-                    depth -= 1;
-                    if depth == 0 {
-                        close_bracket_end = token.range.end;
-                        break;
-                    }
-                    index_tokens.push(token.clone());
-                }
-                _ => {
-                    index_tokens.push(token.clone());
-                }
-            }
-        }
-        Some((index_tokens, close_bracket_end))
-    }
-
     pub fn parse_array_literal(
         &mut self,
         token: &ExprToken,
@@ -65,7 +29,7 @@ impl ExpressionBuilder<'_> {
     ) -> Option<UnresolvedExpr> {
         // Collect until the matching bracket
         let (bracket_items, close_bracket_end) =
-            self.collect_bracket_contents(token.range, rest)?;
+            collect_bracket_contents(self.ec, token.range, rest)?;
 
         // Parse the array literal
         if let Some(semi_pos) = bracket_items

@@ -20,7 +20,7 @@ mod operator;
 mod statement;
 
 pub use expression::{
-    Expr, ExprKind, LValue, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
+    Expr, ExprKind, LValue, LValueKind, UnresolvedChainElement, UnresolvedExpr, UnresolvedExprKind,
 };
 pub use function::{
     FuncBodyMap, FuncCallArg, FuncParam, Function, FunctionContext, FunctionType, NoTypeFuncCallArg,
