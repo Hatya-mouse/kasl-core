@@ -16,9 +16,9 @@
 
 use crate::{
     Expr, ExprKind, Range,
+    common_utils::get_constant_int,
     error::Ph,
     expr_engine::ExpressionResolver,
-    scope_manager::VariableKind,
     symbol_table::UnresolvedExpr,
     type_registry::{PrimitiveType, ResolvedType},
 };
@@ -40,7 +40,7 @@ impl ExpressionResolver<'_> {
             resolved_count.value_type,
             ResolvedType::Primitive(PrimitiveType::Int)
         ) {
-            self.ec.non_integer_for_count(
+            self.ec.non_integer_for_array_count(
                 resolved_count.range,
                 Ph::ExprEngine,
                 self.prog_ctx
@@ -51,7 +51,8 @@ impl ExpressionResolver<'_> {
         }
 
         // Check if the count is a constant and get the value
-        if let Some(count_value) = self.get_constant_int(&resolved_count) {
+        if let Some(count_value) = get_constant_int(&self.prog_ctx.scope_registry, &resolved_count)
+        {
             // Create new array type of get the existing one
             let array_id = self
                 .prog_ctx
@@ -69,29 +70,8 @@ impl ExpressionResolver<'_> {
             ))
         } else {
             self.ec
-                .non_constant_for_count(resolved_count.range, Ph::ExprEngine);
+                .non_constant_for_array_count(resolved_count.range, Ph::ExprEngine);
             None
-        }
-    }
-
-    fn get_constant_int(&self, expr: &Expr) -> Option<u32> {
-        match &expr.kind {
-            ExprKind::IntLiteral(value) => Some(*value),
-            ExprKind::Identifier(id) => {
-                // Check if the variable is a constant
-                if let Some(scope_var) = self.prog_ctx.scope_registry.get_var(id)
-                    && matches!(
-                        scope_var.var_kind,
-                        VariableKind::GlobalConst | VariableKind::LocalConst
-                    )
-                    && let Some(def_val) = &scope_var.def_val
-                {
-                    self.get_constant_int(def_val)
-                } else {
-                    None
-                }
-            }
-            _ => None,
         }
     }
 }

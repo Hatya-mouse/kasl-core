@@ -84,7 +84,23 @@ impl ErrorCollector {
         self.emit(EK::BuiltinVarAccess, range, phase, Sv::Error, Pl::None);
     }
 
-    pub(crate) fn non_constant_for_count(&mut self, range: Range, phase: Phase) {
-        self.emit(EK::NonConstantForCount, range, phase, Sv::Error, Pl::None);
+    pub(crate) fn non_constant_for_array_count(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NonConstantForArrayCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
+    }
+
+    pub(crate) fn non_constant_for_loop_count(&mut self, range: Range, phase: Phase) {
+        self.emit(
+            EK::NonConstantForLoopCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::None,
+        );
     }
 }

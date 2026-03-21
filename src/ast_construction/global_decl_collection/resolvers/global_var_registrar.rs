@@ -15,9 +15,9 @@
 //
 
 use crate::{
-    Expr, ExprToken, Range, ScopeVar, error::Ph, expr_engine::resolve_expr,
-    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName,
-    scope_manager::VariableKind, type_resolver::resolve_type,
+    Expr, ExprToken, Range, ScopeVar, common_utils::resolve_type, error::Ph,
+    expr_engine::resolve_expr, global_decl_collection::GlobalDeclCollector,
+    parser_ast::ParserTypeName, scope_manager::VariableKind,
 };
 
 impl GlobalDeclCollector<'_> {

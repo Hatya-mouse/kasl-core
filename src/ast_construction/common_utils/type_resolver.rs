@@ -18,7 +18,7 @@ use crate::{
     compilation_data::ProgramContext, parser_ast::ParserTypeName, type_registry::ResolvedType,
 };
 
-pub fn resolve_type(
+pub(crate) fn resolve_type(
     prog_ctx: &mut ProgramContext,
     parser_type: &ParserTypeName,
 ) -> Option<ResolvedType> {

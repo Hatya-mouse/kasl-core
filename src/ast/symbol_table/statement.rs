@@ -65,6 +65,10 @@ pub enum Statement {
     Return {
         value: Option<Expr>,
     },
+    Loop {
+        count: u32,
+        body: Block,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]

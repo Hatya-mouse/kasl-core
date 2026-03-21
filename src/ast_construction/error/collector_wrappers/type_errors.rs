@@ -111,9 +111,29 @@ impl ErrorCollector {
         );
     }
 
-    pub(crate) fn non_integer_for_count(&mut self, range: Range, phase: Phase, type_name: String) {
+    pub(crate) fn non_integer_for_array_count(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        type_name: String,
+    ) {
         self.emit(
-            EK::NonIntegerForCount,
+            EK::NonIntegerForArrayCount,
+            range,
+            phase,
+            Sv::Error,
+            Pl::Str(type_name),
+        );
+    }
+
+    pub(crate) fn non_integer_for_loop_count(
+        &mut self,
+        range: Range,
+        phase: Phase,
+        type_name: String,
+    ) {
+        self.emit(
+            EK::NonIntegerForLoopCount,
             range,
             phase,
             Sv::Error,

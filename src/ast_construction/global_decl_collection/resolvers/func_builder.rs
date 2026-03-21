@@ -16,13 +16,13 @@
 
 use crate::{
     FuncParam, Function, ParserFuncParam, Range, ScopeID, ScopeVar,
+    common_utils::resolve_type,
     error::Ph,
     global_decl_collection::GlobalDeclCollector,
     parser_ast::ParserTypeName,
     scope_manager::VariableKind,
     symbol_table::{Block, FunctionType},
     type_registry::{PrimitiveType, ResolvedType},
-    type_resolver::resolve_type,
 };
 use std::collections::HashSet;
 

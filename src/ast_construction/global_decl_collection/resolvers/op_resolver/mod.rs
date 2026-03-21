@@ -19,9 +19,9 @@ mod postfix_op;
 mod prefix_op;
 
 use crate::{
-    ParserFuncParam, ParserOperatorType, ParserScopeStmt, Range, error::Ph,
-    global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName, symbol_table::Block,
-    type_resolver::resolve_type,
+    ParserFuncParam, ParserOperatorType, ParserScopeStmt, Range, common_utils::resolve_type,
+    error::Ph, global_decl_collection::GlobalDeclCollector, parser_ast::ParserTypeName,
+    symbol_table::Block,
 };
 
 impl GlobalDeclCollector<'_> {

@@ -320,15 +320,25 @@ pub enum ErrorKind {
     /// A non-integer value is used to index an array.
     NonIntegerInSubscript,
 
-    /// Title: NonIntegerForCount
+    /// Title: NonIntegerForArrayCount
     /// Payload: Type of the non-integer count value
     /// A non-integer value is used for array count in array spread literal.
-    NonIntegerForCount,
+    NonIntegerForArrayCount,
 
-    /// Title: NonConstantForCount
+    /// Title: NonIntegerForLoopCount
+    /// Payload: Type of the non-integer count value
+    /// A non-integer value is used for loop count in loop statement.
+    NonIntegerForLoopCount,
+
+    /// Title: NonConstantForArrayCount
     /// Payload: None
     /// A non-constant value is used for array count in array spread literal.
-    NonConstantForCount,
+    NonConstantForArrayCount,
+
+    /// Title: NonConstantForLoopCount
+    /// Payload: None
+    /// A non-constant value is used for loop count in loop statement.
+    NonConstantForLoopCount,
 
     /// Title: EmptyArrayLiteral
     /// Payload: None

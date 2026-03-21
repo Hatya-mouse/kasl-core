@@ -14,19 +14,8 @@
 // limitations under the License.
 //
 
-/// Builds an Assign statement.
-mod assign_builder;
-/// Builds a block statement.
-mod block_stmt_builder;
-/// Builds an Expression statement.
-mod expr_stmt_builder;
-/// Builds an If statement.
-mod if_builder;
-/// Builds a LocalVar and LocalConst statements which declare local variables and constants.
-mod local_decl_builder;
-/// Builds a ScopeVar from the given information and registers it in the scope registry.
-mod local_var_registrar;
-/// Builds a Loop statement.
-mod loop_builder;
-/// Builds a Return statement.
-mod return_stmt_builder;
+mod constant_int;
+mod type_resolver;
+
+pub(crate) use constant_int::get_constant_int;
+pub(crate) use type_resolver::resolve_type;

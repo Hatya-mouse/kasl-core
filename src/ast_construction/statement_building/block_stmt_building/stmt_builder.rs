@@ -47,6 +47,9 @@ impl BlockStmtBuilder<'_> {
             ParserScopeStmtKind::Return { value } => {
                 self.build_return_stmt(value.as_ref(), stmt.range)
             }
+            ParserScopeStmtKind::Loop { count, body } => {
+                self.build_loop_stmt(count, body, stmt.range)
+            }
         }
     }
 }
