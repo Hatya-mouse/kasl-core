@@ -61,7 +61,7 @@ impl FuncTranslator<'_> {
                 // Resolve the lhs to get the pointer to the array itself
                 let base_ptr = self.resolve_l_value_ptr(lhs);
                 // Calculate the pointer to the corresponding value
-                self.calculate_array_offset(&l_value.value_type, base_ptr, index)
+                self.calculate_array_offset(&lhs.value_type, base_ptr, index)
             }
             LValueKind::StructField { lhs, offset } => {
                 // Resolve the lhs to get the pointer to the struct
