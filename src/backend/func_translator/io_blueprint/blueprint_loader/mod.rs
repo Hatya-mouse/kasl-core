@@ -71,7 +71,12 @@ impl FuncTranslator<'_> {
                             }
                         }
                         VariableKind::GlobalConst => {
-                            self.declare_var(*var_id, &scope_var.value_type);
+                            let var = self.declare_var(*var_id, &scope_var.value_type);
+                            // Constants must have a default value
+                            let translated_def_val = self
+                                .translate_expr(scope_var.def_val.as_ref().unwrap())
+                                .unwrap();
+                            self.builder.def_var(var, translated_def_val);
                         }
                         _ => (),
                     }
