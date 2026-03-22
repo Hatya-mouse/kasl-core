@@ -45,7 +45,7 @@ impl Display for PrimitiveType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PrimitiveType::Bool => write!(f, "Bool"),
-            PrimitiveType::Float => write!(f, "Bool"),
+            PrimitiveType::Float => write!(f, "Float"),
             PrimitiveType::Int => write!(f, "Int"),
             PrimitiveType::Void => write!(f, "Void"),
         }
