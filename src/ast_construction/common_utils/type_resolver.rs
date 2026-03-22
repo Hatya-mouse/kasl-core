@@ -12,6 +12,11 @@ pub(crate) fn resolve_type(
                 .namespace_registry
                 .resolve_namespace_from_path(path.clone());
 
+            println!(
+                "Path: {}, NameSpaceID: {:?}, Typename: {}",
+                path, namespace_id, type_name
+            );
+
             // Resolved the type name
             prog_ctx
                 .type_registry

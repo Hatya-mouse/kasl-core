@@ -98,10 +98,6 @@ impl TypeRegistry {
     }
 
     pub fn get_alias_type(&self, namespace_id: NameSpaceID, alias: &str) -> Option<&ResolvedType> {
-        println!(
-            "get_alias_type: namespace={:?}, alias={}",
-            namespace_id, alias
-        );
         self.alias_to_type.get(&(namespace_id, alias.to_string()))
     }
 
@@ -149,10 +145,6 @@ impl TypeRegistry {
         alias: String,
         target: ResolvedType,
     ) {
-        println!(
-            "register_typealias: namespace={:?}, alias={}",
-            namespace_id, alias
-        );
         self.alias_to_type.insert((namespace_id, alias), target);
     }
 
