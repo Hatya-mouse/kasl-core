@@ -84,7 +84,7 @@ impl StructDecl {
             offset += size as i32;
         }
 
-        self.total_size = offset as u32;
+        self.total_size = (offset as u32).div_ceil(max_alignment as u32) * max_alignment as u32;
         self.alignment = max_alignment;
     }
 }
