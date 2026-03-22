@@ -1,4 +1,5 @@
 use crate::{
+    NameSpaceID,
     compilation_data::ProgramContext,
     scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
 };
@@ -14,11 +15,15 @@ impl<'a> BlueprintBuilder<'a> {
 
     pub fn build(&self) -> IOBlueprint {
         let mut blueprint = IOBlueprint::default();
-        let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
-        let global_scope = self
-            .prog_ctx
-            .scope_registry
-            .get_global_scope(&root_namespace_id);
+        let namespaces = self.prog_ctx.namespace_registry.get_all_namespace_ids();
+        for namespace_id in namespaces {
+            self.build_namespace(&mut blueprint, &namespace_id);
+        }
+        blueprint
+    }
+
+    fn build_namespace(&self, blueprint: &mut IOBlueprint, namespace_id: &NameSpaceID) {
+        let global_scope = self.prog_ctx.scope_registry.get_global_scope(namespace_id);
 
         // Loop over each variables in the global scope
         for var_id in &global_scope.variables {
@@ -60,7 +65,5 @@ impl<'a> BlueprintBuilder<'a> {
                 _ => (),
             }
         }
-
-        blueprint
     }
 }

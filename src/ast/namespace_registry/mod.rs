@@ -54,6 +54,10 @@ impl NameSpaceRegistry {
         self.namespaces.get(id)
     }
 
+    pub fn get_all_namespace_ids(&self) -> Vec<NameSpaceID> {
+        self.namespaces.keys().copied().collect()
+    }
+
     // --- REGISTRATION ---
 
     pub fn register_namespace(&mut self, name: String, parent: Option<NameSpaceID>) -> NameSpaceID {
