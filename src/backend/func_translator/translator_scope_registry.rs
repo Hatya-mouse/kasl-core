@@ -28,7 +28,7 @@ impl TranslatorScope {
         self.variables.get(var_id).copied()
     }
 
-    pub fn or_insert(&mut self, var_id: VariableID, var: Variable) -> Variable {
+    pub fn or_insert_var(&mut self, var_id: VariableID, var: Variable) -> Variable {
         *self.variables.entry(var_id).or_insert(var)
     }
 }
@@ -51,7 +51,7 @@ impl TranslatorScopeRegistry {
         self.current_scopes
             .last_mut()
             .unwrap()
-            .or_insert(var_id, var)
+            .or_insert_var(var_id, var)
     }
 
     pub fn pop_deepest(&mut self) {

@@ -56,7 +56,7 @@ impl<'a> FuncTranslator<'a> {
         blueprint: &IOBlueprint,
         exit_block: ir::Block,
     ) {
-        // Get the input and state variables from the blueprint
+        // Get the input, output, state variables, and constants from the blueprint
         self.load_blueprint_access(&params, blueprint, iteration_index);
 
         // Get the entry point function node

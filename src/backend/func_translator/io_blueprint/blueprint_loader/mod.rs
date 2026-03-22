@@ -30,48 +30,51 @@ impl FuncTranslator<'_> {
             .unwrap_or_else(|| self.builder.ins().iconst(types::I8, 1));
         let is_first_and_should_init = self.builder.ins().band(is_first, params.should_init);
 
-        // Loop over the inputs, outputs and states in declaration order and load them
-        let root_namespace = self.prog_ctx.namespace_registry.get_root_namespace_id();
-        let global_scope = self
-            .prog_ctx
-            .scope_registry
-            .get_global_scope(&root_namespace);
-        for var_id in global_scope.variables.iter() {
-            if let Some(scope_var) = self.prog_ctx.scope_registry.get_var(var_id) {
-                match scope_var.var_kind {
-                    VariableKind::Input { .. } => {
-                        if let Some(item) = blueprint.get_item(var_id) {
-                            self.load_input(
-                                pointer_type,
-                                params.input_ptr_ptr,
-                                item,
-                                input_offset,
-                                iteration_index,
-                            );
-                            input_offset += pointer_type.bytes() as i32;
+        // Get the all namespaces
+        let namespaces = self.prog_ctx.namespace_registry.get_all_namespace_ids();
+        // Loop over all namespaces
+        for namespace_id in &namespaces {
+            // Get the global scope of the namespace
+            let global_scope = self.prog_ctx.scope_registry.get_global_scope(namespace_id);
+
+            // Loop over the inputs, outputs and states in declaration order and load them
+            for var_id in global_scope.variables.iter() {
+                if let Some(scope_var) = self.prog_ctx.scope_registry.get_var(var_id) {
+                    match scope_var.var_kind {
+                        VariableKind::Input { .. } => {
+                            if let Some(item) = blueprint.get_item(var_id) {
+                                self.load_input(
+                                    pointer_type,
+                                    params.input_ptr_ptr,
+                                    item,
+                                    input_offset,
+                                    iteration_index,
+                                );
+                                input_offset += pointer_type.bytes() as i32;
+                            }
                         }
-                    }
-                    VariableKind::Output => {
-                        if let Some(item) = blueprint.get_item(var_id) {
-                            self.init_output(item);
+                        VariableKind::Output => {
+                            if let Some(item) = blueprint.get_item(var_id) {
+                                self.init_output(item);
+                            }
                         }
-                    }
-                    VariableKind::State => {
-                        if let Some(item) = blueprint.get_item(var_id) {
-                            self.load_or_init_state(
-                                pointer_type,
-                                params.state_ptr_ptr,
-                                is_first_and_should_init,
-                                item,
-                                state_offset,
-                            );
-                            state_offset += pointer_type.bytes() as i32;
+                        VariableKind::State => {
+                            if let Some(item) = blueprint.get_item(var_id) {
+                                self.load_or_init_state(
+                                    pointer_type,
+                                    params.state_ptr_ptr,
+                                    is_first_and_should_init,
+                                    item,
+                                    state_offset,
+                                );
+                                state_offset += pointer_type.bytes() as i32;
+                            }
                         }
+                        VariableKind::GlobalConst => {
+                            self.declare_var(*var_id, &scope_var.value_type);
+                        }
+                        _ => (),
                     }
-                    VariableKind::GlobalConst => {
-                        self.declare_var(*var_id, &scope_var.value_type);
-                    }
-                    _ => (),
                 }
             }
         }
