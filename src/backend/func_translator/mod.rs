@@ -10,8 +10,11 @@ use cranelift_codegen::ir;
 pub use type_converter::TypeConverter;
 
 use crate::{
-    FunctionID, backend::func_translator::translator_scope_registry::TranslatorScopeRegistry,
-    builtin::BuiltinRegistry, compilation_data::ProgramContext, scope_manager::IOBlueprint,
+    FunctionID,
+    backend::func_translator::translator_scope_registry::TranslatorScopeRegistry,
+    builtin::BuiltinRegistry,
+    compilation_data::ProgramContext,
+    scope_manager::{IOBlueprint, VariableKind},
 };
 use cranelift::prelude::FunctionBuilder;
 use cranelift_jit::JITModule;

@@ -3,7 +3,7 @@ mod item_loader;
 use crate::{
     VariableID,
     backend::func_translator::{FuncTranslator, TranslatorParams},
-    scope_manager::{BlueprintItem, BlueprintItemKind, IOBlueprint},
+    scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
     type_registry::ResolvedType,
 };
 use cranelift::prelude::{InstBuilder, IntCC, types};
@@ -31,32 +31,47 @@ impl FuncTranslator<'_> {
         let is_first_and_should_init = self.builder.ins().band(is_first, params.should_init);
 
         // Loop over the inputs, outputs and states in declaration order and load them
-        for (var_id, item_kind) in blueprint.get_order() {
-            if let Some(item) = blueprint.get_item(var_id) {
-                match item_kind {
-                    BlueprintItemKind::Input => {
-                        self.load_input(
-                            pointer_type,
-                            params.input_ptr_ptr,
-                            item,
-                            input_offset,
-                            iteration_index,
-                        );
-                        input_offset += pointer_type.bytes() as i32;
+        let root_namespace = self.prog_ctx.namespace_registry.get_root_namespace_id();
+        let global_scope = self
+            .prog_ctx
+            .scope_registry
+            .get_global_scope(&root_namespace);
+        for var_id in global_scope.variables.iter() {
+            if let Some(scope_var) = self.prog_ctx.scope_registry.get_var(var_id) {
+                match scope_var.var_kind {
+                    VariableKind::Input { .. } => {
+                        if let Some(item) = blueprint.get_item(var_id) {
+                            self.load_input(
+                                pointer_type,
+                                params.input_ptr_ptr,
+                                item,
+                                input_offset,
+                                iteration_index,
+                            );
+                            input_offset += pointer_type.bytes() as i32;
+                        }
                     }
-                    BlueprintItemKind::Output => {
-                        self.init_output(item);
+                    VariableKind::Output => {
+                        if let Some(item) = blueprint.get_item(var_id) {
+                            self.init_output(item);
+                        }
                     }
-                    BlueprintItemKind::State => {
-                        self.load_or_init_state(
-                            pointer_type,
-                            params.state_ptr_ptr,
-                            is_first_and_should_init,
-                            item,
-                            state_offset,
-                        );
-                        state_offset += pointer_type.bytes() as i32;
+                    VariableKind::State => {
+                        if let Some(item) = blueprint.get_item(var_id) {
+                            self.load_or_init_state(
+                                pointer_type,
+                                params.state_ptr_ptr,
+                                is_first_and_should_init,
+                                item,
+                                state_offset,
+                            );
+                            state_offset += pointer_type.bytes() as i32;
+                        }
                     }
+                    VariableKind::GlobalConst => {
+                        self.declare_var(*var_id, &scope_var.value_type);
+                    }
+                    _ => (),
                 }
             }
         }
