@@ -13,7 +13,7 @@ pub use struct_graph::StructGraph;
 use crate::{NameSpaceID, StructID, namespace_registry::ArrayID};
 use std::{collections::HashMap, str::FromStr};
 
-#[derive(Debug, Default, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct TypeRegistry {
     // Struct Registration
     structs: HashMap<StructID, StructDecl>,

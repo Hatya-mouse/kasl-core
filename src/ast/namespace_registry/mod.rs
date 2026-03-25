@@ -14,7 +14,7 @@ use std::collections::HashMap;
 
 /// Stores a id-namespace pair of all namespaces in compilation.
 /// Should only exist one instance per compilation.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NameSpaceRegistry {
     namespaces: HashMap<NameSpaceID, NameSpace>,
     root_namespace_id: NameSpaceID,

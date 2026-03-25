@@ -7,7 +7,7 @@ use crate::{
 };
 use std::{collections::HashSet, path::PathBuf};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProgramContext {
     pub func_ctx: FunctionContext,
     pub op_ctx: OperatorContext,

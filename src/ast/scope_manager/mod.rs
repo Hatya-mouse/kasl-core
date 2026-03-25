@@ -15,7 +15,7 @@ use std::{collections::HashMap, fmt::Display};
 /// ScopeRegistry manages scopes and variables belonging to them.
 /// It only manages the top-level variables and local variables,
 /// and doesn't manage the struct fields.
-#[derive(Default, Debug, serde::Serialize)]
+#[derive(Default, Debug, Clone, serde::Serialize)]
 pub struct ScopeRegistry {
     scopes: HashMap<ScopeID, Scope>,
     variables: HashMap<VariableID, ScopeVar>,

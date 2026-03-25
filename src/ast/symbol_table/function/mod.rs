@@ -7,7 +7,7 @@ pub use function_def::{FuncCallArg, FuncParam, Function, FunctionType, NoTypeFun
 use crate::{FunctionID, NameSpaceID, StructID};
 use std::collections::HashMap;
 
-#[derive(Debug, Default, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct FunctionContext {
     funcs: HashMap<FunctionID, Function>,
     member_functions: HashMap<StructID, HashMap<String, FunctionID>>,

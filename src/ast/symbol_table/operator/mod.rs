@@ -18,7 +18,7 @@ use crate::{
 };
 use hashbrown::{HashMap, hash_map::Entry};
 
-#[derive(Debug, Default, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct OperatorContext {
     infix_operator_properties: HashMap<String, InfixOperatorProperties>,
     infix_operators: HashMap<OperatorID, InfixOperator>,

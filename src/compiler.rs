@@ -14,13 +14,11 @@ use crate::{
 };
 use std::{mem, path::PathBuf};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct KaslCompiler {
     ec: ErrorCollector,
     pub prog_ctx: ProgramContext,
-    comp_data: CompilationData,
     comp_state: CompilerState,
-    builtin_registry: BuiltinRegistry,
 
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
     compiled: *const u8,
@@ -55,38 +53,38 @@ impl KaslCompiler {
     }
 
     pub fn build(&mut self) -> Result<IOBlueprint, Vec<ErrorRecord>> {
+        let mut comp_data = CompilationData::default();
+        let builtin_registry = BuiltinRegistry::default();
+
         // 1. Collect global declarations
         let root_namespace = self.prog_ctx.namespace_registry.get_root_namespace_id();
         let mut global_decl_collector = GlobalDeclCollector::new(
             &mut self.ec,
             &mut self.prog_ctx,
-            &mut self.comp_data,
+            &mut comp_data,
             &self.comp_state,
-            &self.builtin_registry,
+            &builtin_registry,
             root_namespace,
         );
         global_decl_collector.process(&self.parser_decl_stmts);
 
         // 2. Analyze struct graph
         let mut struct_analyzer =
-            StructGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &self.comp_data.struct_graph);
+            StructGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &comp_data.struct_graph);
         struct_analyzer.analyze_all();
 
         // 3. Build statements
         let mut stmt_builder = StatementBuilder::new(
             &mut self.ec,
             &mut self.prog_ctx,
-            &mut self.comp_data,
-            &self.builtin_registry,
+            &mut comp_data,
+            &builtin_registry,
         );
         stmt_builder.build_all();
 
         // 4. Analyze scope graph
-        let mut scope_analyzer = ScopeGraphAnalyzer::new(
-            &mut self.ec,
-            &self.prog_ctx,
-            &mut self.comp_data.scope_graph,
-        );
+        let mut scope_analyzer =
+            ScopeGraphAnalyzer::new(&mut self.ec, &self.prog_ctx, &mut comp_data.scope_graph);
         scope_analyzer.analyze_all();
 
         // 5. Build an IOBlueprint
@@ -97,6 +95,8 @@ impl KaslCompiler {
     }
 
     pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+        let builtin_registry = BuiltinRegistry::default();
+
         // Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
@@ -115,12 +115,7 @@ impl KaslCompiler {
             })?;
 
         self.compiled = backend
-            .compile_once(
-                &self.prog_ctx,
-                &self.builtin_registry,
-                blueprint,
-                &main_func_id,
-            )
+            .compile_once(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
                     ErrorKey::new(EK::CompilerBug, Pl::Str(e)),
@@ -155,6 +150,8 @@ impl KaslCompiler {
     }
 
     pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<(), Vec<ErrorRecord>> {
+        let builtin_registry = BuiltinRegistry::default();
+
         // Compile the program
         let mut backend = Backend::default();
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
@@ -173,12 +170,7 @@ impl KaslCompiler {
             })?;
 
         self.compiled = backend
-            .compile_buffer(
-                &self.prog_ctx,
-                &self.builtin_registry,
-                blueprint,
-                &main_func_id,
-            )
+            .compile_buffer(&self.prog_ctx, &builtin_registry, blueprint, &main_func_id)
             .map_err(|e| {
                 vec![ErrorRecord::new(
                     ErrorKey::new(EK::CompilerBug, Pl::Str(e)),

@@ -1,7 +1,7 @@
 use crate::NameSpaceID;
 use std::collections::HashMap;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct NameSpace {
     pub id: NameSpaceID,
     child_namespaces: HashMap<String, NameSpaceID>,
