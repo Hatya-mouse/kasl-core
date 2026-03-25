@@ -134,7 +134,7 @@ impl KaslCompiler {
     }
 
     pub fn run_once(
-        &mut self,
+        &self,
         inputs: &[*const ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
@@ -192,7 +192,7 @@ impl KaslCompiler {
     }
 
     pub fn run_buffer(
-        &mut self,
+        &self,
         inputs: &[*const ()],
         outputs: &[*mut ()],
         states: &[*mut ()],
