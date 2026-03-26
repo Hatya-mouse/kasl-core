@@ -35,6 +35,18 @@ impl ErrorRecord {
     }
 }
 
+impl std::fmt::Display for ErrorRecord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[{:?}] with payload {:?}",
+            self.key.kind, self.key.payload
+        )
+    }
+}
+
+impl std::error::Error for ErrorRecord {}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub struct ErrorKey {
     pub kind: ErrorKind,
