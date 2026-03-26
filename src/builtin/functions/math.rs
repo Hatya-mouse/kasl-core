@@ -213,7 +213,7 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
                 .declare_function("fpow", Linkage::Import, &sig)
                 .unwrap();
             let func_ref = module.declare_func_in_func(func_id, builder.func);
-            let call = builder.ins().call(func_ref, &[args[0]]);
+            let call = builder.ins().call(func_ref, &[args[0], args[1]]);
             builder.inst_results(call)[0]
         }),
     );
