@@ -12,7 +12,7 @@ use crate::{
     statement_building::StatementBuilder,
     struct_graph_analyzing::StructGraphAnalyzer,
 };
-use std::{mem, path::PathBuf};
+use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct KaslCompiler {
