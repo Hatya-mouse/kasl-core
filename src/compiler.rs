@@ -14,7 +14,7 @@ use crate::{
 };
 use std::{mem, path::PathBuf};
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub struct KaslCompiler {
     ec: ErrorCollector,
     pub prog_ctx: ProgramContext,
@@ -135,6 +135,10 @@ impl KaslCompiler {
         states: &[*mut ()],
         should_init: i8,
     ) -> Result<(), String> {
+        if self.compiled.is_null() {
+            return Ok(());
+        };
+
         unsafe {
             let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8) =
                 mem::transmute(self.compiled);
@@ -191,6 +195,10 @@ impl KaslCompiler {
         should_init: i8,
         buffer_size: i32,
     ) -> Result<(), String> {
+        if self.compiled.is_null() {
+            return Ok(());
+        };
+
         unsafe {
             let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
                 mem::transmute(self.compiled);
