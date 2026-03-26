@@ -9,7 +9,7 @@ pub unsafe fn run_once(
     outputs: &[*mut ()],
     states: &[*mut ()],
     should_init: i8,
-) -> Result<(), String> {
+) {
     unsafe {
         let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8) =
             std::mem::transmute(program);
@@ -20,8 +20,6 @@ pub unsafe fn run_once(
             should_init,
         );
     }
-
-    Ok(())
 }
 
 /// # Safety
@@ -36,7 +34,7 @@ pub unsafe fn run_buffer(
     states: &[*mut ()],
     should_init: i8,
     buffer_size: i32,
-) -> Result<(), String> {
+) {
     unsafe {
         let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
             std::mem::transmute(program);
@@ -48,6 +46,4 @@ pub unsafe fn run_buffer(
             buffer_size,
         );
     }
-
-    Ok(())
 }
