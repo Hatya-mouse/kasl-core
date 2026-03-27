@@ -1,7 +1,4 @@
-use crate::{
-    StructID, backend::func_translator::FuncTranslator, namespace_registry::ArrayID,
-    type_registry::ResolvedType,
-};
+use crate::{StructID, backend::func_translator::FuncTranslator, namespace_registry::ArrayID};
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 use cranelift_module::Module;
