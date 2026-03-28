@@ -392,7 +392,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = "." { ExprTokenKind::Dot }
 
     rule semicolon() -> ExprTokenKind = ";" { ExprTokenKind::Semicolon }
-    rule colon() -> ExprTokenKind = "," { ExprTokenKind::Comma }
+    rule comma() -> ExprTokenKind = "," { ExprTokenKind::Comma }
 
     // --- MISCELLANEOUS ---
 
