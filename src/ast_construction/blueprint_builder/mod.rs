@@ -14,12 +14,15 @@
 //  limitations under the License.
 //
 
+//! Builds a blueprint from the program context.
+
 use crate::ast::{
     NameSpaceID,
     compilation_data::ProgramContext,
     scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
 };
 
+/// Builds a blueprint, which is used to let the host know the desired inputs, outputs and states of the program, from the program context.
 pub struct BlueprintBuilder<'a> {
     prog_ctx: &'a ProgramContext,
 }

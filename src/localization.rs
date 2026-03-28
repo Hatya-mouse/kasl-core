@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Privodes the basic error localization functionality.
+
 use crate::error::{EK, ErrorRecord, Pl};
 use rust_embed::RustEmbed;
 
@@ -21,6 +23,31 @@ use rust_embed::RustEmbed;
 #[folder = "locales/"]
 struct Locales;
 
+/// Formats an error message based on the provided `ErrorRecord` and locale.
+///
+/// # Usage
+/// ```rust
+/// use kasl::{
+///     ast::Range,
+///     error::{EK, ErrorKey, ErrorRecord, Ph, Pl, Sv},
+///     localization::format_error,
+/// };
+/// use std::collections::HashSet;
+///
+/// // Create a dummy error record for demonstration
+/// let record = ErrorRecord {
+///     key: ErrorKey::new(
+///         EK::DuplicateInfixFunc,
+///         Pl::StrTriple("+".to_string(), "Int".to_string(), "Float".to_string()),
+///     ),
+///     earliest_phase: Ph::GlobalDeclCollection,
+///     ranges: [Range::n(0, 10)].iter().cloned().collect::<HashSet<_>>(),
+///     severity: Sv::Error,
+/// };
+///
+/// let message = format_error(&record, "en");
+/// println!("{}", message);
+/// ```
 pub fn format_error(record: &ErrorRecord, locale: &str) -> String {
     // Create a file name by combining the locale and .toml extension
     let filename = format!("{}.toml", locale);

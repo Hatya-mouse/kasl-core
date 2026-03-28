@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+/// Payload for error messages.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum Payload {
     None,

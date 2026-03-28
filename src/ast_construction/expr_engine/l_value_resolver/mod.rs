@@ -22,6 +22,7 @@ use crate::{
     error::ErrorCollector,
 };
 
+/// Resolves the L-value expressions used in assign statement from the list of parsed expression tokens.
 pub struct LValueResolver<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,

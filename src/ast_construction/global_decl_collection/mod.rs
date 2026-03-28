@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Global declaration collection phase of AST construction.
+
 mod resolvers;
 mod stmt_process;
 
@@ -28,6 +30,7 @@ use crate::{
 };
 pub use resolvers::FuncDeclInfo;
 
+/// Collects the top level declarations such as `input`, `output`, `state`, `func`, etc.
 pub struct GlobalDeclCollector<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,

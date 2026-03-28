@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! This module contains the logic for constructing and resolving expressions in the AST.
+
 mod expr_builder;
 mod expr_resolver;
 mod l_value_resolver;
@@ -29,6 +31,7 @@ use crate::{
     parser::ExprToken,
 };
 
+/// Resolved the given parsed expression tokens into a resolved `Expr`.
 pub fn resolve_expr(
     ec: &mut ErrorCollector,
     prog_ctx: &mut ProgramContext,

@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! AST (Abstract Syntax Tree) and related data structures.
+
 pub mod compilation_data;
 pub mod data;
 pub mod namespace_registry;

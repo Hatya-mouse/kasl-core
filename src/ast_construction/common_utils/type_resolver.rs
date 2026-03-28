@@ -19,6 +19,7 @@ use crate::{
     parser::parser_ast::ParserTypeName,
 };
 
+/// Resolves a `ParserTypeName` to a `ResolvedType` using the provided `ProgramContext` and the current namespace.
 pub(crate) fn resolve_type(
     current_namespace: NameSpaceID,
     prog_ctx: &mut ProgramContext,

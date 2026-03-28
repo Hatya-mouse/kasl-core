@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! The backend that compiles the program to machine code using Cranelift.
+
 mod buffer_compile;
 mod func_translator;
 

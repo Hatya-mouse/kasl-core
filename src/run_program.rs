@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Runs the given program with the provided inputs, outputs, and states.
+
 /// Runs the given program once with the provided inputs, outputs, and states.
 /// This function is unsafe because this function can cause an undefined behavior
 /// if any of the pointers passed to the function are null, or if the lengths are incorrect.

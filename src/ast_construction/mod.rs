@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! The implementation of the AST construction phase of the compiler.
+
 pub mod blueprint_builder;
 pub mod error;
 pub mod expr_engine;

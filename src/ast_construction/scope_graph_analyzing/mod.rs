@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! The implementation of the scope graph analyzer, which analyzes and validates the scope graph.
+
 mod scope_traversal;
 
 use crate::{
@@ -22,6 +24,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
+/// Analyzes the scope graph and detects the recursive function calls, and ensures that the all value-returning functions have return statements in all possible execution paths.
 pub struct ScopeGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a ProgramContext,

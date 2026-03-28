@@ -20,6 +20,7 @@ use crate::{
 };
 use std::collections::HashSet;
 
+/// A record of an error that occurred during compilation. The same error will automatically be merged into one record.
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct ErrorRecord {
     pub key: ErrorKey,
@@ -63,6 +64,7 @@ impl std::fmt::Display for ErrorRecord {
 
 impl std::error::Error for ErrorRecord {}
 
+/// A key for an error. Errors with the same key will be merged into one record.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub struct ErrorKey {
     pub kind: ErrorKind,
@@ -75,6 +77,7 @@ impl ErrorKey {
     }
 }
 
+/// Represents the phase of the compilation when an error occurred.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, serde::Serialize)]
 pub enum Phase {
@@ -88,10 +91,9 @@ pub enum Phase {
     Backend = 7,
 }
 
+/// The severity of the error.
 #[derive(Clone, Debug, serde::Serialize)]
 pub enum Severity {
     CompilerBug,
     Error,
-    Warning,
-    Info,
 }

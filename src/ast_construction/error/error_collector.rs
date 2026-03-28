@@ -20,6 +20,8 @@ use crate::{
 };
 use std::collections::HashMap;
 
+/// Collects and manages error records during the AST construction process.
+/// Often called `ec` in the codebase.
 #[derive(Debug, Clone)]
 pub struct ErrorCollector {
     pub records: HashMap<ErrorKey, ErrorRecord>,

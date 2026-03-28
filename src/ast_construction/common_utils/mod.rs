@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Common utilities for AST construction.
+
 mod constant_int;
 mod type_resolver;
 

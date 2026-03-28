@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! The parser of the KASL compiler, which generates an high-level AST from the code string.
+
 pub mod grammar;
 pub mod parser_ast;
 

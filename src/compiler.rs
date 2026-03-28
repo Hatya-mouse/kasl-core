@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! The orchestrator of the entire compilation process, from parsing to code generation.
+
 use crate::{
     MAIN_FUNCTION_NAME,
     ast::{

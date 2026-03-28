@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Collects and organizes the emitted errors during the AST construction phase.
+
 mod collector_wrappers;
 pub mod error_collector;
 pub mod error_kind;
@@ -25,7 +27,11 @@ pub use error_kind::ErrorKind;
 pub use error_record::{ErrorKey, ErrorRecord, Phase, Severity};
 pub use payload::Payload;
 
+/// A shorthand for `ErrorKind`.
 pub type EK = crate::error::ErrorKind;
+/// A shorthand for `Phase`.
 pub type Ph = crate::error::Phase;
+/// A shorthand for `Severity`.
 pub type Sv = crate::error::Severity;
+/// A shorthand for `Payload`.
 pub type Pl = crate::error::Payload;

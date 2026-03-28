@@ -116,11 +116,15 @@ impl SymbolPathComponent {
     }
 }
 
-// Use this macro to create a SymbolPath from a simple list of components
-// Example:
-// ```
-// symbol_path!["foo", "bar", "baz"];
-// ```
+/// Creates a SymbolPath from a list of strings.
+///
+/// # Usage
+/// ```rust
+/// use kasl::symbol_path;
+///
+/// let path = symbol_path!["foo".to_string(), "bar".to_string(), "baz".to_string()];
+/// assert_eq!(path.to_string(), "foo.bar.baz");
+/// ```
 #[macro_export]
 macro_rules! symbol_path {
     ($($x:expr),* $(,)?) => {

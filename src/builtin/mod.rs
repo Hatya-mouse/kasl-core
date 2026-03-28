@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Definitions of built-in functions and their implementations.
+
 mod builtin_func;
 mod functions;
 

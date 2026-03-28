@@ -25,6 +25,7 @@ use crate::{
     parser::{ExprToken, ExprTokenKind},
 };
 
+/// Builds an `UnresolvedExpr`, which does not include type information, from a list of `ExprToken`s.
 pub struct ExpressionBuilder<'a> {
     ec: &'a mut ErrorCollector,
     op_ctx: &'a OperatorContext,

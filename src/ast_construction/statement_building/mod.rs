@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+//! Statement building phase of AST construction.
+
 mod block_stmt_building;
 mod body_collector;
 
@@ -25,6 +27,7 @@ use crate::{
     error::ErrorCollector,
 };
 
+/// Builds the resolved statements from the raw parsed statements.
 pub struct StatementBuilder<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,

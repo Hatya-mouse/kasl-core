@@ -16,6 +16,8 @@
 
 use crate::ast::{Expr, ExprKind, ScopeRegistry, scope_manager::VariableKind};
 
+/// Attempts to evaluate the given expressionas a constant integer.
+/// Returns the constant integer value even if the expression is an identifier of a constant variable.
 pub(crate) fn get_constant_int(scope_registry: &ScopeRegistry, expr: &Expr) -> Option<u32> {
     match &expr.kind {
         ExprKind::IntLiteral(value) => Some(*value),

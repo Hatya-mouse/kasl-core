@@ -14,14 +14,17 @@
 //  limitations under the License.
 //
 
-use std::collections::HashMap;
+//! The logic of traversing the struct graph and analyzing it.
+
+mod struct_traversal;
 
 use crate::{
     ast::{StructID, compilation_data::ProgramContext, type_registry::StructGraph},
     error::ErrorCollector,
 };
-mod struct_traversal;
+use std::collections::HashMap;
 
+/// Analyzes the struct graph and detencts the recursive struct definitions.
 #[derive(Debug)]
 pub struct StructGraphAnalyzer<'a> {
     ec: &'a mut ErrorCollector,

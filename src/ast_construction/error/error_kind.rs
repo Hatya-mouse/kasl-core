@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+/// The all kinds of errors that can occur during compilation.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, strum::Display)]
 pub enum ErrorKind {
     /// Title: ParserError
