@@ -350,7 +350,7 @@ peg::parser!(pub grammar kasl_parser() for str {
             / dot_token()
             / bracketed_token()
             / semicolon()
-            / colon()
+            / comma_token()
         ) end:position!() {
             ExprToken { range: Range::n(start, end), kind }
         }
@@ -392,7 +392,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = "." { ExprTokenKind::Dot }
 
     rule semicolon() -> ExprTokenKind = ";" { ExprTokenKind::Semicolon }
-    rule comma() -> ExprTokenKind = "," { ExprTokenKind::Comma }
+    rule comma_token() -> ExprTokenKind = "," { ExprTokenKind::Comma }
 
     // --- MISCELLANEOUS ---
 
