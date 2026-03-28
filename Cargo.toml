@@ -2,6 +2,10 @@
 name = "kasl"
 version = "0.1.0"
 edition = "2024"
+license = "Apache-2.0"
+description = "Compile and run KASL programs from your Rust code."
+repository = "https://github.com/hatya-mouse/kasl"
+readme = "README.md"
 
 [lib]
 name = "kasl"
