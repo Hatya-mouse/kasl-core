@@ -6,6 +6,9 @@ license = "Apache-2.0"
 description = "Compile and run KASL programs from your Rust code."
 repository = "https://github.com/hatya-mouse/kasl"
 readme = "README.md"
+exclude = [
+    "tests/*",
+]
 
 [lib]
 name = "kasl"
