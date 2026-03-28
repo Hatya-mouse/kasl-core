@@ -16,8 +16,8 @@ scopes:
     name_to_id: {}
     variables: []
     defined_names:
-      - main
       - do_something
+      - main
     range:
       start: 0
       end: 0

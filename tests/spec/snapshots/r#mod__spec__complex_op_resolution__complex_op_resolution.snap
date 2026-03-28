@@ -7,32 +7,32 @@ infix_operator_properties:
     precedence: 2
     associativity: Left
     range:
-      start: 171
-      end: 209
+      start: 172
+      end: 210
   "*":
     precedence: 6
     associativity: Left
     range:
-      start: 752
-      end: 790
+      start: 754
+      end: 792
   +:
     precedence: 5
     associativity: Left
     range:
-      start: 608
-      end: 646
+      start: 610
+      end: 648
   "==":
     precedence: 3
     associativity: Left
     range:
-      start: 319
-      end: 357
+      start: 321
+      end: 359
   ">":
     precedence: 4
     associativity: Left
     range:
-      start: 464
-      end: 502
+      start: 466
+      end: 504
   "||":
     precedence: 1
     associativity: Left
@@ -71,33 +71,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 38
+                  id: 48
                   args:
                     - kind:
-                        Identifier:
-                          id: 0
+                        Identifier: 0
                       value_type:
                         Primitive: Bool
                       range:
-                        start: 134
-                        end: 137
+                        start: 135
+                        end: 138
                     - kind:
-                        Identifier:
-                          id: 1
+                        Identifier: 1
                       value_type:
                         Primitive: Bool
                       range:
-                        start: 139
-                        end: 142
+                        start: 140
+                        end: 143
               value_type:
                 Primitive: Bool
               range:
                 start: 123
-                end: 143
+                end: 144
       scope_id: 2
     range:
       start: 66
-      end: 145
+      end: 146
   1:
     symbol: "&&"
     namespace_id: 0
@@ -109,8 +107,8 @@ infix_operators:
         Primitive: Bool
       def_val: ~
       range:
-        start: 227
-        end: 236
+        start: 228
+        end: 237
     rhs:
       label: ~
       name: rhs
@@ -119,8 +117,8 @@ infix_operators:
         Primitive: Bool
       def_val: ~
       range:
-        start: 238
-        end: 247
+        start: 239
+        end: 248
     return_type:
       Primitive: Bool
     block:
@@ -129,33 +127,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 37
+                  id: 47
                   args:
                     - kind:
-                        Identifier:
-                          id: 2
+                        Identifier: 2
                       value_type:
                         Primitive: Bool
                       range:
-                        start: 282
-                        end: 285
+                        start: 284
+                        end: 287
                     - kind:
-                        Identifier:
-                          id: 3
+                        Identifier: 3
                       value_type:
                         Primitive: Bool
                       range:
-                        start: 287
-                        end: 290
+                        start: 289
+                        end: 292
               value_type:
                 Primitive: Bool
               range:
-                start: 270
-                end: 291
+                start: 271
+                end: 293
       scope_id: 3
     range:
-      start: 213
-      end: 293
+      start: 214
+      end: 295
   2:
     symbol: "=="
     namespace_id: 0
@@ -167,8 +163,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 375
-        end: 383
+        start: 377
+        end: 385
     rhs:
       label: ~
       name: rhs
@@ -177,8 +173,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 385
-        end: 393
+        start: 387
+        end: 395
     return_type:
       Primitive: Bool
     block:
@@ -187,33 +183,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 31
+                  id: 41
                   args:
                     - kind:
-                        Identifier:
-                          id: 4
+                        Identifier: 4
                       value_type:
                         Primitive: Int
                       range:
-                        start: 428
-                        end: 431
+                        start: 430
+                        end: 433
                     - kind:
-                        Identifier:
-                          id: 5
+                        Identifier: 5
                       value_type:
                         Primitive: Int
                       range:
-                        start: 433
-                        end: 436
+                        start: 435
+                        end: 438
               value_type:
                 Primitive: Bool
               range:
-                start: 416
-                end: 437
+                start: 418
+                end: 439
       scope_id: 4
     range:
-      start: 361
-      end: 439
+      start: 363
+      end: 441
   3:
     symbol: ">"
     namespace_id: 0
@@ -225,8 +219,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 519
-        end: 527
+        start: 521
+        end: 529
     rhs:
       label: ~
       name: rhs
@@ -235,8 +229,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 529
-        end: 537
+        start: 531
+        end: 539
     return_type:
       Primitive: Bool
     block:
@@ -245,33 +239,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 33
+                  id: 43
                   args:
                     - kind:
-                        Identifier:
-                          id: 6
+                        Identifier: 6
                       value_type:
                         Primitive: Int
                       range:
-                        start: 572
-                        end: 575
+                        start: 574
+                        end: 577
                     - kind:
-                        Identifier:
-                          id: 7
+                        Identifier: 7
                       value_type:
                         Primitive: Int
                       range:
-                        start: 577
-                        end: 580
+                        start: 579
+                        end: 582
               value_type:
                 Primitive: Bool
               range:
-                start: 560
-                end: 581
+                start: 562
+                end: 583
       scope_id: 5
     range:
-      start: 506
-      end: 583
+      start: 508
+      end: 585
   4:
     symbol: +
     namespace_id: 0
@@ -283,8 +275,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 663
-        end: 671
+        start: 665
+        end: 673
     rhs:
       label: ~
       name: rhs
@@ -293,8 +285,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 673
-        end: 681
+        start: 675
+        end: 683
     return_type:
       Primitive: Int
     block:
@@ -303,33 +295,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 21
+                  id: 31
                   args:
                     - kind:
-                        Identifier:
-                          id: 8
+                        Identifier: 8
                       value_type:
                         Primitive: Int
                       range:
-                        start: 716
-                        end: 719
+                        start: 718
+                        end: 721
                     - kind:
-                        Identifier:
-                          id: 9
+                        Identifier: 9
                       value_type:
                         Primitive: Int
                       range:
-                        start: 721
-                        end: 724
+                        start: 723
+                        end: 726
               value_type:
                 Primitive: Int
               range:
-                start: 703
-                end: 725
+                start: 705
+                end: 727
       scope_id: 6
     range:
-      start: 650
-      end: 727
+      start: 652
+      end: 729
   5:
     symbol: "*"
     namespace_id: 0
@@ -341,8 +331,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 807
-        end: 815
+        start: 809
+        end: 817
     rhs:
       label: ~
       name: rhs
@@ -351,8 +341,8 @@ infix_operators:
         Primitive: Int
       def_val: ~
       range:
-        start: 817
-        end: 825
+        start: 819
+        end: 827
     return_type:
       Primitive: Int
     block:
@@ -361,33 +351,31 @@ infix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 23
+                  id: 33
                   args:
                     - kind:
-                        Identifier:
-                          id: 10
+                        Identifier: 10
                       value_type:
                         Primitive: Int
                       range:
-                        start: 860
-                        end: 863
+                        start: 862
+                        end: 865
                     - kind:
-                        Identifier:
-                          id: 11
+                        Identifier: 11
                       value_type:
                         Primitive: Int
                       range:
-                        start: 865
-                        end: 868
+                        start: 867
+                        end: 870
               value_type:
                 Primitive: Int
               range:
-                start: 847
-                end: 869
+                start: 849
+                end: 871
       scope_id: 7
     range:
-      start: 794
-      end: 871
+      start: 796
+      end: 873
 infix_ids:
   ? symbol: "&&"
     lhs_type:
@@ -429,8 +417,8 @@ prefix_operator_properties:
   "!":
     precedence: 7
     range:
-      start: 897
-      end: 910
+      start: 899
+      end: 912
 prefix_operators:
   6:
     symbol: "!"
@@ -443,8 +431,8 @@ prefix_operators:
         Primitive: Bool
       def_val: ~
       range:
-        start: 928
-        end: 941
+        start: 930
+        end: 943
     return_type:
       Primitive: Bool
     block:
@@ -453,25 +441,24 @@ prefix_operators:
             value:
               kind:
                 BuiltinFuncCall:
-                  id: 43
+                  id: 53
                   args:
                     - kind:
-                        Identifier:
-                          id: 12
+                        Identifier: 12
                       value_type:
                         Primitive: Bool
                       range:
-                        start: 976
-                        end: 983
+                        start: 979
+                        end: 986
               value_type:
                 Primitive: Bool
               range:
-                start: 964
-                end: 984
+                start: 966
+                end: 987
       scope_id: 8
     range:
-      start: 914
-      end: 986
+      start: 916
+      end: 989
 prefix_ids:
   ? symbol: "!"
     operand_type:

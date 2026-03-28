@@ -13,13 +13,15 @@ expression: parsed
             name: "main",
             params: [],
             return_type: Some(
-                SymbolPath {
-                    components: [
-                        SymbolPathComponent {
-                            symbol: "Return",
-                        },
-                    ],
-                },
+                SymbolPath(
+                    SymbolPath {
+                        components: [
+                            SymbolPathComponent {
+                                symbol: "Return",
+                            },
+                        ],
+                    },
+                ),
             ),
             body: [],
         },

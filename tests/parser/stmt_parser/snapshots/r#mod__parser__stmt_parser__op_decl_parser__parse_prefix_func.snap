@@ -18,13 +18,15 @@ expression: parsed
                     ),
                     name: "operand",
                     value_type: Some(
-                        SymbolPath {
-                            components: [
-                                SymbolPathComponent {
-                                    symbol: "Int",
-                                },
-                            ],
-                        },
+                        SymbolPath(
+                            SymbolPath {
+                                components: [
+                                    SymbolPathComponent {
+                                        symbol: "Int",
+                                    },
+                                ],
+                            },
+                        ),
                     ),
                     def_val: None,
                     range: Range {
@@ -33,13 +35,15 @@ expression: parsed
                     },
                 },
             ],
-            return_type: SymbolPath {
-                components: [
-                    SymbolPathComponent {
-                        symbol: "Int",
-                    },
-                ],
-            },
+            return_type: SymbolPath(
+                SymbolPath {
+                    components: [
+                        SymbolPathComponent {
+                            symbol: "Int",
+                        },
+                    ],
+                },
+            ),
             body: [],
         },
     },

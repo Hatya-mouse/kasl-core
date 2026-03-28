@@ -135,11 +135,32 @@ impl ScopeRegistry {
     }
 
     /// Returns if the name is already used.
-    /// Returns `true` if the namespace is not found.
+    /// Returns `true` if the scope is not found.
     pub fn is_name_used(&self, scope_id: &ScopeID, name: &str) -> bool {
-        self.get_scope(scope_id)
-            .is_none_or(|scope| scope.is_name_used(name))
-            || is_reserved_name(name)
+        if is_reserved_name(name) {
+            return true;
+        }
+
+        if let Some(mut current_scope) = self.get_scope(scope_id) {
+            loop {
+                // Return if the name is already used
+                if current_scope.is_name_used(name) {
+                    return true;
+                }
+
+                // Move to the parent scope or return
+                if let Some(parent_scope) = current_scope
+                    .parent
+                    .and_then(|parent| self.get_scope(&parent))
+                {
+                    current_scope = parent_scope;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            false
+        }
     }
 }
 

@@ -24,9 +24,9 @@ scopes:
       - 2
       - 3
     defined_names:
+      - const
       - delay
       - in
-      - const
       - out
     range:
       start: 0

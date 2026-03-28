@@ -19,13 +19,15 @@ expression: parsed
                     kind: StructField {
                         name: "field",
                         value_type: Some(
-                            SymbolPath {
-                                components: [
-                                    SymbolPathComponent {
-                                        symbol: "Int",
-                                    },
-                                ],
-                            },
+                            SymbolPath(
+                                SymbolPath {
+                                    components: [
+                                        SymbolPathComponent {
+                                            symbol: "Int",
+                                        },
+                                    ],
+                                },
+                            ),
                         ),
                         def_val: [
                             ExprToken {
@@ -55,13 +57,15 @@ expression: parsed
                                 ),
                                 name: "name",
                                 value_type: Some(
-                                    SymbolPath {
-                                        components: [
-                                            SymbolPathComponent {
-                                                symbol: "Type",
-                                            },
-                                        ],
-                                    },
+                                    SymbolPath(
+                                        SymbolPath {
+                                            components: [
+                                                SymbolPathComponent {
+                                                    symbol: "Type",
+                                                },
+                                            ],
+                                        },
+                                    ),
                                 ),
                                 def_val: None,
                                 range: Range {
@@ -71,13 +75,15 @@ expression: parsed
                             },
                         ],
                         return_type: Some(
-                            SymbolPath {
-                                components: [
-                                    SymbolPathComponent {
-                                        symbol: "Return",
-                                    },
-                                ],
-                            },
+                            SymbolPath(
+                                SymbolPath {
+                                    components: [
+                                        SymbolPathComponent {
+                                            symbol: "Return",
+                                        },
+                                    ],
+                                },
+                            ),
                         ),
                         body: [],
                     },

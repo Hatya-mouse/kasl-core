@@ -16,11 +16,10 @@ funcs:
             var_id: 0
         - Assign:
             target:
-              var_id: 0
-              offset: 0
+              kind:
+                Identifier: 0
               value_type:
                 Primitive: Int
-              is_field: false
             value:
               kind:
                 IntLiteral: 1

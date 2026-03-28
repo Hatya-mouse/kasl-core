@@ -34,8 +34,7 @@ funcs:
             main:
               condition:
                 kind:
-                  Identifier:
-                    id: 0
+                  Identifier: 0
                 value_type:
                   Primitive: Bool
                 range:
@@ -56,8 +55,7 @@ funcs:
             else_ifs:
               - condition:
                   kind:
-                    Identifier:
-                      id: 1
+                    Identifier: 1
                   value_type:
                     Primitive: Bool
                   range:

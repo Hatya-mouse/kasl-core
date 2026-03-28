@@ -23,15 +23,13 @@ funcs:
       body:
         - Assign:
             target:
-              var_id: 0
-              offset: 0
+              kind:
+                Identifier: 0
               value_type:
                 Primitive: Int
-              is_field: false
             value:
               kind:
-                Identifier:
-                  id: 1
+                Identifier: 1
               value_type:
                 Primitive: Int
               range:

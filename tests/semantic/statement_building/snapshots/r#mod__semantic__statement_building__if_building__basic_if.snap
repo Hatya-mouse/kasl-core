@@ -25,8 +25,7 @@ funcs:
             main:
               condition:
                 kind:
-                  Identifier:
-                    id: 0
+                  Identifier: 0
                 value_type:
                   Primitive: Bool
                 range:

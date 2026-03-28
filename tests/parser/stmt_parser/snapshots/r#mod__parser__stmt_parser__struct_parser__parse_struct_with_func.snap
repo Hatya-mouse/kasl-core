@@ -26,13 +26,15 @@ expression: parsed
                                 ),
                                 name: "name",
                                 value_type: Some(
-                                    SymbolPath {
-                                        components: [
-                                            SymbolPathComponent {
-                                                symbol: "Type",
-                                            },
-                                        ],
-                                    },
+                                    SymbolPath(
+                                        SymbolPath {
+                                            components: [
+                                                SymbolPathComponent {
+                                                    symbol: "Type",
+                                                },
+                                            ],
+                                        },
+                                    ),
                                 ),
                                 def_val: None,
                                 range: Range {
@@ -42,13 +44,15 @@ expression: parsed
                             },
                         ],
                         return_type: Some(
-                            SymbolPath {
-                                components: [
-                                    SymbolPathComponent {
-                                        symbol: "Return",
-                                    },
-                                ],
-                            },
+                            SymbolPath(
+                                SymbolPath {
+                                    components: [
+                                        SymbolPathComponent {
+                                            symbol: "Return",
+                                        },
+                                    ],
+                                },
+                            ),
                         ),
                         body: [],
                     },

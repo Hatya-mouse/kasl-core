@@ -18,13 +18,15 @@ expression: parsed
                     ),
                     name: "name1",
                     value_type: Some(
-                        SymbolPath {
-                            components: [
-                                SymbolPathComponent {
-                                    symbol: "Type",
-                                },
-                            ],
-                        },
+                        SymbolPath(
+                            SymbolPath {
+                                components: [
+                                    SymbolPathComponent {
+                                        symbol: "Type",
+                                    },
+                                ],
+                            },
+                        ),
                     ),
                     def_val: None,
                     range: Range {
@@ -38,13 +40,15 @@ expression: parsed
                     ),
                     name: "name2",
                     value_type: Some(
-                        SymbolPath {
-                            components: [
-                                SymbolPathComponent {
-                                    symbol: "Type",
-                                },
-                            ],
-                        },
+                        SymbolPath(
+                            SymbolPath {
+                                components: [
+                                    SymbolPathComponent {
+                                        symbol: "Type",
+                                    },
+                                ],
+                            },
+                        ),
                     ),
                     def_val: None,
                     range: Range {
@@ -58,13 +62,15 @@ expression: parsed
                     ),
                     name: "name3",
                     value_type: Some(
-                        SymbolPath {
-                            components: [
-                                SymbolPathComponent {
-                                    symbol: "Type",
-                                },
-                            ],
-                        },
+                        SymbolPath(
+                            SymbolPath {
+                                components: [
+                                    SymbolPathComponent {
+                                        symbol: "Type",
+                                    },
+                                ],
+                            },
+                        ),
                     ),
                     def_val: None,
                     range: Range {
@@ -74,13 +80,15 @@ expression: parsed
                 },
             ],
             return_type: Some(
-                SymbolPath {
-                    components: [
-                        SymbolPathComponent {
-                            symbol: "Return",
-                        },
-                    ],
-                },
+                SymbolPath(
+                    SymbolPath {
+                        components: [
+                            SymbolPathComponent {
+                                symbol: "Return",
+                            },
+                        ],
+                    },
+                ),
             ),
             body: [],
         },

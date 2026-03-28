@@ -67,4 +67,8 @@ name_to_id:
   ? - 0
     - Type
   : 0
+array_id_to_decl: {}
+decl_to_array_id: {}
+alias_to_type: {}
 next_struct_id: 1
+next_array_id: 0

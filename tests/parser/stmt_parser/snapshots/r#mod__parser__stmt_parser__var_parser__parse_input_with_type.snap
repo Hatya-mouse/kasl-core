@@ -11,13 +11,15 @@ expression: parsed
         kind: Input {
             name: "in",
             value_type: Some(
-                SymbolPath {
-                    components: [
-                        SymbolPathComponent {
-                            symbol: "Int",
-                        },
-                    ],
-                },
+                SymbolPath(
+                    SymbolPath {
+                        components: [
+                            SymbolPathComponent {
+                                symbol: "Int",
+                            },
+                        ],
+                    },
+                ),
             ),
             def_val: [
                 ExprToken {

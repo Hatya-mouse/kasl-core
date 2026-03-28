@@ -48,8 +48,7 @@ funcs:
                             - var_id: 0
                               value:
                                 kind:
-                                  Identifier:
-                                    id: 1
+                                  Identifier: 1
                                 value_type:
                                   Primitive: Int
                                 range:

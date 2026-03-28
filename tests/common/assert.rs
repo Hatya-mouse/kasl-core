@@ -23,36 +23,63 @@ pub fn assert_error(error: &[ErrorRecord], expected: ErrorKind) {
 #[macro_export]
 macro_rules! assert_func_ctx_snapshot {
     ($func_ctx:expr) => {
-        use insta::{assert_yaml_snapshot, sorted_redaction};
-        assert_yaml_snapshot!($func_ctx, {
-            ".funcs" => sorted_redaction(),
-            ".member_functions" => sorted_redaction(),
-            ".global_functions" => sorted_redaction()
-        });
+        {
+            use insta::{assert_yaml_snapshot, sorted_redaction};
+            assert_yaml_snapshot!($func_ctx, {
+                ".funcs" => sorted_redaction(),
+                ".member_functions" => sorted_redaction(),
+                ".global_functions" => sorted_redaction()
+            });
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! assert_op_ctx_snapshot {
+    ($op_ctx:expr) => {
+        {
+            use insta::{assert_yaml_snapshot, sorted_redaction};
+            assert_yaml_snapshot!($op_ctx, {
+                ".infix_operator_properties" => sorted_redaction(),
+                ".infix_operators" => sorted_redaction(),
+                ".infix_ids" => sorted_redaction(),
+                ".prefix_operator_properties" => sorted_redaction(),
+                ".prefix_operators" => sorted_redaction(),
+                ".prefix_ids" => sorted_redaction(),
+                ".postfix_operator_properties" => sorted_redaction(),
+                ".postfix_operators" => sorted_redaction(),
+                ".postfix_ids" => sorted_redaction(),
+            });
+        }
     };
 }
 
 #[macro_export]
 macro_rules! assert_scope_registry_snapshot {
     ($scope_registry:expr) => {
-        use insta::{assert_yaml_snapshot, sorted_redaction};
-        assert_yaml_snapshot!($scope_registry, {
-            ".scopes" => sorted_redaction(),
-            ".variables" => sorted_redaction(),
-            ".global_scope_ids" => sorted_redaction(),
-            ".**.name_to_id" => sorted_redaction()
-        });
+        {
+            use insta::{assert_yaml_snapshot, sorted_redaction};
+            assert_yaml_snapshot!($scope_registry, {
+                ".scopes" => sorted_redaction(),
+                ".variables" => sorted_redaction(),
+                ".global_scope_ids" => sorted_redaction(),
+                ".**.name_to_id" => sorted_redaction(),
+                ".**.defined_names" => sorted_redaction()
+            });
+        }
     };
 }
 
 #[macro_export]
 macro_rules! assert_type_registry_snapshot {
     ($type_registry:expr) => {
-        use insta::{assert_yaml_snapshot, sorted_redaction};
-        assert_yaml_snapshot!($type_registry, {
-            ".structs" => sorted_redaction(),
-            ".name_to_id" => sorted_redaction(),
-            ".**.indices" => sorted_redaction(),
-        });
+        {
+            use insta::{assert_yaml_snapshot, sorted_redaction};
+            assert_yaml_snapshot!($type_registry, {
+                ".structs" => sorted_redaction(),
+                ".name_to_id" => sorted_redaction(),
+                ".**.indices" => sorted_redaction(),
+            });
+        }
     };
 }
