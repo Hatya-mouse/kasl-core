@@ -18,7 +18,7 @@ mod struct_field;
 
 pub use struct_field::StructField;
 
-use crate::ast::{Range, VariableID, type_registry::TypeRegistry};
+use crate::ast::{Range, type_registry::TypeRegistry};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
@@ -30,10 +30,6 @@ pub struct StructDecl {
     pub fields: Vec<StructField>,
     /// The map of field names to their indices in the `fields` vector.
     pub indices: HashMap<String, usize>,
-    /// The IDs of the instance methods belonging to the struct.
-    pub instance_methods: Vec<VariableID>,
-    /// The IDs of the static methods belonging to the struct.
-    pub static_methods: Vec<VariableID>,
 
     /// The map of field names to their offsets in bytes.
     pub field_offsets: Vec<i32>,
@@ -52,8 +48,6 @@ impl StructDecl {
             name,
             fields: Vec::new(),
             indices: HashMap::new(),
-            instance_methods: Vec::new(),
-            static_methods: Vec::new(),
             field_offsets: Vec::new(),
             total_size: 0,
             alignment: 1,
