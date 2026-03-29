@@ -92,27 +92,33 @@ use std::path::PathBuf;
 #[derive(Default)]
 pub struct KaslCompiler {
     ec: ErrorCollector,
+    /// The current program context, which mainly holds the constructed AST and related information.
     pub prog_ctx: ProgramContext,
     comp_state: CompilerState,
 
     backend: Option<Backend>,
 
+    /// The raw declarations parsed from the KASL code.
     pub parser_decl_stmts: Vec<ParserDeclStmt>,
 }
 
 impl KaslCompiler {
+    /// Adds a search path for the compiler to look for imported modules.
     pub fn add_search_path(&mut self, path: PathBuf) {
         self.comp_state.child_search_paths.push(path);
     }
 
+    /// Sets the search paths for the compiler to look for imported modules, replacing any existing paths.
     pub fn set_search_paths(&mut self, paths: Vec<PathBuf>) {
         self.comp_state.child_search_paths = paths;
     }
 
+    /// Clears all search paths for the compiler.
     pub fn clear_search_paths(&mut self) {
         self.comp_state.child_search_paths.clear();
     }
 
+    /// Parses the given KASL code and stores the resulting declarations in the compiler's state.
     pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
         self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {
             Box::new(ErrorRecord::new(
@@ -128,6 +134,7 @@ impl KaslCompiler {
         Ok(())
     }
 
+    /// Builds the program from the stored declarations, and returns an `IOBlueprint` that represents the program's inputs outputs and states structure.
     pub fn build(&mut self) -> Result<IOBlueprint, Vec<ErrorRecord>> {
         let mut comp_data = CompilationData::default();
         let builtin_registry = BuiltinRegistry::default();
@@ -170,6 +177,12 @@ impl KaslCompiler {
         self.ec.as_result().map(|_| blueprint)
     }
 
+    /// Compiles the program into a ready-to-run program, and returns a pointer to the compiled code.
+    /// The compiled program will run only once.
+    ///
+    /// # Deallocation
+    /// The compiled program will be dropped when the `KaslCompiler` instance is dropped,
+    /// since the `Backend` instance that holds the compiled code is stored in the `KaslCompiler` struct.
     pub fn compile_once(&mut self, blueprint: &IOBlueprint) -> Result<*const u8, Vec<ErrorRecord>> {
         let builtin_registry = BuiltinRegistry::default();
 
@@ -207,6 +220,12 @@ impl KaslCompiler {
         Ok(compiled)
     }
 
+    /// Compiles the program into a ready-to-run program, and returns a pointer to the compiled code.
+    /// The compiled program is ready to run multiple times.
+    ///
+    /// # Deallocation
+    /// The compiled program will be dropped when the `KaslCompiler` instance is dropped,
+    /// since the `Backend` instance that holds the compiled code is stored in the `KaslCompiler` struct.
     pub fn compile_buffer(
         &mut self,
         blueprint: &IOBlueprint,

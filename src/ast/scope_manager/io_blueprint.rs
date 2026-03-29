@@ -17,6 +17,8 @@
 use crate::ast::{Expr, VariableID, type_registry::ResolvedType};
 use std::collections::HashMap;
 
+/// Holds the desired memory layout and type information for the inputs, outputs, and states of a KASL program after `build` phase.
+/// The host is expected to allocate memory for the inputs, outputs, and states based on the blueprint, and then pass the pointers when running the program.
 #[derive(Default)]
 pub struct IOBlueprint {
     inputs: Vec<VariableID>,
@@ -26,12 +28,20 @@ pub struct IOBlueprint {
     decl_order: Vec<(VariableID, BlueprintItemKind)>,
 }
 
+/// Represents an input, output, or state variable in the IOBlueprint, along with its type and memory layout information.
 pub struct BlueprintItem {
+    /// The name of the variable.
     pub name: String,
+    /// The actual memory size of the variable, in bytes.
     pub actual_size: usize,
+    /// The alignment of the variable, in bytes.
     pub align: u8,
+    /// The type of the variable.
     pub value_type: ResolvedType,
+    /// The default value of the variable, which will be used for initialization.
+    /// The host does not need to provide any initial value for the variable.
     pub def_val: Expr,
+    /// The unique identifier of the variable.
     pub id: VariableID,
 }
 
@@ -42,24 +52,28 @@ pub(crate) enum BlueprintItemKind {
 }
 
 impl IOBlueprint {
-    pub fn add_input(&mut self, item: BlueprintItem) {
+    /// Adds an input variable to the blueprint.
+    pub(crate) fn add_input(&mut self, item: BlueprintItem) {
         self.decl_order.push((item.id, BlueprintItemKind::Input));
         self.inputs.push(item.id);
         self.items.insert(item.id, item);
     }
 
-    pub fn add_output(&mut self, item: BlueprintItem) {
+    /// Adds an output variable to the blueprint.
+    pub(crate) fn add_output(&mut self, item: BlueprintItem) {
         self.decl_order.push((item.id, BlueprintItemKind::Output));
         self.outputs.push(item.id);
         self.items.insert(item.id, item);
     }
 
-    pub fn add_state(&mut self, item: BlueprintItem) {
+    /// Adds a state variable to the blueprint.
+    pub(crate) fn add_state(&mut self, item: BlueprintItem) {
         self.decl_order.push((item.id, BlueprintItemKind::State));
         self.states.push(item.id);
         self.items.insert(item.id, item);
     }
 
+    /// Returns the input variables in the order they were declared.
     pub fn get_inputs(&self) -> Vec<&BlueprintItem> {
         self.inputs
             .iter()
@@ -67,6 +81,7 @@ impl IOBlueprint {
             .collect::<Vec<_>>()
     }
 
+    /// Returns the output variables in the order they were declared.
     pub fn get_outputs(&self) -> Vec<&BlueprintItem> {
         self.outputs
             .iter()
@@ -74,6 +89,7 @@ impl IOBlueprint {
             .collect::<Vec<_>>()
     }
 
+    /// Returns the state variables in the order they were declared.
     pub fn get_states(&self) -> Vec<&BlueprintItem> {
         self.states
             .iter()
@@ -81,6 +97,7 @@ impl IOBlueprint {
             .collect::<Vec<_>>()
     }
 
+    /// Returns the blueprint item with the given ID if it exists, or returns `None`.
     pub(crate) fn get_item(&self, id: &VariableID) -> Option<&BlueprintItem> {
         self.items.get(id)
     }
