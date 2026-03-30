@@ -18,10 +18,10 @@ use cranelift_codegen::ir;
 
 use crate::{
     ast::{Statement, symbol_table::Block},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     /// Translates the given block. This method does not create any new blocks.
     pub fn translate_block(&mut self, block: &Block, exit_block: ir::Block) -> bool {
         // Loop over the statements in the function and translate them

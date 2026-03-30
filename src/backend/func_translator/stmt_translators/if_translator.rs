@@ -16,12 +16,12 @@
 
 use crate::{
     ast::{IfArm, symbol_table},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_if(
         &mut self,
         main: &IfArm,

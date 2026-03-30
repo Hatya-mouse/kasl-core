@@ -14,10 +14,10 @@
 //  limitations under the License.
 //
 
-use crate::{ast::Expr, backend::func_translator::FuncTranslator, builtin::BuiltinFuncID};
+use crate::{ast::Expr, backend::func_translator::CLIFFuncTranslator, builtin::BuiltinFuncID};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_builtin_func_call(
         &mut self,
         func_id: &BuiltinFuncID,

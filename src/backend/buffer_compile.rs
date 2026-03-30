@@ -18,7 +18,7 @@ use crate::{
     ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
     backend::{
         Backend,
-        func_translator::{FuncTranslator, TranslatorParams},
+        func_translator::{CLIFFuncTranslator, TranslatorParams},
     },
     builtin::BuiltinRegistry,
 };
@@ -101,8 +101,8 @@ impl Backend {
             should_init: block_params[3],
         };
 
-        // Create a FuncTranslator and translate the loop
-        let mut translator = FuncTranslator::new(builder, module, prog_ctx, builtin_registry);
+        // Create a CLIFFuncTranslator and translate the loop
+        let mut translator = CLIFFuncTranslator::new(builder, module, prog_ctx, builtin_registry);
 
         translator.create_loop(buffer_size, |translator, i, increment_block| {
             translator.translate(

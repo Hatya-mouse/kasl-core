@@ -20,12 +20,12 @@ mod stack_slot;
 
 use crate::{
     ast::{Expr, type_registry::ResolvedType},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn extend_to_ptr(&mut self, val_type: ir::Type, val: ir::Value) -> ir::Value {
         let ptr_type = self.type_converter.pointer_type();
         if val_type == ptr_type {

@@ -14,11 +14,13 @@
 //  limitations under the License.
 //
 
-use crate::{LOOP_UNROLL_THRESHOLD, ast::symbol_table, backend::func_translator::FuncTranslator};
+use crate::{
+    LOOP_UNROLL_THRESHOLD, ast::symbol_table, backend::func_translator::CLIFFuncTranslator,
+};
 use cranelift::prelude::{InstBuilder, types};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_loop(
         &mut self,
         count: u32,

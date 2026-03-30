@@ -17,13 +17,13 @@
 use crate::{
     ast::namespace_registry::ArrayID,
     ast::{Expr, ExprKind},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir::StackSlot;
 use cranelift_module::Module;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn store_array_to_slot(
         &mut self,
         expr: &Expr,

@@ -83,6 +83,7 @@ pub mod backend;
 pub mod builtin;
 pub mod compiler;
 pub mod localization;
+pub mod lowerer;
 pub mod parser;
 pub mod run_program;
 

@@ -14,11 +14,11 @@
 //  limitations under the License.
 //
 
-use crate::{ast::Expr, backend::func_translator::FuncTranslator};
+use crate::{ast::Expr, backend::func_translator::CLIFFuncTranslator};
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::{self, BlockArg};
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_return(&mut self, value: &Option<Expr>, exit_block: ir::Block) {
         if let Some(return_val) = value.as_ref().and_then(|val| self.translate_expr(val)) {
             self.builder

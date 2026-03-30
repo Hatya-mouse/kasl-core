@@ -18,11 +18,11 @@ mod item_store;
 
 use crate::{
     ast::scope_manager::IOBlueprint,
-    backend::func_translator::{FuncTranslator, TranslatorParams},
+    backend::func_translator::{CLIFFuncTranslator, TranslatorParams},
 };
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn store_blueprint(
         &mut self,
         params: &TranslatorParams,

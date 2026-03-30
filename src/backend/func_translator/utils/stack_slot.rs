@@ -16,12 +16,12 @@
 
 use crate::{
     ast::{StructID, namespace_registry::ArrayID},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{StackSlotData, StackSlotKind};
 use cranelift_codegen::ir::StackSlot;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn alloc_struct(&mut self, struct_id: &StructID) -> StackSlot {
         let struct_decl = self.prog_ctx.type_registry.get_struct(struct_id).unwrap();
 

@@ -20,14 +20,14 @@ use cranelift_codegen::ir;
 use cranelift_jit::JITModule;
 use std::fmt::Display;
 
-pub type BuiltinFuncTranslator =
+pub type BuiltinCLIFFuncTranslator =
     Box<dyn Fn(&mut JITModule, &mut FunctionBuilder, &[ir::Value]) -> ir::Value>;
 
 pub struct BuiltinFunc {
     pub name: &'static str,
     pub params: Vec<ResolvedType>,
     pub return_type: ResolvedType,
-    pub translator: BuiltinFuncTranslator,
+    pub translator: BuiltinCLIFFuncTranslator,
 }
 
 /// An ID used to identify an builtin function.

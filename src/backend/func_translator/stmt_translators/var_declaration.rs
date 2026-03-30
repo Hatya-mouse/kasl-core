@@ -16,11 +16,11 @@
 
 use crate::{
     ast::{VariableID, type_registry::ResolvedType},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::Variable;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn declare_var(&mut self, var_id: VariableID, var_type: &ResolvedType) -> Variable {
         // Convert the ResolvedType into Type
         let ir_type = self.type_converter.convert(var_type);

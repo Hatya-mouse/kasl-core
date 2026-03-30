@@ -16,12 +16,12 @@
 
 use crate::{
     ast::type_registry::{PrimitiveType, ResolvedType},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_int_literal(&mut self, value: u32) -> ir::Value {
         self.builder.ins().iconst(
             self.type_converter

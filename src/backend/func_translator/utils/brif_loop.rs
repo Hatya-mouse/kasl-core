@@ -17,12 +17,12 @@
 use cranelift::prelude::{InstBuilder, IntCC, types};
 use cranelift_codegen::ir;
 
-use crate::backend::func_translator::FuncTranslator;
+use crate::backend::func_translator::CLIFFuncTranslator;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn create_loop<F>(&mut self, count: ir::Value, body_translator: F)
     where
-        F: FnOnce(&mut FuncTranslator, ir::Value, ir::Block),
+        F: FnOnce(&mut CLIFFuncTranslator, ir::Value, ir::Block),
     {
         // Create blocks for loop
         let body_block = self.builder.create_block();

@@ -18,10 +18,10 @@ use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
 use crate::{
-    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::CLIFFuncTranslator,
 };
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_struct_field_expr(
         &mut self,
         lhs: &Expr,

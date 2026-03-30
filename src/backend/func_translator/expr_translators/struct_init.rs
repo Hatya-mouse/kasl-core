@@ -14,11 +14,11 @@
 //  limitations under the License.
 //
 
-use crate::{ast::StructID, backend::func_translator::FuncTranslator};
+use crate::{ast::StructID, backend::func_translator::CLIFFuncTranslator};
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::{self};
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_struct_init(&mut self, struct_id: &StructID) -> ir::Value {
         // Create a new stack slot
         let slot = self.alloc_struct(struct_id);

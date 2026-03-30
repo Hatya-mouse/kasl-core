@@ -21,7 +21,7 @@ mod func_translator;
 
 use crate::{
     ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
-    backend::func_translator::{FuncTranslator, TranslatorParams},
+    backend::func_translator::{CLIFFuncTranslator, TranslatorParams},
     builtin::BuiltinRegistry,
 };
 use cranelift::prelude::{
@@ -146,8 +146,8 @@ impl Backend {
         // Create a return block
         let return_block = builder.create_block();
 
-        // Create a FuncTranslator and translate the function
-        let mut translator = FuncTranslator::new(builder, module, prog_ctx, builtin_registry);
+        // Create a CLIFFuncTranslator and translate the function
+        let mut translator = CLIFFuncTranslator::new(builder, module, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
             None,

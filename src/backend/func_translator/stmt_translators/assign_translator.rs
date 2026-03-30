@@ -20,12 +20,12 @@ use crate::{
         symbol_table::{LValue, LValueKind},
         type_registry::ResolvedType,
     },
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_assign(&mut self, target: &LValue, value: &Expr) {
         // Translate the RHS value
         let rhs_value = self.translate_expr(value).unwrap();

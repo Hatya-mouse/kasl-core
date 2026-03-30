@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_subscript(
         &mut self,
         item_type: &ResolvedType,

@@ -14,9 +14,9 @@
 //  limitations under the License.
 //
 
-use crate::{ast::VariableID, backend::func_translator::FuncTranslator};
+use crate::{ast::VariableID, backend::func_translator::CLIFFuncTranslator};
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_local_var(&mut self, var_id: &VariableID) {
         // Get the ScopeVar for the id
         let local_var = self.prog_ctx.scope_registry.get_var(var_id).unwrap();

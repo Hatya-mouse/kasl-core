@@ -20,7 +20,7 @@ mod builtin_func;
 mod functions;
 
 use crate::ast::type_registry::{PrimitiveType, ResolvedType};
-pub use builtin_func::{BuiltinFunc, BuiltinFuncID, BuiltinFuncTranslator};
+pub use builtin_func::{BuiltinCLIFFuncTranslator, BuiltinFunc, BuiltinFuncID};
 use cranelift_jit::JITBuilder;
 use std::collections::HashMap;
 
@@ -79,7 +79,7 @@ impl BuiltinRegistry {
         name: &'static str,
         params: &[PrimitiveType],
         return_type: PrimitiveType,
-        translator: BuiltinFuncTranslator,
+        translator: BuiltinCLIFFuncTranslator,
     ) {
         let func_id = self.generate_id();
         let func = BuiltinFunc {

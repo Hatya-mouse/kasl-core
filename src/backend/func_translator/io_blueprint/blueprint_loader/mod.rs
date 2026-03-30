@@ -22,12 +22,12 @@ use crate::{
         scope_manager::{BlueprintItem, IOBlueprint, VariableKind},
         type_registry::ResolvedType,
     },
-    backend::func_translator::{FuncTranslator, TranslatorParams},
+    backend::func_translator::{CLIFFuncTranslator, TranslatorParams},
 };
 use cranelift::prelude::{InstBuilder, IntCC, types};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn load_blueprint_access(
         &mut self,
         params: &TranslatorParams,

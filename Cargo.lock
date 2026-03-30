@@ -433,12 +433,18 @@ dependencies = [
  "hashbrown 0.16.1",
  "insta",
  "kasl",
+ "kasl-ir",
  "peg",
  "rust-embed",
  "serde",
  "strum",
  "toml",
 ]
+
+[[package]]
+name = "kasl-ir"
+version = "0.1.0"
+source = "git+https://github.com/hatya-mouse/kasl-ir#764b465df0ff689337ed24fa2150748bfb2ee2a1"
 
 [[package]]
 name = "leb128fmt"

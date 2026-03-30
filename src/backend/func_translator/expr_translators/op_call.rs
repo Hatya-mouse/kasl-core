@@ -16,12 +16,12 @@
 
 use crate::{
     ast::{FuncCallArg, OperatorID},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift_codegen::ir;
 use std::slice;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_infix_op_expr(
         &mut self,
         op_id: &OperatorID,

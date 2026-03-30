@@ -33,7 +33,7 @@ use cranelift::prelude::FunctionBuilder;
 use cranelift_codegen::ir;
 use cranelift_jit::JITModule;
 
-pub struct FuncTranslator<'a> {
+pub struct CLIFFuncTranslator<'a> {
     pub builder: FunctionBuilder<'a>,
     module: &'a mut JITModule,
     type_converter: TypeConverter,
@@ -43,7 +43,7 @@ pub struct FuncTranslator<'a> {
     scope_registry: TranslatorScopeRegistry,
 }
 
-impl<'a> FuncTranslator<'a> {
+impl<'a> CLIFFuncTranslator<'a> {
     pub fn new(
         builder: FunctionBuilder<'a>,
         module: &'a mut JITModule,

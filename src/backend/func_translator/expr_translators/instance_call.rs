@@ -16,11 +16,11 @@
 
 use crate::{
     ast::{FuncCallArg, FunctionID},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_instance_call_expr(
         &mut self,
         id: &FunctionID,

@@ -16,10 +16,10 @@
 
 use crate::{
     ast::{Expr, ExprKind},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     /// Checks if the passed expression is a zero literal.
     pub(super) fn is_zero(&mut self, expr: &Expr) -> bool {
         match &expr.kind {

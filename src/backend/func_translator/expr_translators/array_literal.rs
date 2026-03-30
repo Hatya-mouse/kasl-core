@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_array_literal(&mut self, array_expr: &Expr) -> ir::Value {
         // Assume the type is array
         let array_id = match array_expr.value_type {

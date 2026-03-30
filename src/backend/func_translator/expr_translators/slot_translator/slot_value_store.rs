@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+    ast::Expr, ast::type_registry::ResolvedType, backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::StackSlot;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn store_value_to_slot(&mut self, expr: &Expr, slot: StackSlot, offset: i32) {
         match expr.value_type {
             ResolvedType::Primitive(_) => {

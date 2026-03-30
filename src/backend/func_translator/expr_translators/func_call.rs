@@ -18,12 +18,12 @@ use crate::{
     ast::symbol_table,
     ast::type_registry::ResolvedType,
     ast::{FuncCallArg, FunctionID, Statement},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn translate_func_call_expr(
         &mut self,
         func_id: &FunctionID,

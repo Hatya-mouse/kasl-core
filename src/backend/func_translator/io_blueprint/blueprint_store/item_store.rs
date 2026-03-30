@@ -16,12 +16,12 @@
 
 use crate::{
     ast::{scope_manager::BlueprintItem, type_registry::ResolvedType},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags, types};
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub(super) fn store_blueprint_item(
         &mut self,
         pointer_type: ir::Type,

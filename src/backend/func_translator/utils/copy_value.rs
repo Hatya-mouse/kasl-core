@@ -16,13 +16,13 @@
 
 use crate::{
     ast::{StructID, namespace_registry::ArrayID},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::{InstBuilder, MemFlags};
 use cranelift_codegen::ir;
 use cranelift_module::Module;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn copy_struct(
         &mut self,
         struct_id: &StructID,

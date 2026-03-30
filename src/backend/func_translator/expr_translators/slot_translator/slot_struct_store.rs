@@ -15,12 +15,12 @@
 //
 
 use crate::{
-    ast::StructID, ast::type_registry::ResolvedType, backend::func_translator::FuncTranslator,
+    ast::StructID, ast::type_registry::ResolvedType, backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift::prelude::InstBuilder;
 use cranelift_codegen::ir::StackSlot;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn store_init_fields_to_slot(
         &mut self,
         struct_id: &StructID,

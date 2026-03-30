@@ -28,11 +28,11 @@ mod subscript;
 
 use crate::{
     ast::{Expr, ExprKind},
-    backend::func_translator::FuncTranslator,
+    backend::func_translator::CLIFFuncTranslator,
 };
 use cranelift_codegen::ir;
 
-impl FuncTranslator<'_> {
+impl CLIFFuncTranslator<'_> {
     pub fn translate_expr(&mut self, expr: &Expr) -> Option<ir::Value> {
         match &expr.kind {
             ExprKind::IntLiteral(val) => Some(self.translate_int_literal(*val)),
