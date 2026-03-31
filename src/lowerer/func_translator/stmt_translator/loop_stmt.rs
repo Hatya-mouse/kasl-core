@@ -14,6 +14,28 @@
 //  limitations under the License.
 //
 
-use crate::lowerer::func_translator::FuncTranslator;
+use kasl_ir::ir::{self, Const, InstBuilder};
 
-impl FuncTranslator<'_> {}
+use crate::{LOOP_UNROLL_THRESHOLD, ast::symbol_table, lowerer::func_translator::FuncTranslator};
+
+impl FuncTranslator<'_> {
+    pub fn translate_loop(
+        &mut self,
+        count: u32,
+        block: &symbol_table::Block,
+        exit_block: ir::Block,
+    ) {
+        // Translate the count in to an IR value
+        let ir_count = self.builder.const_val(Const::I32(count as i32));
+        // Create a loop
+        if count <= LOOP_UNROLL_THRESHOLD {
+            for _ in 0..count {
+                self.translate_block(block, exit_block);
+            }
+        } else {
+            self.create_loop(ir_count, |_self, _, _| {
+                _self.translate_block(block, exit_block);
+            });
+        }
+    }
+}
