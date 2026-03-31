@@ -70,7 +70,7 @@ impl LValueResolver<'_> {
                 Some(LValue::new(
                     LValueKind::StructField {
                         lhs: Box::new(l_vaule_lhs),
-                        offset,
+                        offset: offset as i32,
                     },
                     expr.value_type,
                 ))

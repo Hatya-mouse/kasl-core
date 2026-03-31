@@ -61,11 +61,21 @@ impl<'a> FuncTranslator<'a> {
     pub(super) fn translate(
         &mut self,
         params: TranslatorParams,
-        iteration_index: Option<Value>,
+        iteration: Option<Value>,
         entry_point: &FunctionID,
         blueprint: &IOBlueprint,
         exit_block: Block,
     ) {
         // Get the input, output, state variables, and constants from the blueprint
+        self.load_blueprint_access(&params, blueprint, iteration);
+
+        // Get the entry point function node
+        let func_block = &self.prog_ctx.func_ctx.get_func(entry_point).unwrap().block;
+
+        // Translate the function
+        self.translate_block(func_block, exit_block);
+
+        // Push the values in the states and outputs to the output pointer
+        self.store_blueprint(&params, blueprint, iteration);
     }
 }

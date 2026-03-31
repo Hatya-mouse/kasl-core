@@ -18,6 +18,7 @@ mod func_translator;
 
 use crate::{
     ast::{FunctionID, compilation_data::ProgramContext, scope_manager::IOBlueprint},
+    builtin::BuiltinRegistry,
     lowerer::func_translator::FuncTranslator,
 };
 use kasl_ir::ir::{IRBuilder, IRType, InstBuilder, Value};
@@ -37,6 +38,7 @@ impl Lowerer {
     pub fn lower(
         &self,
         prog_ctx: &ProgramContext,
+        builtin_registry: &BuiltinRegistry,
         blueprint: &IOBlueprint,
         entry_point: &FunctionID,
     ) {
@@ -69,7 +71,7 @@ impl Lowerer {
         let return_block = builder.create_block(&[]);
 
         // Lower the program context to KASL-IR
-        let mut translator = FuncTranslator::new(builder, prog_ctx);
+        let mut translator = FuncTranslator::new(builder, prog_ctx, builtin_registry);
         translator.translate(
             translator_params,
             None,

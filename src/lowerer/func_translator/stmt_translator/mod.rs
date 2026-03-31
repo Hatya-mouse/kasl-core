@@ -15,6 +15,7 @@
 //
 
 mod assign;
+mod if_stmt;
 mod local_decl;
 mod loop_stmt;
 mod return_stmt;

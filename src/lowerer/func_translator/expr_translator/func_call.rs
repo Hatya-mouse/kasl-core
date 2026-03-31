@@ -58,7 +58,7 @@ impl FuncTranslator<'_> {
         }
 
         // Get the return types
-        let return_types = Vec::new();
+        let mut return_types = Vec::new();
         if !expected_return_type.is_void() {
             let return_type = convert_type(expected_return_type);
             return_types.push(return_type);

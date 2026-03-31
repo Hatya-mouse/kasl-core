@@ -28,12 +28,10 @@ use kasl::{
         scope_graph_analyzing::ScopeGraphAnalyzer, statement_building::StatementBuilder,
         struct_graph_analyzing::StructGraphAnalyzer,
     },
-    backend::Backend,
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
     parser::{ParserDeclStmt, kasl_parser},
 };
-use std::mem;
 
 pub struct TestContext {
     pub ec: ErrorCollector,
@@ -119,41 +117,42 @@ pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
 }
 
 pub fn execute_program(
-    test_ctx: &mut TestContext,
-    blueprint: &IOBlueprint,
-    inputs: &[*mut ()],
-    outputs: &[*mut ()],
-    states: &[*mut ()],
+    _test_ctx: &mut TestContext,
+    _blueprint: &IOBlueprint,
+    _inputs: &[*mut ()],
+    _outputs: &[*mut ()],
+    _states: &[*mut ()],
 ) {
-    let mut backend = Backend::default();
-    let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
-    let main_func_id = test_ctx
-        .prog_ctx
-        .func_ctx
-        .get_global_func_id(root_namespace_id, "main")
-        .unwrap();
-    let code = backend
-        .compile_once(
-            &test_ctx.prog_ctx,
-            &test_ctx.builtin_registry,
-            blueprint,
-            &main_func_id,
-        )
-        .unwrap();
+    todo!()
+    // let mut backend = Backend::default();
+    // let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
+    // let main_func_id = test_ctx
+    //     .prog_ctx
+    //     .func_ctx
+    //     .get_global_func_id(root_namespace_id, "main")
+    //     .unwrap();
+    // let code = backend
+    //     .compile_once(
+    //         &test_ctx.prog_ctx,
+    //         &test_ctx.builtin_registry,
+    //         blueprint,
+    //         &main_func_id,
+    //     )
+    //     .unwrap();
 
-    unsafe {
-        run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
-    }
+    // unsafe {
+    //     run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
+    // }
 }
 
-unsafe fn run_code(
-    code_ptr: *const u8,
-    input: *const *mut (),
-    output: *const *mut (),
-    state: *const *mut (),
-) {
-    unsafe {
-        let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) = mem::transmute(code_ptr);
-        code_fn(input, output, state)
-    }
-}
+// unsafe fn run_code(
+//     code_ptr: *const u8,
+//     input: *const *mut (),
+//     output: *const *mut (),
+//     state: *const *mut (),
+// ) {
+// unsafe {
+//     let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) = mem::transmute(code_ptr);
+//     code_fn(input, output, state)
+// }
+// }
