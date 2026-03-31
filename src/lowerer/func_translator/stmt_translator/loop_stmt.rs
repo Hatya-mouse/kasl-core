@@ -14,9 +14,6 @@
 //  limitations under the License.
 //
 
-mod alloc;
-mod array_offset;
-mod brif_loop;
-mod copy_value;
-mod var_decl;
-mod zero_check;
+use crate::lowerer::func_translator::FuncTranslator;
+
+impl FuncTranslator<'_> {}

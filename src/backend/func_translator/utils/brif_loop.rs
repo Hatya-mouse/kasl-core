@@ -14,10 +14,9 @@
 //  limitations under the License.
 //
 
+use crate::backend::func_translator::CLIFFuncTranslator;
 use cranelift::prelude::{InstBuilder, IntCC, types};
 use cranelift_codegen::ir;
-
-use crate::backend::func_translator::CLIFFuncTranslator;
 
 impl CLIFFuncTranslator<'_> {
     pub fn create_loop<F>(&mut self, count: ir::Value, body_translator: F)
