@@ -79,7 +79,7 @@ impl FuncTranslator<'_> {
         // Switch to the return block and get the return value
         self.builder.switch_to_block(func_return_block);
         if !expected_return_type.is_void() {
-            Some(self.builder.get_block_args(func_return_block)[0])
+            Some(self.builder.get_block_params(func_return_block)[0])
         } else {
             None
         }

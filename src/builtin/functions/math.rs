@@ -145,6 +145,27 @@ pub fn register_builtins(registry: &mut BuiltinRegistry) {
     );
 
     registry.register_func(
+        "log",
+        &[PrimitiveType::Float, PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| builder.fbop(FloatBinOp::Log, args[0], args[1])),
+    );
+
+    registry.register_func(
+        "log10",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Log10, args[0])),
+    );
+
+    registry.register_func(
+        "log2",
+        &[PrimitiveType::Float],
+        PrimitiveType::Float,
+        Box::new(|builder, args| builder.fuop(FloatUnaryOp::Log2, args[0])),
+    );
+
+    registry.register_func(
         "fpow",
         &[PrimitiveType::Float, PrimitiveType::Float],
         PrimitiveType::Float,

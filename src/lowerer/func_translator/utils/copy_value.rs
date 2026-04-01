@@ -74,7 +74,6 @@ impl FuncTranslator<'_> {
         let dst_ptr = self.builder.ptr_add(dst, dst_offset);
 
         // Copy the source to the destination pointer
-        self.builder
-            .memcpy(total_size, src_ptr, Offset::zero(), dst_ptr, Offset::zero());
+        self.builder.memcpy(total_size, src_ptr, dst_ptr);
     }
 }
