@@ -33,7 +33,7 @@ pub unsafe fn run_once(
     should_init: i8,
 ) {
     unsafe {
-        let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8) =
+        let code_fn: extern "C" fn(*const *const (), *const *mut (), *const *mut (), i8) =
             std::mem::transmute(program);
         code_fn(
             inputs.as_ptr(),
@@ -62,7 +62,7 @@ pub unsafe fn run_buffer(
     buffer_size: i32,
 ) {
     unsafe {
-        let code_fn: fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
+        let code_fn: extern "C" fn(*const *const (), *const *mut (), *const *mut (), i8, i32) =
             std::mem::transmute(program);
         code_fn(
             inputs.as_ptr(),
