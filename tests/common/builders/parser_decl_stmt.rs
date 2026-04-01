@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::{
+use kasl_core::{
     ast::{
         InfixOperatorProperties, OperatorAssociativity, PostfixOperatorProperties,
         PrefixOperatorProperties, Range,

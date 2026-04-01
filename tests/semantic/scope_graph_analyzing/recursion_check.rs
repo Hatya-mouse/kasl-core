@@ -21,7 +21,7 @@ use crate::common::{
     builders::{block, bool_literal, expression, func_call, func_decl, if_arm, if_stmt},
     collect_global_decls,
 };
-use kasl::error::EK;
+use kasl_core::error::EK;
 
 // --- SUCCESS CASES ---
 

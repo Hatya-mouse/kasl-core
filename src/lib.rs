@@ -22,7 +22,7 @@
 //! Here's a simple example:
 //!
 //! ```rust
-//! use kasl::{KaslCompiler, run_once};
+//! use kasl_core::{KaslCompiler, run_once};
 //!
 //! let code = r#"
 //! operator infix + {

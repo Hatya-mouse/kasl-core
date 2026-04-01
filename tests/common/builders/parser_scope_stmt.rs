@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::{
+use kasl_core::{
     ast::Range,
     parser::{
         ExprToken, ParserIfArm, ParserScopeStmt, ParserScopeStmtKind, parser_ast::ParserTypeName,

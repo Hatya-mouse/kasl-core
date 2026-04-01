@@ -12,7 +12,7 @@ exclude = [
 ]
 
 [lib]
-name = "kasl"
+name = "kasl_core"
 path = "src/lib.rs"
 
 [dependencies]

@@ -27,7 +27,7 @@ struct Locales;
 ///
 /// # Usage
 /// ```rust
-/// use kasl::{
+/// use kasl_core::{
 ///     ast::Range,
 ///     error::{EK, ErrorKey, ErrorRecord, Ph, Pl, Sv},
 ///     localization::format_error,

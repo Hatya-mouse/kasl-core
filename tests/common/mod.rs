@@ -17,7 +17,7 @@
 pub mod assert;
 pub mod builders;
 
-use kasl::{
+use kasl_core::{
     ast::{
         CompilationData,
         compilation_data::{CompilerState, ProgramContext},

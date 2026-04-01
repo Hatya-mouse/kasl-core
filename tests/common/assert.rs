@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::error::{ErrorKind, ErrorRecord};
+use kasl_core::error::{ErrorKind, ErrorRecord};
 
 pub fn assert_error(error: &[ErrorRecord], expected: ErrorKind) {
     assert!(error.iter().any(|r| r.key.kind == expected))

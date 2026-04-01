@@ -120,7 +120,7 @@ impl SymbolPathComponent {
 ///
 /// # Usage
 /// ```rust
-/// use kasl::symbol_path;
+/// use kasl_core::symbol_path;
 ///
 /// let path = symbol_path!["foo".to_string(), "bar".to_string(), "baz".to_string()];
 /// assert_eq!(path.to_string(), "foo.bar.baz");
