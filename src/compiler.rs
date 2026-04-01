@@ -197,12 +197,8 @@ impl KaslCompiler {
         Ok(func)
     }
 
-    /// Compiles the program into a ready-to-run program, and returns a pointer to the compiled code.
-    /// The compiled program is ready to run multiple times.
-    ///
-    /// # Deallocation
-    /// The compiled program will be dropped when the `KaslCompiler` instance is dropped,
-    /// since the `Backend` instance that holds the compiled code is stored in the `KaslCompiler` struct.
+    /// Translated the program into KASL-IR, an intermediate representation for KASL language.
+    /// The lowered program will run specified times. Iterations can be given by the fifth parameter of the compiled function.
     pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
         let builtin_registry = BuiltinRegistry::default();
 

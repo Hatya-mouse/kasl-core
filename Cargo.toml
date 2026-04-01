@@ -17,6 +17,7 @@ path = "src/lib.rs"
 
 [dependencies]
 hashbrown = { version = "0.16.1", features = ["serde"] }
+kasl-cranelift-backend = { git = "https://github.com/hatya-mouse/kasl-cranelift-backend", version = "0.1.0" }
 kasl-ir = { git = "https://github.com/hatya-mouse/kasl-ir", version = "0.1.0" }
 peg = "0.8.5"
 rust-embed = "8.11.0"
