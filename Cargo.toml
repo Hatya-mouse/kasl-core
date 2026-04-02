@@ -13,6 +13,14 @@ name = "kasl"
 path = "src/lib.rs"
 
 [dependencies]
-kasl-core = "0.1.0"
-kasl-cranelift-backend = "0.1.0"
+hashbrown = { version = "0.16.1", features = ["serde"] }
 kasl-ir = "0.1.0"
+peg = "0.8.5"
+rust-embed = "8.11.0"
+serde = { version = "1.0.228", features = ["derive"] }
+strum = { version = "0.28.0", features = ["derive"] }
+toml = "1.0.7"
+
+[dev-dependencies]
+insta = { version = "1.46.3", features = ["yaml", "redactions"] }
+kasl-core = { path = "./" }
