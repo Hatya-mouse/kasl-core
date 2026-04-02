@@ -87,11 +87,11 @@ use std::path::PathBuf;
 pub struct KaslCompiler {
     ec: ErrorCollector,
     /// The current program context, which mainly holds the constructed AST and related information.
-    pub prog_ctx: ProgramContext,
+    prog_ctx: ProgramContext,
     comp_state: CompilerState,
 
     /// The raw declarations parsed from the KASL code.
-    pub parser_decl_stmts: Vec<ParserDeclStmt>,
+    parser_decl_stmts: Vec<ParserDeclStmt>,
 }
 
 impl KaslCompiler {
