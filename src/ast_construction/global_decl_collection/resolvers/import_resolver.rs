@@ -21,7 +21,12 @@ use crate::{
     },
     error::{ErrorCollector, Ph},
 };
-use std::{collections::HashSet, fs::File, io::Read, path::PathBuf};
+use std::{
+    collections::HashSet,
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 impl GlobalDeclCollector<'_> {
     pub fn resolve_import(&mut self, import_path: &ImportPath, decl_range: Range) {
@@ -93,6 +98,7 @@ impl GlobalDeclCollector<'_> {
         let comp_state = CompilerState {
             child_search_paths,
             imported_paths,
+            virtual_files: self.comp_state.virtual_files.clone(),
         };
 
         // Create a constructor and pass the program to it
@@ -123,25 +129,39 @@ impl GlobalDeclCollector<'_> {
 
     fn search_progam(&mut self, import_path: &ImportPath) -> Option<(String, PathBuf)> {
         for base_path in &self.comp_state.child_search_paths {
-            // Create a full path by joining the base path with the import path
             let full_path = base_path.join(import_path.to_path()).with_extension("kasl");
 
-            if full_path.is_file() {
+            if let Some(content) = self.get_file_content(&full_path) {
+                return Some((content, full_path));
+            }
+        }
+        None
+    }
+
+    fn get_file_content(&self, path: &Path) -> Option<String> {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if path.is_file() {
                 // Open the file
-                let mut file = match File::open(&full_path) {
-                    Err(why) => panic!("couldn't open {}: {}", full_path.display(), why),
+                let mut file = match File::open(&path) {
+                    Err(why) => panic!("couldn't open {}: {}", path.display(), why),
                     Ok(file) => file,
                 };
 
                 // Get the content string of the file
                 let mut str = String::new();
                 match file.read_to_string(&mut str) {
-                    Err(why) => panic!("couldn't read {}: {}", full_path.display(), why),
-                    Ok(_) => return Some((str, full_path)),
+                    Err(why) => panic!("couldn't read {}: {}", path.display(), why),
+                    Ok(_) => return Some(str),
                 }
+            } else {
+                None
             }
         }
 
-        None
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.comp_state.virtual_files.get(path).cloned()
+        }
     }
 }

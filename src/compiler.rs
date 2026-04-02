@@ -110,6 +110,11 @@ impl KaslCompiler {
         self.comp_state.child_search_paths.clear();
     }
 
+    /// Adds a virtual file to the compiler state.
+    pub fn add_virtual_file(&mut self, path: PathBuf, content: String) {
+        self.comp_state.virtual_files.insert(path, content);
+    }
+
     /// Parses the given KASL code and stores the resulting declarations in the compiler's state.
     pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
         self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {

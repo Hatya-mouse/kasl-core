@@ -21,7 +21,10 @@ use crate::ast::{
     symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
     type_registry::{StructGraph, TypeRegistry},
 };
-use std::{collections::HashSet, path::PathBuf};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 #[derive(Debug, Clone)]
 pub struct ProgramContext {
@@ -62,4 +65,5 @@ pub struct CompilationData {
 pub struct CompilerState {
     pub child_search_paths: Vec<PathBuf>,
     pub imported_paths: HashSet<PathBuf>,
+    pub virtual_files: HashMap<PathBuf, String>,
 }
