@@ -169,7 +169,7 @@ impl KaslCompiler {
         self.ec.as_result().map(|_| blueprint)
     }
 
-    /// Translated the program into KASL-IR, an intermediate representation for KASL language.
+    /// Translates the program into KASL-IR, an intermediate representation for KASL language.
     /// The lowered program will run only once.
     pub fn lower_once(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
         let builtin_registry = BuiltinRegistry::default();
@@ -197,9 +197,9 @@ impl KaslCompiler {
         Ok(func)
     }
 
-    /// Translated the program into KASL-IR, an intermediate representation for KASL language.
+    /// Translates the program into KASL-IR, an intermediate representation for KASL language.
     /// The lowered program will run specified times. Iterations can be given by the fifth parameter of the compiled function.
-    pub fn compile_buffer(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
+    pub fn lower_buffer(&mut self, blueprint: &IOBlueprint) -> Result<Function, ErrorRecord> {
         let builtin_registry = BuiltinRegistry::default();
 
         // Create a lowerer and lower the program
