@@ -115,6 +115,11 @@ impl KaslCompiler {
         self.comp_state.virtual_files.insert(path, content);
     }
 
+    /// Returns a reference to the program context in the compiler.
+    pub fn get_prog_ctx(&self) -> &ProgramContext {
+        &self.prog_ctx
+    }
+
     /// Parses the given KASL code and stores the resulting declarations in the compiler's state.
     pub fn parse(&mut self, code: &str) -> Result<(), Box<ErrorRecord>> {
         self.parser_decl_stmts = kasl_parser::parse(code).map_err(|e| {
