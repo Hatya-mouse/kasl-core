@@ -7,8 +7,6 @@ structs:
     name: Type
     fields: []
     indices: {}
-    instance_methods: []
-    static_methods: []
     field_offsets: []
     total_size: 0
     alignment: 1

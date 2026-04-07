@@ -76,7 +76,7 @@ use std::path::PathBuf;
 /// // Allocate a memory for the output value based on the blueprint
 /// let out_value_size = blueprint.get_outputs()[0].actual_size;
 /// let out_value_ptr = unsafe {
-///     let layout = std::alloc::Layout::from_size_align(out_value_size, 1).unwrap();
+///     let layout = std::alloc::Layout::from_size_align(out_value_size as usize, 1).unwrap();
 ///     std::alloc::alloc(layout) as *mut ()
 /// };
 ///

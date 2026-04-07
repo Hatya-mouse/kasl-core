@@ -1,5 +1,5 @@
 ---
-source: tests/semantic/scope_graph_analyzing/return_check.rs
+source: tests/semantic/flow_graph_analyzing/return_check.rs
 expression: "&test_ctx.prog_ctx.func_ctx"
 ---
 funcs:

@@ -24,14 +24,16 @@ use kasl_core::{
         scope_manager::IOBlueprint,
     },
     ast_construction::{
-        blueprint_builder::BlueprintBuilder, global_decl_collection::GlobalDeclCollector,
-        scope_graph_analyzing::ScopeGraphAnalyzer, statement_building::StatementBuilder,
-        struct_graph_analyzing::StructGraphAnalyzer,
+        blueprint_builder::BlueprintBuilder, flow_graph_analyzing::FlowGraphAnalyzer,
+        global_decl_collection::GlobalDeclCollector, scope_graph_analyzing::ScopeGraphAnalyzer,
+        statement_building::StatementBuilder, struct_graph_analyzing::StructGraphAnalyzer,
     },
     builtin::BuiltinRegistry,
     error::{ErrorCollector, ErrorRecord},
+    lowerer::Lowerer,
     parser::{ParserDeclStmt, kasl_parser},
 };
+use kasl_cranelift_backend::CraneliftBackend;
 
 pub struct TestContext {
     pub ec: ErrorCollector,
@@ -111,48 +113,62 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
     test_ctx.ec.as_result()
 }
 
+pub fn analyze_flow_graph(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
+    let mut flow_graph_analyzer = FlowGraphAnalyzer::new(
+        &mut test_ctx.ec,
+        &test_ctx.prog_ctx,
+        &test_ctx.comp_data.func_flow_graphs,
+        &test_ctx.comp_data.op_flow_graphs,
+    );
+    flow_graph_analyzer.analyze_all();
+    test_ctx.ec.as_result()
+}
+
 pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {
     let blueprint_builder = BlueprintBuilder::new(&test_ctx.prog_ctx);
     blueprint_builder.build()
 }
 
 pub fn execute_program(
-    _test_ctx: &mut TestContext,
-    _blueprint: &IOBlueprint,
-    _inputs: &[*mut ()],
-    _outputs: &[*mut ()],
-    _states: &[*mut ()],
+    test_ctx: &mut TestContext,
+    blueprint: &IOBlueprint,
+    inputs: &[*mut ()],
+    outputs: &[*mut ()],
+    states: &[*mut ()],
 ) {
-    todo!()
-    // let mut backend = Backend::default();
-    // let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
-    // let main_func_id = test_ctx
-    //     .prog_ctx
-    //     .func_ctx
-    //     .get_global_func_id(root_namespace_id, "main")
-    //     .unwrap();
-    // let code = backend
-    //     .compile_once(
-    //         &test_ctx.prog_ctx,
-    //         &test_ctx.builtin_registry,
-    //         blueprint,
-    //         &main_func_id,
-    //     )
-    //     .unwrap();
+    // Lower the function to KASL-IR
+    let lowerer = Lowerer::default();
+    let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
+    let main_func_id = test_ctx
+        .prog_ctx
+        .func_ctx
+        .get_global_func_id(root_namespace_id, "main")
+        .unwrap();
+    let ir_func = lowerer.lower_once(
+        &test_ctx.prog_ctx,
+        &test_ctx.builtin_registry,
+        blueprint,
+        &main_func_id,
+    );
 
-    // unsafe {
-    //     run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
-    // }
+    // Compile the KASL-IR function to native program
+    let mut backend = CraneliftBackend::default();
+    let code = backend.compile(ir_func).unwrap();
+
+    unsafe {
+        run_code(code, inputs.as_ptr(), outputs.as_ptr(), states.as_ptr());
+    }
 }
 
-// unsafe fn run_code(
-//     code_ptr: *const u8,
-//     input: *const *mut (),
-//     output: *const *mut (),
-//     state: *const *mut (),
-// ) {
-// unsafe {
-//     let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) = mem::transmute(code_ptr);
-//     code_fn(input, output, state)
-// }
-// }
+unsafe fn run_code(
+    code_ptr: *const u8,
+    input: *const *mut (),
+    output: *const *mut (),
+    state: *const *mut (),
+) {
+    unsafe {
+        let code_fn: fn(*const *mut (), *const *mut (), *const *mut ()) =
+            std::mem::transmute(code_ptr);
+        code_fn(input, output, state)
+    }
+}

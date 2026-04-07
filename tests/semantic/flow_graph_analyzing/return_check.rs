@@ -17,7 +17,7 @@
 use crate::{
     assert_func_ctx_snapshot,
     common::{
-        TestContext, analyze_scopes,
+        TestContext, analyze_flow_graph, analyze_scopes,
         assert::assert_error,
         build_stmts,
         builders::{
@@ -53,6 +53,7 @@ fn test_early_return_in_void_func() {
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
     analyze_scopes(&mut test_ctx).unwrap();
+    analyze_flow_graph(&mut test_ctx).unwrap();
     assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
 }
 
@@ -73,7 +74,7 @@ fn test_missing_return() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    let error = analyze_scopes(&mut test_ctx).unwrap_err();
+    let error = analyze_flow_graph(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -104,7 +105,7 @@ fn test_return_only_in_if() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    let error = analyze_scopes(&mut test_ctx).unwrap_err();
+    let error = analyze_flow_graph(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -143,7 +144,7 @@ fn test_return_only_in_else_if() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    let error = analyze_scopes(&mut test_ctx).unwrap_err();
+    let error = analyze_flow_graph(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }
 
@@ -185,6 +186,6 @@ fn test_return_only_in_if_and_else_if() {
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
     build_stmts(&mut test_ctx).unwrap();
-    let error = analyze_scopes(&mut test_ctx).unwrap_err();
+    let error = analyze_flow_graph(&mut test_ctx).unwrap_err();
     assert_error(&error, EK::MissingReturn);
 }

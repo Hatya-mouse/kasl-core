@@ -52,8 +52,6 @@ structs:
       bool: 1
       float: 0
       int: 2
-    instance_methods: []
-    static_methods: []
     field_offsets:
       - 0
       - 4
