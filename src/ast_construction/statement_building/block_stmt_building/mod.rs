@@ -22,19 +22,21 @@ mod stmt_builder;
 use crate::{
     ast::{
         CompilationData, NameSpaceID, ScopeID, compilation_data::ProgramContext,
-        type_registry::ResolvedType,
+        flow_graph::FlowGraphBuilder, type_registry::ResolvedType,
     },
     builtin::BuiltinRegistry,
     error::ErrorCollector,
 };
 
 /// Builds a statements from raw parser statements.
-/// Should not be reused across multiple blocks.
+/// Should not be reused across multiple functions.
 pub struct BlockStmtBuilder<'a> {
     ec: &'a mut ErrorCollector,
     prog_ctx: &'a mut ProgramContext,
     comp_data: &'a mut CompilationData,
     builtin_registry: &'a BuiltinRegistry,
+
+    flow_graph_builder: &'a mut FlowGraphBuilder,
 
     scope_id: ScopeID,
     namespace_id: NameSpaceID,
@@ -47,6 +49,7 @@ impl<'a> BlockStmtBuilder<'a> {
         prog_ctx: &'a mut ProgramContext,
         comp_data: &'a mut CompilationData,
         builtin_registry: &'a BuiltinRegistry,
+        flow_graph_builder: &'a mut FlowGraphBuilder,
         scope_id: ScopeID,
         namespace_id: NameSpaceID,
         expected_return_type: ResolvedType,
@@ -56,6 +59,7 @@ impl<'a> BlockStmtBuilder<'a> {
             prog_ctx,
             comp_data,
             builtin_registry,
+            flow_graph_builder,
             scope_id,
             namespace_id,
             expected_return_type,

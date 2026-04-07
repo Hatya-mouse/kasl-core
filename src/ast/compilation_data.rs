@@ -15,7 +15,8 @@
 //
 
 use crate::ast::{
-    OperatorContext, ScopeRegistry,
+    FunctionID, OperatorContext, OperatorID, ScopeRegistry,
+    flow_graph::FlowGraph,
     namespace_registry::NameSpaceRegistry,
     scope_manager::ScopeGraph,
     symbol_table::{FuncBodyMap, FunctionContext, OpBodyMap},
@@ -59,6 +60,8 @@ pub struct CompilationData {
     pub op_body_map: OpBodyMap,
     pub struct_graph: StructGraph,
     pub scope_graph: ScopeGraph,
+    pub func_flow_graphs: HashMap<FunctionID, FlowGraph>,
+    pub op_flow_graphs: HashMap<OperatorID, FlowGraph>,
 }
 
 #[derive(Debug, Default, Clone)]

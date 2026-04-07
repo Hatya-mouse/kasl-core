@@ -51,6 +51,7 @@ impl BlockStmtBuilder<'_> {
             self.prog_ctx,
             self.comp_data,
             self.builtin_registry,
+            self.flow_graph_builder,
             block_scope_id,
             self.namespace_id,
             self.expected_return_type,

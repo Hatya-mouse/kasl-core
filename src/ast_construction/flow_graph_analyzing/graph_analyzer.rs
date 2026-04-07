@@ -14,22 +14,12 @@
 //  limitations under the License.
 //
 
-//! The implementation of the AST construction phase of the compiler.
+use crate::{
+    ast::flow_graph::FlowGraph, ast_construction::flow_graph_analyzing::FlowGraphAnalyzer,
+};
 
-pub mod blueprint_builder;
-pub mod error;
-pub mod expr_engine;
-pub mod flow_graph_analyzing;
-pub mod global_decl_collection;
-pub mod scope_graph_analyzing;
-pub mod statement_building;
-pub mod struct_graph_analyzing;
-
-mod common_utils;
-mod namespace_constructor;
-
-pub use blueprint_builder::BlueprintBuilder;
-pub use global_decl_collection::GlobalDeclCollector;
-pub use scope_graph_analyzing::ScopeGraphAnalyzer;
-pub use statement_building::StatementBuilder;
-pub use struct_graph_analyzing::StructGraphAnalyzer;
+impl FlowGraphAnalyzer<'_> {
+    pub(super) fn analyze_graph(&self, flow_graph: &FlowGraph) {
+        // Implement logic to guarantee that every single execution paths have return statements
+    }
+}

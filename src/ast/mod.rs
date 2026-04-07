@@ -18,6 +18,7 @@
 
 pub mod compilation_data;
 pub mod data;
+pub mod flow_graph;
 pub mod namespace_registry;
 pub mod scope_manager;
 pub mod symbol_table;
