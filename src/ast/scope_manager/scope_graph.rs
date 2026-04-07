@@ -20,16 +20,6 @@ use std::collections::{HashMap, HashSet};
 #[derive(Default, Debug)]
 pub struct ScopeGraph {
     pub caller_to_callee: HashMap<ScopeID, HashSet<ScopeID>>,
-    /// Whether the scope guarantees return statement.
-    scope_has_return: HashMap<ScopeID, bool>,
-    scope_requires_return: HashMap<ScopeID, bool>,
-    scope_types: HashMap<ScopeID, ScopeType>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum ScopeType {
-    Conditional,
-    Block,
 }
 
 impl ScopeGraph {
@@ -42,31 +32,5 @@ impl ScopeGraph {
 
     pub fn get_callees(&self, caller: &ScopeID) -> Option<&HashSet<ScopeID>> {
         self.caller_to_callee.get(caller)
-    }
-
-    pub fn guarantees_return(&self, id: &ScopeID) -> bool {
-        // If the scope is run conditionally, thus the scope won't guarantee return
-        *self.scope_has_return.get(id).unwrap_or(&false)
-            && self.get_scope_type(id) == Some(&ScopeType::Block)
-    }
-
-    pub fn requires_return(&self, id: &ScopeID) -> bool {
-        *self.scope_requires_return.get(id).unwrap_or(&false)
-    }
-
-    pub fn set_has_return(&mut self, id: ScopeID, has_return: bool) {
-        self.scope_has_return.insert(id, has_return);
-    }
-
-    pub fn set_requires_return(&mut self, id: ScopeID, requires_return: bool) {
-        self.scope_requires_return.insert(id, requires_return);
-    }
-
-    pub fn set_scope_type(&mut self, id: ScopeID, scope_type: ScopeType) {
-        self.scope_types.insert(id, scope_type);
-    }
-
-    pub fn get_scope_type(&self, id: &ScopeID) -> Option<&ScopeType> {
-        self.scope_types.get(id)
     }
 }

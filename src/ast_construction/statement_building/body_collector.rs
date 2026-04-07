@@ -57,8 +57,7 @@ impl StatementBuilder<'_> {
             func.block.set_stmt(resolved_stmts);
         }
         // Add a function edge to the scope graph
-        let requires_return = !func_return_type.is_void();
-        self.add_func_scope_edge(func_namespace, func_scope, requires_return);
+        self.add_func_scope_edge(func_namespace, func_scope);
     }
 
     pub fn build_infix_body(&mut self, op_id: OperatorID) {
@@ -98,7 +97,7 @@ impl StatementBuilder<'_> {
             op.block.set_stmt(resolved_stmts);
         }
         // Add an operator edge to the scope graph
-        self.add_func_scope_edge(op_namespace, op_scope, true);
+        self.add_func_scope_edge(op_namespace, op_scope);
     }
 
     pub fn build_prefix_body(&mut self, op_id: OperatorID) {
@@ -138,7 +137,7 @@ impl StatementBuilder<'_> {
             op.block.set_stmt(resolved_stmts);
         }
         // Add an operator edge to the scope graph
-        self.add_func_scope_edge(op_namespace, op_scope, true);
+        self.add_func_scope_edge(op_namespace, op_scope);
     }
 
     pub fn build_postfix_body(&mut self, op_id: OperatorID) {
@@ -178,15 +177,10 @@ impl StatementBuilder<'_> {
             op.block.set_stmt(resolved_stmts);
         }
         // Add an operator edge to the scope graph
-        self.add_func_scope_edge(op_namespace, op_scope, true);
+        self.add_func_scope_edge(op_namespace, op_scope);
     }
 
-    fn add_func_scope_edge(
-        &mut self,
-        func_namespace: NameSpaceID,
-        func_scope: ScopeID,
-        requires_return: bool,
-    ) {
+    fn add_func_scope_edge(&mut self, func_namespace: NameSpaceID, func_scope: ScopeID) {
         // Register the function to the scope graph
         let global_scope_id = self
             .prog_ctx
@@ -196,9 +190,5 @@ impl StatementBuilder<'_> {
         self.comp_data
             .scope_graph
             .add_edge(global_scope_id, func_scope);
-        // Mark the function scope as requires return
-        self.comp_data
-            .scope_graph
-            .set_requires_return(func_scope, requires_return);
     }
 }

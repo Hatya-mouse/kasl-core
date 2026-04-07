@@ -28,9 +28,7 @@ impl BlockStmtBuilder<'_> {
         decl_range: Range,
     ) -> Option<Statement> {
         // The current scope has a return statement
-        self.comp_data
-            .scope_graph
-            .set_has_return(self.scope_id, true);
+        self.flow_graph_builder.current_has_return();
 
         if self.expected_return_type.is_void() {
             if value.is_some() {
