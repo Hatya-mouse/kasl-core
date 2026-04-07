@@ -74,8 +74,9 @@ impl BlockStmtBuilder<'_> {
             None
         };
 
-        // Add the edges from the branch nodes to after node
+        // Add the edges from the before node to branch nodes, and the edges from the branch nodes to after node
         for branch_node in branch_nodes {
+            self.flow_graph_builder.add_edge(before_node, branch_node);
             self.flow_graph_builder.add_edge(branch_node, after_node);
         }
         // Switch to the after node

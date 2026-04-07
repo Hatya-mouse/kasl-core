@@ -21,7 +21,8 @@ use crate::{
         assert::assert_error,
         build_stmts,
         builders::{
-            float_literal, func_decl, func_param, identifier, if_arm, if_stmt, return_stmt,
+            float_literal, func_decl, func_param, identifier, if_arm, if_stmt, int_literal,
+            return_stmt,
         },
         collect_global_decls,
     },
@@ -48,6 +49,36 @@ fn test_early_return_in_void_func() {
             if_arm(&[identifier("param")], &[return_stmt(None)]),
             &[],
             Some(&[]),
+        )],
+    )];
+    collect_global_decls(&mut test_ctx, &parsed).unwrap();
+    build_stmts(&mut test_ctx).unwrap();
+    analyze_scopes(&mut test_ctx).unwrap();
+    analyze_flow_graph(&mut test_ctx).unwrap();
+    assert_func_ctx_snapshot!(&test_ctx.prog_ctx.func_ctx);
+}
+
+#[test]
+fn test_return_in_both_if_else() {
+    let mut test_ctx = TestContext::default();
+
+    let parsed = vec![func_decl(
+        false,
+        "do_something",
+        &[func_param(
+            None,
+            "param",
+            Some(ParserTypeName::SymbolPath(symbol_path!["Bool".to_string()])),
+            None,
+        )],
+        Some(ParserTypeName::SymbolPath(symbol_path!["Int".to_string()])),
+        &[if_stmt(
+            if_arm(
+                &[identifier("param")],
+                &[return_stmt(Some(&[int_literal(1)]))],
+            ),
+            &[],
+            Some(&[return_stmt(Some(&[int_literal(1)]))]),
         )],
     )];
     collect_global_decls(&mut test_ctx, &parsed).unwrap();
