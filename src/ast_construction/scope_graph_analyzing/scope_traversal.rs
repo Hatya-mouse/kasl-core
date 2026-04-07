@@ -19,23 +19,18 @@ use crate::{
     ast_construction::scope_graph_analyzing::{ScopeGraphAnalyzer, ScopeState},
     error::Ph,
 };
-use std::{cmp::max, collections::HashMap};
+use std::collections::HashMap;
 
 impl ScopeGraphAnalyzer<'_> {
     pub fn analyze_scope(
         &mut self,
         current_scope: &ScopeID,
         states: &mut HashMap<ScopeID, ScopeState>,
-        total_sizes: &mut HashMap<ScopeID, u32>,
     ) {
         // Update the state to Visiting
         states.insert(*current_scope, ScopeState::Visiting);
 
-        // Calculate the size of the current scope
-        let current_scope_size = self.calculate_scope_size(current_scope);
-
         // Analyze the scope recursively
-        let mut max_child_size: u32 = 0;
         let child_scopes = self.scope_graph.get_callees(current_scope).cloned();
 
         if let Some(child_scopes) = &child_scopes {
@@ -50,11 +45,7 @@ impl ScopeGraphAnalyzer<'_> {
                     self.ec
                         .recursive_call(child_scope_range, Ph::ScopeGraphAnalyzing);
                 } else {
-                    self.analyze_scope(child_scope_id, states, total_sizes);
-
-                    // Take the maximum of the current total child size and the size of the child scope
-                    // Scopes with the same level should not exist at the same type
-                    max_child_size = max(max_child_size, total_sizes[child_scope_id]);
+                    self.analyze_scope(child_scope_id, states);
                 }
             }
         }
@@ -83,33 +74,7 @@ impl ScopeGraphAnalyzer<'_> {
         self.scope_graph
             .set_has_return(*current_scope, guarantees_return);
 
-        // Add the current scope size and the maximum child size to get the maximum scope size in bytes
-        let total_size = max_child_size + current_scope_size;
-
         // Mark the current scope as Visited
         states.insert(*current_scope, ScopeState::Visited);
-        // Update the total size of the current scope
-        total_sizes.insert(*current_scope, total_size);
-    }
-
-    fn calculate_scope_size(&mut self, scope_id: &ScopeID) -> u32 {
-        let mut size = 0;
-        if let Some(scope) = self.prog_ctx.scope_registry.get_scope(scope_id) {
-            for var_id in &scope.variables {
-                let Some(var) = self.prog_ctx.scope_registry.get_var(var_id) else {
-                    continue;
-                };
-
-                // Get the size of the variable type
-                let var_size = self
-                    .prog_ctx
-                    .type_registry
-                    .get_type_actual_size(&var.value_type)
-                    .unwrap();
-                // Update the total size of the scope
-                size += var_size;
-            }
-        }
-        size
     }
 }

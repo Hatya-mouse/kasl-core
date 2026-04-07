@@ -59,11 +59,9 @@ impl<'a> ScopeGraphAnalyzer<'a> {
             .into_iter()
             .map(|scope_id| (scope_id, ScopeState::Unvisited))
             .collect();
-        // Create a total sizes map for all scopes
-        let mut total_sizes: HashMap<ScopeID, u32> = HashMap::new();
 
         // Analyze the scope graph starting from the global scope
-        self.analyze_scope(&global_scope_id, &mut states, &mut total_sizes);
+        self.analyze_scope(&global_scope_id, &mut states);
     }
 }
 
