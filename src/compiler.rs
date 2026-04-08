@@ -170,6 +170,8 @@ impl KaslCompiler {
             &comp_data.op_flow_graphs,
         );
         flow_analyzer.analyze_all();
+
+        println!("{:#?}", self.prog_ctx.func_ctx.get_func_map());
         println!("{:#?}", comp_data.func_flow_graphs);
 
         // 4. Analyze scope graph

@@ -65,6 +65,10 @@ impl FunctionContext {
         self.funcs.keys().copied().collect()
     }
 
+    pub fn get_func_map(&self) -> HashMap<FunctionID, Function> {
+        self.funcs.clone()
+    }
+
     // --- REGISTRATION ---
 
     /// Registers a member function in the given struct in the namespace.
