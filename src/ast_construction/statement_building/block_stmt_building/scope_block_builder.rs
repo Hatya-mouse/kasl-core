@@ -30,11 +30,14 @@ impl BlockStmtBuilder<'_> {
             };
 
             // If the statement is return or break statement, return the body and stop building
-            if let Statement::Return { .. } = &resolved_stmt {
+            let is_return = matches!(&resolved_stmt, Statement::Return { .. });
+
+            // Push the resolved statement to the body
+            body.push(resolved_stmt);
+
+            if is_return {
                 return body;
             }
-
-            body.push(resolved_stmt);
         }
         body
     }
