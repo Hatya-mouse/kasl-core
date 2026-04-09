@@ -28,6 +28,15 @@ impl BlockStmtBuilder<'_> {
             let Some(resolved_stmt) = self.build_stmt(stmt) else {
                 continue;
             };
+
+            // If the statement is return or break statement, return the body and stop building
+            match &resolved_stmt {
+                Statement::Return { .. } => {
+                    return body;
+                }
+                _ => (),
+            }
+
             body.push(resolved_stmt);
         }
         body
