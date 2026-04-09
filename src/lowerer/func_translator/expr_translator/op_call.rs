@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+use std::slice::from_ref;
+
 use kasl_ir::Value;
 
 use crate::{
@@ -41,7 +43,7 @@ impl FuncTranslator<'_> {
     ) -> Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_prefix_func(op_id).unwrap();
-        self.call_func(&op.block, &[operand.clone()], &op.return_type)
+        self.call_func(&op.block, from_ref(operand), &op.return_type)
             .unwrap()
     }
 
@@ -52,7 +54,7 @@ impl FuncTranslator<'_> {
     ) -> Value {
         // Get the operator function block
         let op = &self.prog_ctx.op_ctx.get_postfix_func(op_id).unwrap();
-        self.call_func(&op.block, &[operand.clone()], &op.return_type)
+        self.call_func(&op.block, from_ref(operand), &op.return_type)
             .unwrap()
     }
 }

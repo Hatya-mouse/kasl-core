@@ -189,7 +189,7 @@ impl KaslCompiler {
         let builtin_registry = BuiltinRegistry::default();
 
         // Create a lowerer and lower the program
-        let lowerer = Lowerer::default();
+        let lowerer = Lowerer;
 
         // Get the main function
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();
@@ -217,7 +217,7 @@ impl KaslCompiler {
         let builtin_registry = BuiltinRegistry::default();
 
         // Create a lowerer and lower the program
-        let lowerer = Lowerer::default();
+        let lowerer = Lowerer;
 
         // Get the main function
         let root_namespace_id = self.prog_ctx.namespace_registry.get_root_namespace_id();

@@ -55,7 +55,7 @@ impl FuncTranslator<'_> {
             .type_registry
             .get_type_actual_size(array_decl.item_type())
             .unwrap();
-        let array_size = item_size as u32 * *array_decl.count();
+        let array_size = item_size * *array_decl.count();
 
         // Copy the array to the destination pointer
         self.copy_with_offset(array_size, src, src_offset, dst, dst_offset);

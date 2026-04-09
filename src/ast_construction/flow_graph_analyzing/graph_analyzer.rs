@@ -36,10 +36,11 @@ impl FlowGraphAnalyzer<'_> {
 
         // If the function requires return, and the entry node does not guarantee return,
         // throw an error
-        if let Some(func) = self.prog_ctx.func_ctx.get_func(func_id) {
-            if !func.return_type.is_void() && !guaranteed[&flow_graph.entry_node()] {
-                self.emit_missing_return_error(&func.block.scope_id, &func.name);
-            }
+        if let Some(func) = self.prog_ctx.func_ctx.get_func(func_id)
+            && !func.return_type.is_void()
+            && !guaranteed[&flow_graph.entry_node()]
+        {
+            self.emit_missing_return_error(&func.block.scope_id, &func.name);
         }
     }
 
@@ -54,10 +55,11 @@ impl FlowGraphAnalyzer<'_> {
 
         // If the function requires return, and the entry node does not guarantee return,
         // throw an error
-        if let Some(op) = self.prog_ctx.op_ctx.get_infix_func(op_id) {
-            if !op.return_type.is_void() && !guaranteed[&flow_graph.entry_node()] {
-                self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
-            }
+        if let Some(op) = self.prog_ctx.op_ctx.get_infix_func(op_id)
+            && !op.return_type.is_void()
+            && !guaranteed[&flow_graph.entry_node()]
+        {
+            self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
         }
     }
 
@@ -72,10 +74,11 @@ impl FlowGraphAnalyzer<'_> {
 
         // If the function requires return, and the entry node does not guarantee return,
         // throw an error
-        if let Some(op) = self.prog_ctx.op_ctx.get_prefix_func(op_id) {
-            if !op.return_type.is_void() && !guaranteed[&flow_graph.entry_node()] {
-                self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
-            }
+        if let Some(op) = self.prog_ctx.op_ctx.get_prefix_func(op_id)
+            && !op.return_type.is_void()
+            && !guaranteed[&flow_graph.entry_node()]
+        {
+            self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
         }
     }
 
@@ -90,10 +93,11 @@ impl FlowGraphAnalyzer<'_> {
 
         // If the function requires return, and the entry node does not guarantee return,
         // throw an error
-        if let Some(op) = self.prog_ctx.op_ctx.get_postfix_func(op_id) {
-            if !op.return_type.is_void() && !guaranteed[&flow_graph.entry_node()] {
-                self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
-            }
+        if let Some(op) = self.prog_ctx.op_ctx.get_postfix_func(op_id)
+            && !op.return_type.is_void()
+            && !guaranteed[&flow_graph.entry_node()]
+        {
+            self.emit_missing_return_error(&op.block.scope_id, &op.symbol);
         }
     }
 

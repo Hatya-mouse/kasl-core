@@ -127,7 +127,7 @@ pub fn execute_program(
     states: &[*mut ()],
 ) {
     // Lower the function to KASL-IR
-    let lowerer = Lowerer::default();
+    let lowerer = Lowerer;
     let root_namespace_id = test_ctx.prog_ctx.namespace_registry.get_root_namespace_id();
     let main_func_id = test_ctx
         .prog_ctx

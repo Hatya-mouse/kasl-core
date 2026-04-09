@@ -31,7 +31,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(func_name.to_string()),
+            Pl::StrVec(vec![func_name.to_string()]),
         );
     }
 
@@ -41,7 +41,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(func_name.to_string()),
+            Pl::StrVec(vec![func_name.to_string()]),
         );
     }
 
@@ -51,7 +51,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(param_label.to_string()),
+            Pl::StrVec(vec![param_label.to_string()]),
         );
     }
 
@@ -61,7 +61,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(param_label.to_string()),
+            Pl::StrVec(vec![param_label.to_string()]),
         );
     }
 
@@ -81,7 +81,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(param_name.to_string()),
+            Pl::StrVec(vec![param_name.to_string()]),
         );
     }
 
@@ -97,7 +97,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(param_name.to_string(), param_label.to_string()),
+            Pl::StrVec(vec![param_name.to_string(), param_label.to_string()]),
         );
     }
 
@@ -114,7 +114,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrTriple(arg_name.to_string(), expected_type, actual_type),
+            Pl::StrVec(vec![arg_name.to_string(), expected_type, actual_type]),
         );
     }
 
@@ -124,7 +124,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(passed_label.to_string()),
+            Pl::StrVec(vec![passed_label.to_string()]),
         );
     }
 
@@ -147,7 +147,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(func_name.to_string()),
+            Pl::StrVec(vec![func_name.to_string()]),
         );
     }
 
@@ -157,7 +157,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(func_name.to_string()),
+            Pl::StrVec(vec![func_name.to_string()]),
         );
     }
 
@@ -173,7 +173,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(expected_type, actual_type),
+            Pl::StrVec(vec![expected_type, actual_type]),
         );
     }
 }

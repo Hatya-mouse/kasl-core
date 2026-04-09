@@ -37,7 +37,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(stmt_kind),
+            Pl::StrVec(vec![stmt_kind]),
         );
     }
 
@@ -57,7 +57,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(target_type, value_type),
+            Pl::StrVec(vec![target_type, value_type]),
         );
     }
 
@@ -81,7 +81,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(token.to_string()),
+            Pl::StrVec(vec![token.to_string()]),
         );
     }
 

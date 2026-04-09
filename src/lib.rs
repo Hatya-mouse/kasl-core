@@ -16,7 +16,7 @@
 
 //! This crate includes the core implementation of the KASL programming language.
 
-pub(crate) const MAIN_FUNCTION_NAME: &'static str = "main";
+pub(crate) const MAIN_FUNCTION_NAME: &str = "main";
 pub(crate) const LOOP_UNROLL_THRESHOLD: u32 = 32;
 
 pub mod ast;

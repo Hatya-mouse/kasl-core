@@ -44,6 +44,11 @@ pub struct BlockStmtBuilder<'a> {
 }
 
 impl<'a> BlockStmtBuilder<'a> {
+    #[allow(
+        clippy::too_many_arguments,
+        reason = "Compiler data such as error collector, program context, compilation data, builtin registry, and flow graph builder must be passed to the function.
+        Also scope_id, namespace_id and expected_return_type is crucial for this function so they cannot be reduced."
+    )]
     pub fn new(
         ec: &'a mut ErrorCollector,
         prog_ctx: &'a mut ProgramContext,

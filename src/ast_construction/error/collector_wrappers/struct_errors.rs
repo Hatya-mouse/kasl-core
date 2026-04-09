@@ -31,7 +31,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -41,7 +41,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -57,7 +57,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(struct_name.to_string(), field_name.to_string()),
+            Pl::StrVec(vec![struct_name.to_string(), field_name.to_string()]),
         );
     }
 
@@ -73,7 +73,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(struct_name.to_string(), func_name.to_string()),
+            Pl::StrVec(vec![struct_name.to_string(), func_name.to_string()]),
         );
     }
 
@@ -83,7 +83,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(struct_name.to_string()),
+            Pl::StrVec(vec![struct_name.to_string()]),
         )
     }
 

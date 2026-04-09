@@ -142,28 +142,20 @@ impl GlobalDeclCollector<'_> {
     }
 
     fn get_file_content(&self, path: &Path) -> Option<String> {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            if path.is_file() {
-                // Open the file
-                let mut file = match File::open(&path) {
-                    Err(why) => panic!("couldn't open {}: {}", path.display(), why),
-                    Ok(file) => file,
-                };
+        if path.is_file() {
+            // Open the file
+            let mut file = match File::open(path) {
+                Err(why) => panic!("couldn't open {}: {}", path.display(), why),
+                Ok(file) => file,
+            };
 
-                // Get the content string of the file
-                let mut str = String::new();
-                match file.read_to_string(&mut str) {
-                    Err(why) => panic!("couldn't read {}: {}", path.display(), why),
-                    Ok(_) => return Some(str),
-                }
-            } else {
-                None
+            // Get the content string of the file
+            let mut str = String::new();
+            match file.read_to_string(&mut str) {
+                Err(why) => panic!("couldn't read {}: {}", path.display(), why),
+                Ok(_) => Some(str),
             }
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        {
+        } else {
             self.comp_state.virtual_files.get(path).cloned()
         }
     }

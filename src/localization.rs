@@ -38,7 +38,7 @@ struct Locales;
 /// let record = ErrorRecord {
 ///     key: ErrorKey::new(
 ///         EK::DuplicateInfixFunc,
-///         Pl::StrTriple("+".to_string(), "Int".to_string(), "Float".to_string()),
+///         Pl::StrVec(vec!["+".to_string(), "Int".to_string(), "Float".to_string()]),
 ///     ),
 ///     earliest_phase: Ph::GlobalDeclCollection,
 ///     ranges: [Range::n(0, 10)].iter().cloned().collect::<HashSet<_>>(),

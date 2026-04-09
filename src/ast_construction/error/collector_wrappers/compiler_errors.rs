@@ -36,7 +36,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::CompilerBug,
-            Pl::Str(full),
+            Pl::StrVec(vec![full]),
         );
     }
 }

@@ -36,7 +36,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(var_name.to_string()),
+            Pl::StrVec(vec![var_name.to_string()]),
         );
     }
 
@@ -52,7 +52,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(annotation_type, expr_type),
+            Pl::StrVec(vec![annotation_type, expr_type]),
         );
     }
 
@@ -62,7 +62,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(name.to_string()),
+            Pl::StrVec(vec![name.to_string()]),
         );
     }
 
@@ -72,7 +72,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(var_name.to_string()),
+            Pl::StrVec(vec![var_name.to_string()]),
         );
     }
 

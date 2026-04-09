@@ -26,7 +26,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -41,7 +41,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(got_type),
+            Pl::StrVec(vec![got_type]),
         );
     }
 
@@ -57,7 +57,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(expected_type, value_type),
+            Pl::StrVec(vec![expected_type, value_type]),
         );
     }
 
@@ -82,7 +82,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(return_type),
+            Pl::StrVec(vec![return_type]),
         );
     }
 
@@ -92,7 +92,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -107,7 +107,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -122,7 +122,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -137,7 +137,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::Str(type_name),
+            Pl::StrVec(vec![type_name]),
         );
     }
 
@@ -153,7 +153,7 @@ impl ErrorCollector {
             range,
             phase,
             Sv::Error,
-            Pl::StrPair(first_type, item_type),
+            Pl::StrVec(vec![first_type, item_type]),
         );
     }
 }
