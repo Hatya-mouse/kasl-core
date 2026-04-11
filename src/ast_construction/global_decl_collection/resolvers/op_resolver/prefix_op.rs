@@ -58,15 +58,15 @@ impl GlobalDeclCollector<'_> {
 
         for param in params.iter() {
             // Throw a warning if label is set for parameters in operator function
-            if let Some(label) = param.label.as_ref() {
+            if param.label.is_some() {
                 self.ec
-                    .label_for_op_param(decl_range, Ph::GlobalDeclCollection, label);
+                    .label_for_op_param(decl_range, Ph::GlobalDeclCollection);
             }
 
             // Throw a warning if there's a default for the parameters in operator function
             if param.def_val.is_some() {
                 self.ec
-                    .def_val_for_op_param(decl_range, Ph::GlobalDeclCollection, &param.name);
+                    .def_val_for_op_param(decl_range, Ph::GlobalDeclCollection);
             }
         }
 

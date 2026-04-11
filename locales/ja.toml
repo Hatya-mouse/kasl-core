@@ -1,3 +1,7 @@
+[parser_error]
+MultipleExpected = "文法に誤りがあります。{$0} または {$1} のいずれかが必要です"
+SingleExpected = "文法に誤りがあります。{$0} が必要です"
+
 [errors]
 ArgForStructInit = '"struct" の初期化時に引数を設定することはできません'
 ArgLabelNotFound = 'ラベルが "{$0}" である引数が見つかりません'
@@ -10,6 +14,7 @@ BuiltinFuncNotFound = 'ビルトイン関数 "{$0}" は存在しません'
 BuiltinVarAccess = 'ビルトイン "Builtin" に対して変数へのアクセスを行うことはできません'
 CompilerBug = "コンパイラの内部エラーが発生しました。GitHub にて報告いただけると幸いです -- {$0}"
 CyclicDependency = '"{$0}.kasl" をインポートすると循環依存が発生します'
+DefValForOpParam = "演算子の引数のデフォルト値は無効です"
 DuplicateArgIsGiven = '引数 "{$0}" が複数回指定されています'
 DuplicateInfixDefine = '中置演算子 "{$0}" は既に定義されています'
 DuplicateInfixFunc = '左辺に "{$1}" 型の値、右辺に "{$2}" 型の値を取る中置演算子 "{$0}" の定義が重複しています'
@@ -32,6 +37,7 @@ InfixOpNotFound = '左辺に "{$1}" 型の値、右辺に "{$2}" 型の値を取
 InfixOrPostfixOpNotDefined = '中置演算子または後置演算子 "{$0}" は定義されていません'
 InvalidLValue = "代入の左辺には変数のみ使用できます"
 InvalidStructStmt = '"{$0}" 構文は"struct"の中では使用できません'
+LabelForOpParam = "演算子の引数ラベルは無効です"
 MemberAccessOnArray = '"{$0}" 型の配列にはメンバがありません'
 MemberAccessOnPrimitive = '"{$0}" 型の値にはメンバがありません'
 MemberFieldNotFound = '"{$0}" 型のメンバ変数 "{$1}" が見つかりません'

@@ -22,7 +22,7 @@ pub enum ErrorKind {
     ParserError,
 
     /// Title: TopLevelVar
-    /// Payload: The name of the variable declared with `var` keyword that is defined in the top level
+    /// Payload: None
     /// A `var` variable is defined in the top level.
     TopLevelVar,
 
@@ -357,13 +357,13 @@ pub enum ErrorKind {
     ArgLabelNotFound,
 
     /// Title: LabelForOpParam
-    /// Payload: The unneeded label
-    /// Label is unneccesary for operator functions.
+    /// Payload: None
+    /// Label is unnecessary for operator functions.
     LabelForOpParam,
 
     /// Title: DefValForOpParam
-    /// Payload: The name of the parameter with an unneeded default value
-    /// Default value is unneccesary for opeartor functions.
+    /// Payload: None
+    /// Default value is unnecessary for opeartor functions.
     DefValForOpParam,
 
     /// Title: CompilerBug

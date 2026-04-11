@@ -20,23 +20,11 @@ use crate::{
 };
 
 impl ErrorCollector {
-    pub(crate) fn label_for_op_param(&mut self, range: Range, phase: Phase, label: &str) {
-        self.emit(
-            EK::LabelForOpParam,
-            range,
-            phase,
-            Sv::Warning,
-            Pl::StrVec(vec![label.to_string()]),
-        );
+    pub(crate) fn label_for_op_param(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::LabelForOpParam, range, phase, Sv::Warning, Pl::None);
     }
 
-    pub(crate) fn def_val_for_op_param(&mut self, range: Range, phase: Phase, param: &str) {
-        self.emit(
-            EK::DefValForOpParam,
-            range,
-            phase,
-            Sv::Warning,
-            Pl::StrVec(vec![param.to_string()]),
-        );
+    pub(crate) fn def_val_for_op_param(&mut self, range: Range, phase: Phase) {
+        self.emit(EK::DefValForOpParam, range, phase, Sv::Warning, Pl::None);
     }
 }
