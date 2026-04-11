@@ -86,8 +86,7 @@ impl ErrorCollector {
     }
 
     pub fn has_error(&self) -> bool {
-        !self
-            .records
+        self.records
             .iter()
             .any(|record| matches!(record.1.severity, Sv::CompilerBug | Sv::Error))
     }
