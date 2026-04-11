@@ -14,7 +14,4 @@
 //  limitations under the License.
 //
 
-//! This module contains wrappers of the `emit` function for each errors.
-
-mod errors;
-mod warnings;
+mod op_warnings;

@@ -97,4 +97,5 @@ pub enum Phase {
 pub enum Severity {
     CompilerBug,
     Error,
+    Warning,
 }

@@ -353,8 +353,18 @@ pub enum ErrorKind {
 
     /// Title: ArgLabelNotFound
     /// Payload: The passed label
-    /// There is no parameter with the given label
+    /// There is no parameter with the given label.
     ArgLabelNotFound,
+
+    /// Title: LabelForOpParam
+    /// Payload: The unneeded label
+    /// Label is unneccesary for operator functions.
+    LabelForOpParam,
+
+    /// Title: DefValForOpParam
+    /// Payload: The name of the parameter with an unneeded default value
+    /// Default value is unneccesary for opeartor functions.
+    DefValForOpParam,
 
     /// Title: CompilerBug
     /// Payload: Error message
