@@ -137,7 +137,7 @@ impl KaslCompiler {
     }
 
     /// Builds the program from the stored declarations, and returns an `IOBlueprint` that represents the program's inputs outputs and states structure.
-    pub fn build(&mut self) -> Result<IOBlueprint, Vec<ErrorRecord>> {
+    pub fn build(&mut self) -> Result<(IOBlueprint, Vec<ErrorRecord>), Vec<ErrorRecord>> {
         let mut comp_data = CompilationData::default();
         let builtin_registry = BuiltinRegistry::default();
 
@@ -180,7 +180,7 @@ impl KaslCompiler {
         let blueprint_builder = BlueprintBuilder::new(&self.prog_ctx);
         let blueprint = blueprint_builder.build();
 
-        self.ec.as_result().map(|_| blueprint)
+        self.ec.as_result().map(|warnings| (blueprint, warnings))
     }
 
     /// Translates the program into KASL-IR, an intermediate representation for KASL language.

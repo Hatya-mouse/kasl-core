@@ -79,7 +79,7 @@ pub fn collect_global_decls(
         root_namespace_id,
     );
     global_decl_collector.process(statements);
-    test_ctx.ec.as_result()
+    test_ctx.ec.as_result().map(|_| ())
 }
 
 pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
@@ -90,7 +90,7 @@ pub fn build_stmts(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
         &test_ctx.builtin_registry,
     );
     stmt_builder.build_all();
-    test_ctx.ec.as_result()
+    test_ctx.ec.as_result().map(|_| ())
 }
 
 pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
@@ -100,7 +100,7 @@ pub fn analyze_scopes(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>
         &mut test_ctx.comp_data.scope_graph,
     );
     scope_graph_analyzer.analyze_all();
-    test_ctx.ec.as_result()
+    test_ctx.ec.as_result().map(|_| ())
 }
 
 pub fn analyze_flow_graph(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRecord>> {
@@ -111,7 +111,7 @@ pub fn analyze_flow_graph(test_ctx: &mut TestContext) -> Result<(), Vec<ErrorRec
         &test_ctx.comp_data.op_flow_graphs,
     );
     flow_graph_analyzer.analyze_all();
-    test_ctx.ec.as_result()
+    test_ctx.ec.as_result().map(|_| ())
 }
 
 pub fn build_blueprint(test_ctx: &mut TestContext) -> IOBlueprint {

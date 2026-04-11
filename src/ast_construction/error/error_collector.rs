@@ -16,7 +16,7 @@
 
 use crate::{
     ast::Range,
-    error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity},
+    error::{ErrorKey, ErrorKind, ErrorRecord, Payload, Phase, Severity, Sv},
 };
 use std::collections::HashMap;
 
@@ -77,16 +77,19 @@ impl ErrorCollector {
         }
     }
 
-    pub fn as_result(&self) -> Result<(), Vec<ErrorRecord>> {
+    pub fn as_result(&self) -> Result<Vec<ErrorRecord>, Vec<ErrorRecord>> {
         if self.has_error() {
             Err(self.records.values().cloned().collect())
         } else {
-            Ok(())
+            Ok(self.records.values().cloned().collect())
         }
     }
 
     pub fn has_error(&self) -> bool {
-        !self.records.is_empty()
+        !self
+            .records
+            .iter()
+            .any(|record| matches!(record.1.severity, Sv::CompilerBug | Sv::Error))
     }
 
     pub fn has_error_kind(&self, kind: ErrorKind, payload: Payload) -> bool {
