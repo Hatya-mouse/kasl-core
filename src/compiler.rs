@@ -71,7 +71,7 @@ use std::path::PathBuf;
 /// compiler.parse(code).expect("Failed to parse code");
 ///
 /// // Analyze and build the program, which returns an IOBlueprint
-/// let blueprint = compiler.build().expect("Failed to build program");
+/// let (blueprint, _) = compiler.build().expect("Failed to build program");
 ///
 /// // Allocate a memory for the output value based on the blueprint
 /// let out_value_size = blueprint.get_outputs()[0].actual_size;

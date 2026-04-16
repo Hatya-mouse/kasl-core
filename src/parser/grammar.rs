@@ -34,10 +34,10 @@ peg::parser!(pub grammar kasl_parser() for str {
     // --- STATEMENTS ---
 
     rule decl_stmts() -> Vec<ParserDeclStmt>
-        = __? statements:(decl_stmt() ** ((_? "\n" _?)+)) __? { statements }
+        = __? statements:(decl_stmt() ** (__?)) __? { statements }
 
     rule scope_stmts() -> Vec<ParserScopeStmt>
-        = __? statements:(scope_stmt() ** ((_? "\n" _?)+)) __? { statements }
+        = __? statements:(scope_stmt() ** (__?)) __? { statements }
 
     rule decl_stmt() -> ParserDeclStmt
         = import_statement()
@@ -445,7 +445,7 @@ peg::parser!(pub grammar kasl_parser() for str {
         = ("input" / "output" / "var" / "let" / "state" / "static" / "func" / "return" / "if" / "else"
             / "struct" / "operator" / "infix" / "prefix" / "postfix") !['a'..='z' | 'A'..='Z' | '0'..='9' | '_']
 
-    rule comment() = "//" (!['\n'] [_])* &['\n']
+    rule comment() = "//" (!['\n' | '\r'] [_])* &['\n' | '\r']
 
     rule comma() = __? "," __?
 
@@ -453,5 +453,5 @@ peg::parser!(pub grammar kasl_parser() for str {
 
     rule _() = quiet!{([' ' | '\t'] / comment())+}
 
-    rule __() = quiet!{([' ' | '\t' | '\n'] / comment())+}
+    rule __() = quiet!{([' ' | '\t' | '\n' | '\r'] / comment())+}
 });
